@@ -1,0 +1,2 @@
+# Astr
+Stargazing Planner
