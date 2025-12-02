@@ -5,3 +5,6 @@ __pycache__/
 .venv
 env/
 venv/
+node_modules/
+.wrangler/
+package-lock.json
