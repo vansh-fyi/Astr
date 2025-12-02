@@ -41,11 +41,13 @@ def get_db():
             mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
             # Test connection
             mongo_client.admin.command('ping')
-            db = mongo_client.get_database()
+            # Get database - use 'astr' as default database name
+            db = mongo_client['astr']
             print("MongoDB connected successfully", file=sys.stderr)
             return db
         except (ConnectionFailure, Exception) as e:
             print(f"MongoDB connection failed: {e}", file=sys.stderr)
+            print(f"Connection error type: {type(e).__name__}", file=sys.stderr)
             mongo_client = None
             db = None
             return None
@@ -81,11 +83,20 @@ def health_check():
     db = get_db()
     db_status = "connected" if db is not None else "disconnected"
 
-    return jsonify({
+    # Include diagnostic info
+    response = {
         "status": "healthy",
         "service": "Astr Backend API",
-        "database": db_status
-    }), 200
+        "database": db_status,
+        "env_var_set": MONGO_URI is not None and len(MONGO_URI) > 0
+    }
+
+    # If verbose mode requested, include more details
+    if request.args.get('verbose') == 'true':
+        response["mongo_uri_prefix"] = MONGO_URI[:20] if MONGO_URI else None
+        response["python_version"] = sys.version
+
+    return jsonify(response), 200
 
 @app.route('/api/light-pollution', methods=['GET'])
 def get_light_pollution():
