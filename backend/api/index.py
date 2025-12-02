@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import os
+import sys
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
@@ -10,6 +11,19 @@ load_dotenv()
 
 app = Flask(__name__)
 
+# Global error handler
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Global exception handler for all unhandled errors"""
+    import traceback
+    error_trace = traceback.format_exc()
+    print(f"Unhandled error: {error_trace}", file=sys.stderr)
+    return jsonify({
+        "error": "Internal server error",
+        "message": str(e),
+        "type": type(e).__name__
+    }), 500
+
 # MongoDB connection
 MONGO_URI = os.getenv('MONGODB_URI')
 mongo_client = None
@@ -18,15 +32,22 @@ db = None
 def get_db():
     """Initialize MongoDB connection lazily"""
     global mongo_client, db
-    if mongo_client is None and MONGO_URI:
+    if mongo_client is None:
+        if not MONGO_URI:
+            print("Warning: MONGODB_URI environment variable not set", file=sys.stderr)
+            return None
         try:
+            print(f"Attempting MongoDB connection...", file=sys.stderr)
             mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
             # Test connection
             mongo_client.admin.command('ping')
             db = mongo_client.get_database()
+            print("MongoDB connected successfully", file=sys.stderr)
             return db
         except (ConnectionFailure, Exception) as e:
-            print(f"MongoDB connection failed: {e}")
+            print(f"MongoDB connection failed: {e}", file=sys.stderr)
+            mongo_client = None
+            db = None
             return None
     return db
 
@@ -173,11 +194,6 @@ def root():
             "/api/light-pollution": "Get light pollution data (requires lat and lon query params)"
         }
     }), 200
-
-# Vercel serverless function handler
-def handler(request):
-    with app.app_context():
-        return app.full_dispatch_request()
 
 # For local development
 if __name__ == '__main__':
