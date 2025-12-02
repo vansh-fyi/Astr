@@ -1,84 +1,175 @@
+from flask import Flask, request, jsonify
 import os
-from flask import Flask, jsonify, request
+from dotenv import load_dotenv
 from pymongo import MongoClient
-from bson.json_util import dumps
-import json
+from pymongo.errors import ConnectionFailure
+import math
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 
-# Connect to MongoDB
-# Note: In Vercel, env vars are injected.
-# We use a global client to take advantage of connection pooling in serverless.
-mongo_uri = os.environ.get('MONGODB_URI')
-client = None
+# MongoDB connection
+# Vercel uses MONGODB_URI
+MONGO_URI = os.getenv('MONGODB_URI')
+mongo_client = None
 db = None
-collection = None
 
 def get_db():
-    global client, db, collection
-    if client is None and mongo_uri:
+    """Initialize MongoDB connection lazily"""
+    global mongo_client, db
+    if mongo_client is None and MONGO_URI:
         try:
-            client = MongoClient(mongo_uri)
-            db = client.get_database('astr')
-            collection = db.get_collection('light_pollution')
-        except Exception as e:
-            print(f"Error connecting to MongoDB: {e}")
+            mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+            # Test connection
+            mongo_client.admin.command('ping')
+            db = mongo_client.get_database('astr') # Explicitly select 'astr' database
+            return db
+        except (ConnectionFailure, Exception) as e:
+            print(f"MongoDB connection failed: {e}")
             return None
-    return collection
+    return db
 
-@app.route('/')
-def home():
+def calculate_bortle_class(mpsas):
+    """
+    Convert MPSAS to Bortle Dark Sky Scale
+    MPSAS ranges from ~22 (darkest) to ~12 (brightest)
+    """
+    if mpsas >= 21.7: return 1
+    if mpsas >= 21.5: return 2
+    if mpsas >= 21.3: return 3
+    if mpsas >= 20.4: return 4
+    if mpsas >= 19.1: return 5
+    if mpsas >= 18.0: return 6
+    if mpsas >= 18.0: return 7
+    if mpsas >= 17.0: return 8
+    return 9
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    db = get_db()
+    db_status = "connected" if db is not None else "disconnected"
+    
+    # Debug info (safe to expose in health check for now)
+    env_check = "Set" if MONGO_URI else "Missing"
+
     return jsonify({
-        "status": "online",
-        "service": "Astr Backend",
-        "endpoints": ["/api/health", "/api/light-pollution"]
-    })
+        "status": "healthy",
+        "service": "Astr Backend API",
+        "database": db_status,
+        "env_var": env_check
+    }), 200
 
-@app.route('/api/health')
-def health():
-    col = get_db()
-    db_status = "connected" if col is not None else "disconnected"
-    return jsonify({"status": "ok", "database": db_status})
-
-@app.route('/api/light-pollution')
+@app.route('/api/light-pollution', methods=['GET'])
 def get_light_pollution():
+    """
+    Get light pollution data for given coordinates
+    Query params: lat (latitude), lon (longitude)
+    Returns: MPSAS value and Bortle class
+    """
+    # Validate query parameters
+    lat = request.args.get('lat', type=float)
+    lon = request.args.get('lon', type=float)
+
+    if lat is None or lon is None:
+        return jsonify({
+            "error": "Missing required parameters",
+            "message": "Both 'lat' and 'lon' query parameters are required"
+        }), 400
+
+    # Validate coordinate ranges
+    if not (-90 <= lat <= 90):
+        return jsonify({
+            "error": "Invalid latitude",
+            "message": "Latitude must be between -90 and 90"
+        }), 400
+
+    if not (-180 <= lon <= 180):
+        return jsonify({
+            "error": "Invalid longitude",
+            "message": "Longitude must be between -180 and 180"
+        }), 400
+
+    # Get database connection
+    db = get_db()
+    if db is None:
+        return jsonify({
+            "error": "Database unavailable",
+            "message": "Unable to connect to MongoDB. Using fallback data.",
+            "lat": lat,
+            "lon": lon,
+            "mpsas": 18.5,
+            "bortle_class": 6,
+            "fallback": True
+        }), 200
+
+    # Query MongoDB for nearest light pollution data
     try:
-        lat = request.args.get('lat', type=float)
-        lon = request.args.get('lon', type=float)
+        collection = db.light_pollution
 
-        if lat is None or lon is None:
-            return jsonify({"error": "Missing 'lat' or 'lon' parameters"}), 400
-
-        col = get_db()
-        if col is None:
-            return jsonify({"error": "Database connection failed"}), 500
-
-        # Find nearest point within 50km (50000 meters)
-        # MongoDB expects [lon, lat]
-        query = {
+        # Use geospatial query to find nearest point
+        result = collection.find_one({
             "location": {
                 "$near": {
                     "$geometry": {
                         "type": "Point",
-                        "coordinates": [lon, lat]
+                        "coordinates": [lon, lat]  # GeoJSON uses [lon, lat] order
                     },
-                    "$maxDistance": 50000 
+                    "$maxDistance": 50000  # 50km radius
                 }
             }
-        }
-
-        result = col.find_one(query)
+        })
 
         if result:
-            # Convert ObjectId to string for JSON serialization
-            result['_id'] = str(result['_id'])
-            return jsonify(result)
+            mpsas = result.get('mpsas', 18.5)
+            bortle = calculate_bortle_class(mpsas)
+
+            return jsonify({
+                "lat": lat,
+                "lon": lon,
+                "mpsas": round(mpsas, 2),
+                "bortle_class": bortle,
+                "fallback": False
+            }), 200
         else:
-            return jsonify({"error": "No data found for this location", "code": "NO_DATA"}), 404
+            # No data found, return fallback
+            return jsonify({
+                "error": "No data found",
+                "message": "No light pollution data found within 50km. Using fallback.",
+                "lat": lat,
+                "lon": lon,
+                "mpsas": 18.5,
+                "bortle_class": 6,
+                "fallback": True
+            }), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Query error: {e}")
+        return jsonify({
+            "error": "Query failed",
+            "message": str(e),
+            "lat": lat,
+            "lon": lon,
+            "mpsas": 18.5,
+            "bortle_class": 6,
+            "fallback": True
+        }), 200
 
-# Vercel requires the app to be exposed as 'app'
+@app.route('/', methods=['GET'])
+def root():
+    """Root endpoint"""
+    return jsonify({
+        "message": "Astr Backend API",
+        "version": "1.0.0",
+        "endpoints": {
+            "/api/health": "Health check",
+            "/api/light-pollution": "Get light pollution data"
+        }
+    }), 200
+
+# Vercel serverless function handler
+# This is crucial for Vercel to know how to handle the request
 if __name__ == '__main__':
     app.run(debug=True)
