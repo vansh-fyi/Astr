@@ -2,3 +2,5 @@ Flask==3.0.0
 pymongo==4.6.0
 python-dotenv==1.0.0
 dnspython==2.4.2
+h5py==3.10.0
+numpy==1.26.0

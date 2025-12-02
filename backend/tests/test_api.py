@@ -188,25 +188,42 @@ class TestBortleClassCalculation(unittest.TestCase):
         self.assertEqual(calculate_bortle_class(20.4), 4)
 
     def test_bortle_class_5_suburban(self):
-        """Test MPSAS >= 19.1 returns Bortle Class 5"""
+        """Test MPSAS 19.50-20.48 returns Bortle Class 5"""
         self.assertEqual(calculate_bortle_class(20.0), 5)
-        self.assertEqual(calculate_bortle_class(19.1), 5)
+        self.assertEqual(calculate_bortle_class(19.50), 5)
 
     def test_bortle_class_6_bright_suburban(self):
-        """Test MPSAS >= 18.0 returns Bortle Class 6"""
+        """Test MPSAS 18.94-19.49 returns Bortle Class 6"""
         self.assertEqual(calculate_bortle_class(19.0), 6)
-        self.assertEqual(calculate_bortle_class(18.5), 6)
-        self.assertEqual(calculate_bortle_class(18.0), 6)
+        self.assertEqual(calculate_bortle_class(18.94), 6)
+
+    def test_bortle_class_7_suburban_urban(self):
+        """Test MPSAS 18.38-18.93 returns Bortle Class 7"""
+        self.assertEqual(calculate_bortle_class(18.70), 7)
+        self.assertEqual(calculate_bortle_class(18.38), 7)
 
     def test_bortle_class_8_city(self):
-        """Test MPSAS >= 17.0 returns Bortle Class 8"""
-        self.assertEqual(calculate_bortle_class(17.5), 8)
-        self.assertEqual(calculate_bortle_class(17.0), 8)
+        """Test MPSAS 17.80-18.37 returns Bortle Class 8"""
+        self.assertEqual(calculate_bortle_class(18.00), 8)
+        self.assertEqual(calculate_bortle_class(17.80), 8)
 
     def test_bortle_class_9_inner_city(self):
-        """Test MPSAS < 17.0 returns Bortle Class 9"""
-        self.assertEqual(calculate_bortle_class(16.5), 9)
-        self.assertEqual(calculate_bortle_class(15.0), 9)
+        """Test MPSAS < 17.80 returns Bortle Class 9"""
+        self.assertEqual(calculate_bortle_class(17.50), 9)
+        self.assertEqual(calculate_bortle_class(16.0), 9)
+
+    def test_all_bortle_classes_reachable(self):
+        """Comprehensive test ensuring all Bortle classes 1-9 are reachable"""
+        # Test one value in each Bortle class range
+        self.assertEqual(calculate_bortle_class(22.0), 1)   # Bortle 1
+        self.assertEqual(calculate_bortle_class(21.90), 2)  # Bortle 2
+        self.assertEqual(calculate_bortle_class(21.70), 3)  # Bortle 3
+        self.assertEqual(calculate_bortle_class(21.0), 4)   # Bortle 4
+        self.assertEqual(calculate_bortle_class(20.0), 5)   # Bortle 5
+        self.assertEqual(calculate_bortle_class(19.0), 6)   # Bortle 6
+        self.assertEqual(calculate_bortle_class(18.50), 7)  # Bortle 7 - CRITICAL: Was unreachable before fix
+        self.assertEqual(calculate_bortle_class(18.0), 8)   # Bortle 8
+        self.assertEqual(calculate_bortle_class(17.0), 9)   # Bortle 9
 
 if __name__ == '__main__':
     unittest.main()

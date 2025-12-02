@@ -55,24 +55,36 @@ def get_db():
 
 def calculate_bortle_class(mpsas):
     """
-    Convert MPSAS to Bortle Dark Sky Scale
-    MPSAS ranges from ~22 (darkest) to ~12 (brightest)
+    Convert MPSAS to Bortle Dark Sky Scale (1-9)
+
+    Based on standard MPSAS to Bortle mapping:
+    - Bortle 1 (Excellent): MPSAS >= 21.99
+    - Bortle 2 (Truly Dark): MPSAS 21.89-21.98
+    - Bortle 3 (Rural): MPSAS 21.69-21.88
+    - Bortle 4 (Rural/Suburban): MPSAS 20.49-21.68
+    - Bortle 5 (Suburban): MPSAS 19.50-20.48
+    - Bortle 6 (Bright Suburban): MPSAS 18.94-19.49
+    - Bortle 7 (Suburban/Urban): MPSAS 18.38-18.93
+    - Bortle 8 (City): MPSAS 17.80-18.37
+    - Bortle 9 (Inner City): MPSAS < 17.80
+
+    Reference: Matches backend/scripts/process_nasa_data.py implementation
     """
-    if mpsas >= 21.7:
+    if mpsas >= 21.99:
         return 1  # Excellent dark sky
-    elif mpsas >= 21.5:
-        return 2  # Typical dark sky
-    elif mpsas >= 21.3:
+    elif mpsas >= 21.89:
+        return 2  # Truly dark sky
+    elif mpsas >= 21.69:
         return 3  # Rural sky
-    elif mpsas >= 20.4:
+    elif mpsas >= 20.49:
         return 4  # Rural/suburban transition
-    elif mpsas >= 19.1:
+    elif mpsas >= 19.50:
         return 5  # Suburban sky
-    elif mpsas >= 18.0:
+    elif mpsas >= 18.94:
         return 6  # Bright suburban sky
-    elif mpsas >= 18.0:
+    elif mpsas >= 18.38:
         return 7  # Suburban/urban transition
-    elif mpsas >= 17.0:
+    elif mpsas >= 17.80:
         return 8  # City sky
     else:
         return 9  # Inner city sky
