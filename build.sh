@@ -18,6 +18,6 @@ flutter config --enable-web
 flutter pub get
 
 # Build web app
-flutter build web --release --web-renderer canvaskit
+flutter build web --release
 
 echo "Build completed successfully!"
