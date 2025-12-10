@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
+import 'package:clarity_flutter/clarity_flutter.dart';
 
 import 'constants/strings.dart';
 import 'features/astronomy/data/repositories/astro_engine_impl.dart';
@@ -30,13 +31,8 @@ void main() async {
     }
   }
 
-  // Initialize Astronomy Service (Swiss Ephemeris)
+  // Astronomy Service initialization now handled by SplashScreen
   final container = ProviderContainer();
-  try {
-    await container.read(astronomyServiceProvider).init();
-  } catch (e) {
-    debugPrint('Failed to initialize AstronomyService: $e');
-  }
 
   if (kReleaseMode) {
     /// Disable debugPrint in release mode
@@ -46,18 +42,27 @@ void main() async {
     debugPrint = (String? message, {int? wrapWidth}) {};
   }
 
+  // Configure Microsoft Clarity
+  final clarityConfig = ClarityConfig(
+    projectId: "ujfp0i4u4p",
+    logLevel: LogLevel.None, // Use LogLevel.Verbose for debugging
+  );
+
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: EasyLocalization(
-        supportedLocales: const <Locale>[
-          /// Add your supported locales here
-          Locale('en'),
-          Locale('tr'),
-        ],
-        path: Strings.localizationsPath,
-        fallbackLocale: const Locale('en'),
-        child: const MyApp(),
+    ClarityWidget(
+      clarityConfig: clarityConfig,
+      app: UncontrolledProviderScope(
+        container: container,
+        child: EasyLocalization(
+          supportedLocales: const <Locale>[
+            /// Add your supported locales here
+            Locale('en'),
+            Locale('tr'),
+          ],
+          path: Strings.localizationsPath,
+          fallbackLocale: const Locale('en'),
+          child: const MyApp(),
+        ),
       ),
     ),
   );

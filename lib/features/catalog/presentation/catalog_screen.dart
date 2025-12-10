@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../app/theme/app_theme.dart';
-import '../../dashboard/presentation/widgets/glass_panel.dart';
+import 'package:astr/core/widgets/glass_panel.dart';
 import '../../dashboard/presentation/widgets/nebula_background.dart';
 
 class CatalogScreen extends ConsumerWidget {
@@ -79,6 +79,7 @@ class CatalogScreen extends ConsumerWidget {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: GlassPanel(
+                            enableBlur: false,
                             padding: const EdgeInsets.all(16),
                             child: Row(
                               children: [

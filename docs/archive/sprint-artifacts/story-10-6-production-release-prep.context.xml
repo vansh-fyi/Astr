@@ -1,0 +1,116 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>10</epicId>
+    <storyId>6</storyId>
+    <title>Production Release Prep</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-02</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/story-10-6-production-release-prep.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Developer</asA>
+    <iWant>to finalize the app configuration for Web, iOS, and Android</iWant>
+    <soThat>it is ready for production deployment and store submission</soThat>
+    <tasks>
+- [ ] Audit Platform Configs (AC: 1)
+  - [ ] Review `android/app/src/main/AndroidManifest.xml`.
+  - [ ] Review `ios/Runner/Info.plist`.
+  - [ ] Review `web/index.html` and `web/manifest.json`.
+
+- [ ] Verify Icons & Splash (AC: 3)
+  - [ ] Check `pubspec.yaml` for launcher icon config.
+  - [ ] Run `dart run flutter_launcher_icons` if updates needed.
+  - [ ] Run `dart run flutter_native_splash:create` if updates needed.
+
+- [ ] Smoke Test Builds (AC: 2)
+  - [ ] Run `flutter build web --release`.
+  - [ ] Run `flutter build apk --release` (Dry run for Android).
+  - [ ] **Manual:** Verify the built artifacts run on simulator/device.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. **Platform Configuration**
+   - [ ] **Android:** Verify `AndroidManifest.xml` permissions, label, and icon. Ensure release signing config is ready (keystore placeholders).
+   - [ ] **iOS:** Verify `Info.plist` permissions (Location, etc.), display name, and assets (AppIcon).
+   - [ ] **Web:** Verify `index.html` title, favicon, and manifest.json.
+
+2. **Build Verification**
+   - [ ] Successful `flutter build appbundle` (Android).
+   - [ ] Successful `flutter build ipa` (iOS - requires Mac/Xcode).
+   - [ ] Successful `flutter build web` (Web).
+
+3. **Metadata & Assets**
+   - [ ] Ensure App Icon is correctly generated for all platforms (using `flutter_launcher_icons` if needed).
+   - [ ] Ensure Splash Screen is consistent (using `flutter_native_splash` if needed).
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics & Stories</title>
+        <section>Story 10.6: Production Release Prep</section>
+        <snippet>Goal: Finalize configuration for Web, iOS, and Android.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Deployment</section>
+        <snippet>Target platforms: iOS, Android, Web. Release readiness required.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>android/app/src/main/AndroidManifest.xml</path>
+        <kind>config</kind>
+        <symbol>application</symbol>
+        <reason>Contains Android app label ("temp") and icon settings.</reason>
+      </item>
+      <item>
+        <path>ios/Runner/Info.plist</path>
+        <kind>config</kind>
+        <symbol>CFBundleDisplayName</symbol>
+        <reason>Contains iOS app display name ("Temp").</reason>
+      </item>
+      <item>
+        <path>web/index.html</path>
+        <kind>config</kind>
+        <symbol>title</symbol>
+        <reason>Contains Web app title ("temp").</reason>
+      </item>
+      <item>
+        <path>pubspec.yaml</path>
+        <kind>config</kind>
+        <symbol>dev_dependencies</symbol>
+        <reason>Needs flutter_launcher_icons and flutter_native_splash.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <ecosystem name="flutter">
+        <package>flutter_launcher_icons</package>
+        <package>flutter_native_splash</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Signing:** Do not commit actual signing keys.
+    - **Web:** Ensure base href is correct.
+    - **Consistency:** App name and icon must be consistent across all platforms.
+  </constraints>
+  <interfaces>
+    <!-- No code interfaces, strictly configuration -->
+  </interfaces>
+  <tests>
+    <standards>Build verification (flutter build).</standards>
+    <locations>android/, ios/, web/</locations>
+    <ideas>
+      - Verify app name appears correctly on home screen.
+      - Verify app icon is correct on home screen.
+      - Verify splash screen appears on launch.
+    </ideas>
+  </tests>
+</story-context>

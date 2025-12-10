@@ -1,0 +1,130 @@
+<story-context id="story-6-1-context" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.1</storyId>
+    <title>Secure API Proxy & Open-Meteo Exception</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/story-6-1-secure-api-proxy-cloudflare-workers.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Developer</asA>
+    <iWant>to proxy sensitive API calls while allowing direct calls for free/public APIs (like Open-Meteo)</iWant>
+    <soThat>we balance security with cost/complexity for the MVP</soThat>
+    <tasks>
+      ### Flutter App
+      - [ ] Refactor `ApiConfig` to support direct URLs.
+      - [ ] Update `OpenMeteoWeatherService` to use direct URL.
+      - [ ] Update `GeocodingService` to use direct URL.
+      - [ ] Verify `WeatherRepository` works with direct calls.
+
+      ### Backend (Worker)
+      - [ ] Keep existing `astr-proxy` project.
+      - [ ] (Optional) Comment out or deprecate the proxy routes for now to save worker requests.
+      - [ ] Ensure `wrangler.toml` is configured.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    ### AC 1: Hybrid API Configuration
+    - [ ] **Config**: Implement `ApiConfig` class that distinguishes between `direct` and `proxied` endpoints.
+    - [ ] **Switch**: Add a feature flag (compile-time or config) to easily switch Open-Meteo to proxy mode in the future.
+
+    ### AC 2: Open-Meteo Direct Client (The Exception)
+    - [ ] **Implementation**: `WeatherRepository` and `GeocodingRepository` call `https://api.open-meteo.com` directly.
+    - [ ] **Justification**: Document in code why this is safe (Keyless, Free Tier).
+    - [ ] **Removal**: Remove existing proxy calls for Weather/Geocoding if they exist.
+
+    ### AC 3: Cloudflare Worker (Infrastructure Prep)
+    - [ ] **Setup**: Initialize `astr-proxy` worker (Hono) as a placeholder for future keyed APIs.
+    - [ ] **Endpoint**: Create a simple `/health` or `/status` endpoint to verify connectivity.
+    - [ ] **Security**: Ensure it's ready to accept secrets when needed.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>6. Implementation Patterns > C. The "Proxy" Pattern</section>
+        <snippet>APIs requiring keys/auth MUST be proxied through Cloudflare Workers. Free/keyless APIs (Open-Meteo) may be called directly from Flutter.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-6.md</path>
+        <title>Epic Technical Specification: Security & Compliance</title>
+        <section>Detailed Design</section>
+        <snippet>Describes the Cloudflare Worker setup and Hono framework usage.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Data Sources & APIs</section>
+        <snippet>Mandate: All data sources must be Open Source and Free of Cost. Open-Meteo is keyless for non-commercial use.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/core/config/api_config.dart</path>
+        <kind>config</kind>
+        <symbol>ApiConfig</symbol>
+        <reason>Central configuration for API base URLs. Needs to support both direct and proxied URLs.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/data/repositories/weather_repository_impl.dart</path>
+        <kind>repository</kind>
+        <symbol>WeatherRepositoryImpl</symbol>
+        <reason>Implementation of weather data fetching. Currently uses OpenMeteoWeatherService.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/domain/repositories/i_weather_repository.dart</path>
+        <kind>interface</kind>
+        <symbol>IWeatherRepository</symbol>
+        <reason>Interface for weather repository.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>dio</dep>
+      <dep>wrangler</dep>
+      <dep>hono</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Security**: Upstream API keys must be stored in Cloudflare Secrets (Environment Variables), NEVER in the code.
+    - **Cost**: Minimize Cloudflare Worker usage for free tier (100k req/day) by using direct calls for Open-Meteo.
+    - **Future Proofing**: The proxy infrastructure must remain in place for future use.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Weather Proxy Endpoint</name>
+      <kind>REST</kind>
+      <signature>GET /api/weather?lat={lat}&long={long}</signature>
+      <path>backend/src/index.ts</path>
+    </interface>
+    <interface>
+      <name>Geocode Proxy Endpoint</name>
+      <kind>REST</kind>
+      <signature>GET /api/geocode?q={query}</signature>
+      <path>backend/src/index.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      - **Backend**: Unit tests for Hono routes (mocking upstream). Manual `curl` testing for deployment.
+      - **Frontend**: Verify `WeatherRepository` integration with direct URL.
+    </standards>
+    <locations>
+      <loc>backend/test</loc>
+      <loc>test/features/dashboard/data/repositories</loc>
+    </locations>
+    <ideas>
+      <idea>Verify `ApiConfig` returns correct URL based on environment/flag.</idea>
+      <idea>Verify `WeatherRepository` calls Open-Meteo directly.</idea>
+      <idea>Verify Worker `/health` endpoint returns 200 OK.</idea>
+    </ideas>
+  </tests>
+</story-context>

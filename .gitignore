@@ -78,23 +78,19 @@ yarn.lock
 .agent/
 .bmad/
 .gemini/
-.github/
 .claude/
 .cursor/
-docs/
 
-# Documentation files to exclude
-CODE_OF_CONDUCT.md
-CONTRIBUTING.md
+# Documentation files to exclude (keep these if you want to exclude them)
+# CODE_OF_CONDUCT.md
+# CONTRIBUTING.md
 
 # Test output files
 test_output*.txt
 
-# Image assets
-assets/img/
-
-# Large NASA data files
+# Large NASA data files (keep these ignored - they're too large)
 NASA_Light_Pollution/
+Light_Pollution_ATLAS/
 
 # Environment variables
 .env

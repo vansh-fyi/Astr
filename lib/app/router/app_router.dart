@@ -13,6 +13,8 @@ import '../../features/profile/presentation/screens/tos_screen.dart';
 import '../../features/profile/presentation/screens/locations_screen.dart';
 import 'package:astr/features/profile/presentation/screens/add_location_screen.dart';
 import 'package:astr/features/profile/domain/entities/saved_location.dart';
+import '../../features/splash/presentation/splash_screen.dart';
+import '../../features/splash/presentation/providers/initialization_provider.dart';
 import 'scaffold_with_nav_bar.dart';
 
 part 'app_router.g.dart';
@@ -28,25 +30,41 @@ GoRouter goRouter(Ref ref) {
   // Watch the provider to rebuild the router when state changes.
   // This ensures the redirect logic is re-evaluated.
   final tosAccepted = ref.watch(tosNotifierProvider);
+  final initialized = ref.watch(initializationNotifierProvider);
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/splash',
     navigatorKey: rootNavigatorKey,
     debugLogDiagnostics: true,
     redirect: (context, state) {
+      final isSplashRoute = state.uri.path == '/splash';
       final isTosRoute = state.uri.path == '/tos';
 
+      // Show splash during initialization
+      if (!initialized) {
+        return isSplashRoute ? null : '/splash';
+      }
+
+      // After initialization, handle ToS redirect
       if (!tosAccepted) {
         return isTosRoute ? null : '/tos';
       }
 
-      if (isTosRoute) {
+      if (isTosRoute || isSplashRoute) {
         return '/';
       }
 
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => SplashScreen(
+          onInitializationComplete: () {
+            ref.read(initializationNotifierProvider.notifier).initialize();
+          },
+        ),
+      ),
       GoRoute(
         path: '/tos',
         builder: (context, state) => const ToSScreen(),

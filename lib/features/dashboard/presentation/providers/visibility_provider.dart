@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'weather_provider.dart'; // For dioProvider
 import '../../../../features/context/presentation/providers/astr_context_provider.dart';
 import '../../data/datasources/png_map_service.dart';
 import '../../data/repositories/light_pollution_repository.dart';
@@ -10,10 +9,9 @@ import '../../../../features/context/domain/entities/geo_location.dart';
 // Services
 final pngMapServiceProvider = Provider((ref) => PngMapService());
 
-// Repository
+// Repository - Uses PNG Light Pollution Atlas only (removed VIIRS API)
 final lightPollutionRepositoryProvider = Provider<ILightPollutionService>((ref) {
   return LightPollutionRepository(
-    ref.watch(dioProvider),
     ref.watch(pngMapServiceProvider),
   );
 });

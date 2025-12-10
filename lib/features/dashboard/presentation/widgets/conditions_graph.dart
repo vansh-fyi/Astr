@@ -1,5 +1,6 @@
 import 'package:astr/features/catalog/domain/entities/graph_point.dart';
 import 'package:astr/features/dashboard/domain/entities/hourly_forecast.dart';
+import 'package:astr/core/engine/prime_view_calculator.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,7 @@ class ConditionsGraph extends StatelessWidget {
   final List<HourlyForecast>? cloudCoverData;
   final DateTime startTime;
   final DateTime endTime;
+  final PrimeViewWindow? primeViewWindow;
 
   const ConditionsGraph({
     super.key,
@@ -19,6 +21,7 @@ class ConditionsGraph extends StatelessWidget {
     this.cloudCoverData,
     required this.startTime,
     required this.endTime,
+    this.primeViewWindow,
   });
 
   @override
@@ -35,6 +38,7 @@ class ConditionsGraph extends StatelessWidget {
             cloudCoverData: cloudCoverData,
             startTime: startTime,
             endTime: endTime,
+            primeViewWindow: primeViewWindow,
           ),
         ),
         
@@ -81,6 +85,7 @@ class _ConditionsGraphPainter extends CustomPainter {
   final List<HourlyForecast>? cloudCoverData;
   final DateTime startTime;
   final DateTime endTime;
+  final PrimeViewWindow? primeViewWindow;
 
   _ConditionsGraphPainter({
     required this.themeColor,
@@ -89,6 +94,7 @@ class _ConditionsGraphPainter extends CustomPainter {
     this.cloudCoverData,
     required this.startTime,
     required this.endTime,
+    this.primeViewWindow,
   });
 
   @override
@@ -141,25 +147,10 @@ class _ConditionsGraphPainter extends CustomPainter {
         _drawMoonLabel(canvas, moonX + 8, labelY);
     }
 
-    // 5. Prime View Highlight
-    // Keep fixed for now as requested
-    final primeX = width * 0.5;
-    
-    // Gradient Line for Prime View
-    final primeLinePaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          const Color(0xFF10B981).withValues(alpha: 0.5), // Emerald-500/50
-          const Color(0xFF10B981).withValues(alpha: 0.0), // Transparent
-        ],
-      ).createShader(Rect.fromLTWH(primeX, height - 40, 1, 40));
-
-    canvas.drawLine(Offset(primeX, height - 40), Offset(primeX, height), primeLinePaint);
-
-    // Prime View Badge
-    _drawPrimeViewBadge(canvas, primeX, height - 40);
+    // 5. Prime View Highlight (Dynamic based on calculation)
+    if (primeViewWindow != null) {
+      _drawPrimeViewHighlight(canvas, width, height);
+    }
 
     // 6. Current Time Indicator
     final now = DateTime.now();
@@ -335,6 +326,54 @@ class _ConditionsGraphPainter extends CustomPainter {
       strokePath.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, p2.dx, p2.dy);
     }
     canvas.drawPath(strokePath, strokePaint);
+  }
+
+  /// Draws the Prime View window highlight based on calculated optimal time range
+  void _drawPrimeViewHighlight(Canvas canvas, double width, double height) {
+    if (primeViewWindow == null) return;
+
+    final totalDuration = endTime.difference(startTime).inMinutes;
+    if (totalDuration == 0) return;
+
+    // Calculate X positions for the window
+    final windowStartMinutes = primeViewWindow!.start.difference(startTime).inMinutes;
+    final windowEndMinutes = primeViewWindow!.end.difference(startTime).inMinutes;
+
+    final startX = (windowStartMinutes / totalDuration) * width;
+    final endX = (windowEndMinutes / totalDuration) * width;
+    final centerX = (startX + endX) / 2;
+
+    // Draw subtle background highlight
+    final highlightPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFF10B981).withValues(alpha: 0.08), // Emerald-500/8
+          const Color(0xFF10B981).withValues(alpha: 0.02), // Emerald-500/2
+        ],
+      ).createShader(Rect.fromLTWH(startX, 0, endX - startX, height));
+
+    canvas.drawRect(
+      Rect.fromLTWH(startX, 0, endX - startX, height),
+      highlightPaint,
+    );
+
+    // Draw vertical line at center with gradient
+    final centerLinePaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFF10B981).withValues(alpha: 0.5), // Emerald-500/50
+          const Color(0xFF10B981).withValues(alpha: 0.0), // Transparent
+        ],
+      ).createShader(Rect.fromLTWH(centerX, height - 40, 1, 40));
+
+    canvas.drawLine(Offset(centerX, height - 40), Offset(centerX, height), centerLinePaint);
+
+    // Draw Prime View badge at center
+    _drawPrimeViewBadge(canvas, centerX, height - 40);
   }
 
   void _drawMoonLabel(Canvas canvas, double x, double y) {

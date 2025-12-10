@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story_context>
+    <metadata>
+        <story_id>1.3</story_id>
+        <story_key>1-3-hybrid-light-pollution-logic</story_key>
+        <generated_date>2025-12-03</generated_date>
+        <status>ready-for-dev</status>
+    </metadata>
+
+    <story_definition>
+        <user_story>
+            As a Stargazer,
+            I want the app to determine the light pollution level (Bortle scale) for my location using a hybrid online/offline approach,
+            so that I can know how dark the sky is even when I don't have an internet connection.
+        </user_story>
+        <acceptance_criteria>
+            <criterion id="1">Hybrid Logic: Service attempts to fetch LP data from API first; if fails or offline, falls back to local asset.</criterion>
+            <criterion id="2">Online Fetch: Successfully parses JSON response from `/api/light-pollution` when online.</criterion>
+            <criterion id="3">Offline Fallback: Loads `world_lp.webp` and maps lat/long to pixel color to determine Bortle class when offline.</criterion>
+            <criterion id="4">Accuracy: Offline fallback returns Bortle class matching the online API for the same location > 90% of the time (within 1 class).</criterion>
+            <criterion id="5">Performance: LP lookup completes in < 1s (online) or < 100ms (offline).</criterion>
+            <criterion id="6">Error Handling: Returns `Result.failure` only if both methods fail; handles network timeouts gracefully.</criterion>
+        </acceptance_criteria>
+    </story_definition>
+
+    <artifacts>
+        <documentation>
+            <doc path="docs/sprint-artifacts/tech-spec-epic-1.md" description="Detailed Design & NFRs"/>
+            <doc path="docs/architecture.md" description="Project Structure & Offline-First Strategy"/>
+        </documentation>
+        <code_references>
+            <ref path="lib/core/engine/models/result.dart" description="Result<T> pattern for error handling"/>
+            <ref path="lib/core/engine/models/location.dart" description="Location model (if exists, else create)"/>
+            <ref path="pubspec.yaml" description="Dependencies (http, image)"/>
+        </code_references>
+        <dependencies>
+            <dep name="http" version="^1.6.0" status="present"/>
+            <dep name="image" version="^4.5.4" status="present"/>
+            <dep name="flutter_image" version="check-if-needed" status="missing"/>
+        </dependencies>
+        <assets>
+            <asset path="assets/images/light_pollution/world_lp.webp" description="Offline LP Map (Equirectangular)"/>
+        </assets>
+    </artifacts>
+
+    <constraints>
+        <constraint type="architectural">Must use Result<T> for all service methods (no unchecked exceptions).</constraint>
+        <constraint type="architectural">Offline fallback must be completely local (no network calls).</constraint>
+        <constraint type="performance">Offline lookup < 100ms (requires efficient pixel reading).</constraint>
+        <constraint type="data">WebP map projection assumed Equirectangular (verify if different).</constraint>
+    </constraints>
+
+    <interfaces>
+        <interface name="ILightPollutionService">
+            <method>Future<Result<int>> getBortleClass(Location location)</method>
+        </interface>
+        <interface name="ILPDataSource">
+            <method>Future<int?> getBortleClass(Location location)</method>
+        </interface>
+    </interfaces>
+
+    <testing_strategy>
+        <unit_tests>
+            <test>Mock OnlineDataSource failure -> Verify OfflineDataSource called</test>
+            <test>Mock OnlineDataSource success -> Verify OfflineDataSource NOT called</test>
+            <test>Mock both fail -> Verify Result.failure returned</test>
+        </unit_tests>
+        <integration_tests>
+            <test>OfflineDataSource: Load actual WebP asset and verify pixel reading for known locations (e.g., NYC=Bortle 9, Desert=Bortle 1)</test>
+        </integration_tests>
+        <manual_verification>
+            <step>Turn off WiFi/Data -> Open App -> Check LP value (should be from map)</step>
+        </manual_verification>
+    </testing_strategy>
+</story_context>

@@ -1,0 +1,159 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>10</epicId>
+    <storyId>4</storyId>
+    <title>Performance Optimization</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-02</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/story-10-4-performance-optimization.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>the app to be light, fast, and stable</iWant>
+    <soThat>it runs smoothly on my device without draining battery or crashing, while looking exactly the same</soThat>
+    <tasks>
+- [ ] Analyze Bundle Size (AC: 1)
+  - [ ] Run `flutter build appbundle --analyze-size` to generate size report.
+  - [ ] Review `build/app/outputs/bundle/release/app-release.aab` size.
+  - [ ] Identify top 3 largest components (assets vs code).
+  - [ ] Document findings in Dev Notes.
+
+- [ ] Optimize Assets & Dependencies (AC: 1, 3)
+  - [ ] Compress any large images in `assets/`.
+  - [ ] Remove unused dependencies from `pubspec.yaml`.
+  - [ ] Verify `flutter clean` and rebuild reduces size.
+
+- [ ] Profile Rendering Performance (AC: 2)
+  - [ ] Run app in Profile mode (`flutter run --profile`).
+  - [ ] Navigate to Object Detail Page (Visibility Graph).
+  - [ ] Navigate to Atmospheric Drawer (Cloud Cover Graph).
+  - [ ] Use DevTools Performance overlay to check for frame drops (jank).
+  - [ ] **Optimization:** If jank found, refactor `CustomPainter` to pre-calculate paths in `shouldRepaint` or outside `paint`.
+
+- [ ] Code Duplication Audit & Refactor (AC: 4)
+  - [ ] Identify repeated widget patterns or logic blocks.
+  - [ ] Extract common widgets to `core/widgets` or feature-specific shared folders.
+  - [ ] **Verify:** Ensure no visual regression after refactor.
+
+- [ ] Stability Audit (AC: 5)
+  - [ ] Review `Riverpod` providers for circular dependencies or infinite rebuild loops.
+  - [ ] Check `initState` and `dispose` logic for proper resource management.
+  - [ ] Verify async methods handle "widget unmounted" scenarios.
+
+- [ ] Verify Final Build Targets (AC: 1, 6)
+  - [ ] Build final release bundle.
+  - [ ] Confirm size is within limits (&lt; 50MB Android).
+  - [ ] **Manual QA:** Walk through the entire app to ensure UI/Flow is identical to pre-optimization state.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. **Bundle Size Analysis & Reduction**
+   - [ ] Analyze current app bundle size for Android (`.aab`) and iOS (`.ipa`).
+   - [ ] Identify large assets or unused dependencies.
+   - [ ] Implement optimization strategies (e.g., asset compression, tree-shaking) to meet targets:
+     - Android: &lt; 50MB
+     - iOS: &lt; 100MB
+
+2. **Rendering Performance (60fps)**
+   - [ ] Profile `CustomPainter` implementations (Visibility Graph, Cloud Cover Graph).
+   - [ ] Verify consistent 60fps rendering on mid-range devices (or emulator equivalent).
+   - [ ] Optimize paint methods if frame drops are detected (e.g., caching `Path` objects, reducing overdraw).
+
+3. **Asset Optimization**
+   - [ ] Compress static image assets (PNG/JPG) without visible quality loss.
+   - [ ] Verify font subsets are used if applicable.
+   - [ ] Ensure `flutter build` commands use `--release` and appropriate tree-shaking flags.
+
+4. **Code Quality & Modularization**
+   - [ ] Audit codebase for code duplication (DRY principle).
+   - [ ] Refactor duplicated logic into reusable widgets or services/mixins.
+   - [ ] **Constraint:** Refactoring must NOT alter the visual appearance or user flow.
+
+5. **Stability & Concurrency**
+   - [ ] Audit for potential infinite loops (e.g., in `build()` methods or recursive state updates).
+   - [ ] Audit for race conditions in asynchronous operations (e.g., multiple API calls, state hydration).
+   - [ ] Ensure `mounted` checks are present before `setState` or context usage in async gaps.
+
+6. **Visual Regression Prevention**
+   - [ ] **Critical:** The UI look and flow must be preserved exactly. No visual changes allowed.
+   - [ ] Verify pixel-perfect consistency after optimizations.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics & Stories</title>
+        <section>Story 10.4: Performance Optimization</section>
+        <snippet>Goal: Finalize the app for store release, addressing UX gaps, logic accuracy, backend infrastructure, and performance.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Non-Functional Requirements</section>
+        <snippet>Performance: App Launch &lt; 2 seconds. Animation: 60fps for all visual scales and graphs (Impeller/CustomPainter). Battery: Minimal drain.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Rendering Engine</section>
+        <snippet>Custom Canvas: High-performance custom painters for graphs (Visibility, Cloud Cover).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>pubspec.yaml</path>
+        <kind>config</kind>
+        <symbol>dependencies</symbol>
+        <reason>Source of truth for app dependencies and assets to be optimized.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/widgets/cloud_cover_graph_painter.dart</path>
+        <kind>file</kind>
+        <symbol>CloudCoverGraphPainter</symbol>
+        <reason>CustomPainter implementation to be profiled and optimized.</reason>
+      </item>
+      <item>
+        <path>lib/features/catalog/presentation/widgets/visibility_graph_painter.dart</path>
+        <kind>file</kind>
+        <symbol>VisibilityGraphPainter</symbol>
+        <reason>CustomPainter implementation to be profiled and optimized.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/widgets/altitude_graph.dart</path>
+        <kind>file</kind>
+        <symbol>AltitudeGraph</symbol>
+        <reason>CustomPainter implementation to be profiled and optimized.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <ecosystem name="flutter">
+        <package>flutter_animate</package>
+        <package>rive</package>
+        <package>flutter_svg</package>
+        <package>google_fonts</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Strict Constraint:** DO NOT change the UI or Flow. The look should be preserved at all costs.
+    - **Refactoring Goal:** Modularize code to reduce bundle size and improve maintainability, but only if it doesn't risk visual regression.
+    - **Visual Regression:** No visual changes allowed. Verify pixel-perfect consistency.
+  </constraints>
+  <interfaces>
+    <!-- No specific new interfaces for performance, but refactoring might create shared widgets -->
+  </interfaces>
+  <tests>
+    <standards>Use Flutter DevTools for profiling. Use `flutter build --analyze-size` for bundle analysis.</standards>
+    <locations>lib/features/astronomy/presentation/widgets/</locations>
+    <ideas>
+      - Profile `paint` methods for excessive object creation.
+      - Check for unnecessary repaints in `shouldRepaint`.
+      - Verify asset compression doesn't degrade visual quality on high-DPI screens.
+    </ideas>
+  </tests>
+</story-context>

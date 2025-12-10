@@ -1,0 +1,104 @@
+<story-context id="3-1-celestial-objects-catalog-list" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.1</storyId>
+    <title>Celestial Objects Catalog List</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-29</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-1-celestial-objects-catalog-list.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>to browse a list of Planets, Stars, and Constellations</iWant>
+    <soThat>I can see what's out there and choose a target</soThat>
+    <tasks>
+      - [ ] **Domain Layer** (AC: 1, 2)
+        - [ ] Define `CelestialObject` entity (id, name, type, iconPath, magnitude, coordinates/ephemerisId).
+        - [ ] Define `ICatalogRepository` interface.
+        - [ ] Define `CelestialType` enum.
+      - [ ] **Data Layer** (AC: 3)
+        - [ ] Implement `CatalogRepositoryImpl`.
+        - [ ] Populate static data for Planets, Major Stars, Constellations.
+        - [ ] Integrate `IAstroEngine` to calculate Rise/Set times.
+      - [ ] **Presentation Layer** (AC: 1, 2, 4, 5)
+        - [ ] Create `CatalogNotifier` (Riverpod).
+        - [ ] Implement `CatalogScreen` with `TabBar` or `ChoiceChip`.
+        - [ ] Implement `ObjectListItem` widget (Glass style).
+        - [ ] Wire up navigation to placeholder Detail Page.
+      - [ ] **Assets** (AC: 2)
+        - [ ] Add icons/images for planets and major objects.
+      - [ ] **Testing**
+        - [ ] Unit Test: `CatalogRepository`.
+        - [ ] Widget Test: Filter switching.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1.  **Categorized List:** Users can switch between categories: Planets, Stars, Constellations, Galaxies.
+    2.  **Object Cards:** Each item displays Icon, Name, Type, Rise/Set Time.
+    3.  **Data Source:** Objects are sourced from a local offline database.
+    4.  **Navigation:** Tapping an object navigates to the Object Detail Page.
+    5.  **Visuals:** Uses "Deep Cosmos" theme and "Glass" styling.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Detailed Design</section>
+        <snippet>Defines CatalogRepository, CelestialObject, and integration with IAstroEngine.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Project Structure</section>
+        <snippet>Defines feature module structure and "Glass Pattern" for UI.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/features/astronomy/domain/repositories/i_astro_engine.dart</path>
+        <kind>interface</kind>
+        <symbol>IAstroEngine</symbol>
+        <reason>Required for calculating Rise/Set times.</reason>
+      </item>
+      <item>
+        <path>lib/core/widgets/glass_panel.dart</path>
+        <kind>widget</kind>
+        <symbol>GlassPanel</symbol>
+        <reason>Standard UI container for object cards.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>flutter_riverpod</dep>
+      <dep>fpdart</dep>
+      <dep>go_router</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must work offline (no API calls for catalog).
+    - Must use "Deep Cosmos" theme.
+    - Must use `IAstroEngine` for calculations.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>ICatalogRepository</name>
+      <signature>Future&lt;Either&lt;Failure, List&lt;CelestialObject&gt;&gt;&gt; getObjectsByType(CelestialType type)</signature>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for Repository logic. Widget tests for UI filtering.</standards>
+    <locations>test/features/catalog/</locations>
+    <ideas>
+      - Test that `getObjectsByType` returns correct subset.
+      - Test that Rise/Set calculation handles errors gracefully.
+      - Test that UI updates when tab is switched.
+    </ideas>
+  </tests>
+</story-context>

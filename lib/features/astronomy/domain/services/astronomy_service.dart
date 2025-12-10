@@ -94,6 +94,10 @@ class AstronomyService {
 
   /// Calculate Altitude Trajectory for a celestial body over a specified duration
   /// Returns a list of GraphPoints (time, altitude) every 15 minutes
+  ///
+  /// NOTE: Heavy calculation (>16ms) that should ideally run in isolate, but sweph's
+  /// native FFI bindings are incompatible with Dart isolates. Future optimization may
+  /// require switching to a pure Dart astronomy library.
   Future<List<GraphPoint>> calculateAltitudeTrajectory({
     required HeavenlyBody body,
     required DateTime startTime,
@@ -110,7 +114,6 @@ class AstronomyService {
 
     for (int i = 0; i <= intervals; i++) {
       final time = startTime.add(Duration(minutes: i * 15));
-      // Stop if we exceed the duration slightly due to rounding, though <= intervals handles it.
       if (time.difference(startTime) > duration) break;
 
       final utcTime = time.toUtc();
@@ -123,18 +126,18 @@ class AstronomyService {
         CalendarType.SE_GREG_CAL,
       );
 
-      // 1. Calculate Equatorial Position
+      // Calculate Equatorial Position
       final flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
       final xx = Sweph.swe_calc_ut(jd, body, flags);
-      
-      // 2. Convert to Horizon Coordinates (Az/Alt)
+
+      // Convert to Horizon Coordinates
       final xin = Coordinates(xx.longitude, xx.latitude, xx.distance);
       final azAlt = Sweph.swe_azalt(
         jd,
         AzAltMode.SE_EQU2HOR,
         geopos,
-        0.0, // pressure
-        10.0, // temperature (standard)
+        0.0,
+        10.0,
         xin,
       );
 
@@ -146,6 +149,8 @@ class AstronomyService {
 
   /// Calculate Altitude Trajectory for a fixed object (RA/Dec) over a specified duration
   /// Returns a list of GraphPoints (time, altitude) every 15 minutes
+  ///
+  /// NOTE: Heavy calculation (>16ms) - see calculateAltitudeTrajectory for isolate limitation details
   Future<List<GraphPoint>> calculateFixedObjectTrajectory({
     required double ra, // Right Ascension in degrees
     required double dec, // Declination in degrees
@@ -175,23 +180,14 @@ class AstronomyService {
         CalendarType.SE_GREG_CAL,
       );
 
-      // Convert Fixed RA/Dec to Horizon Coordinates (Az/Alt)
-      // Note: RA/Dec are J2000 usually, but for simplicity we assume current epoch or J2000
-      // If J2000, we might need precession, but for now let's treat as current.
-      // Actually, standard catalog is J2000. swisseph handles this.
-      // Let's assume input is J2000 and use SE_EQU2HOR.
-      
-      // We need to pass coordinates.
-      // Sweph.swe_azalt takes 'xin' which are equatorial coordinates.
-      // We assume distance is infinite (0.0 or 1.0 AU doesn't matter much for stars/DSO for altitude)
       final xin = Coordinates(ra, dec, 1.0);
-      
+
       final azAlt = Sweph.swe_azalt(
         jd,
         AzAltMode.SE_EQU2HOR,
         geopos,
-        0.0, // pressure
-        10.0, // temperature
+        0.0,
+        10.0,
         xin,
       );
 
@@ -204,6 +200,8 @@ class AstronomyService {
   /// Calculate Moon Interference Trajectory over a specified duration
   /// Returns a list of GraphPoints (time, interference score) every 15 minutes
   /// Interference = Altitude * Illumination (0-1)
+  ///
+  /// NOTE: Heavy calculation (>16ms) - see calculateAltitudeTrajectory for isolate limitation details
   Future<List<GraphPoint>> calculateMoonTrajectory({
     required DateTime startTime,
     required double lat,
@@ -220,7 +218,7 @@ class AstronomyService {
     for (int i = 0; i <= intervals; i++) {
       final time = startTime.add(Duration(minutes: i * 15));
       if (time.difference(startTime) > duration) break;
-      
+
       final utcTime = time.toUtc();
 
       final jd = Sweph.swe_julday(
@@ -231,11 +229,11 @@ class AstronomyService {
         CalendarType.SE_GREG_CAL,
       );
 
-      // 1. Calculate Moon Position
+      // Calculate Moon Position
       final flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
       final xx = Sweph.swe_calc_ut(jd, HeavenlyBody.SE_MOON, flags);
 
-      // 2. Calculate Moon Altitude
+      // Calculate Moon Altitude
       final xin = Coordinates(xx.longitude, xx.latitude, xx.distance);
       final azAlt = Sweph.swe_azalt(
         jd,
@@ -246,19 +244,18 @@ class AstronomyService {
         xin,
       );
 
-      // 3. Calculate Moon Phase (Illumination)
+      // Calculate Moon Phase
       final pheno = Sweph.swe_pheno_ut(jd, HeavenlyBody.SE_MOON, flags);
-      
-      // pheno[1] is phase (0.0 to 1.0)
+
       double illumination = 0.0;
       if (pheno.length > 1) {
         illumination = pheno[1];
       }
-      
+
       // Calculate Interference
       double altitude = azAlt.trueAltitude;
       double interference = 0.0;
-      
+
       if (altitude > 0) {
         interference = altitude * illumination;
       }

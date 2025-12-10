@@ -58,6 +58,7 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         // Red Mode Card
                         GlassPanel(
+                          enableBlur: false,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           child: Row(
                             children: [
@@ -109,6 +110,7 @@ class ProfileScreen extends ConsumerWidget {
 
                         // Locations Card
                         GlassPanel(
+                          enableBlur: false,
                           onTap: () => context.push('/settings/locations'),
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                           child: Row(
@@ -143,10 +145,11 @@ class ProfileScreen extends ConsumerWidget {
 
                         const SizedBox(height: 16),
 
-                        // Support Astr Card
+                        // Support Astr Card - AC#7: Updated to Ko-fi
                         GlassPanel(
+                          enableBlur: false,
                           onTap: () async {
-                            final Uri url = Uri.parse(ExternalUrls.buyMeACoffee);
+                            final Uri url = Uri.parse(ExternalUrls.kofiSupport);
                             if (!await launchUrl(url)) {
                               // Handle error silently or show snackbar
                             }
@@ -157,10 +160,10 @@ class ProfileScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.1),
+                                  color: Colors.pink.withOpacity(0.1), // Ko-fi brand color
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Ionicons.cafe, color: Colors.amber),
+                                child: const Icon(Ionicons.heart, color: Colors.pink), // Ko-fi uses heart
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -177,7 +180,7 @@ class ProfileScreen extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'I am solo dev working on this one, would be grateful for your support, thanks !',
+                                      "Hi! I'm a solo designer working on this. Your support helps me to push this project further!",
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.white.withOpacity(0.5),

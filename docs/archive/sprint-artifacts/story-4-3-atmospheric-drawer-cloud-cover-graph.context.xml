@@ -1,0 +1,118 @@
+<story-context id="docs/sprint-artifacts/story-4-3-atmospheric-drawer-cloud-cover-graph.context.xml" v="1.0">
+  <metadata>
+    <epicId>epic-4</epicId>
+    <storyId>4.3</storyId>
+    <title>Atmospheric Drawer - Cloud Cover Graph</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/story-4-3-atmospheric-drawer-cloud-cover-graph.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>to see a cloud cover forecast graph for the next 12 hours</iWant>
+    <soThat>I can identify clear windows for observation and see how clouds might interfere with object visibility</soThat>
+    <tasks>
+      <task>Task 1: Data Layer &amp; Logic (AC: 1, 2)</task>
+      <task>Task 2: Cloud Cover Graph Widget (AC: 1)</task>
+      <task>Task 3: Update Visibility Graph (AC: 2)</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion>1. Cloud Cover Graph (Atmospherics): Graph displays Cloud Cover % (0-100) on Y-axis, Time on X-axis (Now to +12h). Data fetched from Open-Meteo hourly forecast. Graph renders using CustomPainter. Displayed in the AtmosphericsSheet. Updates immediately when global Location or Date context changes.</criterion>
+    <criterion>2. Visibility Graph Integration: The existing VisibilityGraph must also visualize Cloud Cover. Cloud Cover is overlaid to show interference with the object's altitude. Uses the same underlying cloud cover data logic as the Atmospherics graph.</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-4.md</path>
+        <title>Epic Technical Specification: Planning &amp; Forecast</title>
+        <section>Detailed Design</section>
+        <snippet>Epic 4 focuses on extending the Astr experience beyond the "now" by enabling users to plan stargazing sessions up to 7 days in advance. Includes 7-Day Forecast List and Future Date Context Switching.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/3-3-the-universal-visibility-graph-the-core-feature.md</path>
+        <title>Story 3.3: The Universal Visibility Graph</title>
+        <section>Summary</section>
+        <snippet>The "Universal Visibility Graph" feature has been successfully implemented. The core logic for calculating object visibility and moon interference resides in VisibilityService. The presentation layer uses a responsive CustomPaint implementation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/4-2-future-date-context-switching.md</path>
+        <title>Story 4.2: Future Date Context Switching</title>
+        <section>Dev Notes</section>
+        <snippet>Reused AstrContext instead of creating DateNotifier. Enhanced core GlassPanel for banner usage. WeatherNotifier now correctly switches between WeatherRepository (current) and Planner (future) data.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/features/catalog/presentation/widgets/visibility_graph_widget.dart</path>
+        <kind>widget</kind>
+        <symbol>VisibilityGraphWidget</symbol>
+        <reason>Existing visibility graph to be updated with cloud cover overlay.</reason>
+      </item>
+      <item>
+        <path>lib/features/catalog/presentation/widgets/visibility_graph_painter.dart</path>
+        <kind>painter</kind>
+        <symbol>VisibilityGraphPainter</symbol>
+        <reason>CustomPainter logic for the visibility graph, needs modification for cloud cover.</reason>
+      </item>
+      <item>
+        <path>lib/features/catalog/data/services/visibility_service_impl.dart</path>
+        <kind>service</kind>
+        <symbol>VisibilityServiceImpl</symbol>
+        <reason>Service calculating visibility data, may need to integrate cloud data.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/widgets/atmospherics_sheet.dart</path>
+        <kind>widget</kind>
+        <symbol>AtmosphericsSheet</symbol>
+        <reason>Drawer where the new Cloud Cover Graph will be displayed.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/providers/weather_provider.dart</path>
+        <kind>provider</kind>
+        <symbol>WeatherNotifier</symbol>
+        <reason>Source of truth for weather data (including cloud cover).</reason>
+      </item>
+      <item>
+        <path>lib/core/widgets/glass_panel.dart</path>
+        <kind>widget</kind>
+        <symbol>GlassPanel</symbol>
+        <reason>Standard container for UI consistency.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <package>flutter_riverpod</package>
+      <package>custom_painter</package>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use CustomPainter for all graphs for performance and aesthetic consistency.</constraint>
+    <constraint>Reuse GlassPanel for container styling.</constraint>
+    <constraint>Ensure WeatherNotifier or Planner providers are the single source of truth for weather data.</constraint>
+    <constraint>Maintain separation of concerns: Logic in Services/Repositories, UI in Widgets/Painters.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>VisibilityGraphPainter</name>
+      <kind>class</kind>
+      <signature>class VisibilityGraphPainter extends CustomPainter</signature>
+      <path>lib/features/catalog/presentation/widgets/visibility_graph_painter.dart</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for logic (data parsing, graph data preparation). Widget tests for rendering and updates. Golden tests if possible for pixel-perfect graph verification.</standards>
+    <locations>test/features/dashboard/presentation/widgets, test/features/catalog/presentation/widgets</locations>
+    <ideas>
+      <idea>Verify CloudCoverGraphPainter draws correct path based on data points.</idea>
+      <idea>Verify VisibilityGraphPainter overlays cloud cover correctly without obscuring object line.</idea>
+      <idea>Verify graphs update when AstrContext.selectedDate changes.</idea>
+    </ideas>
+  </tests>
+</story-context>

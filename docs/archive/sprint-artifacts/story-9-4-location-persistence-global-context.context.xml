@@ -1,0 +1,72 @@
+<story_context story_id="9-4-location-persistence-global-context">
+    <story_definition>
+        <title>Location Persistence & Global Context</title>
+        <user_story>As a User, I want my manually added locations to be saved and selectable, so that I can switch contexts easily.</user_story>
+        <acceptance_criteria>
+            <criterion id="1">
+                <description>Implement Location Persistence using Hive.</description>
+                <verification_steps>
+                    <step>Verify `SavedLocation` model is used.</step>
+                    <step>Verify `SavedLocationsRepository` saves and retrieves data from `locations` box.</step>
+                    <step>Verify data persists after app restart.</step>
+                </verification_steps>
+            </criterion>
+            <criterion id="2">
+                <description>Update `AddLocationScreen` to save locations.</description>
+                <verification_steps>
+                    <step>Verify "Save" action adds location to the repository.</step>
+                    <step>Verify duplicates are prevented.</step>
+                </verification_steps>
+            </criterion>
+            <criterion id="3">
+                <description>Display and Select Saved Locations in Profile.</description>
+                <verification_steps>
+                    <step>Verify `ProfileScreen` lists saved locations.</step>
+                    <step>Verify tapping a location updates the global context.</step>
+                    <step>Verify locations can be deleted.</step>
+                </verification_steps>
+            </criterion>
+            <criterion id="4">
+                <description>Ensure Global Context Integration.</description>
+                <verification_steps>
+                    <step>Verify `AstrContextProvider` updates `location` and `isCurrentLocation` flag.</step>
+                    <step>Verify Home and Forecast screens update immediately.</step>
+                </verification_steps>
+            </criterion>
+        </acceptance_criteria>
+    </story_definition>
+
+    <technical_context>
+        <architecture_alignment>
+            <component>SavedLocationsRepository</component>
+            <description>Handles Hive operations for `SavedLocation` entities.</description>
+            <pattern>Repository Pattern</pattern>
+        </architecture_alignment>
+        <architecture_alignment>
+            <component>SavedLocationsNotifier</component>
+            <description>Riverpod provider managing the list of saved locations.</description>
+            <pattern>State Management (Riverpod)</pattern>
+        </architecture_alignment>
+        <architecture_alignment>
+            <component>AstrContextProvider</component>
+            <description>Global source of truth for the active location context.</description>
+            <pattern>Global State</pattern>
+        </architecture_alignment>
+        <existing_code_references>
+            <reference path="lib/features/profile/domain/entities/saved_location.dart">Existing Hive entity.</reference>
+            <reference path="lib/hive/hive.dart">Hive initialization and box opening.</reference>
+            <reference path="lib/features/context/presentation/providers/astr_context_provider.dart">Global context provider.</reference>
+            <reference path="lib/features/profile/presentation/screens/add_location_screen.dart">UI for adding locations.</reference>
+            <reference path="lib/features/profile/presentation/profile_screen.dart">UI for listing locations.</reference>
+        </existing_code_references>
+    </technical_context>
+
+    <implementation_guide>
+        <step>Implement `SavedLocationsRepository` in `lib/features/profile/data/repositories/saved_locations_repository.dart`.</step>
+        <step>Implement `SavedLocationsNotifier` in `lib/features/profile/presentation/providers/saved_locations_provider.dart`.</step>
+        <step>Update `AddLocationScreen` to use `SavedLocationsNotifier.addLocation`.</step>
+        <step>Update `ProfileScreen` to watch `savedLocationsProvider` and display the list.</step>
+        <step>Wire list item tap to `ref.read(astrContextProvider.notifier).updateLocation(location)`.</step>
+        <step>Ensure `AstrContextProvider` correctly handles the transition (setting `isCurrentLocation` to false).</step>
+    </implementation_guide>
+</story_context>

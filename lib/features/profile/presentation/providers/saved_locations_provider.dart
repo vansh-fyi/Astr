@@ -1,5 +1,7 @@
 import 'package:astr/features/profile/data/repositories/profile_repository.dart';
 import 'package:astr/features/profile/domain/entities/saved_location.dart';
+import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
+import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'saved_locations_provider.g.dart';
@@ -20,12 +22,25 @@ class SavedLocationsNotifier extends _$SavedLocationsNotifier {
     );
   }
 
+  /// AC#4: Adds a new location and auto-selects it as the current location
   Future<void> addLocation(SavedLocation location) async {
     final repository = ref.read(profileRepositoryProvider);
     final result = await repository.saveLocation(location);
     result.fold(
       (failure) => null, // Handle error
-      (_) => ref.invalidateSelf(), // Reload list
+      (_) {
+        ref.invalidateSelf(); // Reload list
+        
+        // AC#4: Auto-select the newly added location
+        // Import needed: astr_context_provider.dart
+        ref.read(astrContextProvider.notifier).updateLocation(
+          GeoLocation(
+            latitude: location.latitude,
+            longitude: location.longitude,
+            name: location.name,
+          ),
+        );
+      },
     );
   }
 

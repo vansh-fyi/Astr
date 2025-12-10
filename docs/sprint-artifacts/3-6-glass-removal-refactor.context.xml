@@ -1,0 +1,77 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>epic-3</epicId>
+    <storyId>3.6</storyId>
+    <title>Glass Removal Refactor</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-6-glass-removal-refactor.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>the app to scroll efficiently with zero frame drops</iWant>
+    <soThat>I have a smooth and responsive experience even on older devices</soThat>
+    <tasks>
+      - Remove Blur from GlassPanel Widget
+      - Update List Implementations
+      - Verify Static Elements
+      - Performance Comparison
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. **Card Styling Update:** Cards MUST NOT use `BackdropFilter` (Blur) in lists. Use Opacity + Border.
+    2. **StaticBlur Preservation:** Headers/NavBars SHOULD continue to use Blur.
+    3. **Performance Target:** 60fps on reference devices for 50+ item lists.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/architecture.md">
+        <title>Architecture Decision Document</title>
+        <section>2. Architectural Decisions</section>
+        <snippet>RATIONALE: Heavy Meeus algorithms must run off the main thread to guarantee the 60fps Glass UI target.</snippet>
+      </doc>
+      <doc path="docs/prd.md">
+        <title>Product Requirements Document</title>
+        <section>Visuals & Polish</section>
+        <snippet>FR21: Glass UI Optimization - Refactor blur/glass effects to ensure 60fps on mobile devices.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item path="lib/core/widgets/glass_panel.dart" kind="widget" symbol="GlassPanel" reason="Primary widget causing performance issues"/>
+      <item path="lib/features/dashboard/presentation/widgets/glass_panel.dart" kind="widget" symbol="GlassPanel" reason="Duplicate implementation that needs alignment or removal"/>
+      <item path="lib/features/catalog/presentation/widgets/object_list_item.dart" kind="widget" symbol="ObjectListItem" reason="Key list item using GlassPanel"/>
+    </code>
+    <dependencies>
+      <item key="flutter">sdk: flutter</item>
+      <item key="flutter_riverpod">^2.6.1</item>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Architecture: Presentation Layer (UI) only.
+    - Performance: 16ms frame budget (60fps).
+    - Visuals: Maintain "Glassy" feel via opacity/borders, reserve blur for static elements.
+  </constraints>
+
+  <interfaces>
+    <interface name="GlassPanel" kind="widget constructor">
+      GlassPanel({required Widget child, EdgeInsetsGeometry? padding, VoidCallback? onTap, BorderRadius? borderRadius, BoxBorder? border})
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Use Flutter Widget Tests to verify widget composition. Use Flutter Driver or DevTools for performance profiling.</standards>
+    <locations>
+      test/
+      test/features/
+    </locations>
+    <ideas>
+      - Test specific: Verify GlassPanel renders Container instead of BackdropFilter when blur is disabled.
+      - Performance: Profile scrolling fps in Release mode.
+    </ideas>
+  </tests>
+</story-context>

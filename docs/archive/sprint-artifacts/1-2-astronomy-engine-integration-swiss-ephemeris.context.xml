@@ -1,0 +1,92 @@
+<story_context>
+  <story_id>1.2</story_id>
+  <story_key>1-2-astronomy-engine-integration-swiss-ephemeris</story_key>
+  <story_title>Astronomy Engine Integration (Swiss Ephemeris)</story_title>
+  <story_status>ready-for-dev</story_status>
+
+  <user_story>
+    <as_a>System</as_a>
+    <i_want>to calculate the precise position of celestial objects for any given time and location</i_want>
+    <so_that>the app displays accurate data without relying on paid APIs</so_that>
+  </user_story>
+
+  <acceptance_criteria>
+    <criterion id="AC-1.2.1">AstroEngine service is implemented in lib/features/astronomy.</criterion>
+    <criterion id="AC-1.2.2">System can calculate Altitude/Azimuth for Sun and Moon given a Lat/Long/Time.</criterion>
+    <criterion id="AC-1.2.3">System can calculate Altitude/Azimuth for major planets (Mars, Jupiter, Saturn, Venus).</criterion>
+    <criterion id="AC-1.2.4">Calculations are performed locally (Offline).</criterion>
+    <criterion id="AC-1.2.5">Error handling uses Either&lt;Failure, CelestialPosition&gt; pattern.</criterion>
+    <criterion id="AC-1.2.6">IAstroEngine interface is defined in the Domain layer.</criterion>
+  </acceptance_criteria>
+
+  <tasks>
+    <task>Research and select the best Dart astronomy package (e.g., sweph, swisseph, or hrk_nasa_apis if offline capable, or dart_periphery if needed). Decision: Prefer Pure Dart if possible.</task>
+    <task>Add dependency to pubspec.yaml.</task>
+    <task>Create feature structure: lib/features/astronomy/{data,domain,presentation}.</task>
+    <task>Define CelestialBody enum (Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune).</task>
+    <task>Define CelestialPosition entity (altitude, azimuth, distance, magnitude).</task>
+    <task>Define IAstroEngine abstract repository interface.</task>
+    <task>Implement SwissEphEngine (or chosen lib) implementing IAstroEngine.</task>
+    <task>Implement conversion logic (Equatorial to Horizontal coordinates if raw lib doesn't provide it).</task>
+    <task>Ensure all methods return Future&lt;Either&lt;Failure, CelestialPosition&gt;&gt;.</task>
+    <task>Create test/astronomy/engine_test.dart.</task>
+    <task>Add test cases for known positions (e.g., "Moon at Greenwich, Jan 1 2024").</task>
+    <task>Verify performance (calculation &lt; 50ms).</task>
+  </tasks>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Epic 1</title>
+        <section>2.1 Services & Modules</section>
+        <snippet>AstroEngine: Core calculation service. Inputs: Time, Lat, Long. Outputs: Altitude, Azimuth, Phase.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Epic 1</title>
+        <section>2.3 API & Interfaces</section>
+        <snippet>IAstroEngine (Repository Interface): Future&lt;Either&lt;Failure, CelestialPosition&gt;&gt; getPosition(...)</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>6. Implementation Patterns - A. The "Result" Pattern</section>
+        <snippet>Repositories MUST return Future&lt;Either&lt;Failure, Type&gt;&gt;. Forces the UI to handle the "Left" (Error) case.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements - System & Data</section>
+        <snippet>FR15: System calculates celestial positions and moon interference using accurate ephemeris data. App functions fully offline.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <!-- No existing code for this feature yet -->
+    </code>
+
+    <dependencies>
+      <dependency>fpdart</dependency>
+      <dependency>swisseph (or equivalent)</dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Must use Clean Architecture (Domain/Data separation).</constraint>
+    <constraint>Must use fpdart Either for error handling.</constraint>
+    <constraint>Must work 100% offline.</constraint>
+    <constraint>Must convert Equatorial (RA/Dec) to Horizontal (Alt/Az) coordinates.</constraint>
+  </constraints>
+
+  <tests>
+    <standards>
+      Unit tests are critical for the Engine. Validate against known astronomical data points (e.g., Stellarium or NASA Horizons). Performance must be under 50ms per calculation.
+    </standards>
+    <ideas>
+      <test_idea id="AC-1.2.2">Calculate Sun position for Greenwich, UK on Jan 1, 2024, 12:00 UTC. Verify Alt/Az within 1 degree tolerance.</test_idea>
+      <test_idea id="AC-1.2.4">Run calculation with network disconnected (simulated).</test_idea>
+      <test_idea id="AC-1.2.5">Simulate an invalid date/time and verify it returns Left(Failure).</test_idea>
+    </ideas>
+  </tests>
+</story_context>

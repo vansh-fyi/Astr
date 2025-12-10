@@ -18,6 +18,7 @@ class ForecastListItem extends StatelessWidget {
     final dateStr = dateFormat.format(forecast.date);
 
     return GlassPanel(
+      enableBlur: false,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [

@@ -1,3 +1,4 @@
+import 'package:astr/core/widgets/cosmic_loader.dart';
 import 'dart:ui';
 import 'package:astr/core/widgets/glass_toast.dart';
 import 'package:flutter/material.dart';
@@ -122,14 +123,19 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Prev Button
+                            // Prev Button - AC#3: Restricted to -10 days
                             GlassPanel(
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(30),
                               onTap: () {
-                                ref.read(astrContextProvider.notifier).updateDate(
-                                  selectedDate.subtract(const Duration(days: 1)),
-                                );
+                                final now = DateTime.now();
+                                final minDate = now.subtract(const Duration(days: 10));
+                                final nextDate = selectedDate.subtract(const Duration(days: 1));
+                                if (nextDate.isBefore(minDate)) {
+                                  showGlassToast(context, 'Cloud cover forecast unavailable beyond 10 days in the past');
+                                  return;
+                                }
+                                ref.read(astrContextProvider.notifier).updateDate(nextDate);
                               },
                               child: const SizedBox(
                                 width: 32,
@@ -141,17 +147,23 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                             const SizedBox(width: 6),
 
                             // Date Pill
+                            // AC#3: Date Picker restricted to +/-10 days for cloud cover availability
                             Flexible(
                               child: GlassPanel(
                                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                                 borderRadius: BorderRadius.circular(30),
                                 onTap: () async {
                                   final now = DateTime.now();
+                                  // AC#3: Restrict to +/-10 days for cloud cover data
+                                  final minDate = now.subtract(const Duration(days: 10));
+                                  final maxDate = now.add(const Duration(days: 10));
+                                  
                                   final pickedDate = await showDatePicker(
                                     context: context,
                                     initialDate: selectedDate,
-                                    firstDate: now.subtract(const Duration(days: 365)),
-                                    lastDate: now.add(const Duration(days: 365)),
+                                    firstDate: minDate,
+                                    lastDate: maxDate,
+                                    helpText: 'Cloud cover forecast available for ±10 days',
                                     builder: (context, child) {
                                       return Theme(
                                         data: Theme.of(context).copyWith(
@@ -188,14 +200,19 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
                             const SizedBox(width: 6),
 
-                            // Next Button
+                            // Next Button - AC#3: Restricted to +10 days
                             GlassPanel(
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(30),
                               onTap: () {
-                                ref.read(astrContextProvider.notifier).updateDate(
-                                  selectedDate.add(const Duration(days: 1)),
-                                );
+                                final now = DateTime.now();
+                                final maxDate = now.add(const Duration(days: 10));
+                                final nextDate = selectedDate.add(const Duration(days: 1));
+                                if (nextDate.isAfter(maxDate)) {
+                                  showGlassToast(context, 'Cloud cover forecast unavailable beyond 10 days in the future');
+                                  return;
+                                }
+                                ref.read(astrContextProvider.notifier).updateDate(nextDate);
                               },
                               child: const SizedBox(
                                 width: 32,
@@ -299,18 +316,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     return Positioned.fill(
       child: Container(
         color: Colors.black.withOpacity(0.5),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFF141419),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-            ),
-            child: const CircularProgressIndicator(
-              color: Colors.blueAccent,
-            ),
-          ),
+        child: const Center(
+          child: CosmicLoader(),
         ),
       ),
     );

@@ -1,0 +1,111 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>8</storyId>
+    <title>Offline Bortle Dictionary</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-8-offline-bortle-dictionary.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>accurate Light Pollution (Bortle) data for my city even when offline</iWant>
+    <soThat>I don't get misleading information (e.g., "Class 4" for a bright city like Delhi)</soThat>
+    <tasks>
+- [ ] Data Preparation
+  - [ ] Create `scripts/generate_city_db.py` to merge WorldCities Dataset with Light Pollution Atlas.
+  - [ ] Generate `assets/db/cities.json` (or compact binary format).
+- [ ] KD-Tree Implementation
+  - [ ] Create `algorithms/kd_tree.dart` (or use `kdtree` package if available and lightweight).
+  - [ ] Implement `nearestNeighbor(lat, lon)` search.
+- [ ] Service Integration
+  - [ ] Modify `OfflineLPDataSource` to load the KD-Tree on startup.
+  - [ ] Implement the "Dictionary First, Map Second" fallback logic.
+- [ ] Testing
+  - [ ] Unit Test: `KDTree.search` with known points.
+  - [ ] Integration Test: `getBortleClass` returns correct values for test cities vs rural points.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. **Hybrid City Database:**
+   - **Given** the app initializes, **When** loading light pollution data, **Then** it must load a compact "City Dictionary" (KD-Tree) containing ~15,000 major cities with confirmed Bortle values.
+   - **Constraint:** The dictionary asset file must be < 2MB.
+
+2. **Offline Lookup Logic (Nearest Neighbor):**
+   - **Given** a user location, **When** checking Bortle Class, **Then**:
+     1. Query the KD-Tree for the *nearest* city within 10km.
+     2. **If Found (<10km):** Return that city's stored Bortle value (High Precision).
+     3. **If Not Found (>10km):** Fallback to the existing "World Map" pixel-lookup (Rural/fallback logic).
+
+3. **Accuracy Validation:**
+   - **Given** urban coordinates (e.g., Delhi, NYC), **When** queried offline, **Then** the logic MUST return the dictionary value (e.g., Class 8/9).
+   - **Given** rural coordinates (e.g., Sahara Desert), **When** queried, **Then** it must fallback to the map (Class 1/2).
+
+4. **Performance:**
+   - The KD-Tree lookup must be instant (< 50ms) and non-blocking.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Success Criteria (Scientific Accuracy)</section>
+        <snippet>Bortle Zones: Light pollution data matches reality (validated against offline map fallback).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision Document</title>
+        <section>5. Data Architecture</section>
+        <snippet>Defines "Offline-First" strategy. SQLite/Isolates pattern can be adapted for the KD-Tree if needed (though memory-mapped JSON is likely sufficient for 1MB).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/core/services/light_pollution/data/offline_lp_data_source.dart</path>
+        <kind>class</kind>
+        <symbol>OfflineLPDataSource</symbol>
+        <lines>10-155</lines>
+        <reason>Primary class to modify. Currently handles Map lookup. Needs to integrate KD-Tree lookup.</reason>
+      </item>
+      <item>
+        <path>lib/core/services/light_pollution/light_pollution_service.dart</path>
+        <kind>class</kind>
+        <symbol>LightPollutionService</symbol>
+        <lines>8-52</lines>
+        <reason>The orchestrator service. Logic may need slight adjustment to ensure fallback propagates correctly (though primarily in DataSource).</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>image (Existing - for Map reading)</dep>
+      <dep>json_serializable (For parsing city DB)</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Asset Size:** Critical constraint. The `cities.json` MUST be under 2MB to avoid bloating the app.
+    - **Performance:** Lookup must be instant. KD-Tree is chosen specifically for O(log n) performance.
+    - **Complexity:** Do NOT use a heavy GIS database. Simple in-memory structure is preferred for this scale (~15k points).
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>KDTree.nearest</name>
+      <kind>algorithm</kind>
+      <signature>CityNode? nearest(double lat, double lon, double maxDistanceKm)</signature>
+      <path>(New File) lib/core/engine/algorithms/kd_tree.dart</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Use `flutter_test`. Mock the AssetBundle to provide a test JSON for the KD-Tree.</standards>
+    <locations>test/services/light_pollution/</locations>
+    <ideas>
+      - Construct a minimal 3-point KD-Tree in a unit test. Verify search finds the correct point within 10km and returns null for 11km.
+      - Integration: Ensure the "OfflineLPDataSource" initializes correctly without crashing even if the file is missing (graceful degradation).
+    </ideas>
+  </tests>
+</story-context>

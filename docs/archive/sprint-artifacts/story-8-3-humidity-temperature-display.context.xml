@@ -1,0 +1,80 @@
+<story_context>
+  <story_id>8.3</story_id>
+  <story_key>8-3-humidity-temperature-display</story_key>
+  <title>Humidity & Temperature Display</title>
+  <status>ready-for-dev</status>
+
+  <user_story>
+    <as_a>User</as_a>
+    <i_want>to see current humidity and temperature</i_want>
+    <so_that>I know if dew/frost will form on my equipment</so_that>
+  </user_story>
+
+  <acceptance_criteria>
+    <criterion id="1">
+      <description>System fetches current Humidity (%) and Temperature (°C) from Open-Meteo API.</description>
+    </criterion>
+    <criterion id="2">
+      <description>Displayed in the Atmospherics Sheet (alongside Cloud Cover, Seeing, Darkness).</description>
+    </criterion>
+    <criterion id="3">
+      <description>System supports °C internally (MVP displays °C).</description>
+    </criterion>
+    <criterion id="4">
+      <description>Graceful fallback if data fetch fails (e.g., "--" or "N/A").</description>
+    </criterion>
+  </acceptance_criteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics & Stories</title>
+        <section>Story 8.3</section>
+        <snippet>Fetches Humidity + Temperature from Open-Meteo. Displayed in Atmospheric drawer.</snippet>
+      </doc>
+      <doc>
+        <path>docs/backend-architecture-research.md</path>
+        <title>Backend Architecture Research</title>
+        <section>Open-Meteo Routing Decision</section>
+        <snippet>Open-Meteo Direct Client Calls recommended for MVP.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <item>
+        <path>lib/features/dashboard/data/repositories/weather_repository_impl.dart</path>
+        <kind>repository</kind>
+        <symbol>WeatherRepositoryImpl</symbol>
+        <reason>Already fetches temperature and humidity from Open-Meteo. Needs verification.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/widgets/atmospherics_sheet.dart</path>
+        <kind>widget</kind>
+        <symbol>AtmosphericsSheet</symbol>
+        <reason>UI widget that displays atmospheric conditions. Logic for Temp/Humidity cards appears to be present.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/domain/entities/weather.dart</path>
+        <kind>entity</kind>
+        <symbol>Weather</symbol>
+        <reason>Domain entity holding weather data.</reason>
+      </item>
+    </code>
+
+    <dependencies>
+      <dep>open_meteo_weather_service</dep>
+    </dependencies>
+  </artifacts>
+
+  <testing>
+    <standards>
+      Unit tests for data parsing in WeatherRepository. Widget tests for AtmosphericsSheet.
+    </standards>
+    <ideas>
+      <test id="1">Verify WeatherRepository parses humidity and temperature correctly from API response.</test>
+      <test id="2">Verify AtmosphericsSheet displays N/A when data is missing.</test>
+      <test id="3">Verify correct units (°C, %) are shown.</test>
+    </ideas>
+  </testing>
+</story_context>

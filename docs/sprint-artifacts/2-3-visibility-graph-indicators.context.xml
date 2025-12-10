@@ -1,0 +1,109 @@
+<story-context id="2-3-visibility-graph-indicators" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.3</storyId>
+    <title>Visibility Graph Indicators</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-3-visibility-graph-indicators.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Stargazer</asA>
+    <iWant>to see exactly where an object is in the sky right now on the graph</iWant>
+    <soThat>I can instantly know if it is currently visible or rising/setting without mental math</soThat>
+    <tasks>
+      - Update Visibility Graph Painter (AC: #1, #4)
+      - Implement Real-Time Logic (AC: #2)
+      - Implement Context-Aware Coloring (AC: #3)
+      - Testing &amp; Verification (AC: #1, #2, #3, #4)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. **Current Position Indicator**: A "Current Position" indicator (white circle with colored stroke) is drawn on the altitude curve corresponding to the current time (`DateTime.now()`).
+    2. **Real-Time Updates**: The indicator's position updates in real-time (or refreshes at least every minute) to reflect the changing altitude.
+    3. **Context-Aware Coloring**: The indicator's stroke color changes based on the context:
+        *   **Orange** (0xFFF97316) when displayed on the Home Screen (Dashboard).
+        *   **Blue** (0xFF3B82F6) when displayed on Catalog or Object Details screens.
+    4. **Visual Style**: The indicator uses the existing Glass UI aesthetic (e.g., 4px stroke width, white fill) and matches the "Now" indicator style on the Atmospherics graph.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic Technical Specification: Epic 2</title>
+        <section>Detailed Design</section>
+        <snippet>Specifies `VisibilityPainter` responsibility to draw "Current Position" indicator. Defines workflows for calculating Y-position (Altitude) for `DateTime.now()`.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision Document</title>
+        <section>Implementation Patterns</section>
+        <snippet>Specifies `CustomPainter` for high-performance rendering. Mentions `Riverpod` for state management.</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Product Scope - MVP</section>
+        <snippet>Describes "Real-Time Indicator" requirement: restore the "Current Position" indicator (White circle with Blue/Orange stroke) that moves along the altitude curve.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/features/catalog/presentation/widgets/visibility_graph_painter.dart</path>
+        <kind>painter</kind>
+        <symbol>VisibilityGraphPainter</symbol>
+        <reason>Target painter to update. Needs to accept `currentTime` and `contextColor` and draw the indicator.</reason>
+      </item>
+      <item>
+        <path>lib/features/catalog/presentation/widgets/visibility_graph_widget.dart</path>
+        <kind>widget</kind>
+        <symbol>VisibilityGraphWidget</symbol>
+        <reason>Parent widget. Needs to pass context color (Orange/Blue) and potentially a ticker/time stream to the painter.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/widgets/conditions_graph.dart</path>
+        <kind>widget</kind>
+        <symbol>ConditionsGraph</symbol>
+        <reason>Reference for "Now" indicator style and drawing logic (reusability).</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>flutter_riverpod</dep>
+      <dep>intl</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Performance**: Repainting for real-time updates must be efficient. Avoid full widget tree rebuilds if possible; use `RepaintBoundary` or optimized painter.
+    - **UI Style**: Must match existing Glass UI. Indicator style (stroke width, colors) must be consistent with design specs.
+    - **Interpolation**: Altitude data is likely hourly; must interpolate Y-value for exact current minute.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>VisibilityGraphPainter</name>
+      <kind>class</kind>
+      <signature>VisibilityGraphPainter({required this.currentTime, required this.indicatorColor, ...})</signature>
+      <path>lib/features/catalog/presentation/widgets/visibility_graph_painter.dart</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Widget tests for `VisibilityGraphPainter` to verify indicator position and color. Manual testing for smooth movement.
+    </standards>
+    <locations>
+      <loc>test/features/catalog/presentation/widgets/visibility_graph_painter_test.dart</loc>
+    </locations>
+    <ideas>
+      - Test `_drawCurrentPositionIndicator` with `currentTime` exactly matching a data point.
+      - Test `_drawCurrentPositionIndicator` with `currentTime` between data points (verify interpolation).
+      - Test with `indicatorColor` set to Orange and Blue.
+      - Verify indicator is NOT drawn if `currentTime` is outside the graph timeframe.
+    </ideas>
+  </tests>
+</story-context>

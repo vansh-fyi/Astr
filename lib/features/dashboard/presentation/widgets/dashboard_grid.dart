@@ -6,7 +6,7 @@ import 'package:astr/features/catalog/presentation/providers/object_detail_notif
 import 'package:astr/features/catalog/presentation/providers/rise_set_provider.dart';
 import 'celestial_detail_sheet.dart';
 import 'atmospherics_sheet.dart';
-import 'glass_panel.dart';
+import 'package:astr/core/widgets/glass_panel.dart';
 import '../../domain/entities/light_pollution.dart';
 import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
 import 'cloud_bar.dart';
@@ -78,7 +78,16 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
       children: [
         // Main Forecast Strip
         GlassPanel(
+          enableBlur: false,
           padding: const EdgeInsets.all(20),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              isScrollControlled: true,
+              builder: (context) => const AtmosphericsSheet(),
+            );
+          },
           child: Column(
             children: [
               Row(
@@ -190,6 +199,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
             // Moon Card
             Expanded(
               child: GlassPanel(
+                enableBlur: false,
                 padding: const EdgeInsets.all(20),
                 onTap: () {
                   showModalBottomSheet(
@@ -231,12 +241,12 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                         ],
                       ),
                       
-                      // Moon Emoji
-                      Text(
-                        _getMoonEmoji(widget.moonPhaseInfo),
-                        style: const TextStyle(
-                          fontSize: 64,
-                        ),
+                      // Moon Phase Image
+                      // AC#2: Increased from 64 to 80 to compensate for padding
+                      Image.asset(
+                        _getMoonAsset(widget.moonPhaseInfo),
+                        width: 104,
+                        height: 104,
                       ),
 
                       Text(
@@ -261,40 +271,40 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
 
 
 
-  String _getMoonEmoji(MoonPhaseInfo info) {
+  String _getMoonAsset(MoonPhaseInfo info) {
     // Phase Angle (0-360)
     // 0 = New Moon
     // 90 = First Quarter
     // 180 = Full Moon
     // 270 = Last Quarter
-    
+
     final angle = info.phaseAngle;
-    
+
     // New Moon (0 +/- 5)
-    if (angle >= 355 || angle <= 5) return '🌑';
-    
+    if (angle >= 355 || angle <= 5) return 'assets/img/moon_new.webp';
+
     // Waxing Crescent (5 - 85)
-    if (angle > 5 && angle < 85) return '🌒';
-    
+    if (angle > 5 && angle < 85) return 'assets/img/moon_waxing_crescent.webp';
+
     // First Quarter (90 +/- 5)
-    if (angle >= 85 && angle <= 95) return '🌓';
-    
+    if (angle >= 85 && angle <= 95) return 'assets/img/moon_first_quarter.webp';
+
     // Waxing Gibbous (95 - 175)
-    if (angle > 95 && angle < 175) return '🌔';
-    
+    if (angle > 95 && angle < 175) return 'assets/img/moon_waxing_gibbous.webp';
+
     // Full Moon (180 +/- 5)
-    if (angle >= 175 && angle <= 185) return '🌕';
-    
+    if (angle >= 175 && angle <= 185) return 'assets/img/moon_full.webp';
+
     // Waning Gibbous (185 - 265)
-    if (angle > 185 && angle < 265) return '🌖';
-    
+    if (angle > 185 && angle < 265) return 'assets/img/moon_waning_gibbous.webp';
+
     // Last Quarter (270 +/- 5)
-    if (angle >= 265 && angle <= 275) return '🌗';
-    
+    if (angle >= 265 && angle <= 275) return 'assets/img/moon_last_quarter.webp';
+
     // Waning Crescent (275 - 355)
-    if (angle > 275 && angle < 355) return '🌘';
-    
-    return '🌖'; // Fallback
+    if (angle > 275 && angle < 355) return 'assets/img/moon_waning_crescent.webp';
+
+    return 'assets/img/moon_waning_gibbous.webp'; // Fallback
   }
 
   String _getMoonPhaseLabel(MoonPhaseInfo info) {

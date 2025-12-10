@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:astr/core/engine/models/condition_result.dart';
 
 class SkyPortal extends StatelessWidget {
   final String qualityLabel;
   final int score;
   final VoidCallback? onTap;
+  final ConditionResult? conditionResult;
 
   const SkyPortal({
     super.key,
     required this.qualityLabel,
     required this.score,
     this.onTap,
+    this.conditionResult,
   });
 
   @override
@@ -120,39 +123,75 @@ class SkyPortal extends StatelessWidget {
                            ),
                          ).animate().shimmer(duration: 2.seconds, delay: 1.seconds),
                          const SizedBox(height: 8),
-                         Container(
-                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                           decoration: BoxDecoration(
-                             color: Colors.green.withOpacity(0.1),
-                             borderRadius: BorderRadius.circular(20),
-                             border: Border.all(color: Colors.green.withOpacity(0.2)),
-                           ),
-                           child: Row(
-                             mainAxisSize: MainAxisSize.min,
-                             children: [
-                               Container(
-                                 width: 6,
-                                 height: 6,
-                                 decoration: const BoxDecoration(
-                                   color: Colors.greenAccent,
-                                   shape: BoxShape.circle,
+                         // Qualitative Advice or Numeric Score
+                         if (conditionResult != null)
+                           Container(
+                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                             decoration: BoxDecoration(
+                               color: conditionResult!.statusColor.withOpacity(0.1),
+                               borderRadius: BorderRadius.circular(20),
+                               border: Border.all(color: conditionResult!.statusColor.withOpacity(0.2)),
+                             ),
+                             child: Row(
+                               mainAxisSize: MainAxisSize.min,
+                               children: [
+                                 Container(
+                                   width: 6,
+                                   height: 6,
+                                   decoration: BoxDecoration(
+                                     color: conditionResult!.statusColor,
+                                     shape: BoxShape.circle,
+                                   ),
+                                 ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                                  .fadeIn(duration: 1.seconds)
+                                  .fadeOut(duration: 1.seconds),
+                                 const SizedBox(width: 6),
+                                 Text(
+                                   conditionResult!.detailedAdvice,
+                                   style: TextStyle(
+                                     fontSize: 10,
+                                     fontWeight: FontWeight.w500,
+                                     color: conditionResult!.statusColor,
+                                     letterSpacing: 0.5,
+                                   ),
                                  ),
-                               ).animate(onPlay: (controller) => controller.repeat(reverse: true))
-                                .fadeIn(duration: 1.seconds)
-                                .fadeOut(duration: 1.seconds),
-                               const SizedBox(width: 6),
-                               Text(
-                                 '$score/100',
-                                 style: const TextStyle(
-                                   fontSize: 10,
-                                   fontWeight: FontWeight.w500,
-                                   color: Colors.greenAccent,
-                                   letterSpacing: 0.5,
+                               ],
+                             ),
+                           )
+                         else
+                           Container(
+                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                             decoration: BoxDecoration(
+                               color: Colors.green.withOpacity(0.1),
+                               borderRadius: BorderRadius.circular(20),
+                               border: Border.all(color: Colors.green.withOpacity(0.2)),
+                             ),
+                             child: Row(
+                               mainAxisSize: MainAxisSize.min,
+                               children: [
+                                 Container(
+                                   width: 6,
+                                   height: 6,
+                                   decoration: const BoxDecoration(
+                                     color: Colors.greenAccent,
+                                     shape: BoxShape.circle,
+                                   ),
+                                 ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                                  .fadeIn(duration: 1.seconds)
+                                  .fadeOut(duration: 1.seconds),
+                                 const SizedBox(width: 6),
+                                 Text(
+                                   '$score/100',
+                                   style: const TextStyle(
+                                     fontSize: 10,
+                                     fontWeight: FontWeight.w500,
+                                     color: Colors.greenAccent,
+                                     letterSpacing: 0.5,
+                                   ),
                                  ),
-                               ),
-                             ],
+                               ],
+                             ),
                            ),
-                         ),
                        ],
                      ),
                    ),

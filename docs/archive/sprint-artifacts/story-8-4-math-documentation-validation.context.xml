@@ -1,0 +1,71 @@
+<story_context>
+  <story_id>8.4</story_id>
+  <story_key>8-4-math-documentation-validation</story_key>
+  <title>Math Documentation & Validation</title>
+  <status>ready-for-dev</status>
+
+  <user_story>
+    <as_a>Developer</as_a>
+    <i_want>all formulas documented and validated</i_want>
+    <so_that>I can verify accuracy and debug issues</so_that>
+  </user_story>
+
+  <acceptance_criteria>
+    <criterion id="1">
+      <description>Create /docs/calculations.md with all astronomy formulas (Seeing, Darkness, Moon Phase).</description>
+    </criterion>
+    <criterion id="2">
+      <description>Each formula includes notation, code reference, and authoritative source.</description>
+    </criterion>
+    <criterion id="3">
+      <description>Unit tests compare outputs to known reference values (Stellarium/JPL).</description>
+    </criterion>
+  </acceptance_criteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics & Stories</title>
+        <section>Story 8.4</section>
+        <snippet>Goal: Implement missing calculations with documented formulas and authoritative sources.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <item>
+        <path>lib/core/services/seeing_calculator.dart</path>
+        <kind>service</kind>
+        <symbol>SeeingCalculator</symbol>
+        <reason>Contains Pickering Scale calculation logic to be documented and validated.</reason>
+      </item>
+      <item>
+        <path>lib/core/services/darkness_calculator.dart</path>
+        <kind>service</kind>
+        <symbol>DarknessCalculator</symbol>
+        <reason>Contains r^6 Darkness calculation logic to be documented and validated.</reason>
+      </item>
+      <item>
+        <path>lib/features/astronomy/data/repositories/astro_engine_impl.dart</path>
+        <kind>repository</kind>
+        <symbol>AstroEngineImpl</symbol>
+        <reason>Likely contains Moon Phase/Position calculations.</reason>
+      </item>
+    </code>
+
+    <dependencies>
+      <dep>flutter_test</dep>
+    </dependencies>
+  </artifacts>
+
+  <testing>
+    <standards>
+      Unit tests must use authoritative reference values (e.g., from Stellarium or JPL Horizons) as expected outputs.
+    </standards>
+    <ideas>
+      <test id="1">Verify SeeingCalculator output against manual Pickering calculation.</test>
+      <test id="2">Verify DarknessCalculator r^6 output against Lorenz's web tool values.</test>
+      <test id="3">Verify Moon Phase calculation against Stellarium for specific dates.</test>
+    </ideas>
+  </testing>
+</story_context>

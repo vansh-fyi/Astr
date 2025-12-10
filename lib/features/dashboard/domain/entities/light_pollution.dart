@@ -37,11 +37,12 @@ class LightPollution extends Equatable {
 
   factory LightPollution.fromJson(Map<String, dynamic> json) {
     final bortle = (json['bortle_class'] ?? json['bortle']) as int? ?? 0;
+    final isFallback = json['fallback'] == true;
     return LightPollution(
       visibilityIndex: bortle,
       brightnessRatio: 0.0, // Not provided by API yet
       mpsas: (json['mpsas'] as num?)?.toDouble() ?? 22.0,
-      source: LightPollutionSource.precise,
+      source: isFallback ? LightPollutionSource.fallback : LightPollutionSource.precise,
       zone: bortle.toString(),
     );
   }

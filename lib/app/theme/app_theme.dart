@@ -1,6 +1,5 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   const AppTheme._();
@@ -29,7 +28,7 @@ class AppTheme {
       onSecondary: starlight,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3: true,
-      fontFamily: GoogleFonts.outfit().fontFamily,
+      fontFamily: 'Satoshi',
       subThemesData: const FlexSubThemesData(
         blendOnLevel: 20,
         blendTextTheme: true,

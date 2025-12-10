@@ -1,0 +1,109 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>10</epicId>
+    <storyId>5</storyId>
+    <title>Buy Me a Coffee Integration</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-02</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/story-10-5-buy-me-a-coffee-integration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Developer</asA>
+    <iWant>to allow users to support the project</iWant>
+    <soThat>I can cover basic hosting costs</soThat>
+    <tasks>
+- [ ] Verify Dependencies (AC: 2)
+  - [ ] Confirm `url_launcher` is added to `pubspec.yaml` (should be present).
+
+- [ ] Implement UI Component (AC: 1, 3)
+  - [ ] Create `BuyMeCoffeeButton` widget in `lib/features/profile/presentation/widgets/`.
+  - [ ] Apply "Astr Aura" styling (GlassPanel, standard padding, icon).
+  - [ ] Add to `ProfileScreen` (or Settings view).
+
+- [ ] Implement Logic (AC: 2)
+  - [ ] Implement `onTap` handler to launch URL.
+  - [ ] Handle `canLaunchUrl` checks if necessary (though modern `url_launcher` handles this well).
+  - [ ] Define the donation URL constant in `lib/core/constants/`.
+
+- [ ] Verification (AC: 1, 2, 3)
+  - [ ] Verify button appears correctly on Profile screen.
+  - [ ] Verify tapping opens the correct URL in the browser.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. **Settings Integration**
+   - [ ] "Buy Me a Coffee" button is visible and functional in the Settings/Profile area.
+   - [ ] Button placement is unobtrusive but accessible.
+
+2. **Link Action**
+   - [ ] Tapping the button opens the donation page (e.g., buymeacoffee.com/vansh) in an external browser or in-app browser.
+   - [ ] Uses `url_launcher` package for safe link handling.
+
+3. **Styling (Astr Aura)**
+   - [ ] Button style matches the "Astr Aura" theme (Glassmorphism, correct colors).
+   - [ ] Iconography is consistent (e.g., coffee cup icon).
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics & Stories</title>
+        <section>Story 10.5: Buy Me a Coffee Integration</section>
+        <snippet>Goal: Add a simple way for users to support the project.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Monetization</section>
+        <snippet>Donation-based model (Buy Me a Coffee link) for initial release.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>pubspec.yaml</path>
+        <kind>config</kind>
+        <symbol>dependencies</symbol>
+        <reason>Contains url_launcher dependency.</reason>
+      </item>
+      <item>
+        <path>lib/features/profile/presentation/profile_screen.dart</path>
+        <kind>file</kind>
+        <symbol>ProfileScreen</symbol>
+        <reason>Target screen for the Buy Me a Coffee button.</reason>
+      </item>
+      <item>
+        <path>lib/core/widgets/glass_panel.dart</path>
+        <kind>file</kind>
+        <symbol>GlassPanel</symbol>
+        <reason>Reusable widget for consistent "Astr Aura" styling.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <ecosystem name="flutter">
+        <package>url_launcher</package>
+        <package>flutter_svg</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Styling:** Must match "Astr Aura" theme (Glassmorphism).
+    - **Placement:** Unobtrusive but accessible.
+    - **Interaction:** Must use `url_launcher` for external links.
+  </constraints>
+  <interfaces>
+    <!-- No complex interfaces, just URL launching -->
+  </interfaces>
+  <tests>
+    <standards>Manual verification on device/emulator.</standards>
+    <locations>lib/features/profile/presentation/widgets/</locations>
+    <ideas>
+      - Verify URL launches correctly on both Android and iOS.
+      - Check button appearance in both light and dark modes (if applicable, though Astr is dark-themed).
+    </ideas>
+  </tests>
+</story-context>

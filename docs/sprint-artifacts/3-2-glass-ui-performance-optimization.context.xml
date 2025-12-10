@@ -1,0 +1,116 @@
+<story-context id="3-2-glass-ui-performance-optimization-context" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.2</storyId>
+    <title>Glass UI Performance Optimization</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-2-glass-ui-performance-optimization.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>the app to scroll smoothly (60fps) on my phone</iWant>
+    <soThat>the experience feels premium and responsive without stuttering</soThat>
+    <tasks>
+      - [ ] Performance Profiling (Baseline)
+        - [ ] Run scrolling performance test on profile mode to establish baseline FPS and raster times.
+        - [ ] Identify specific widgets or calculations causing jank (e.g., `GlassPanel` rebuilds, main thread math).
+      - [ ] Refactor GlassPanel (AC: #2)
+        - [ ] Implement `RepaintBoundary` around static glass content.
+        - [ ] Investigate and implement `ImageFilter.blur` optimization or static snapshotting if dynamic blur is too heavy.
+      - [ ] Offload Astronomy Math to Isolates (AC: #2)
+        - [ ] Identify heavy calculations in `AstronomyService` (e.g., `calculatePosition` for catalog).
+        - [ ] Implement `IsolateManager` or use `flutter_isolate` to run these calculations in a background thread.
+        - [ ] Update `AstronomyProvider` to consume async results from the Isolate.
+      - [ ] Verification (AC: #1)
+        - [ ] Re-run scrolling performance test to verify >55fps target.
+        - [ ] Verify no visual regressions in Glass UI.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1.  **Scroll Performance:**
+        *   **Given** a list with Glass cards, **When** scrolling, **Then** the frame rate remains >55fps on target devices (iPhone 12, Pixel 6).
+    2.  **Technical Implementation:**
+        *   **Refactor** `GlassPanel` to optimize `BackdropFilter` usage (e.g., using `RepaintBoundary` or static blur snapshots).
+        *   **Offload** all heavy astronomy math (specifically star/DSO position calculations) to Isolates to free up the UI thread.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Detailed Design</section>
+        <snippet>Specifies refactoring `GlassPanel` for optimization and offloading heavy astronomy math to Isolates. Defines performance NFRs (>55fps).</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics and Stories</title>
+        <section>Story 3.2: Glass UI Performance Optimization</section>
+        <snippet>Defines the user story and acceptance criteria for 60fps performance and isolate usage.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision Document</title>
+        <section>Performance Rules</section>
+        <snippet>States "Isolate Boundary: Any calculation taking >16ms MUST move to an Isolate."</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/core/widgets/glass_panel.dart</path>
+        <kind>widget</kind>
+        <symbol>GlassPanel</symbol>
+        <reason>The primary widget to be optimized. (Note: Check if `features/dashboard/presentation/widgets/glass_panel.dart` is a duplicate or the actual one used).</reason>
+      </item>
+      <item>
+        <path>lib/features/astronomy/domain/services/astronomy_service.dart</path>
+        <kind>service</kind>
+        <symbol>AstronomyService</symbol>
+        <reason>Contains the heavy math calculations that need to be offloaded.</reason>
+      </item>
+      <item>
+        <path>lib/core/engine/isolates/isolate_manager.dart</path>
+        <kind>class</kind>
+        <symbol>IsolateManager</symbol>
+        <reason>Existing isolate infrastructure to leverage or extend.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>flutter_isolate</dep>
+      <dep>flutter_riverpod</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Isolate Boundary:** Heavy math (>16ms) MUST be offloaded.
+    - **UI Consistency:** Optimizations must NOT change the visual appearance of the Glass UI.
+    - **Platform Specifics:** `BackdropFilter` is expensive on Android; consider platform-specific optimizations if needed.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>IAstronomyService</name>
+      <kind>Service Interface</kind>
+      <signature>Future&lt;List&lt;CelestialObject&gt;&gt; calculatePositions(DateTime time, Coordinates location)</signature>
+      <path>lib/features/astronomy/domain/services/i_astronomy_service.dart</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Performance profiling using Flutter DevTools (Profile mode). Unit tests for Isolate communication.
+    </standards>
+    <locations>
+      test/core/widgets/glass_panel_test.dart
+      test/core/engine/isolates/
+    </locations>
+    <ideas>
+      - Profile scrolling a list of 50 GlassPanels.
+      - Unit test `IsolateManager` to ensure it returns correct results asynchronously.
+    </ideas>
+  </tests>
+</story-context>

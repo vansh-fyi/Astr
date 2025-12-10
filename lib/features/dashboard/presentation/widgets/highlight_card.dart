@@ -23,10 +23,10 @@ class HighlightCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              _getIcon(item.body),
-              color: Colors.white,
-              size: 32,
+            Image.asset(
+              _getAssetPath(item.body),
+              width: 32,
+              height: 32,
             ),
             const SizedBox(height: 8),
             Text(
@@ -51,14 +51,28 @@ class HighlightCard extends StatelessWidget {
     );
   }
 
-  IconData _getIcon(CelestialBody body) {
+  String _getAssetPath(CelestialBody body) {
     switch (body) {
       case CelestialBody.sun:
-        return Icons.wb_sunny;
+        return 'assets/icons/stars/sun.webp';
       case CelestialBody.moon:
-        return Icons.nightlight_round;
-      default:
-        return Icons.public; // Generic planet icon
+        return 'assets/img/moon_full.webp'; // Moon phases stay in img/
+      case CelestialBody.mercury:
+        return 'assets/icons/planets/mercury.webp';
+      case CelestialBody.venus:
+        return 'assets/icons/planets/venus.webp';
+      case CelestialBody.mars:
+        return 'assets/icons/planets/mars.webp';
+      case CelestialBody.jupiter:
+        return 'assets/icons/planets/jupiter.webp';
+      case CelestialBody.saturn:
+        return 'assets/icons/planets/saturn.webp';
+      case CelestialBody.uranus:
+        return 'assets/icons/planets/uranus.webp';
+      case CelestialBody.neptune:
+        return 'assets/icons/planets/neptune.webp';
+      case CelestialBody.pluto:
+        return 'assets/icons/stars/star.webp'; // Fallback to star for pluto
     }
   }
 }

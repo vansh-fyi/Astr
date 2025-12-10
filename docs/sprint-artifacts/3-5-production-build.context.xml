@@ -1,0 +1,125 @@
+<story-context id="3-5-production-build" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.5</storyId>
+    <title>Production Build &amp; Performance Optimization</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-05</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-5-production-build.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Release Manager and Developer</asA>
+    <iWant>audit the application for performance bottlenecks and generate a signed production build</iWant>
+    <soThat>I can deploy a stable, high-performance application to the app stores</soThat>
+    <tasks>
+      - [ ] **Task 1: Performance Audit (AC: 1)**
+        - [ ] Subtask 1.1: Audit `WeatherProvider` and `AstronomyService` for redundant calls and race conditions.
+        - [ ] Subtask 1.2: Verify caching mechanisms for Weather and Light Pollution data.
+        - [ ] Subtask 1.3: Profile UI performance (scrolling, graph rendering) to identify and fix re-render loops.
+        - [ ] Subtask 1.4: Check for memory leaks in `dispose` methods (e.g., Timers, Controllers).
+      - [ ] **Task 2: Production Build Configuration (AC: 2)**
+        - [ ] Subtask 2.1: Verify `pubspec.yaml` version and build number.
+        - [ ] Subtask 2.2: Configure signing configs (keystore.properties for Android).
+        - [ ] Subtask 2.3: Run `flutter build appbundle --release` and verify output.
+        - [ ] Subtask 2.4: Run `flutter build ipa --release` (if macOS) and verify output.
+      - [ ] **Task 3: Release Verification (AC: 3)**
+        - [ ] Subtask 3.1: Install release build on local device (`flutter run --release`).
+        - [ ] Subtask 3.2: Smoke test core flows (Onboarding, Home, Catalog, Details).
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. **Performance Audit &amp; Fixes**
+       - **Given** the application running in profile/release mode, **When** analyzed with DevTools, **Then** no infinite loops or excessive re-renders are detected.
+       - **Given** data fetching services (Weather, Astronomy), **When** requests are made, **Then** responses are correctly cached and no redundant network calls occur (race conditions handled).
+       - **Given** heavy computations (Astronomy engine), **When** running, **Then** UI remains responsive (no jank).
+    2. **Production Build Generation**
+       - **Given** the stable codebase, **When** the build command is run, **Then** a signed Android App Bundle (AAB) and/or APK is generated.
+       - **Given** the stable codebase, **When** the build command is run, **Then** a signed iOS IPA is generated (if environment allows).
+    3. **Release Verification**
+       - **Given** the release build, **When** installed on a physical device, **Then** it launches successfully and core features (Location, Dashboard, Catalog) function without crashing.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Success Criteria</section>
+        <snippet>Performance &amp; Stability: Scroll Performance: 60fps scrolling on all lists. App size remains under 100MB.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision Document</title>
+        <section>Performance Rules</section>
+        <snippet>Isolate Boundary: Any calculation taking >16ms MUST move to an Isolate. Asset Loading: Large assets must be loaded asynchronously.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Objectives and Scope</section>
+        <snippet>Production Readiness: Addressing manual testing bugs and generating signed release builds. Performance Optimization: Refactoring GlassPanel and offloading heavy astronomy math.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics and Stories</title>
+        <section>Story 3.5: Production Build</section>
+        <snippet>As a release manager, I want to generate a signed production build for deployment. Build must be installed and verified on a physical device in Release mode.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/core/services/weather/weather_service.dart</path>
+        <kind>service</kind>
+        <symbol>WeatherService</symbol>
+        <reason>Audit for redundant calls and caching.</reason>
+      </item>
+      <item>
+        <path>lib/core/engine/astronomy_engine.dart</path>
+        <kind>engine</kind>
+        <symbol>AstronomyEngine</symbol>
+        <reason>Audit for heavy computations and isolate usage.</reason>
+      </item>
+      <item>
+        <path>pubspec.yaml</path>
+        <kind>config</kind>
+        <symbol>version</symbol>
+        <reason>Verify version and build number.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>flutter</dep>
+      <dep>flutter_native_splash</dep>
+      <dep>flutter_launcher_icons</dep>
+      <dep>dio_cache_interceptor</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Performance:** Scroll frame rate must stay above 55fps. App size under 100MB.
+    - **Security:** Signing keys must NOT be committed to the repo.
+    - **Offline:** Core features must work offline.
+  </constraints>
+
+  <interfaces>
+    <!-- No specific new interfaces for this story, mainly config and audit -->
+  </interfaces>
+
+  <tests>
+    <standards>
+      Use Flutter DevTools for performance profiling.
+      Verify release builds on physical devices.
+      Smoke test core flows manually.
+    </standards>
+    <locations>
+      <loc>test/</loc>
+    </locations>
+    <ideas>
+      - Profile scrolling on Home and Catalog screens.
+      - Verify network requests in DevTools Network tab (caching).
+      - Check memory usage during extended sessions.
+    </ideas>
+  </tests>
+</story-context>

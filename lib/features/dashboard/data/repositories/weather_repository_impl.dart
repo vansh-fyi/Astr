@@ -22,10 +22,10 @@ class WeatherRepositoryImpl implements IWeatherRepository {
       final hourlyData = await _service.getHourlyForecast(location);
       
       // Use current hour (index 0) for instant weather display
-      final cloudCover = (hourlyData['cloudCover'] as List)[0] as double;
-      final temperature = (hourlyData['temperature'] as List)[0] as double;
-      final humidity = (hourlyData['humidity'] as List)[0] as double;
-      final windSpeed = (hourlyData['windSpeed'] as List)[0] as double;
+      final cloudCover = ((hourlyData['cloudCover'] as List)[0] as num?)?.toDouble() ?? 0.0;
+      final temperature = ((hourlyData['temperature'] as List)[0] as num?)?.toDouble() ?? 0.0;
+      final humidity = ((hourlyData['humidity'] as List)[0] as num?)?.toDouble() ?? 0.0;
+      final windSpeed = ((hourlyData['windSpeed'] as List)[0] as num?)?.toDouble() ?? 0.0;
 
       // AC#1, AC#4: Calculate Seeing score using hourly forecast data
       final (seeingScore, seeingLabel) = _seeingCalculator.calculateSeeing(
@@ -105,10 +105,10 @@ class WeatherRepositoryImpl implements IWeatherRepository {
         
         if (index < cloudCovers.length) {
           final cloudCover = cloudCovers[index];
-          final temperature = (hourlyData['temperature'] as List)[index] as double;
-          final humidity = (hourlyData['humidity'] as List)[index] as double;
-          final windSpeed = (hourlyData['windSpeed'] as List)[index] as double;
-          final weatherCode = (hourlyData['weatherCode'] as List)[index].toInt();
+          final temperature = ((hourlyData['temperature'] as List)[index] as num?)?.toDouble() ?? 0.0;
+          final humidity = ((hourlyData['humidity'] as List)[index] as num?)?.toDouble() ?? 0.0;
+          final windSpeed = ((hourlyData['windSpeed'] as List)[index] as num?)?.toDouble() ?? 0.0;
+          final weatherCode = ((hourlyData['weatherCode'] as List)[index] as num?)?.toInt() ?? 0;
 
           final (seeingScore, seeingLabel) = _seeingCalculator.calculateSeeing(
             temperatures: [temperature], // Pass single value as list

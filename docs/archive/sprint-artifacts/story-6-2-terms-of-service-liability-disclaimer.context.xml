@@ -1,0 +1,144 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.2</storyId>
+    <title>Terms of Service &amp; Liability Disclaimer</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-30</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/story-6-2-terms-of-service-liability-disclaimer.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>to see a disclaimer upon first launch</iWant>
+    <soThat>I understand the risks of visiting remote locations</soThat>
+    <tasks>
+- [ ] Task 1: Implement ToS Persistence (AC: 1, 4)
+    - [ ] Update `SettingsRepository` (or create `ToSRepository`) to handle `tos_accepted` key.
+    - [ ] Create `ToSNotifier` (Riverpod) to expose state.
+- [ ] Task 2: Create ToS Screen UI (AC: 3)
+    - [ ] Build `ToSScreen` widget using `GlassPanel`.
+    - [ ] Add Disclaimer Text (Liability, Safety).
+    - [ ] Add "I Agree" button (Primary Action Style).
+- [ ] Task 3: Implement Navigation Guard (AC: 2, 5)
+    - [ ] Update `GoRouter` configuration (`app_router.dart`).
+    - [ ] Add redirect logic: `if (!tosAccepted) return '/tos';`.
+    - [ ] Ensure state changes trigger router refresh.
+- [ ] Task 4: Verification
+    - [ ] Verify fresh install shows screen.
+    - [ ] Verify acceptance persists after restart.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1.  **First Launch Check:**
+    -   App checks `tos_accepted` flag in Hive (`settings` box) on startup.
+    -   Default value is `false` (not accepted).
+2.  **Blocking UI:**
+    -   If `tos_accepted` is false, the user is redirected to a blocking `ToSScreen`.
+    -   Navigation to other routes is prevented until accepted.
+3.  **Content Display:**
+    -   Screen displays clear text stating:
+        -   "Astr is not liable for accidents or injuries."
+        -   "Stargazing locations are suggestions only; verify safety yourself."
+    -   **UX:** Uses "Astr Aura" theme (GlassPanel, Deep Cosmos background).
+4.  **Acceptance Action:**
+    -   User taps "I Agree" button.
+    -   System saves `tos_accepted = true` to Hive.
+5.  **Navigation:**
+    -   Upon acceptance, user is automatically navigated to the Home screen.
+    -   Subsequent app launches skip this screen.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-6.md</path>
+        <title>Epic Technical Specification: Security &amp; Compliance</title>
+        <section>Detailed Design</section>
+        <snippet>Defines the ToS Flow: App Launch check -> Redirect if false -> User Agrees -> Save to Hive -> Route to Home.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Local Storage (Hive)</section>
+        <snippet>Specifies `settings` box for storing `tos_accepted` boolean.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics &amp; Stories</title>
+        <section>Story 6.2: Terms of Service &amp; Liability Disclaimer</section>
+        <snippet>Original story definition and acceptance criteria.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- Existing code relevant to this story -->
+      <item>
+        <path>lib/main.dart</path>
+        <kind>file</kind>
+        <reason>Entry point where Hive is initialized and initial state is loaded.</reason>
+      </item>
+      <item>
+        <path>lib/app/router/app_router.dart</path>
+        <kind>file</kind>
+        <reason>GoRouter configuration where the redirect logic must be implemented.</reason>
+      </item>
+      <item>
+        <path>lib/features/profile/data/repositories/settings_repository.dart</path>
+        <kind>file</kind>
+        <reason>Existing repository for settings; likely place to add `tos_accepted` handling.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dependency>
+        <ecosystem>Flutter</ecosystem>
+        <package>hive</package>
+        <version>latest</version>
+      </dependency>
+      <dependency>
+        <ecosystem>Flutter</ecosystem>
+        <package>flutter_riverpod</package>
+        <version>latest</version>
+      </dependency>
+      <dependency>
+        <ecosystem>Flutter</ecosystem>
+        <package>go_router</package>
+        <version>latest</version>
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Must use Hive `settings` box for persistence.</constraint>
+    <constraint>Must use `GoRouter` redirect for blocking navigation.</constraint>
+    <constraint>UI must match "Astr Aura" theme (GlassPanel).</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>ToS Persistence</name>
+      <kind>Function</kind>
+      <signature>Future&lt;void&gt; setTosAccepted(bool value)</signature>
+      <path>lib/features/profile/data/repositories/settings_repository.dart</path>
+    </interface>
+    <interface>
+      <name>ToS State Provider</name>
+      <kind>Provider</kind>
+      <signature>Provider&lt;bool&gt; tosAcceptedProvider</signature>
+      <path>lib/features/profile/presentation/providers/tos_provider.dart</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Widget tests for UI screens. Integration tests for navigation flows.</standards>
+    <locations>test/features/profile/presentation/</locations>
+    <ideas>
+      <idea ac="1">Verify `tos_accepted` defaults to false on fresh install.</idea>
+      <idea ac="2">Verify router redirects to `/tos` when `tos_accepted` is false.</idea>
+      <idea ac="3">Verify `ToSScreen` displays correct text and button.</idea>
+      <idea ac="4">Verify tapping "I Agree" updates Hive state.</idea>
+      <idea ac="5">Verify router redirects to `/home` after acceptance.</idea>
+    </ideas>
+  </tests>
+</story-context>

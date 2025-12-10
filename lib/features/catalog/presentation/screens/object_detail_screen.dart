@@ -1,5 +1,7 @@
+import 'package:astr/core/widgets/cosmic_loader.dart';
 import 'package:astr/core/widgets/glass_panel.dart';
 import 'package:astr/features/dashboard/presentation/widgets/nebula_background.dart';
+import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
 import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
 import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
 import 'package:astr/features/catalog/presentation/providers/rise_set_provider.dart';
@@ -51,9 +53,7 @@ class ObjectDetailScreen extends ConsumerWidget {
                 // Scrollable Content
                 Expanded(
                   child: state.isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        )
+                      ? const Center(child: CosmicLoader())
                       : state.error != null
                           ? Center(
                               child: Text(
@@ -113,23 +113,32 @@ class ObjectDetailScreen extends ConsumerWidget {
   }
 
   /// AC #3: Large title, type badge, hero icon
-  Widget _buildHeader(object) {
+  Widget _buildHeader(CelestialObject object) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Hero Icon
         Center(
           child: Container(
-            width: 120,
-            height: 120,
+            width: 180,
+            height: 180,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              _getIconForType(object.type),
-              size: 64,
-              color: Colors.white.withOpacity(0.9),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: object.iconPath.isNotEmpty
+                  ? Image.asset(
+                      object.iconPath,
+                      width: 180,
+                      height: 180,
+                    )
+                  : Image.asset(
+                      _getDefaultIconForType(object.type),
+                      width: 180,
+                      height: 180,
+                    ),
             ),
           ),
         ),
@@ -283,20 +292,20 @@ class ObjectDetailScreen extends ConsumerWidget {
     );
   }
 
-  IconData _getIconForType(CelestialType type) {
+  String _getDefaultIconForType(CelestialType type) {
     switch (type) {
       case CelestialType.planet:
-        return Icons.public;
+        return 'assets/icons/stars/star.webp'; // Fallback for planets
       case CelestialType.star:
-        return Icons.star;
+        return 'assets/icons/stars/star.webp';
       case CelestialType.constellation:
-        return Icons.grid_on;
+        return 'assets/icons/stars/star.webp'; // Fallback for constellations
       case CelestialType.galaxy:
-        return Icons.blur_circular;
+        return 'assets/icons/galaxy/andromeda.webp';
       case CelestialType.nebula:
-        return Icons.cloud;
+        return 'assets/icons/nebula/orion_nebula.webp';
       case CelestialType.cluster:
-        return Icons.grain;
+        return 'assets/icons/cluster/pleidas.webp';
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:astr/core/widgets/cosmic_loader.dart';
 import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
 import 'package:astr/features/catalog/presentation/providers/catalog_notifier.dart';
 import 'package:astr/features/catalog/presentation/widgets/object_list_item.dart';
@@ -98,11 +99,7 @@ class CatalogScreen extends ConsumerWidget {
                     },
                     blendMode: BlendMode.dstIn,
                     child: state.isLoading
-                        ? const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          )
+                        ? const Center(child: CosmicLoader())
                         : state.error != null
                             ? Center(
                                 child: Text(

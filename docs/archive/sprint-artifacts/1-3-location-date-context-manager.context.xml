@@ -1,0 +1,110 @@
+<story_context>
+  <story_id>1.3</story_id>
+  <story_key>1-3-location-date-context-manager</story_key>
+  <story_title>Location & Date Context Manager</story_title>
+  <status>drafted</status>
+
+  <user_story>
+    <as_a>User</as_a>
+    <i_want>the app to automatically detect my location and default to the current date</i_want>
+    <so_that>the astronomy data I see is immediately relevant to where I am right now</so_that>
+  </user_story>
+
+  <acceptance_criteria>
+    <criterion id="AC-1.3.1">App requests "While Using" Location Permission on first launch.</criterion>
+    <criterion id="AC-1.3.2">LocationService returns current GPS coordinates if permission granted.</criterion>
+    <criterion id="AC-1.3.3">If permission denied, system defaults to a "Fallback Location" (e.g., (0,0) or last known) without crashing.</criterion>
+    <criterion id="AC-1.3.4">AstrContext state defaults to "Current Date/Time" on startup.</criterion>
+    <criterion id="AC-1.3.5">AstrContext is accessible globally via Riverpod Provider.</criterion>
+    <criterion id="AC-1.3.6">GeoLocation entity includes latitude, longitude, and optional name.</criterion>
+  </acceptance_criteria>
+
+  <tasks>
+    <task>Add geolocator and permission_handler to pubspec.yaml</task>
+    <task>Configure Android AndroidManifest.xml (Permissions)</task>
+    <task>Configure iOS Info.plist (Usage Descriptions)</task>
+    <task>Define GeoLocation entity</task>
+    <task>Define AstrContext entity (immutable state holding Location + Date)</task>
+    <task>Define ILocationService interface</task>
+    <task>Implement DeviceLocationService using geolocator</task>
+    <task>Handle permission requests and exceptions (Denied, Permanently Denied)</task>
+    <task>Create AstrContextNotifier (Riverpod Notifier or StateNotifier)</task>
+    <task>Implement loadContext() logic (Request permission -> Get Location -> Set State)</task>
+    <task>Expose astrContextProvider</task>
+    <task>Create test/core/services/location_service_test.dart (Mocking Geolocator)</task>
+    <task>Create test/features/context/astr_context_test.dart (State logic)</task>
+    <task>Manual: Verify permission flow on Emulator/Simulator</task>
+  </tasks>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements</section>
+        <snippet>FR2: The currently selected Location and Date context persists across all tabs. FR15: System calculates celestial positions... using accurate ephemeris data. Security: Request "While Using App".</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Epic 1</title>
+        <section>2.1 Services & Modules</section>
+        <snippet>ContextManager: Global state for "Where & When". LocationService: Hardware GPS access.</snippet>
+      </doc>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Technical Specification: Epic 1</title>
+        <section>2.2 Data Models</section>
+        <snippet>AstrContext: DateTime selectedDate, GeoLocation location, bool isCurrentLocation. GeoLocation: latitude, longitude, name.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>6. Implementation Patterns</section>
+        <snippet>The "Result" Pattern (No Crashes): Repositories MUST return Future<Either<Failure, Type>>.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <item>
+        <path>lib/core/error/failure.dart</path>
+        <kind>class</kind>
+        <symbol>Failure</symbol>
+        <reason>Base class for error handling, to be used in LocationService failures (e.g., PermissionDeniedFailure).</reason>
+      </item>
+      <item>
+        <path>lib/features/astronomy/domain/repositories/i_astro_engine.dart</path>
+        <kind>interface</kind>
+        <symbol>IAstroEngine</symbol>
+        <reason>Example of repository interface pattern to follow for ILocationService.</reason>
+      </item>
+    </code>
+
+    <dependencies>
+      <package>flutter_riverpod</package>
+      <package>fpdart</package>
+      <package>geolocator</package>
+      <package>permission_handler</package>
+    </dependencies>
+  </artifacts>
+
+  <tests>
+    <standards>
+      Unit tests for Logic/State (Riverpod Notifiers). Mocking external services (Geolocator) for Service tests.
+    </standards>
+    <locations>
+      <path>test/core/services/</path>
+      <path>test/features/context/</path>
+    </locations>
+    <ideas>
+      <idea ac_id="AC-1.3.2">Mock Geolocator to return fixed position, verify LocationService returns mapped GeoLocation.</idea>
+      <idea ac_id="AC-1.3.3">Mock Geolocator to throw permission exception, verify LocationService returns Failure (Left).</idea>
+      <idea ac_id="AC-1.3.4">Verify AstrContextNotifier initial state has current date and default location (or loading state).</idea>
+    </ideas>
+  </tests>
+
+  <constraints>
+    <constraint>Must use fpdart Either for error handling.</constraint>
+    <constraint>LocationService must be an interface (ILocationService) for testability.</constraint>
+    <constraint>State must be immutable (use Freezed or simple immutable classes).</constraint>
+  </constraints>
+</story_context>

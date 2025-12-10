@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'glass_panel.dart';
+import 'package:astr/core/widgets/glass_panel.dart';
 
 class CloudBar extends StatefulWidget {
   final double cloudCoverPercentage; // 0-100

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'glass_panel.dart';
+import 'package:astr/core/widgets/glass_panel.dart';
 import '../../domain/entities/light_pollution.dart';
 
 class BortleBar extends StatefulWidget {
@@ -22,6 +22,7 @@ class _BortleBarState extends State<BortleBar> {
   @override
   Widget build(BuildContext context) {
     return GlassPanel(
+      enableBlur: false,
       onTap: widget.onTap,
       child: SizedBox(
         height: 150,

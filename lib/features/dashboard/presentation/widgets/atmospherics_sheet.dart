@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
 import '../providers/weather_provider.dart';
 import '../providers/darkness_provider.dart';
+import '../providers/prime_view_provider.dart';
 import 'conditions_graph.dart';
 import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
 import 'package:astr/features/catalog/presentation/providers/rise_set_provider.dart';
 import 'package:astr/features/catalog/presentation/providers/visibility_graph_notifier.dart';
 import 'package:intl/intl.dart';
-import 'glass_panel.dart';
+import 'package:astr/core/widgets/glass_panel.dart';
 import 'package:astr/features/dashboard/presentation/widgets/time_card.dart';
 import 'package:astr/features/dashboard/presentation/widgets/graph_legend_item.dart';
 import 'package:astr/features/dashboard/presentation/theme/graph_theme.dart';
@@ -97,6 +98,10 @@ class AtmosphericsSheet extends ConsumerWidget {
                             final hourlyForecastAsync = ref.watch(hourlyForecastProvider);
                             final cloudCoverData = hourlyForecastAsync.valueOrNull;
 
+                            // Fetch Prime View Window
+                            final primeViewAsync = ref.watch(primeViewProvider);
+                            final primeViewWindow = primeViewAsync.valueOrNull;
+
                             return Container(
                               height: 200,
                               margin: const EdgeInsets.only(bottom: 32),
@@ -116,6 +121,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                                       themeColor: Colors.indigo,
                                       moonCurve: moonCurve,
                                       cloudCoverData: cloudCoverData,
+                                      primeViewWindow: primeViewWindow,
                                   ),
                                 ),
                               ),

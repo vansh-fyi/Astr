@@ -21,11 +21,14 @@ class VisibilityGraphPainter extends CustomPainter {
   late final Paint _moonFillPaint;
   late final Paint _moonStrokePaint;
 
+  final DateTime currentTime;
+
   VisibilityGraphPainter({
     required this.data,
     required this.scrubberPosition,
     required this.startTime,
     required this.endTime,
+    required this.currentTime,
     this.highlightColor,
     this.cloudCoverData,
   }) {
@@ -66,6 +69,9 @@ class VisibilityGraphPainter extends CustomPainter {
     // 3. Draw Object Curve
     _drawObjectCurve(canvas, size);
 
+    // 3.5. Draw Current Position Indicator (AC #1)
+    _drawCurrentPositionIndicator(canvas, size);
+
     // 4. Draw Current Time Indicator
     _drawNowIndicator(canvas, size);
 
@@ -102,7 +108,7 @@ class VisibilityGraphPainter extends CustomPainter {
     if (minutesFromStart < 0 || minutesFromStart > totalDuration) return;
 
     final x = (minutesFromStart / totalDuration) * size.width;
-    final y = size.height - (peakPoint.value / 90 * size.height);
+    final y = size.height - (peakPoint.value / 90 * size.height *0.7);
 
     // Draw Peak Dot (Filled Circle, same color as line)
     canvas.drawCircle(Offset(x, y), 5, _peakDotPaint);
@@ -293,7 +299,7 @@ class VisibilityGraphPainter extends CustomPainter {
       final minutesFromStart = point.time.difference(startTime).inMinutes;
       final x = (minutesFromStart / totalDuration) * size.width;
       // Scale moon altitude to be visible but background
-      final y = size.height - (point.value / 90 * size.height * 0.8); 
+      final y = size.height - (point.value / 90 * size.height * 0.7); 
       
       if (point.value > 0) {
         if (!isMoonUp) {
@@ -322,7 +328,7 @@ class VisibilityGraphPainter extends CustomPainter {
     for (final point in data.moonCurve) {
       final minutesFromStart = point.time.difference(startTime).inMinutes;
       final x = (minutesFromStart / totalDuration) * size.width;
-      final y = size.height - (point.value / 90 * size.height * 0.8); 
+      final y = size.height - (point.value / 90 * size.height * 0.7); 
       
       if (point.value > 0) {
         if (!isMoonUp) {
@@ -351,7 +357,7 @@ class VisibilityGraphPainter extends CustomPainter {
     for (final point in data.objectCurve) {
       final minutesFromStart = point.time.difference(startTime).inMinutes;
       final x = (minutesFromStart / totalDuration) * size.width;
-      final y = size.height - (point.value / 90 * size.height);
+      final y = size.height - (point.value / 90 * size.height *0.7);
 
       if (isFirst) {
         path.moveTo(x, y);
@@ -365,8 +371,81 @@ class VisibilityGraphPainter extends CustomPainter {
     canvas.drawPath(path, _objectCurvePaint);
   }
 
+  void _drawCurrentPositionIndicator(Canvas canvas, Size size) {
+    final now = currentTime;
+    if (now.isBefore(startTime) || now.isAfter(endTime)) return;
+
+    if (data.objectCurve.isEmpty) return;
+
+    // Find surrounding points for interpolation
+    GraphPoint? p1;
+    GraphPoint? p2;
+
+    for (int i = 0; i < data.objectCurve.length - 1; i++) {
+      if (data.objectCurve[i].time.isBefore(now) && 
+          data.objectCurve[i+1].time.isAfter(now)) {
+        p1 = data.objectCurve[i];
+        p2 = data.objectCurve[i+1];
+        break;
+      }
+    }
+
+    // Handle edge case where now matches a point exactly or is first/last
+    if (p1 == null) {
+       // Check if it matches exactly
+       try {
+         final exact = data.objectCurve.firstWhere((p) => p.time.isAtSameMomentAs(now));
+         p1 = exact;
+         p2 = exact;
+       } catch (e) {
+         return; // Should be covered by range check, but safety first
+       }
+    }
+
+    // Interpolate Altitude
+    final totalMillis = p2!.time.difference(p1!.time).inMilliseconds;
+    final nowMillis = now.difference(p1.time).inMilliseconds;
+    final fraction = totalMillis == 0 ? 0.0 : nowMillis / totalMillis;
+    
+    final altitude = p1.value + (p2.value - p1.value) * fraction;
+
+    // Calculate Coordinates
+    final totalDuration = endTime.difference(startTime).inMinutes;
+    final minutesFromStart = now.difference(startTime).inMinutes;
+    final x = (minutesFromStart / totalDuration) * size.width;
+    final y = size.height - (altitude / 90 * size.height * 0.7);
+
+    // Draw Indicator (White Circle with Colored Stroke)
+    // AC #4: Glass UI aesthetic (4px stroke width, white fill)
+    final strokeColor = highlightColor ?? const Color(0xFF3B82F6);
+    
+    // Outer Glow
+    canvas.drawCircle(
+      Offset(x, y),
+      8,
+      Paint()..color = strokeColor.withValues(alpha: 0.3)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
+
+    // Stroke
+    canvas.drawCircle(
+      Offset(x, y),
+      5, // Radius
+      Paint()
+        ..color = strokeColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3,
+    );
+
+    // Fill
+    canvas.drawCircle(
+      Offset(x, y),
+      5, // Radius matches stroke radius (stroke is centered)
+      Paint()..color = Colors.white,
+    );
+  }
+
   void _drawNowIndicator(Canvas canvas, Size size) {
-    final now = DateTime.now();
+    final now = currentTime;
     if (now.isBefore(startTime) || now.isAfter(endTime)) return;
 
     final totalDuration = endTime.difference(startTime).inMinutes;
@@ -535,7 +614,8 @@ class VisibilityGraphPainter extends CustomPainter {
     return oldDelegate.data != data || 
            oldDelegate.scrubberPosition != scrubberPosition ||
            oldDelegate.startTime != startTime ||
-           oldDelegate.endTime != endTime;
+           oldDelegate.endTime != endTime ||
+           oldDelegate.currentTime != currentTime;
   }
 }
 

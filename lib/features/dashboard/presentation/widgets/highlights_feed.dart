@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'celestial_detail_sheet.dart';
-import 'glass_panel.dart';
+import 'package:astr/core/widgets/glass_panel.dart';
 
 class HighlightsFeed extends ConsumerWidget {
   const HighlightsFeed({super.key});
@@ -67,6 +67,7 @@ class _HighlightItemWidget extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: GlassPanel(
+        enableBlur: false,
         padding: const EdgeInsets.all(16),
         onTap: () {
           showModalBottomSheet(

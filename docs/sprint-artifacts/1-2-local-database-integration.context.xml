@@ -1,0 +1,107 @@
+<story-context id="1-2-local-database-integration-context" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.2</storyId>
+    <title>Local Database Integration</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-2-local-database-integration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Stargazer</asA>
+    <iWant>the app to search and retrieve celestial objects from a local database</iWant>
+    <soThat>I can find stars and DSOs without an internet connection</soThat>
+    <tasks>
+- [ ] Implement Database Service (AC: #1, #5)
+  - [ ] Create `lib/core/engine/database/database_service.dart`
+  - [ ] Implement asset-to-storage copy logic for `astr.db`
+  - [ ] Configure `sqflite` connection and schema mapping
+  - [ ] Implement `Result&lt;T&gt;` pattern for DB operations
+- [ ] Implement Data Repositories (AC: #2)
+  - [ ] Create `StarRepository` and `DsoRepository`
+  - [ ] Implement search queries (by name, constellation, type)
+  - [ ] Map SQLite rows to `Star` and `DSO` models (reuse models from Story 1.1)
+- [ ] Optimize Query Performance (AC: #3)
+  - [ ] Ensure proper indexing on `name` and `id` columns in `astr.db` (verify schema)
+  - [ ] Implement efficient query patterns (limit results, debounce search)
+- [ ] Integration &amp; Testing (AC: #4)
+  - [ ] Write integration tests for `DatabaseService` (mocking file system)
+  - [ ] Verify retrieved objects can be passed to `AstroEngine.calculatePosition()`
+  - [ ] Measure query performance to ensure &lt; 100ms target
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. **Database Initialization**: `DatabaseService` initializes `astr.db` from assets on first run.
+2. **Search Capability**: Searching for "Andromeda" or "Sirius" returns correct `Star` or `DSO` objects from SQLite.
+3. **Performance**: Database queries for search results complete in &lt; 100ms.
+4. **Engine Integration**: `AstroEngine` can accept objects retrieved from the database for calculation.
+5. **Data Integrity**: `astr.db` contains expected Star (Hipparcos) and DSO (Messier/NGC) data.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      - path: docs/sprint-artifacts/tech-spec-epic-1.md
+        title: Epic 1 Tech Spec
+        section: Detailed Design
+        snippet: Integration of sqflite with a pre-populated astr.db (Stars, DSOs).
+      - path: docs/architecture.md
+        title: Architecture Decision Document
+        section: 5. Data Architecture
+        snippet: Local Database Schema (SQLite) for stars and dso tables.
+      - path: docs/sprint-artifacts/1-1-dart-native-engine-implementation.md
+        title: Story 1.1
+        section: Dev Agent Record
+        snippet: Implemented complete Dart Native astronomical engine. Reuse Result&lt;T&gt; pattern and models.
+    </docs>
+    <code>
+      - path: lib/core/engine/models/celestial_object.dart
+        kind: model
+        symbol: CelestialObject
+        reason: Base class for Star and DSO models
+      - path: lib/core/engine/models/result.dart
+        kind: utility
+        symbol: Result
+        reason: Error handling pattern to reuse
+      - path: lib/core/engine/astro_engine.dart
+        kind: engine
+        symbol: AstroEngine
+        reason: Target for integration (AC #4)
+    </code>
+    <dependencies>
+      - sqflite: (Missing in pubspec.yaml, required for AC #1)
+      - path_provider: (Present, reuse for DB file location)
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Database queries must be non-blocking (async).
+    - Reuse existing models (Star, DSO) from Story 1.1.
+    - astr.db must be copied from assets to app documents directory on first launch.
+    - Query performance must be &lt; 100ms.
+  </constraints>
+
+  <interfaces>
+    - name: DatabaseService
+      kind: class
+      signature: Future&lt;Result&lt;void&gt;&gt; initialize();
+      path: lib/core/engine/database/database_service.dart (Proposed)
+    - name: StarRepository
+      kind: class
+      signature: Future&lt;Result&lt;List&lt;Star&gt;&gt;&gt; searchStars(String query);
+      path: lib/core/engine/database/star_repository.dart (Proposed)
+  </interfaces>
+
+  <tests>
+    <standards>Integration tests with mocked file system. Performance measurement for queries.</standards>
+    <locations>test/core/engine/database/</locations>
+    <ideas>
+      - Test DB initialization (copy from assets).
+      - Test search queries with various inputs (valid, invalid, partial).
+      - Verify mapping from SQLite rows to Dart models.
+      - Measure query execution time.
+    </ideas>
+  </tests>
+</story-context>

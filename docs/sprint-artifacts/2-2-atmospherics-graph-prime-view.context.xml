@@ -1,0 +1,108 @@
+<story-context id="2-2-atmospherics-graph-prime-view" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.2</storyId>
+    <title>Atmospherics Graph &amp; Prime View</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-2-atmospherics-graph-prime-view.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Stargazer</asA>
+    <iWant>to know the absolute best time to observe tonight</iWant>
+    <soThat>I can plan my session during the optimal window of clear skies and low moon interference</soThat>
+    <tasks>
+      - Implement PrimeViewCalculator (AC: #1, #4)
+      - Update Atmospherics Graph Painter (AC: #2, #3)
+      - Integrate with State Management (AC: #1, #2)
+      - Testing &amp; Verification (AC: #1, #2, #3, #4)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. **Prime View Calculation**: The system calculates the "Prime View" window for the current night, defined as the contiguous time range with the lowest combined Cloud Cover and Moon interference score.
+    2. **Visual Highlight**: The Atmospherics Graph visually highlights this "Prime View" window (e.g., subtle background highlight or distinct marker) using the existing Glass UI style.
+    3. **Now Indicator**: A vertical "Now" indicator (Orange line) is drawn at the correct X-position for the current time on the Atmospherics Graph.
+    4. **No Prime View**: If no time window meets the minimum quality threshold (e.g., >80% cloud cover all night), no highlight is shown (or a "Conditions Poor" state is handled).
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic Technical Specification: Epic 2</title>
+        <section>Detailed Design</section>
+        <snippet>Defines `PrimeViewCalculator` responsibility, `PrimeViewWindow` data model, and `AtmosphericsPainter` requirements. Specifies NFRs for performance (60fps) and calculation speed (<10ms).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision Document</title>
+        <section>Implementation Patterns</section>
+        <snippet>Specifies use of Riverpod for state management, `CustomPainter` for high-performance rendering, and Isolate usage for heavy calculations (though Prime View is expected to be lightweight).</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Product Scope - MVP</section>
+        <snippet>Describes "Prime View Logic" as a new algorithm to calculate and highlight the optimal viewing window. Mentions "Glass UI" aesthetic.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/features/dashboard/presentation/widgets/cloud_cover_graph_painter.dart</path>
+        <kind>painter</kind>
+        <symbol>CloudCoverGraphPainter</symbol>
+        <reason>Existing painter for the atmospherics graph. Needs to be modified to accept `PrimeViewWindow` and draw the highlight.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/widgets/atmospherics_sheet.dart</path>
+        <kind>widget</kind>
+        <symbol>AtmosphericsSheet</symbol>
+        <reason>Parent widget that instantiates the graph. Will need to connect to the new Prime View provider.</reason>
+      </item>
+      <item>
+        <path>lib/features/astronomy/domain/services/astronomy_service.dart</path>
+        <kind>service</kind>
+        <symbol>AstronomyService</symbol>
+        <reason>Provides `getNightWindow()` which defines the X-axis timeframe.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>flutter_riverpod</dep>
+      <dep>intl</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Performance**: Prime View calculation must be fast (<10ms) to avoid blocking the UI thread.
+    - **UI Style**: Must use existing "Glass UI" aesthetic. Highlight should be subtle and not clutter the graph.
+    - **Architecture**: Keep calculation logic pure and separate from UI code. Use Riverpod for state management.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>PrimeViewCalculator</name>
+      <kind>class</kind>
+      <signature>PrimeViewWindow? calculatePrimeView(List&lt;HourlyWeather&gt; weather, MoonPhase moonPhase)</signature>
+      <path>lib/core/engine/prime_view_calculator.dart (Proposed)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Unit tests for calculation logic (`PrimeViewCalculator`). Widget tests for `AtmosphericsPainter` to verify drawing commands (highlight, now indicator).
+    </standards>
+    <locations>
+      <loc>test/core/engine/prime_view_calculator_test.dart</loc>
+      <loc>test/features/dashboard/presentation/widgets/cloud_cover_graph_painter_test.dart</loc>
+    </locations>
+    <ideas>
+      - Test `calculatePrimeView` with perfect conditions (should return full night).
+      - Test `calculatePrimeView` with terrible conditions (should return null).
+      - Test `calculatePrimeView` with mixed conditions (should find best contiguous block).
+      - Verify `_drawNowIndicator` X-offset calculation matches `DateTime.now()`.
+    </ideas>
+  </tests>
+</story-context>

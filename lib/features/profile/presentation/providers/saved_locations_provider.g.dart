@@ -7,7 +7,7 @@ part of 'saved_locations_provider.dart';
 // **************************************************************************
 
 String _$savedLocationsNotifierHash() =>
-    r'630bbc935c04fa5dcfb08e354175daa711046ffc';
+    r'70f14287f459b7ecb9deee27dd32303e2e97a42c';
 
 /// See also [SavedLocationsNotifier].
 @ProviderFor(SavedLocationsNotifier)

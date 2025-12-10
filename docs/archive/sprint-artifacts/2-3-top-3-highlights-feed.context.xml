@@ -1,0 +1,80 @@
+<context story="2-3-top-3-highlights-feed">
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="Story 2.3: Top 3 Highlights Feed">
+        <snippet>
+          System filters visible objects (Planets > Stars). Selects top 3 based on Altitude and Magnitude. Displays them as cards on the Home screen.
+        </snippet>
+      </doc>
+      <doc path="docs/epics.md" title="Epics & Stories" section="Story 2.3">
+        <snippet>
+          Goal: Give immediate goal. Value: Actionable targets. Logic: Altitude > 10 deg, Sort by Type then Magnitude.
+        </snippet>
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Presentation Layer">
+        <snippet>
+          The "Glass" Pattern (UI): All container widgets should use the shared GlassPanel widget.
+        </snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <item path="lib/features/astronomy/domain/entities/celestial_body.dart" kind="enum" symbol="CelestialBody" reason="Enum of all trackable objects" />
+      <item path="lib/features/astronomy/domain/repositories/i_astro_engine.dart" kind="interface" symbol="IAstroEngine" reason="Interface for calculating position (Altitude)" />
+      <item path="lib/features/astronomy/presentation/providers/astronomy_provider.dart" kind="provider" symbol="AstronomyNotifier" reason="Existing provider for astronomy state" />
+      <item path="lib/core/widgets/glass_panel.dart" kind="widget" symbol="GlassPanel" reason="Standard container for UI consistency" />
+      <item path="lib/features/dashboard/presentation/home_screen.dart" kind="widget" symbol="HomeScreen" reason="Target screen for the highlights feed" />
+    </code>
+
+    <dependencies>
+      <dep ecosystem="flutter" package="flutter_riverpod" version="latest" />
+      <dep ecosystem="flutter" package="flutter_animate" version="latest" />
+      <dep ecosystem="flutter" package="freezed_annotation" version="latest" />
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface name="HighlightsLogic" kind="class" path="lib/features/dashboard/domain/logic/highlights_logic.dart">
+      <signature>
+        class HighlightsLogic {
+          static List<HighlightItem> selectTop3({
+            required List<CelestialPosition> positions,
+          });
+        }
+      </signature>
+    </interface>
+    <interface name="HighlightItem" kind="class" path="lib/features/dashboard/domain/entities/highlight_item.dart">
+      <signature>
+        class HighlightItem {
+          final CelestialBody body;
+          final double altitude;
+          final double magnitude;
+          final bool isVisible;
+        }
+      </signature>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <rule>Logic must reside in the Domain layer (pure Dart).</rule>
+    <rule>UI must use `GlassPanel` for consistency.</rule>
+    <rule>Must iterate over `CelestialBody.values` to find candidates.</rule>
+    <rule>Must use `IAstroEngine` to calculate real-time positions.</rule>
+  </constraints>
+
+  <tests>
+    <standards>
+      Unit tests for `HighlightsLogic` covering sorting and filtering.
+      Widget tests for `HighlightCard` and `HighlightsFeed`.
+    </standards>
+    <locations>
+      <loc>test/features/dashboard/domain/logic/</loc>
+      <loc>test/features/dashboard/presentation/widgets/</loc>
+    </locations>
+    <ideas>
+      <idea id="AC-2.3.1">Test filtering: Object below horizon should be excluded.</idea>
+      <idea id="AC-2.3.2">Test sorting: Planet with Mag 1.0 should beat Star with Mag 0.0 (if Type priority enforced).</idea>
+      <idea id="AC-2.3.3">Test selection: Returns exactly 3 items if >3 available.</idea>
+    </ideas>
+  </tests>
+</context>

@@ -1,0 +1,126 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>7</storyId>
+    <title>Fix Astro Calculations</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-7-fix-astro-calculations.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>the stars and constellations to appear in their correct positions for my location</iWant>
+    <soThat>I can reliably use the app for real-world observing and navigation</soThat>
+    <tasks>
+- [ ] Audit Time Calculation
+  - [ ] Verify `Julian Date` calculation.
+  - [ ] Verify `Local Sidereal Time (LST)` formula, specifically handling of longitude direction (+/- for East/West).
+- [ ] Audit Coordinate Conversion
+  - [ ] Verify `EqToHoriz` (Equatorial to Horizon) transformation matrix.
+  - [ ] Check for Radians vs Degrees mix-ups.
+- [ ] Create Test Harness
+  - [ ] Create a unit test with known "Gold Standard" inputs/outputs (e.g., Position of Sirius at 2024-01-01 00:00 UTC at 0,0 Lat/Long).
+- [ ] Fix Logic &amp; Verify
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. **Accuracy Verification:**
+   - **Given** a specific location (e.g., Delhi, London) and time, **When** the app displays Alt/Az for known bright stars (Sirius, Arcturus, Polaris), **Then** the values must match trusted reference data (Stellarium, SkySafari, or NOAA calculators) within 1 degree.
+
+2. **Fix Coordinate Conversion:**
+   - Identify and fix inaccuracies in the `Local Sidereal Time (LST)` calculation or the `RA/Dec` to `Alt/Az` conversion algorithm in the Dart Engine.
+   - **Verification:** Ensure correct handling of Time Zones and Daylight Savings Time (major source of LST errors).
+
+3. **Constellation Lines:**
+   - **Given** correct star positions, **When** constellation lines are drawn, **Then** they must connect the correct stars without distortion/mirroring (verifying specific projection logic).
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Success Criteria (Scientific Accuracy)</section>
+        <snippet>Object Tracking: Rise/Set times and Altitude graphs for DSOs match astronomical standards (within reasonable visual tolerance).</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision Document</title>
+        <section>2. Architectural Decisions</section>
+        <snippet>Heavy Meeus algorithms (trigonometry for 9000+ objects) must run off the main thread (Isolates). Result Pattern used for Engine operations.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics and Stories</title>
+        <section>Epic 1: Foundation &amp; Offline Engine Overhaul</section>
+        <snippet>Goal: Replace limited sweph dependency with robust, offline-first Dart Native Astronomy Engine. Story 1.1 defines the implementation of Meeus algorithms.</snippet>
+      </doc>
+       <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Objectives and Scope</section>
+        <snippet>Aligns with Offline-First architecture. Performance enforces Isolate Boundary rule.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/core/engine/algorithms/time_utils.dart</path>
+        <kind>utility</kind>
+        <symbol>TimeUtils</symbol>
+        <lines>6-121</lines>
+        <reason>Contains Julian Date and Sidereal Time calculations (Core auditing targets).</reason>
+      </item>
+      <item>
+        <path>lib/core/engine/algorithms/coordinate_transformations.dart</path>
+        <kind>utility</kind>
+        <symbol>CoordinateTransformations</symbol>
+        <lines>8-61</lines>
+        <reason>Contains equatorialToHorizontal (EqToHoriz) logic which may have the bug.</reason>
+      </item>
+      <item>
+        <path>test/astronomy/engine_test.dart</path>
+        <kind>test</kind>
+        <symbol>main</symbol>
+        <reason>Existing test harness comparing against Sweph. Needs to be extended for specific star positions.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>sweetph ^3.2.1+2.10.3 (Reference/Verification only)</dep>
+      <dep>flutter_test (Testing framework)</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Scientific Accuracy:** Calculations must match trusted sources within 1 degree.
+    - **Performance:** Complex calculations should remain in Isolates if heavy (though this story focuses on correctness of the math itself).
+    - **Dart Native:** Logic must remain pure Dart without relying on external native libraries for the core engine production code.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>TimeUtils.localSiderealTime</name>
+      <kind>static method</kind>
+      <signature>double localSiderealTime(DateTime dateTime, double longitude)</signature>
+      <path>lib/core/engine/algorithms/time_utils.dart</path>
+    </interface>
+    <interface>
+      <name>CoordinateTransformations.equatorialToHorizontal</name>
+      <kind>static method</kind>
+      <signature>HorizontalCoordinates equatorialToHorizontal(EquatorialCoordinates equatorial, Location location, DateTime dateTime)</signature>
+      <path>lib/core/engine/algorithms/coordinate_transformations.dart</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests should use `flutter_test`. Verification against known "Gold Standard" values (e.g. from Stellarium or NOAA) is required.</standards>
+    <locations>test/astronomy/</locations>
+    <ideas>
+      - Create a data-driven test with a table of known Date/Time + Lat/Long -> Expected Alt/Az for Sirius.
+      - Test LST calculation specifically with positive (East) and negative (West) longitudes to ensure direction correctness.
+      - Verify Julian Date calculation for edge cases (leap years, year boundaries).
+    </ideas>
+  </tests>
+</story-context>

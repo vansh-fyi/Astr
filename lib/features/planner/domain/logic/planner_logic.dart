@@ -1,56 +1,48 @@
+import '../../../../core/services/qualitative/qualitative_condition_service.dart';
+import '../../../../core/utils/bortle_mpsas_converter.dart';
+import '../../../../core/engine/models/condition_quality.dart';
+
 class PlannerLogic {
+  final QualitativeConditionService _conditionService = QualitativeConditionService();
+
   /// Calculates a 1-5 star rating based on cloud cover, moon illumination, and light pollution.
   ///
-  /// Logic:
-  /// - Cloud Cover (0-100%): Heavily weighted. >80% clouds = 1 star.
-  /// - Moon Illumination (0.0-1.0): Affects visibility of deep sky objects.
-  /// - Bortle Scale (1-9): Light pollution penalty.
-  ///
-  /// Heuristic:
-  /// 1. Base Score = 100
-  /// 2. Cloud Penalty: -1 point per 1% cloud cover.
-  /// 3. Moon Penalty: -30 points * moonIllumination.
-  /// 4. Bortle Penalty: -(Bortle - 1) * 5 points. (Bortle 1 = 0, Bortle 9 = -40)
-  /// 5. Map Score to 1-5:
-  ///    - > 80: 5 stars
-  ///    - > 60: 4 stars
-  ///    - > 40: 3 stars
-  ///    - > 20: 2 stars
-  ///    - <= 20: 1 star
+  /// Uses the same QualitativeConditionService as the home screen for consistency.
+  /// Maps quality levels to star ratings:
+  /// - Excellent -> 5 stars
+  /// - Good -> 4 stars
+  /// - Fair -> 3 stars
+  /// - Poor -> 1-2 stars (depending on cloud cover)
   int calculateStarRating({
     required double cloudCoverAvg,
     required double moonIllumination,
     required int bortleScale,
   }) {
-    // 1. Cloud Penalty (Critical)
-    // If it's completely cloudy, it's bad regardless of anything else.
-    if (cloudCoverAvg > 80) return 1;
+    // Convert Bortle to MPSAS
+    final mpsas = BortleMpsasConverter.bortleToMpsas(bortleScale);
 
-    double score = 100;
+    // Evaluate conditions using the same service as home screen
+    final result = _conditionService.evaluate(
+      cloudCover: cloudCoverAvg,
+      moonIllumination: moonIllumination,
+      mpsas: mpsas,
+    );
 
-    // Cloud Penalty: Linear reduction
-    score -= cloudCoverAvg;
-
-    // Moon Penalty: Max 30 points reduction (Full Moon)
-    // We only penalize if clouds are low enough to see the moon/stars
-    if (cloudCoverAvg < 50) {
-      score -= (moonIllumination * 30);
+    // Map quality to star rating
+    switch (result.quality) {
+      case ConditionQuality.excellent:
+        return 5;
+      case ConditionQuality.good:
+        return 4;
+      case ConditionQuality.fair:
+        return 3;
+      case ConditionQuality.poor:
+        // Poor conditions: differentiate based on severity
+        // Very cloudy (>80%) = 1 star, otherwise 2 stars
+        return cloudCoverAvg > 80 ? 1 : 2;
+      case ConditionQuality.unknown:
+        // If quality unknown, fallback to basic cloud-based rating
+        return cloudCoverAvg > 80 ? 1 : 2;
     }
-
-    // Bortle Penalty:
-    // Bortle 1 (Excellent) -> 0 penalty
-    // Bortle 9 (City) -> 40 penalty
-    // This ensures a city user rarely gets 5 stars unless conditions are perfect.
-    score -= ((bortleScale - 1) * 5);
-
-    // Clamp score
-    if (score < 0) score = 0;
-
-    // Map to 1-5
-    if (score >= 80) return 5;
-    if (score >= 60) return 4;
-    if (score >= 40) return 3;
-    if (score >= 20) return 2;
-    return 1;
   }
 }

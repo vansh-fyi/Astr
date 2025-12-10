@@ -1,3 +1,4 @@
+import 'package:astr/core/widgets/cosmic_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:astr/features/planner/presentation/providers/planner_provider.dart';
@@ -34,7 +35,7 @@ class ForecastScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CosmicLoader()),
         error: (error, stack) => Center(
           child: Text(
             'Error loading forecast: $error',

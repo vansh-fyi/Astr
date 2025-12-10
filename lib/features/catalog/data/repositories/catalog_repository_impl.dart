@@ -13,7 +13,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'sun',
       name: 'Sun',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/sun.png',
+      iconPath: 'assets/icons/stars/sun.webp',
       magnitude: -26.74,
       ephemerisId: 0, // SE_SUN
     ),
@@ -21,7 +21,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'moon',
       name: 'Moon',
       type: CelestialType.planet,
-      iconPath: 'assets/icons/planets/moon.png',
+      iconPath: 'assets/img/moon_full.webp', // Moon uses phase images
       magnitude: -12.74,
       ephemerisId: 1, // SE_MOON
     ),
@@ -31,7 +31,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'mercury',
       name: 'Mercury',
       type: CelestialType.planet,
-      iconPath: 'assets/icons/planets/mercury.png',
+      iconPath: 'assets/icons/planets/mercury.webp',
       magnitude: -1.9,
       ephemerisId: 1, // SE_MERCURY
     ),
@@ -39,7 +39,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'venus',
       name: 'Venus',
       type: CelestialType.planet,
-      iconPath: 'assets/icons/planets/venus.png',
+      iconPath: 'assets/icons/planets/venus.webp',
       magnitude: -4.6,
       ephemerisId: 2, // SE_VENUS
     ),
@@ -47,7 +47,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'mars',
       name: 'Mars',
       type: CelestialType.planet,
-      iconPath: 'assets/icons/planets/mars.png',
+      iconPath: 'assets/icons/planets/mars.webp',
       magnitude: -2.9,
       ephemerisId: 4, // SE_MARS
     ),
@@ -55,7 +55,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'jupiter',
       name: 'Jupiter',
       type: CelestialType.planet,
-      iconPath: 'assets/icons/planets/jupiter.png',
+      iconPath: 'assets/icons/planets/jupiter.webp',
       magnitude: -2.9,
       ephemerisId: 5, // SE_JUPITER
     ),
@@ -63,7 +63,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'saturn',
       name: 'Saturn',
       type: CelestialType.planet,
-      iconPath: 'assets/icons/planets/saturn.png',
+      iconPath: 'assets/icons/planets/saturn.webp',
       magnitude: 0.7,
       ephemerisId: 6, // SE_SATURN
     ),
@@ -71,7 +71,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'uranus',
       name: 'Uranus',
       type: CelestialType.planet,
-      iconPath: 'assets/icons/planets/uranus.png',
+      iconPath: 'assets/icons/planets/uranus.webp',
       magnitude: 5.7,
       ephemerisId: 7, // SE_URANUS
     ),
@@ -79,7 +79,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'neptune',
       name: 'Neptune',
       type: CelestialType.planet,
-      iconPath: 'assets/icons/planets/neptune.png',
+      iconPath: 'assets/icons/planets/neptune.webp',
       magnitude: 7.8,
       ephemerisId: 8, // SE_NEPTUNE
     ),
@@ -90,7 +90,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'sirius',
       name: 'Sirius',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: -1.46,
       ephemerisId: null,
       ra: 101.287, // 06h 45m 09s
@@ -100,7 +100,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'canopus',
       name: 'Canopus',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: -0.74,
       ephemerisId: null,
       ra: 95.988, // 06h 23m 57s
@@ -110,7 +110,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'arcturus',
       name: 'Arcturus',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: -0.05,
       ephemerisId: null,
       ra: 213.915, // 14h 15m 40s
@@ -120,7 +120,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'vega',
       name: 'Vega',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: 0.03,
       ephemerisId: null,
       ra: 279.234, // 18h 36m 56s
@@ -130,7 +130,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'capella',
       name: 'Capella',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: 0.08,
       ephemerisId: null,
       ra: 79.172, // 05h 16m 41s
@@ -140,7 +140,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'rigel',
       name: 'Rigel',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: 0.13,
       ephemerisId: null,
       ra: 78.634, // 05h 14m 32s
@@ -150,7 +150,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'procyon',
       name: 'Procyon',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: 0.34,
       ephemerisId: null,
       ra: 114.825, // 07h 39m 18s
@@ -160,7 +160,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'betelgeuse',
       name: 'Betelgeuse',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: 0.50,
       ephemerisId: null,
       ra: 88.793, // 05h 55m 10s
@@ -170,7 +170,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'altair',
       name: 'Altair',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: 0.76,
       ephemerisId: null,
       ra: 297.696, // 19h 50m 47s
@@ -180,7 +180,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'aldebaran',
       name: 'Aldebaran',
       type: CelestialType.star,
-      iconPath: 'assets/icons/stars/star.png',
+      iconPath: 'assets/icons/stars/star.webp',
       magnitude: 0.85,
       ephemerisId: null,
       ra: 68.980, // 04h 35m 55s
@@ -192,7 +192,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'orion',
       name: 'Orion',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/orion.png',
+      iconPath: 'assets/icons/constellations/orion.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 83.5,
@@ -202,7 +202,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'ursa-major',
       name: 'Ursa Major',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/ursa_major.png',
+      iconPath: 'assets/icons/constellations/ursa_major.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 160.0,
@@ -212,7 +212,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'cassiopeia',
       name: 'Cassiopeia',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/cassiopeia.png',
+      iconPath: 'assets/icons/constellations/cassiopeia.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 15.0,
@@ -222,7 +222,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'crux',
       name: 'Crux (Southern Cross)',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/crux.png',
+      iconPath: 'assets/icons/constellations/crux.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 187.5,
@@ -232,7 +232,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'scorpius',
       name: 'Scorpius',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/scorpius.png',
+      iconPath: 'assets/icons/constellations/scorpius.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 253.0,
@@ -242,7 +242,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'leo',
       name: 'Leo',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/leo.png',
+      iconPath: 'assets/icons/constellations/leo.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 165.0,
@@ -252,7 +252,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'gemini',
       name: 'Gemini',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/gemini.png',
+      iconPath: 'assets/icons/constellations/gemini.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 105.0,
@@ -262,7 +262,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'andromeda',
       name: 'Andromeda',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/andromeda.png',
+      iconPath: 'assets/icons/constellations/andromeda.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 12.0,
@@ -272,7 +272,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'cygnus',
       name: 'Cygnus',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/cygnus.png',
+      iconPath: 'assets/icons/constellations/cygnus.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 307.5,
@@ -282,7 +282,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'lyra',
       name: 'Lyra',
       type: CelestialType.constellation,
-      iconPath: 'assets/icons/constellations/lyra.png',
+      iconPath: 'assets/icons/constellations/lyra.webp',
       magnitude: null,
       ephemerisId: null,
       ra: 282.5,
@@ -294,7 +294,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'andromeda-galaxy',
       name: 'Andromeda Galaxy (M31)',
       type: CelestialType.galaxy,
-      iconPath: 'assets/icons/constellations/andromeda.png', // Reusing constellation icon for now
+      iconPath: 'assets/icons/galaxy/andromeda.webp',
       magnitude: 3.44,
       ra: 10.68, // 00h 42m 44s
       dec: 41.27, // +41° 16′ 9″
@@ -303,7 +303,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'orion-nebula',
       name: 'Orion Nebula (M42)',
       type: CelestialType.nebula,
-      iconPath: 'assets/icons/constellations/orion.png', // Reusing constellation icon for now
+      iconPath: 'assets/icons/nebula/orion_nebula.webp',
       magnitude: 4.0,
       ra: 83.82, // 05h 35m 17s
       dec: -5.38, // -05° 23′ 28″
@@ -312,7 +312,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
       id: 'pleiades',
       name: 'Pleiades (M45)',
       type: CelestialType.cluster,
-      iconPath: 'assets/icons/stars/star.png', // Reusing star icon for now
+      iconPath: 'assets/icons/cluster/pleidas.webp',
       magnitude: 1.6,
       ra: 56.75, // 03h 47m 24s
       dec: 24.12, // +24° 07′ 00″

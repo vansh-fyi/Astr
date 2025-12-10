@@ -22,6 +22,7 @@ class ObjectListItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: GlassPanel(
+        enableBlur: false,
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
@@ -34,11 +35,17 @@ class ObjectListItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
-                child: Icon(
-                  _getIconForType(),
-                  size: 32,
-                  color: Colors.white.withOpacity(0.9),
-                ),
+                child: object.iconPath.isNotEmpty
+                    ? Image.asset(
+                        object.iconPath,
+                        width: 32,
+                        height: 32,
+                      )
+                    : Image.asset(
+                        _getDefaultAssetForType(),
+                        width: 32,
+                        height: 32,
+                      ),
               ),
             ),
             const SizedBox(width: 16),
@@ -150,20 +157,20 @@ class ObjectListItem extends StatelessWidget {
     );
   }
 
-  IconData _getIconForType() {
+  String _getDefaultAssetForType() {
     switch (object.type) {
       case CelestialType.planet:
-        return Icons.public;
+        return 'assets/icons/stars/star.webp'; // Fallback for planets
       case CelestialType.star:
-        return Icons.star;
+        return 'assets/icons/stars/star.webp';
       case CelestialType.constellation:
-        return Icons.grid_on;
+        return 'assets/icons/stars/star.webp'; // Fallback for constellations without iconPath
       case CelestialType.galaxy:
-        return Icons.blur_circular;
+        return 'assets/icons/galaxy/andromeda.webp'; // Default galaxy icon
       case CelestialType.nebula:
-        return Icons.cloud;
+        return 'assets/icons/nebula/orion_nebula.webp'; // Default nebula icon
       case CelestialType.cluster:
-        return Icons.grain;
+        return 'assets/icons/cluster/pleidas.webp'; // Default cluster icon
     }
   }
 }

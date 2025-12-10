@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:astr/core/widgets/glass_panel.dart';
 import 'package:astr/features/catalog/domain/entities/visibility_graph_data.dart';
 import 'package:astr/features/catalog/presentation/providers/visibility_graph_notifier.dart';
@@ -32,13 +33,27 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
   DateTime? _scrubbedTime;
   double? _scrubbedAltitude;
 
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
     // Fetch graph data when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(visibilityGraphProvider(widget.objectId).notifier).calculateGraph();
     });
+
+    // AC #2: Real-time updates (every minute)
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   void _updateScrubber(double dx, double width, VisibilityGraphData data) {
@@ -201,6 +216,7 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
                               scrubberPosition: _scrubberPosition,
                               startTime: startTime,
                               endTime: endTime,
+                              currentTime: DateTime.now(),
                               highlightColor: highlightColor,
                               cloudCoverData: cloudCoverData,
                             ),
@@ -241,28 +257,6 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
                     );
                   },
                 ),
-
-                // SQM Badge (Top Right)
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: highlightColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: highlightColor.withValues(alpha: 0.2)),
-                    ),
-                    child: Text(
-                      'SQM 21.00',
-                      style: TextStyle(
-                        color: highlightColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -297,6 +291,4 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
       );
     });
   }
-
-
 }

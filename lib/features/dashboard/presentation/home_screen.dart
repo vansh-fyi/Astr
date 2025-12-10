@@ -1,9 +1,11 @@
+import 'package:astr/core/widgets/cosmic_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:astr/features/dashboard/domain/services/quality_calculator.dart';
 import 'package:astr/features/dashboard/presentation/providers/weather_provider.dart';
 import 'package:astr/features/dashboard/presentation/providers/visibility_provider.dart';
+import 'package:astr/features/dashboard/presentation/providers/condition_quality_provider.dart';
 import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
 import 'package:astr/features/dashboard/domain/entities/light_pollution.dart';
 
@@ -11,7 +13,6 @@ import 'package:astr/features/context/presentation/providers/astr_context_provid
 import 'package:intl/intl.dart';
 import 'package:astr/core/widgets/glass_panel.dart' as core;
 import 'package:astr/features/context/presentation/widgets/location_sheet.dart';
-import 'widgets/glass_panel.dart';
 import 'widgets/sky_portal.dart';
 import 'widgets/dashboard_grid.dart';
 import 'widgets/highlights_feed.dart';
@@ -178,22 +179,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                               // Sky Portal (Main Visual)
                               // Sky Portal (Hero)
                               if (weatherAsync.hasValue && astronomyAsync.hasValue) ...[
-                                Builder(
-                                  builder: (context) {
+                                Consumer(
+                                  builder: (context, ref, child) {
                                     final weather = weatherAsync.value!;
                                     final astronomy = astronomyAsync.value!;
-                                    
+
                                     final score = QualityCalculator.calculateScore(
                                       bortleScale: visibilityState.lightPollution.visibilityIndex.toDouble(),
                                       cloudCover: weather.cloudCover,
                                       moonIllumination: astronomy.moonPhaseInfo.illumination,
                                     );
-                                    
-                                    final label = QualityCalculator.getQualityLabel(score);
-                                    
+
+                                    // Watch the qualitative condition provider
+                                    final conditionAsync = ref.watch(conditionQualityProvider);
+
                                     return SkyPortal(
-                                      qualityLabel: label,
+                                      qualityLabel: conditionAsync.valueOrNull?.shortSummary ?? 'Loading...',
                                       score: score,
+                                      conditionResult: conditionAsync.valueOrNull,
                                       onTap: () {
                                         // TODO: Open Details Sheet
                                       },
@@ -203,7 +206,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                               ] else ...[
                                  const SizedBox(
                                    height: 300,
-                                   child: Center(child: CircularProgressIndicator(color: Colors.white10)),
+                                   child: CosmicLoader(),
                                  ),
                               ],
 

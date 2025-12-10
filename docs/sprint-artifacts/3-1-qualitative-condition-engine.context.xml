@@ -1,0 +1,120 @@
+<story-context id="3-1-qualitative-condition-engine-context" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.1</storyId>
+    <title>Qualitative Condition Engine</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-1-qualitative-condition-engine.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>clear advice like "Milky Way Visible" instead of a vague number</iWant>
+    <soThat>I can instantly understand if tonight is good for observing without interpreting complex data</soThat>
+    <tasks>
+      - [ ] Implement QualitativeConditionService (AC: #1)
+        - [ ] Create `ConditionQuality` enum and `ConditionResult` class in `lib/core/engine/models/`
+        - [ ] Implement `QualitativeConditionService` in `lib/core/services/qualitative/` with `evaluate` method
+        - [ ] Implement logic to combine Cloud Cover, Moon Phase, and Bortle Zone into a quality score/advice
+        - [ ] Create unit tests for `evaluate` logic covering various scenarios
+      - [ ] Update Home Screen UI (AC: #2)
+        - [ ] Create `ConditionStatusWidget` to display the summary and advice
+        - [ ] Replace the existing numeric score widget in `HomeHeader` (or equivalent)
+        - [ ] Integrate `QualitativeConditionService` with the Home Screen state management (Riverpod)
+        - [ ] Ensure font sizes and weights match the previous design (Glass UI)
+      - [ ] Testing &amp; Verification (AC: #1, #2)
+        - [ ] Unit tests for `QualitativeConditionService`
+        - [ ] Widget tests for `ConditionStatusWidget`
+        - [ ] Manual verification: Check different simulated conditions to ensure correct text displays
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1.  **Qualitative Feedback:**
+        *   **Given** environmental factors (Bortle, Cloud, Moon), **When** the Home Screen loads, **Then** display a text-based condition summary (e.g., "Excellent - Great for Galaxies").
+    2.  **UI Update:**
+        *   Replace the "66/100" text widget with this new descriptive text widget, keeping the same font size/weight hierarchy.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Detailed Design</section>
+        <snippet>Defines `QualitativeConditionService` responsibility, inputs (Cloud, Moon, Bortle), and outputs (`ConditionResult`). Specifies `ConditionQuality` enum and `ConditionResult` class structure.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics and Stories</title>
+        <section>Story 3.1: Qualitative Condition Engine</section>
+        <snippet>Defines the user story and acceptance criteria for replacing the numeric score with descriptive text.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Decision Document</title>
+        <section>Implementation Patterns</section>
+        <snippet>Specifies naming conventions (PascalCase for classes, camelCase for variables) and error handling (Result Pattern). Mentions "Offline-First" pillar.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/core/services/weather/i_weather_service.dart</path>
+        <kind>interface</kind>
+        <symbol>IWeatherService</symbol>
+        <reason>Defines the contract for fetching weather data, which is an input to the qualitative engine.</reason>
+      </item>
+      <item>
+        <path>lib/features/astronomy/domain/services/astronomy_service.dart</path>
+        <kind>service</kind>
+        <symbol>AstronomyService</symbol>
+        <reason>Provides astronomical data (Moon Phase) needed for condition evaluation.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/home_screen.dart</path>
+        <kind>widget</kind>
+        <symbol>HomeScreen</symbol>
+        <reason>The UI component where the new condition summary will be displayed.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>flutter_riverpod</dep>
+      <dep>freezed_annotation</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - **Offline-First:** The condition engine must operate entirely offline using local data.
+    - **Performance:** Calculations should be lightweight, but if heavy, use Isolates (though unlikely for this logic).
+    - **UI Consistency:** The new text widget must match the existing Glass UI design language (font sizes, weights).
+    - **State Management:** Use Riverpod for managing the condition state.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>IQualitativeConditionService</name>
+      <kind>Service Interface</kind>
+      <signature>ConditionResult evaluate(Weather weather, Astronomy astro, LightPollution lp)</signature>
+      <path>lib/core/services/qualitative/i_qualitative_condition_service.dart</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Unit tests for logic classes (`QualitativeConditionService`). Widget tests for UI components (`ConditionStatusWidget`). Follow existing testing patterns in `test/`.
+    </standards>
+    <locations>
+      test/core/services/qualitative/
+      test/features/home/presentation/widgets/
+    </locations>
+    <ideas>
+      - Test `evaluate` with:
+        - Low Cloud, New Moon, Low Bortle -> Excellent
+        - High Cloud -> Poor
+        - Full Moon -> Fair/Poor (depending on target)
+      - Test `ConditionStatusWidget` renders correct text and color for each `ConditionQuality`.
+    </ideas>
+  </tests>
+</story-context>

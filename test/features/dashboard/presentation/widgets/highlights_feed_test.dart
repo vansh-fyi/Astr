@@ -2,7 +2,7 @@ import 'package:astr/features/astronomy/domain/entities/astronomy_state.dart';
 import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
 import 'package:astr/features/astronomy/domain/entities/celestial_position.dart';
 import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
-import 'package:astr/features/dashboard/presentation/widgets/glass_panel.dart';
+import 'package:astr/core/widgets/glass_panel.dart';
 import 'package:astr/features/dashboard/presentation/widgets/highlights_feed.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

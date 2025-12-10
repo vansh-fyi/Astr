@@ -2,6 +2,9 @@
 class ExternalUrls {
   ExternalUrls._();
 
-  /// Buy Me a Coffee donation page
-  static const String buyMeACoffee = 'https://buymeacoffee.com/vansh.fyi';
+  /// AC#7: Ko-fi support page (updated from Buy Me a Coffee)
+  static const String kofiSupport = 'https://ko-fi.com/vanshgrover';
+  
+  @Deprecated('Use kofiSupport instead')
+  static const String buyMeACoffee = kofiSupport;
 }

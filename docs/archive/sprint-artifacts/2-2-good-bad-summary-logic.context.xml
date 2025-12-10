@@ -1,0 +1,77 @@
+<context story="2-2-good-bad-summary-logic">
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="Story 2.2: Good/Bad Summary Logic">
+        <snippet>
+          System evaluates Cloud Cover, Moon Phase, and Bortle Scale. Returns a simple string: "Excellent", "Good", "Fair", "Poor". UI: Displayed prominently in "Starlight" white font. UX: Text uses animate-pulse-glow if "Excellent".
+        </snippet>
+      </doc>
+      <doc path="docs/epics.md" title="Epics & Stories" section="Story 2.2">
+        <snippet>
+          Goal: Deliver the immediate "Good/Bad" answer and visual summary for the current night. Value: Users get the core value ("Can I see stars?") in < 5 seconds.
+        </snippet>
+      </doc>
+      <doc path="docs/architecture.md" title="Architecture" section="Presentation Layer">
+        <snippet>
+          The "Glass" Pattern (UI): All container widgets should use the shared GlassPanel widget.
+        </snippet>
+      </doc>
+    </docs>
+    
+    <code>
+      <item path="lib/features/dashboard/presentation/providers/weather_provider.dart" kind="provider" symbol="WeatherNotifier" reason="Source of Cloud Cover data" />
+      <item path="lib/features/dashboard/domain/entities/bortle_scale.dart" kind="entity" symbol="BortleScale" reason="Domain entity for light pollution scale" />
+      <item path="lib/features/astronomy/domain/repositories/i_astro_engine.dart" kind="interface" symbol="IAstroEngine" reason="Interface for retrieving Moon Phase data" />
+      <item path="lib/core/widgets/glass_panel.dart" kind="widget" symbol="GlassPanel" reason="Standard container for UI consistency" />
+      <item path="lib/features/dashboard/presentation/home_screen.dart" kind="widget" symbol="HomeScreen" reason="Target screen for the summary widget" />
+    </code>
+
+    <dependencies>
+      <dep ecosystem="flutter" package="flutter_riverpod" version="latest" />
+      <dep ecosystem="flutter" package="flutter_animate" version="latest" />
+      <dep ecosystem="flutter" package="freezed_annotation" version="latest" />
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface name="StargazingLogic" kind="class" path="lib/features/dashboard/domain/logic/stargazing_logic.dart">
+      <signature>
+        class StargazingLogic {
+          static StargazingQuality calculate({
+            required double cloudCover,
+            required double moonPhase,
+            required int bortleLevel,
+          });
+        }
+      </signature>
+    </interface>
+    <interface name="StargazingQuality" kind="enum" path="lib/features/dashboard/domain/entities/stargazing_quality.dart">
+      <signature>
+        enum StargazingQuality { excellent, good, fair, poor }
+      </signature>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <rule>Logic must reside in the Domain layer (pure Dart, no Flutter dependencies except basic types).</rule>
+    <rule>UI must use `GlassPanel` for consistency.</rule>
+    <rule>Animation should be subtle (`animate-pulse-glow`) and only for "Excellent" state.</rule>
+    <rule>Must use `WeatherNotifier` and `AstronomyNotifier` (to be created/located) as state sources.</rule>
+  </constraints>
+
+  <tests>
+    <standards>
+      Unit tests for `StargazingLogic` covering all edge cases (0% cloud, 100% cloud, full moon, new moon, etc.).
+      Widget tests for `SummaryText` verifying text rendering and style.
+    </standards>
+    <locations>
+      <loc>test/features/dashboard/domain/logic/</loc>
+      <loc>test/features/dashboard/presentation/widgets/</loc>
+    </locations>
+    <ideas>
+      <idea id="AC-2.2.1">Test logic with (Cloud: 0, Moon: 0, Bortle: 1) -> Excellent</idea>
+      <idea id="AC-2.2.1">Test logic with (Cloud: 100, Moon: 0, Bortle: 1) -> Poor</idea>
+      <idea id="AC-2.2.4">Verify `animate-pulse-glow` is active only when state is Excellent</idea>
+    </ideas>
+  </tests>
+</context>

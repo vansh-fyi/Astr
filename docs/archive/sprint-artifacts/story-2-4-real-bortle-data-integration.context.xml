@@ -1,0 +1,124 @@
+<story-context id="story-2-4-real-bortle-data-integration" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>4</storyId>
+    <title>Real Bortle Data Integration (Refactor)</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-01</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/story-2-4-real-bortle-data-integration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>accurate light pollution data for my exact location</iWant>
+    <soThat>the "Stargazing Quality" assessment is reliable</soThat>
+    <tasks>
+      <task>Task 1: Backend Integration (AC: 1, 3)</task>
+      <task>Task 2: Offline Fallback (AC: 2)</task>
+      <task>Task 3: Cleanup & Optimization (AC: 3, 5)</task>
+      <task>Task 4: Location Permission (AC: 4)</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion>1. Backend Integration: System fetches Light Pollution data (MPSAS, Bortle) from the new Vercel backend.</criterion>
+    <criterion>2. Offline Fallback: If the API fails or device is offline, the system falls back to the local `assets/maps/world2024_low3.png` lookup.</criterion>
+    <criterion>3. Repository Refactor: `LightPollutionRepository` is refactored to prioritize the API call and fallback to the PNG service.</criterion>
+    <criterion>4. Location Permission: The app requests "While Using" location permission when needed.</criterion>
+    <criterion>5. Data Accuracy: The API returns pre-computed NASA Black Marble data (2024).</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>6. Implementation Patterns</section>
+        <snippet>D. The "Backend Data Services" Pattern (NASA + Vercel + MongoDB): Light pollution data must use pre-computed architecture with offline fallback.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epics & Stories</title>
+        <section>Story 8.0: Backend Architecture Research & Decision</section>
+        <snippet>Final Architecture Decision: Backend: Vercel Serverless Functions (Python 3.12, Flask 3.1.2) + MongoDB Atlas.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Functional Requirements</section>
+        <snippet>FR15.1: Light Pollution Data Sources — System supports multiple light pollution data sources with fallback strategy.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/features/dashboard/data/repositories/light_pollution_repository.dart</path>
+        <kind>repository</kind>
+        <symbol>LightPollutionRepository</symbol>
+        <reason>Main repository to refactor for backend integration.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/data/datasources/binary_tile_service.dart</path>
+        <kind>service</kind>
+        <symbol>BinaryTileService</symbol>
+        <reason>To be removed as part of cleanup.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/data/datasources/png_map_service.dart</path>
+        <kind>service</kind>
+        <symbol>PngMapService</symbol>
+        <reason>To be preserved as offline fallback.</reason>
+      </item>
+      <item>
+        <path>lib/features/dashboard/presentation/providers/light_pollution_provider.dart</path>
+        <kind>provider</kind>
+        <symbol>lightPollutionProvider</symbol>
+        <reason>State management for light pollution data.</reason>
+      </item>
+      <item>
+        <path>lib/core/services/i_location_service.dart</path>
+        <kind>interface</kind>
+        <symbol>ILocationService</symbol>
+        <reason>Interface for location services.</reason>
+      </item>
+      <item>
+        <path>lib/features/context/domain/entities/geo_location.dart</path>
+        <kind>entity</kind>
+        <symbol>GeoLocation</symbol>
+        <reason>Entity representing user location.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>http</dep>
+      <dep>fpdart</dep>
+      <dep>riverpod</dep>
+      <dep>hive</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Must use Vercel backend for primary data source.</constraint>
+    <constraint>Must maintain offline capability via PNG fallback.</constraint>
+    <constraint>Must handle location permissions gracefully.</constraint>
+    <constraint>Must remove unused binary tile code to reduce app size.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Light Pollution API</name>
+      <kind>REST</kind>
+      <signature>GET https://astr-backend.vercel.app/api/light-pollution?lat={lat}&lon={lon}</signature>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for repository logic (mocking API and fallback). Integration tests for API call (if possible) or manual verification.</standards>
+    <locations>test/features/dashboard/data/repositories</locations>
+    <ideas>
+      <idea>Test repository returns API data when successful.</idea>
+      <idea>Test repository falls back to PNG service when API fails.</idea>
+      <idea>Test repository falls back to PNG service when offline.</idea>
+      <idea>Test cleanup: Ensure BinaryTileService is no longer called.</idea>
+    </ideas>
+  </tests>
+</story-context>

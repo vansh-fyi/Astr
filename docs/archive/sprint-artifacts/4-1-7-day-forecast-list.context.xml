@@ -1,0 +1,104 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>epic-4</epicId>
+    <storyId>4.1</storyId>
+    <title>7-Day Forecast List</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-30</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-1-7-day-forecast-list.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>User</asA>
+    <iWant>to see a list of the next 7 days with summary conditions</iWant>
+    <soThat>I can pick the best night for stargazing</soThat>
+    <tasks>
+- Task 1: Create `features/planner` module structure (AC: 1)
+- Task 2: Implement `PlannerRepository` (AC: 1, 2)
+- Task 3: Implement `PlannerLogic` (AC: 3)
+- Task 4: Implement `ForecastScreen` UI (AC: 1, 2)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1. **7-Day Forecast List:**
+   - [ ] Displays 7 days starting from "Today".
+   - [ ] Each item shows: Date, Weather Icon, Cloud Cover %, Star Rating (1-5).
+   - [ ] Star Rating logic considers both Cloud Cover and Moon Phase.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/sprint-artifacts/tech-spec-epic-4.md</path>
+        <title>Epic Technical Specification: Planning & Forecast</title>
+        <section>Detailed Design</section>
+        <snippet>Defines the `DailyForecast` model, `PlannerRepository` responsibility, and the logic for "Star Rating" calculation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>7-Day Forecast</section>
+        <snippet>FR10: Users can view a 7-day weather/visibility forecast list. FR11: Users can tap a specific day to view a detailed dashboard.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>System Architecture</section>
+        <snippet>Describes the Clean Architecture layers and the interaction between Repositories, Domain Logic, and Presentation.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>lib/features/dashboard/data/repositories/weather_repository_impl.dart</path>
+        <kind>repository</kind>
+        <symbol>WeatherRepositoryImpl</symbol>
+        <reason>Reference for fetching weather data from Open-Meteo. Can be used as a template for `PlannerRepository`.</reason>
+      </item>
+      <item>
+        <path>lib/features/astronomy/domain/entities/astronomy_state.dart</path>
+        <kind>entity</kind>
+        <symbol>AstronomyState</symbol>
+        <reason>Contains moon phase data which is needed for the Star Rating calculation.</reason>
+      </item>
+      <item>
+        <path>lib/core/widgets/glass_panel.dart</path>
+        <kind>widget</kind>
+        <symbol>GlassPanel</symbol>
+        <reason>Reusable UI component for the forecast list items to maintain the "Astr Aura" theme.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>flutter_riverpod</dep>
+      <dep>open_meteo</dep>
+      <dep>swisseph</dep>
+      <dep>intl</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Follow Clean Architecture (Data/Domain/Presentation).
+    - Use Riverpod for state management.
+    - Reuse `GlassPanel` for UI consistency.
+    - Use `open_meteo` (or direct HTTP) for weather data.
+    - Use `swisseph` (via `AstronomyEngine`) for moon calculations.
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>Open-Meteo API</name>
+      <kind>REST API</kind>
+      <signature>GET /v1/forecast?latitude={lat}&longitude={lon}&daily=weathercode,cloudcover_mean,precipitation_probability_max&timezone=auto&forecast_days=7</signature>
+      <path>https://open-meteo.com/en/docs</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>Unit tests for Logic and Repository. Widget tests for Screen.</standards>
+    <locations>test/features/planner</locations>
+    <ideas>
+      - Verify `PlannerRepository` correctly parses Open-Meteo JSON response.
+      - Verify `PlannerLogic` correctly calculates star rating based on cloud cover and moon phase inputs.
+      - Verify `ForecastScreen` displays the correct number of list items and data.
+    </ideas>
+  </tests>
+</story-context>
