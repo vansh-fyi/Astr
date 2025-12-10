@@ -1,4 +1,7 @@
 {
+  "buildCommand": "chmod +x ./build.sh && ./build.sh",
+  "outputDirectory": "build/web",
+  "installCommand": "echo 'Flutter will be installed in build.sh'",
   "rewrites": [
     {
       "source": "/(.*)",
