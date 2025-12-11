@@ -81,6 +81,7 @@ yarn.lock
 .claude/
 .cursor/
 .github/
+docs/
 
 # Documentation files to exclude (keep these if you want to exclude them)
 # CODE_OF_CONDUCT.md
