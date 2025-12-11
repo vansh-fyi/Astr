@@ -1,14 +1,14 @@
 // ignore_for_file: always_put_control_body_on_new_line
 
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:clarity_flutter/clarity_flutter.dart';
+
+// Platform-specific imports - only import on non-web platforms
+import 'main_mobile.dart' if (dart.library.html) 'main_web.dart';
 
 import 'constants/strings.dart';
 import 'features/astronomy/data/repositories/astro_engine_impl.dart';
@@ -25,11 +25,9 @@ void main() async {
   await initHive();
   // await AstroEngineImpl.initialize(); // Disabled for visual testing
   await setPreferredOrientations();
-  if (!kIsWeb) {
-    if (Platform.isAndroid) {
-      await FlutterDisplayMode.setHighRefreshRate();
-    }
-  }
+
+  // Platform-specific initialization (Android high refresh rate, etc.)
+  await initializePlatformSpecific();
 
   // Astronomy Service initialization now handled by SplashScreen
   final container = ProviderContainer();

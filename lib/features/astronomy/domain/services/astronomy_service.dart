@@ -1,8 +1,11 @@
 import 'package:astr/features/catalog/domain/entities/graph_point.dart';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sweph/sweph.dart';
+
+// Conditional imports for platform-specific functionality
+import 'astronomy_service_mobile.dart'
+    if (dart.library.html) 'astronomy_service_web.dart';
 
 /// Provider for the AstronomyService
 final astronomyServiceProvider = Provider<AstronomyService>((ref) {
@@ -19,29 +22,13 @@ class AstronomyService {
     if (_isInitialized) return;
 
     try {
-      if (kIsWeb) {
-        // Web Initialization
-        // On web, we rely on assets being served correctly or default initialization
-        await Sweph.init();
-        print('AstronomyService: Initialized for Web');
-      } else {
-        // Native Initialization
-        final docsDir = await getApplicationDocumentsDirectory();
-        final ephePath = '${docsDir.path}/ephe_files';
-        final epheDir = Directory(ephePath);
-
-        if (!await epheDir.exists()) {
-          await epheDir.create(recursive: true);
-        }
-
-        // Initialize with the writable path
-        await Sweph.init(epheFilesPath: ephePath);
-        print('AstronomyService: Initialized successfully at $ephePath');
-      }
+      await initializeSwephPlatform();
       _isInitialized = true;
+      debugPrint('AstronomyService: Initialized successfully');
     } catch (e) {
-      print('AstronomyService: Initialization failed: $e');
-      rethrow;
+      debugPrint('AstronomyService: Initialization failed: $e');
+      // Don't rethrow - allow app to continue with degraded functionality
+      _isInitialized = false;
     }
   }
 
@@ -62,7 +49,7 @@ class AstronomyService {
     // This ensures we find events for the selected date, not tomorrow.
     final localMidnight = DateTime(date.year, date.month, date.day);
     final utcStart = localMidnight.toUtc();
-    
+
     // Convert UTC DateTime to Julian Day
     final jd = Sweph.swe_julday(
       utcStart.year,
@@ -305,7 +292,7 @@ class AstronomyService {
 
     final flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
     final pheno = Sweph.swe_pheno_ut(jd, HeavenlyBody.SE_MOON, flags);
-    
+
     if (pheno.length > 1) {
       return pheno[1];
     }
@@ -320,7 +307,7 @@ class AstronomyService {
     required double long,
   }) async {
     await checkInitialized();
-    
+
     // Calculate events for the given date
     final todayEvents = await calculateRiseSetTransit(
       body: HeavenlyBody.SE_SUN,
@@ -328,10 +315,10 @@ class AstronomyService {
       lat: lat,
       long: long,
     );
-    
+
     final todaySet = todayEvents['set'];
     final todayRise = todayEvents['rise'];
-    
+
     // Calculate events for tomorrow
     final tomorrow = date.add(const Duration(days: 1));
     final tomorrowEvents = await calculateRiseSetTransit(
@@ -341,7 +328,7 @@ class AstronomyService {
       long: long,
     );
     final tomorrowRise = tomorrowEvents['rise'];
-    
+
     // Calculate events for yesterday
     final yesterday = date.subtract(const Duration(days: 1));
     final yesterdayEvents = await calculateRiseSetTransit(
@@ -351,16 +338,16 @@ class AstronomyService {
       long: long,
     );
     final yesterdaySet = yesterdayEvents['set'];
-    
+
     DateTime start;
     DateTime end;
-    
+
     // Logic:
     // If date is before today's sunrise (early morning), night started yesterday evening.
     if (todayRise != null && date.isBefore(todayRise)) {
         start = yesterdaySet ?? date.subtract(const Duration(hours: 6)); // Fallback
         end = todayRise;
-    } 
+    }
     // If date is after today's sunset (evening), night starts today evening.
     else if (todaySet != null && date.isAfter(todaySet)) {
         start = todaySet;
@@ -371,7 +358,7 @@ class AstronomyService {
         start = todaySet ?? date; // Fallback to now if no set
         end = tomorrowRise ?? date.add(const Duration(hours: 12));
     }
-    
+
     return {'start': start, 'end': end};
   }
 
