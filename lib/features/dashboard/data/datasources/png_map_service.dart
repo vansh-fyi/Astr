@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 
@@ -7,18 +8,42 @@ import '../../../../core/utils/bortle_mpsas_converter.dart';
 import '../../../../features/context/domain/entities/geo_location.dart';
 import '../../domain/entities/light_pollution.dart';
 
+/// Decode PNG in a separate isolate to avoid blocking the UI thread.
+/// The 43200x16800 Light Pollution Map is ~726 megapixels and takes
+/// significant time to decode - this MUST run off the main thread.
+Future<img.Image?> _decodePngInIsolate(Uint8List bytes) async {
+  return compute(_decodePng, bytes);
+}
+
+/// Top-level function for isolate (must be static or top-level)
+img.Image? _decodePng(Uint8List bytes) {
+  return img.decodePng(bytes);
+}
+
 class PngMapService {
   img.Image? _mapImage;
+  bool _isLoading = false;
 
   Future<void> loadMap() async {
     if (_mapImage != null) return;
+    if (_isLoading) return; // Prevent concurrent loads
+
+    _isLoading = true;
     try {
       final ByteData data = await rootBundle.load('assets/maps/Light_Pollution_Map.png');
       final Uint8List bytes = data.buffer.asUint8List();
-      _mapImage = img.decodePng(bytes);
-      print('Light pollution map loaded: ${_mapImage!.width}x${_mapImage!.height} pixels');
+
+      // Decode in separate isolate to avoid blocking UI thread
+      // This prevents the Lottie loading animation from freezing
+      _mapImage = await _decodePngInIsolate(bytes);
+
+      if (_mapImage != null) {
+        debugPrint('Light pollution map loaded: ${_mapImage!.width}x${_mapImage!.height} pixels');
+      }
     } catch (e) {
-      print('Error loading map: $e');
+      debugPrint('Error loading map: $e');
+    } finally {
+      _isLoading = false;
     }
   }
 
@@ -30,14 +55,13 @@ class PngMapService {
     final double lng = location.longitude;
 
     // Equirectangular Projection
-    // Map dimensions: 4000x2000 (assumed for world2024_low3.png, need to verify)
-    // Actually, let's check the image size dynamically.
+    // Map dimensions: 43200x16800 for Light_Pollution_Map.png
     final int width = _mapImage!.width;
     final int height = _mapImage!.height;
 
     // x = (lng + 180) * (width / 360)
     // y = (90 - lat) * (height / 180)
-    
+
     int x = ((lng + 180.0) * (width / 360.0)).round();
     int y = ((90.0 - lat) * (height / 180.0)).round();
 
@@ -55,9 +79,9 @@ class PngMapService {
     final int b = pixel.b.toInt();
 
     final int bortleClass = _colorToBortleClass(r, g, b);
-    
+
     // Debug logging for troubleshooting
-    print('PngMapService: lat=$lat, lng=$lng, pixel=($x,$y), RGB=($r,$g,$b) → Bortle $bortleClass');
+    debugPrint('PngMapService: lat=$lat, lng=$lng, pixel=($x,$y), RGB=($r,$g,$b) → Bortle $bortleClass');
 
     // Convert Bortle to MPSAS using standard astronomical conversion
     final double mpsas = BortleMpsasConverter.bortleToMpsas(bortleClass);
