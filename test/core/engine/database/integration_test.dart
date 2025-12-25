@@ -1,9 +1,15 @@
 import 'dart:io';
+
 import 'package:astr/core/engine/astro_engine.dart';
 import 'package:astr/core/engine/database/database_service.dart';
-import 'package:astr/core/engine/database/star_repository.dart';
 import 'package:astr/core/engine/database/dso_repository.dart';
+import 'package:astr/core/engine/database/star_repository.dart';
+import 'package:astr/core/engine/models/coordinates.dart';
+import 'package:astr/core/engine/models/dso.dart';
 import 'package:astr/core/engine/models/location.dart';
+import 'package:astr/core/engine/models/result.dart';
+import 'package:astr/core/engine/models/rise_set_times.dart';
+import 'package:astr/core/engine/models/star.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -23,9 +29,9 @@ void main() {
 
     setUpAll(() async {
       // Copy database from assets to test directory
-      final testDir = await Directory.systemTemp.createTemp('astr_test_');
-      final testDbPath = join(testDir.path, 'astr_test.db');
-      final assetDb = File('assets/db/astr.db');
+      final Directory testDir = await Directory.systemTemp.createTemp('astr_test_');
+      final String testDbPath = join(testDir.path, 'astr_test.db');
+      final File assetDb = File('assets/db/astr.db');
       await assetDb.copy(testDbPath);
 
       databaseService = DatabaseService(testDatabasePath: testDbPath);
@@ -42,23 +48,23 @@ void main() {
 
     test('Star from database can be passed to AstroEngine.calculatePosition', () async {
       // Get a star from the database
-      final starResult = await starRepository.searchByName('Sirius');
+      final Result<List<Star>> starResult = await starRepository.searchByName('Sirius');
       expect(starResult.isSuccess, true);
       expect(starResult.value.isNotEmpty, true);
 
-      final sirius = starResult.value.first;
+      final Star sirius = starResult.value.first;
 
       // Create location (New York)
-      final location = Location(
+      const Location location = Location(
         latitude: 40.7128,
         longitude: -74.0060,
       );
 
       // Calculate position using AstroEngine
-      final positionResult = await astroEngine.calculatePosition(
+      final Result<HorizontalCoordinates> positionResult = await astroEngine.calculatePosition(
         sirius,
         location,
-        DateTime.utc(2024, 12, 3, 2, 0, 0),
+        DateTime.utc(2024, 12, 3, 2),
       );
 
       // Verify calculation succeeded
@@ -71,23 +77,23 @@ void main() {
 
     test('DSO from database can be passed to AstroEngine.calculatePosition', () async {
       // Get a DSO from the database
-      final dsoResult = await dsoRepository.searchByName('Andromeda');
+      final Result<List<DSO>> dsoResult = await dsoRepository.searchByName('Andromeda');
       expect(dsoResult.isSuccess, true);
       expect(dsoResult.value.isNotEmpty, true);
 
-      final andromeda = dsoResult.value.first;
+      final DSO andromeda = dsoResult.value.first;
 
       // Create location (New York)
-      final location = Location(
+      const Location location = Location(
         latitude: 40.7128,
         longitude: -74.0060,
       );
 
       // Calculate position using AstroEngine
-      final positionResult = await astroEngine.calculatePosition(
+      final Result<HorizontalCoordinates> positionResult = await astroEngine.calculatePosition(
         andromeda,
         location,
-        DateTime.utc(2024, 12, 3, 2, 0, 0),
+        DateTime.utc(2024, 12, 3, 2),
       );
 
       // Verify calculation succeeded
@@ -100,19 +106,19 @@ void main() {
 
     test('Star from database can be passed to AstroEngine.calculateRiseSet', () async {
       // Get a star from the database
-      final starResult = await starRepository.searchByName('Sirius');
+      final Result<List<Star>> starResult = await starRepository.searchByName('Sirius');
       expect(starResult.isSuccess, true);
 
-      final sirius = starResult.value.first;
+      final Star sirius = starResult.value.first;
 
       // Create location (New York)
-      final location = Location(
+      const Location location = Location(
         latitude: 40.7128,
         longitude: -74.0060,
       );
 
       // Calculate rise/set times
-      final riseSetResult = await astroEngine.calculateRiseSet(
+      final Result<RiseSetTimes> riseSetResult = await astroEngine.calculateRiseSet(
         sirius,
         location,
         DateTime.utc(2024, 12, 3),
@@ -129,19 +135,19 @@ void main() {
 
     test('DSO from database can be passed to AstroEngine.calculateRiseSet', () async {
       // Get a DSO from the database
-      final dsoResult = await dsoRepository.searchByName('Andromeda');
+      final Result<List<DSO>> dsoResult = await dsoRepository.searchByName('Andromeda');
       expect(dsoResult.isSuccess, true);
 
-      final andromeda = dsoResult.value.first;
+      final DSO andromeda = dsoResult.value.first;
 
       // Create location (New York)
-      final location = Location(
+      const Location location = Location(
         latitude: 40.7128,
         longitude: -74.0060,
       );
 
       // Calculate rise/set times
-      final riseSetResult = await astroEngine.calculateRiseSet(
+      final Result<RiseSetTimes> riseSetResult = await astroEngine.calculateRiseSet(
         andromeda,
         location,
         DateTime.utc(2024, 12, 3),
@@ -155,24 +161,24 @@ void main() {
 
     test('database and engine work together in realistic workflow', () async {
       // User searches for "Vega"
-      final searchResult = await starRepository.searchByName('Vega');
+      final Result<List<Star>> searchResult = await starRepository.searchByName('Vega');
       expect(searchResult.isSuccess, true);
       expect(searchResult.value.isNotEmpty, true);
 
-      final vega = searchResult.value.first;
+      final Star vega = searchResult.value.first;
 
       // User wants to know if Vega is visible now
-      final location = Location(latitude: 40.7128, longitude: -74.0060);
-      final now = DateTime.utc(2024, 12, 3, 20, 0, 0);
+      const Location location = Location(latitude: 40.7128, longitude: -74.0060);
+      final DateTime now = DateTime.utc(2024, 12, 3, 20);
 
-      final positionResult = await astroEngine.calculatePosition(vega, location, now);
+      final Result<HorizontalCoordinates> positionResult = await astroEngine.calculatePosition(vega, location, now);
       expect(positionResult.isSuccess, true);
 
       // Check if above horizon
-      final isVisible = positionResult.value.altitude > 0;
+      final bool isVisible = positionResult.value.altitude > 0;
 
       // User wants rise/set times for planning
-      final riseSetResult = await astroEngine.calculateRiseSet(
+      final Result<RiseSetTimes> riseSetResult = await astroEngine.calculateRiseSet(
         vega,
         location,
         now,

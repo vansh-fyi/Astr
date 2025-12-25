@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:astr/core/engine/database/database_service.dart';
 import 'package:astr/core/engine/database/star_repository.dart';
+import 'package:astr/core/engine/models/result.dart';
 import 'package:astr/core/engine/models/star.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
@@ -19,9 +20,9 @@ void main() {
 
     setUpAll(() async {
       // Copy database from assets to test directory
-      final testDir = await Directory.systemTemp.createTemp('astr_test_');
-      final testDbPath = join(testDir.path, 'astr_test.db');
-      final assetDb = File('assets/db/astr.db');
+      final Directory testDir = await Directory.systemTemp.createTemp('astr_test_');
+      final String testDbPath = join(testDir.path, 'astr_test.db');
+      final File assetDb = File('assets/db/astr.db');
       await assetDb.copy(testDbPath);
 
       databaseService = DatabaseService(testDatabasePath: testDbPath);
@@ -35,12 +36,12 @@ void main() {
 
     group('searchByName (AC #2)', () {
       test('searching for "Sirius" returns correct Star object', () async {
-        final result = await repository.searchByName('Sirius');
+        final Result<List<Star>> result = await repository.searchByName('Sirius');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
 
-        final sirius = result.value.first;
+        final Star sirius = result.value.first;
         expect(sirius, isA<Star>());
         expect(sirius.name, 'Sirius');
         expect(sirius.hipId, 32349);
@@ -49,7 +50,7 @@ void main() {
       });
 
       test('partial name search works', () async {
-        final result = await repository.searchByName('Sir');
+        final Result<List<Star>> result = await repository.searchByName('Sir');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -57,21 +58,21 @@ void main() {
       });
 
       test('case-insensitive search works', () async {
-        final result = await repository.searchByName('sirius');
+        final Result<List<Star>> result = await repository.searchByName('sirius');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
       });
 
       test('empty query returns empty list', () async {
-        final result = await repository.searchByName('');
+        final Result<List<Star>> result = await repository.searchByName('');
 
         expect(result.isSuccess, true);
         expect(result.value, isEmpty);
       });
 
       test('non-existent star returns empty list', () async {
-        final result = await repository.searchByName('NonExistentStar12345');
+        final Result<List<Star>> result = await repository.searchByName('NonExistentStar12345');
 
         expect(result.isSuccess, true);
         expect(result.value, isEmpty);
@@ -80,7 +81,7 @@ void main() {
 
     group('searchByConstellation', () {
       test('finds stars in Orion', () async {
-        final result = await repository.searchByConstellation('Orion');
+        final Result<List<Star>> result = await repository.searchByConstellation('Orion');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -88,7 +89,7 @@ void main() {
       });
 
       test('empty constellation returns empty list', () async {
-        final result = await repository.searchByConstellation('');
+        final Result<List<Star>> result = await repository.searchByConstellation('');
 
         expect(result.isSuccess, true);
         expect(result.value, isEmpty);
@@ -97,7 +98,7 @@ void main() {
 
     group('getByHipId', () {
       test('gets Sirius by Hipparcos ID', () async {
-        final result = await repository.getByHipId(32349);
+        final Result<Star?> result = await repository.getByHipId(32349);
 
         expect(result.isSuccess, true);
         expect(result.value, isNotNull);
@@ -105,7 +106,7 @@ void main() {
       });
 
       test('non-existent HIP ID returns null', () async {
-        final result = await repository.getByHipId(999999);
+        final Result<Star?> result = await repository.getByHipId(999999);
 
         expect(result.isSuccess, true);
         expect(result.value, isNull);
@@ -114,7 +115,7 @@ void main() {
 
     group('getBrightestStars', () {
       test('returns stars ordered by magnitude', () async {
-        final result = await repository.getBrightestStars(maxMagnitude: 3.0);
+        final Result<List<Star>> result = await repository.getBrightestStars();
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -124,7 +125,7 @@ void main() {
           if (result.value[i].magnitude != null &&
               result.value[i + 1].magnitude != null) {
             expect(
-              result.value[i].magnitude!,
+              result.value[i].magnitude,
               lessThanOrEqualTo(result.value[i + 1].magnitude!),
             );
           }
@@ -132,12 +133,12 @@ void main() {
       });
 
       test('respects magnitude limit', () async {
-        final result = await repository.getBrightestStars(maxMagnitude: 1.0);
+        final Result<List<Star>> result = await repository.getBrightestStars(maxMagnitude: 1);
 
         expect(result.isSuccess, true);
-        for (final star in result.value) {
+        for (final Star star in result.value) {
           if (star.magnitude != null) {
-            expect(star.magnitude!, lessThanOrEqualTo(1.0));
+            expect(star.magnitude, lessThanOrEqualTo(1.0));
           }
         }
       });
@@ -145,7 +146,7 @@ void main() {
 
     group('getAll', () {
       test('returns multiple stars', () async {
-        final result = await repository.getAll(limit: 10);
+        final Result<List<Star>> result = await repository.getAll(limit: 10);
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -154,7 +155,7 @@ void main() {
 
     group('performance (AC #3)', () {
       test('search query completes in < 100ms', () async {
-        final stopwatch = Stopwatch()..start();
+        final Stopwatch stopwatch = Stopwatch()..start();
 
         await repository.searchByName('Sirius');
 

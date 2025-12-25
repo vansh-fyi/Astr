@@ -1,14 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'weather.dart';
 
 class HourlyForecast extends Equatable {
-  final DateTime time;
-  final double cloudCover;
-  final double temperatureC;
-  final int humidity;
-  final double windSpeedKph;
-  final int seeingScore;
-  final String seeingLabel;
 
   const HourlyForecast({
     required this.time,
@@ -19,7 +11,14 @@ class HourlyForecast extends Equatable {
     required this.seeingScore,
     required this.seeingLabel,
   });
+  final DateTime time;
+  final double cloudCover;
+  final double temperatureC;
+  final int humidity;
+  final double windSpeedKph;
+  final int seeingScore;
+  final String seeingLabel;
 
   @override
-  List<Object?> get props => [time, cloudCover, temperatureC, humidity, windSpeedKph, seeingScore, seeingLabel];
+  List<Object?> get props => <Object?>[time, cloudCover, temperatureC, humidity, windSpeedKph, seeingScore, seeingLabel];
 }

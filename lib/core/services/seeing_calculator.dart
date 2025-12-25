@@ -23,6 +23,7 @@
 /// - "Atmospheric Seeing" - Wikipedia (https://en.wikipedia.org/wiki/Astronomical_seeing)
 /// - Atmospheric turbulence factors: Temperature gradients, wind shear, humidity
 ///   (Sources: SPIE, astrobackyard.com)
+library;
 
 class SeeingCalculator {
   /// Calculates Pickering Seeing score (1-10) from hourly weather data
@@ -47,11 +48,11 @@ class SeeingCalculator {
     }
 
     // Use current hour (index 0) for instant calculations
-    final currentWind = windSpeeds[0];
-    final currentHumidity = humidities[0];
+    final double currentWind = windSpeeds[0];
+    final double currentHumidity = humidities[0];
 
     // Calculate temperature variance over 3 hours (AC#4)
-    final tempVariance = _calculateTemperatureVariance(temperatures);
+    final double tempVariance = _calculateTemperatureVariance(temperatures);
 
     // AC#4: Start with base score (perfect seeing)
     int score = 10;
@@ -81,7 +82,7 @@ class SeeingCalculator {
     score = score.clamp(1, 10);
 
     // AC#1: Map score to descriptive label
-    final label = _getSeeingLabel(score);
+    final String label = _getSeeingLabel(score);
 
     return (score, label);
   }
@@ -91,15 +92,15 @@ class SeeingCalculator {
   double _calculateTemperatureVariance(List<double> temperatures) {
     if (temperatures.length < 3) {
       // Not enough data for 3-hour window, use available data
-      if (temperatures.length == 1) return 0.0;
-      return (temperatures.reduce((a, b) => a > b ? a : b) - 
-              temperatures.reduce((a, b) => a < b ? a : b)).abs();
+      if (temperatures.length == 1) return 0;
+      return (temperatures.reduce((double a, double b) => a > b ? a : b) - 
+              temperatures.reduce((double a, double b) => a < b ? a : b)).abs();
     }
 
     // Use first 3 hours (indices 0, 1, 2)
-    final threeHourData = temperatures.take(3).toList();
-    final maxTemp = threeHourData.reduce((a, b) => a > b ? a : b);
-    final minTemp = threeHourData.reduce((a, b) => a < b ? a : b);
+    final List<double> threeHourData = temperatures.take(3).toList();
+    final double maxTemp = threeHourData.reduce((double a, double b) => a > b ? a : b);
+    final double minTemp = threeHourData.reduce((double a, double b) => a < b ? a : b);
     
     return (maxTemp - minTemp).abs();
   }

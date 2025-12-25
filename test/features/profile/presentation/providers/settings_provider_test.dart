@@ -1,8 +1,9 @@
 import 'dart:io';
+
+import 'package:astr/features/profile/presentation/providers/settings_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:astr/features/profile/presentation/providers/settings_provider.dart';
 
 void main() {
   late Directory tempDir;
@@ -18,17 +19,17 @@ void main() {
   });
 
   test('SettingsNotifier defaults to false', () {
-    final container = ProviderContainer();
+    final ProviderContainer container = ProviderContainer();
     addTearDown(container.dispose);
 
     expect(container.read(settingsNotifierProvider), false);
   });
 
   test('SettingsNotifier toggles state and persists', () async {
-    final container = ProviderContainer();
+    final ProviderContainer container = ProviderContainer();
     addTearDown(container.dispose);
 
-    final notifier = container.read(settingsNotifierProvider.notifier);
+    final SettingsNotifier notifier = container.read(settingsNotifierProvider.notifier);
     
     notifier.toggleRedMode();
     expect(container.read(settingsNotifierProvider), true);

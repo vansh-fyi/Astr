@@ -1,4 +1,4 @@
-import 'package:astr/core/engine/models/coordinates.dart';
+import 'coordinates.dart';
 
 /// Type of celestial object
 enum CelestialObjectType {
@@ -11,6 +11,15 @@ enum CelestialObjectType {
 
 /// Represents a celestial object with its equatorial coordinates
 class CelestialObject {
+
+  const CelestialObject({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.coordinates,
+    this.magnitude,
+    this.constellation,
+  });
   /// Unique identifier for the object
   final String id;
 
@@ -28,15 +37,6 @@ class CelestialObject {
 
   /// Constellation name
   final String? constellation;
-
-  const CelestialObject({
-    required this.id,
-    required this.name,
-    required this.type,
-    required this.coordinates,
-    this.magnitude,
-    this.constellation,
-  });
 
   @override
   String toString() => 'CelestialObject(id: $id, name: $name, type: $type)';

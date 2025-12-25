@@ -1,6 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
+import '../../../astronomy/domain/services/astronomy_service.dart';
 
 part 'initialization_provider.g.dart';
 

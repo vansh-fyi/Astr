@@ -1,6 +1,6 @@
-import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
-import 'package:astr/features/astronomy/domain/entities/celestial_position.dart';
-import 'package:astr/features/dashboard/domain/entities/highlight_item.dart';
+import '../../../astronomy/domain/entities/celestial_body.dart';
+import '../../../astronomy/domain/entities/celestial_position.dart';
+import '../entities/highlight_item.dart';
 
 class HighlightsLogic {
   /// Selects the top 3 highlights from a list of celestial positions.
@@ -14,18 +14,18 @@ class HighlightsLogic {
     required List<CelestialPosition> positions,
   }) {
     // 0. Determine if it's "Daytime" (Sun Altitude > -6 degrees, i.e., Civil Twilight)
-    double sunAltitude = -90.0;
+    double sunAltitude = -90;
     try {
-      final sunPos = positions.firstWhere((p) => p.body == CelestialBody.sun);
+      final CelestialPosition sunPos = positions.firstWhere((CelestialPosition p) => p.body == CelestialBody.sun);
       sunAltitude = sunPos.altitude;
     } catch (e) {
       // Sun not found in list, assume night or handle gracefully
     }
 
-    final isDaytime = sunAltitude > -6.0;
+    final bool isDaytime = sunAltitude > -6.0;
 
     // 1. Filter visible objects
-    final visibleObjects = positions.where((pos) {
+    final List<CelestialPosition> visibleObjects = positions.where((CelestialPosition pos) {
       // Ensure body is not null
       if (pos.body == null) return false;
 
@@ -48,13 +48,13 @@ class HighlightsLogic {
     // 2. Sort by Magnitude (ascending)
     // Note: For MVP, we treat all remaining bodies (Moon, Planets) as high priority.
     // We sort purely by brightness.
-    visibleObjects.sort((a, b) => a.magnitude.compareTo(b.magnitude));
+    visibleObjects.sort((CelestialPosition a, CelestialPosition b) => a.magnitude.compareTo(b.magnitude));
 
     // 3. Take Top 3
-    final top3 = visibleObjects.take(3).toList();
+    final List<CelestialPosition> top3 = visibleObjects.take(3).toList();
 
     // 4. Map to HighlightItem
-    return top3.map((pos) => HighlightItem(
+    return top3.map((CelestialPosition pos) => HighlightItem(
       body: pos.body!,
       altitude: pos.altitude,
       magnitude: pos.magnitude,

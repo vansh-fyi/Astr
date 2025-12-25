@@ -1,8 +1,11 @@
 import 'dart:io';
+
 import 'package:astr/core/engine/database/database_service.dart';
-import 'package:astr/core/engine/database/star_repository.dart';
 import 'package:astr/core/engine/database/dso_repository.dart';
+import 'package:astr/core/engine/database/star_repository.dart';
 import 'package:astr/core/engine/models/dso.dart';
+import 'package:astr/core/engine/models/result.dart';
+import 'package:astr/core/engine/models/star.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -23,9 +26,9 @@ void main() {
 
     setUpAll(() async {
       // Copy database from assets to test directory
-      final testDir = await Directory.systemTemp.createTemp('astr_perf_test_');
-      final testDbPath = join(testDir.path, 'astr_test.db');
-      final assetDb = File('assets/db/astr.db');
+      final Directory testDir = await Directory.systemTemp.createTemp('astr_perf_test_');
+      final String testDbPath = join(testDir.path, 'astr_test.db');
+      final File assetDb = File('assets/db/astr.db');
       await assetDb.copy(testDbPath);
 
       databaseService = DatabaseService(testDatabasePath: testDbPath);
@@ -39,12 +42,12 @@ void main() {
     });
 
     test('star search by name completes in < 100ms', () async {
-      final stopwatch = Stopwatch()..start();
+      final Stopwatch stopwatch = Stopwatch()..start();
       
-      final result = await starRepository.searchByName('Sirius');
+      final Result<List<Star>> result = await starRepository.searchByName('Sirius');
       
       stopwatch.stop();
-      final elapsedMs = stopwatch.elapsedMilliseconds;
+      final int elapsedMs = stopwatch.elapsedMilliseconds;
 
       expect(result.isSuccess, true);
       expect(elapsedMs, lessThan(100), 
@@ -52,12 +55,12 @@ void main() {
     });
 
     test('dso search by name completes in < 100ms', () async {
-      final stopwatch = Stopwatch()..start();
+      final Stopwatch stopwatch = Stopwatch()..start();
       
-      final result = await dsoRepository.searchByName('Andromeda');
+      final Result<List<DSO>> result = await dsoRepository.searchByName('Andromeda');
       
       stopwatch.stop();
-      final elapsedMs = stopwatch.elapsedMilliseconds;
+      final int elapsedMs = stopwatch.elapsedMilliseconds;
 
       expect(result.isSuccess, true);
       expect(elapsedMs, lessThan(100), 
@@ -65,12 +68,12 @@ void main() {
     });
 
     test('star search by constellation completes in < 100ms', () async {
-      final stopwatch = Stopwatch()..start();
+      final Stopwatch stopwatch = Stopwatch()..start();
       
-      final result = await starRepository.searchByConstellation('Orion');
+      final Result<List<Star>> result = await starRepository.searchByConstellation('Orion');
       
       stopwatch.stop();
-      final elapsedMs = stopwatch.elapsedMilliseconds;
+      final int elapsedMs = stopwatch.elapsedMilliseconds;
 
       expect(result.isSuccess, true);
       expect(elapsedMs, lessThan(100), 
@@ -78,12 +81,12 @@ void main() {
     });
 
     test('dso search by type completes in < 100ms', () async {
-      final stopwatch = Stopwatch()..start();
+      final Stopwatch stopwatch = Stopwatch()..start();
       
-      final result = await dsoRepository.searchByType(DSOType.galaxy);
+      final Result<List<DSO>> result = await dsoRepository.searchByType(DSOType.galaxy);
       
       stopwatch.stop();
-      final elapsedMs = stopwatch.elapsedMilliseconds;
+      final int elapsedMs = stopwatch.elapsedMilliseconds;
 
       expect(result.isSuccess, true);
       expect(elapsedMs, lessThan(100), 
@@ -91,12 +94,12 @@ void main() {
     });
 
     test('get brightest stars completes in < 100ms', () async {
-      final stopwatch = Stopwatch()..start();
+      final Stopwatch stopwatch = Stopwatch()..start();
       
-      final result = await starRepository.getBrightestStars(maxMagnitude: 3.0, limit: 50);
+      final Result<List<Star>> result = await starRepository.getBrightestStars(limit: 50);
       
       stopwatch.stop();
-      final elapsedMs = stopwatch.elapsedMilliseconds;
+      final int elapsedMs = stopwatch.elapsedMilliseconds;
 
       expect(result.isSuccess, true);
       expect(elapsedMs, lessThan(100), 
@@ -104,11 +107,11 @@ void main() {
     });
 
     test('multiple consecutive queries maintain performance', () async {
-      final timings = <int>[];
+      final List<int> timings = <int>[];
 
       // Run 10 queries and measure each
       for (int i = 0; i < 10; i++) {
-        final stopwatch = Stopwatch()..start();
+        final Stopwatch stopwatch = Stopwatch()..start();
         await starRepository.searchByName('Vega');
         stopwatch.stop();
         timings.add(stopwatch.elapsedMilliseconds);
@@ -121,24 +124,24 @@ void main() {
       }
 
       // Average should be well under 100ms
-      final avgMs = timings.reduce((a, b) => a + b) / timings.length;
+      final double avgMs = timings.reduce((int a, int b) => a + b) / timings.length;
       expect(avgMs, lessThan(50), 
         reason: 'Average query time should be < 50ms for good UX (actual: ${avgMs.toStringAsFixed(1)}ms)');
     });
 
     test('database initialization completes quickly', () async {
       // Create a new service to test initialization time
-      final testDir = await Directory.systemTemp.createTemp('astr_init_test_');
-      final testDbPath = join(testDir.path, 'astr_init.db');
-      final assetDb = File('assets/db/astr.db');
+      final Directory testDir = await Directory.systemTemp.createTemp('astr_init_test_');
+      final String testDbPath = join(testDir.path, 'astr_init.db');
+      final File assetDb = File('assets/db/astr.db');
       await assetDb.copy(testDbPath);
 
-      final testService = DatabaseService(testDatabasePath: testDbPath);
+      final DatabaseService testService = DatabaseService(testDatabasePath: testDbPath);
 
-      final stopwatch = Stopwatch()..start();
-      final result = await testService.initialize();
+      final Stopwatch stopwatch = Stopwatch()..start();
+      final Result<void> result = await testService.initialize();
       stopwatch.stop();
-      final elapsedMs = stopwatch.elapsedMilliseconds;
+      final int elapsedMs = stopwatch.elapsedMilliseconds;
 
       expect(result.isSuccess, true);
       expect(elapsedMs, lessThan(500), 

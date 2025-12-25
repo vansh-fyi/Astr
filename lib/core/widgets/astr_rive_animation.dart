@@ -7,10 +7,6 @@ import 'package:rive/rive.dart';
 /// if the native libraries aren't available or configured correctly.
 /// This wrapper allows us to disable the actual Rive rendering during tests.
 class AstrRiveAnimation extends StatelessWidget {
-  final String asset;
-  final String? artboard;
-  final BoxFit? fit;
-  final void Function(Artboard)? onInit;
 
   const AstrRiveAnimation.asset(
     this.asset, {
@@ -19,6 +15,10 @@ class AstrRiveAnimation extends StatelessWidget {
     this.fit,
     this.onInit,
   });
+  final String asset;
+  final String? artboard;
+  final BoxFit? fit;
+  final void Function(Artboard)? onInit;
 
   /// Set this to true in your test `setUp` to prevent Rive from loading.
   static bool testMode = false;

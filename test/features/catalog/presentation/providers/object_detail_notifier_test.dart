@@ -3,22 +3,22 @@ import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
 import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
 import 'package:astr/features/catalog/domain/repositories/i_catalog_repository.dart';
 import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'object_detail_notifier_test.mocks.dart';
 
 class MockRef extends Mock implements Ref {}
 
-@GenerateMocks([ICatalogRepository])
+@GenerateMocks(<Type>[ICatalogRepository])
 void main() {
   late MockICatalogRepository mockRepository;
   late ObjectDetailNotifier notifier;
 
-  const testObject = CelestialObject(
+  const CelestialObject testObject = CelestialObject(
     id: 'mars',
     name: 'Mars',
     type: CelestialType.planet,
@@ -58,7 +58,7 @@ void main() {
     test('handles non-existent object ID', () async {
       // Arrange
       when(mockRepository.getObjectById('nonexistent'))
-          .thenAnswer((_) async => left(CacheFailure('Object not found')));
+          .thenAnswer((_) async => left(const CacheFailure('Object not found')));
 
       // Act
       notifier = ObjectDetailNotifier(mockRepository, MockRef(), 'nonexistent');

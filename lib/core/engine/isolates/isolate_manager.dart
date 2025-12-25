@@ -9,7 +9,7 @@ class IsolateManager {
   Isolate? _isolate;
   SendPort? _sendPort;
   ReceivePort? _receivePort;
-  final Map<int, Completer<dynamic>> _pendingRequests = {};
+  final Map<int, Completer<dynamic>> _pendingRequests = <int, Completer>{};
   int _nextRequestId = 0;
   bool _isInitialized = false;
 
@@ -26,7 +26,7 @@ class IsolateManager {
     );
 
     // Wait for the isolate to send back its SendPort
-    final completer = Completer<SendPort>();
+    final Completer<SendPort> completer = Completer<SendPort>();
     late StreamSubscription subscription;
 
     subscription = _receivePort!.listen((message) {
@@ -41,7 +41,7 @@ class IsolateManager {
     // Now listen for responses
     _receivePort!.listen((message) {
       if (message is _IsolateResponse) {
-        final completer = _pendingRequests.remove(message.requestId);
+        final Completer? completer = _pendingRequests.remove(message.requestId);
         if (completer != null) {
           if (message.error != null) {
             completer.completeError(message.error!, message.stackTrace);
@@ -65,8 +65,8 @@ class IsolateManager {
       await initialize();
     }
 
-    final requestId = _nextRequestId++;
-    final completer = Completer<T>();
+    final int requestId = _nextRequestId++;
+    final Completer<T> completer = Completer<T>();
     _pendingRequests[requestId] = completer;
 
     // Send the request to the isolate
@@ -75,7 +75,7 @@ class IsolateManager {
       computation: computation,
     ));
 
-    return completer.future as Future<T>;
+    return completer.future;
   }
 
   /// Disposes of the isolate and cleans up resources
@@ -90,7 +90,7 @@ class IsolateManager {
     _sendPort = null;
 
     // Complete any pending requests with errors
-    for (final completer in _pendingRequests.values) {
+    for (final Completer completer in _pendingRequests.values) {
       if (!completer.isCompleted) {
         completer.completeError(
           StateError('IsolateManager disposed while request was pending'),
@@ -104,7 +104,7 @@ class IsolateManager {
 
   /// Entry point for the isolate worker
   static void _isolateEntryPoint(SendPort sendPort) {
-    final receivePort = ReceivePort();
+    final ReceivePort receivePort = ReceivePort();
 
     // Send our SendPort back to the main isolate
     sendPort.send(receivePort.sendPort);
@@ -136,21 +136,17 @@ class IsolateManager {
 
 /// Request message sent to the isolate
 class _IsolateRequest {
-  final int requestId;
-  final Function computation;
 
   _IsolateRequest({
     required this.requestId,
     required this.computation,
   });
+  final int requestId;
+  final Function computation;
 }
 
 /// Response message from the isolate
 class _IsolateResponse {
-  final int requestId;
-  final dynamic result;
-  final Object? error;
-  final StackTrace? stackTrace;
 
   _IsolateResponse({
     required this.requestId,
@@ -158,4 +154,8 @@ class _IsolateResponse {
     this.error,
     this.stackTrace,
   });
+  final int requestId;
+  final dynamic result;
+  final Object? error;
+  final StackTrace? stackTrace;
 }

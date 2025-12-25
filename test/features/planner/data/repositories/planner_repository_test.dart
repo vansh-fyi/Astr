@@ -1,15 +1,15 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:astr/features/planner/data/repositories/planner_repository.dart';
-import 'package:astr/features/planner/domain/logic/planner_logic.dart';
-import 'package:astr/features/dashboard/data/datasources/open_meteo_weather_service.dart';
+import 'package:astr/core/error/failure.dart';
+import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
 import 'package:astr/features/astronomy/domain/repositories/i_astro_engine.dart';
 import 'package:astr/features/context/domain/entities/geo_location.dart';
-import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
-import 'package:astr/core/error/failure.dart';
-import 'package:mockito/mockito.dart';
-
+import 'package:astr/features/dashboard/data/datasources/open_meteo_weather_service.dart';
+import 'package:astr/features/planner/data/repositories/planner_repository.dart';
+import 'package:astr/features/planner/domain/entities/daily_forecast.dart';
+import 'package:astr/features/planner/domain/logic/planner_logic.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:mockito/mockito.dart';
 
 class MockDio extends Mock implements Dio {}
 
@@ -28,13 +28,13 @@ class StubWeatherService extends OpenMeteoWeatherService {
 }
 
 class StubAstroEngine implements IAstroEngine {
-  double moonIllumination = 0.0;
+  double moonIllumination = 0;
 
   @override
   Future<Either<Failure, MoonPhaseInfo>> getMoonPhaseInfo({required DateTime time}) async {
     return Right(MoonPhaseInfo(
       illumination: moonIllumination,
-      phaseAngle: 0.0,
+      phaseAngle: 0,
     ));
   }
 
@@ -55,34 +55,34 @@ void main() {
     repository = PlannerRepository(stubWeatherService, stubAstroEngine, plannerLogic);
   });
 
-  final tLocation = GeoLocation(latitude: 0, longitude: 0, name: 'Test');
+  const GeoLocation tLocation = GeoLocation(latitude: 0, longitude: 0, name: 'Test');
 
   group('PlannerRepository', () {
     test('should return list of 7 DailyForecasts when API calls succeed', () async {
       // Arrange
-      final times = List.generate(168, (i) => DateTime.now().add(Duration(hours: i)).toIso8601String());
-      final cloudCovers = List.generate(168, (i) => 10.0);
-      final weatherCodes = List.generate(168, (i) => 0.0);
+      final List<String> times = List.generate(168, (int i) => DateTime.now().add(Duration(hours: i)).toIso8601String());
+      final List<double> cloudCovers = List.generate(168, (int i) => 10.0);
+      final List<double> weatherCodes = List.generate(168, (int i) => 0.0);
 
-      stubWeatherService.response = {
+      stubWeatherService.response = <String, dynamic>{
         'time': times,
         'cloudCover': cloudCovers,
         'weatherCode': weatherCodes,
-        'temperature': List.filled(168, 20.0),
-        'humidity': List.filled(168, 50.0),
-        'windSpeed': List.filled(168, 5.0),
+        'temperature': List.filled(168, 20),
+        'humidity': List.filled(168, 50),
+        'windSpeed': List.filled(168, 5),
       };
 
       stubAstroEngine.moonIllumination = 0.5;
 
       // Act
-      final result = await repository.get7DayForecast(tLocation, 1); // Bortle 1
+      final Either<Failure, List<DailyForecast>> result = await repository.get7DayForecast(tLocation, 1); // Bortle 1
 
       // Assert
       expect(result.isRight(), true);
       result.fold(
-        (l) => fail('Should not return failure'),
-        (r) {
+        (Failure l) => fail('Should not return failure'),
+        (List<DailyForecast> r) {
           expect(r.length, 7);
           expect(r[0].cloudCoverAvg, 10.0);
           expect(r[0].moonIllumination, 0.5);
@@ -97,7 +97,7 @@ void main() {
       stubWeatherService.error = Exception('API Error');
 
       // Act
-      final result = await repository.get7DayForecast(tLocation, 1);
+      final Either<Failure, List<DailyForecast>> result = await repository.get7DayForecast(tLocation, 1);
 
       // Assert
       expect(result.isLeft(), true);

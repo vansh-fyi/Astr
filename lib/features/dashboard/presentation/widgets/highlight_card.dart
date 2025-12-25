@@ -1,17 +1,18 @@
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
-import 'package:astr/features/dashboard/domain/entities/highlight_item.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../astronomy/domain/entities/celestial_body.dart';
+import '../../domain/entities/highlight_item.dart';
+
 class HighlightCard extends StatelessWidget {
-  final HighlightItem item;
-  final VoidCallback? onTap;
 
   const HighlightCard({
     super.key,
     required this.item,
     this.onTap,
   });
+  final HighlightItem item;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,7 @@ class HighlightCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             Image.asset(
               _getAssetPath(item.body),
               width: 32,

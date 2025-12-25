@@ -1,17 +1,19 @@
 import 'dart:async';
-import 'package:astr/core/widgets/glass_panel.dart';
+
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
+import 'glass_panel.dart';
+
 class GlassToast extends StatefulWidget {
-  final String message;
-  final VoidCallback onDismissed;
 
   const GlassToast({
     super.key,
     required this.message,
     required this.onDismissed,
   });
+  final String message;
+  final VoidCallback onDismissed;
 
   @override
   State<GlassToast> createState() => _GlassToastState();
@@ -30,7 +32,7 @@ class _GlassToastState extends State<GlassToast> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 300),
     );
 
-    _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _opacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
@@ -73,7 +75,7 @@ class _GlassToastState extends State<GlassToast> with SingleTickerProviderStateM
                 borderRadius: BorderRadius.circular(30),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
+                  children: <Widget>[
                     const Icon(Ionicons.information_circle, color: Colors.white, size: 20),
                     const SizedBox(width: 12),
                     Flexible(
@@ -102,7 +104,7 @@ void showGlassToast(BuildContext context, String message) {
   late OverlayEntry overlayEntry;
   
   overlayEntry = OverlayEntry(
-    builder: (context) => GlassToast(
+    builder: (BuildContext context) => GlassToast(
       message: message,
       onDismissed: () {
         overlayEntry.remove();

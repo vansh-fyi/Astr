@@ -15,21 +15,21 @@ void main() {
       // Source: NASA / USNO / Meeus
       // J2000.0: 2000 Jan 1, 12:00 UTC -> 2451545.0
       expect(
-        TimeUtils.dateTimeToJulianDate(DateTime.utc(2000, 1, 1, 12, 0, 0)),
+        TimeUtils.dateTimeToJulianDate(DateTime.utc(2000, 1, 1, 12)),
         closeTo(2451545.0, 0.000001),
         reason: 'J2000.0 Mismatch'
       );
 
       // Unix Epoch: 1970 Jan 1, 00:00 UTC -> 2440587.5
       expect(
-        TimeUtils.dateTimeToJulianDate(DateTime.utc(1970, 1, 1, 0, 0, 0)),
+        TimeUtils.dateTimeToJulianDate(DateTime.utc(1970, 1)),
         closeTo(2440587.5, 0.000001),
         reason: 'Unix Epoch Mismatch'
       );
       
       // 2024 Jan 1, 00:00 UTC -> 2460310.5
       expect(
-         TimeUtils.dateTimeToJulianDate(DateTime.utc(2024, 1, 1, 0, 0, 0)),
+         TimeUtils.dateTimeToJulianDate(DateTime.utc(2024, 1)),
          closeTo(2460310.5, 0.000001),
          reason: '2024 Start Mismatch'
       );
@@ -45,8 +45,8 @@ void main() {
        // Note: Meeus 12.2 is valid for Mean Sidereal Time at Greenwich at 0h UT.
        // TimeUtils.greenwichMeanSiderealTime uses the linear combination form.
        
-       final time = DateTime.utc(2024, 1, 1, 0, 0, 0);
-       final gmst = TimeUtils.greenwichMeanSiderealTime(time);
+       final DateTime time = DateTime.utc(2024, 1);
+       final double gmst = TimeUtils.greenwichMeanSiderealTime(time);
        print('GMST (2024-01-01): $gmst');
        
        // Allow 0.5 degree leeway for simple formula diffs, but usually should match < 0.1
@@ -65,20 +65,20 @@ void main() {
       // Let's settle for Declination -10 (South of Zenith).
       // At Lat 0, Dec -10. Object should be due South (Az 180) at Altitude 80.
       
-      final lat = 0.0;
-      final lon = 0.0;
-      final time = DateTime.utc(2024, 1, 1, 0, 0, 0); // Arbitrary time
+      const double lat = 0;
+      const double lon = 0;
+      final DateTime time = DateTime.utc(2024, 1); // Arbitrary time
       
       // 1. Calculate LST for this time/loc
-      final lst = TimeUtils.localSiderealTime(time, lon);
+      final double lst = TimeUtils.localSiderealTime(time, lon);
       
       // 2. Set Object RA = LST (Hour Angle = 0)
-      final ra = lst;
-      final dec = -10.0;
+      final double ra = lst;
+      const double dec = -10;
       
-      final horiz = CoordinateTransformations.equatorialToHorizontal(
+      final HorizontalCoordinates horiz = CoordinateTransformations.equatorialToHorizontal(
         EquatorialCoordinates(rightAscension: ra, declination: dec),
-        Location(latitude: lat, longitude: lon),
+        const Location(latitude: lat, longitude: lon),
         time
       );
       
@@ -95,17 +95,17 @@ void main() {
       // Lat: 0. Dec: +10.
       // Should be Azimuth 0 (North), Altitude 80.
       
-      final lat = 0.0;
-      final lon = 0.0;
-      final time = DateTime.utc(2024, 1, 1, 0, 0, 0);
-      final lst = TimeUtils.localSiderealTime(time, lon);
+      const double lat = 0;
+      const double lon = 0;
+      final DateTime time = DateTime.utc(2024, 1);
+      final double lst = TimeUtils.localSiderealTime(time, lon);
       
-      final ra = lst;
-      final dec = 10.0;
+      final double ra = lst;
+      const double dec = 10;
       
-      final horiz = CoordinateTransformations.equatorialToHorizontal(
+      final HorizontalCoordinates horiz = CoordinateTransformations.equatorialToHorizontal(
         EquatorialCoordinates(rightAscension: ra, declination: dec),
-        Location(latitude: lat, longitude: lon),
+        const Location(latitude: lat, longitude: lon),
         time
       );
 
@@ -121,17 +121,17 @@ void main() {
       // Hour Angle should be 6h (90 deg).
       // RA = LST - 90.
       
-      final lat = 0.0;
-      final lon = 0.0;
-      final time = DateTime.utc(2024, 1, 1, 0, 0, 0);
-      final lst = TimeUtils.localSiderealTime(time, lon);
+      const double lat = 0;
+      const double lon = 0;
+      final DateTime time = DateTime.utc(2024, 1);
+      final double lst = TimeUtils.localSiderealTime(time, lon);
       
-      final ra = TimeUtils.normalizeDegrees(lst - 90);
-      final dec = 0.0;
+      final double ra = TimeUtils.normalizeDegrees(lst - 90);
+      const double dec = 0;
       
-      final horiz = CoordinateTransformations.equatorialToHorizontal(
+      final HorizontalCoordinates horiz = CoordinateTransformations.equatorialToHorizontal(
         EquatorialCoordinates(rightAscension: ra, declination: dec),
-        Location(latitude: lat, longitude: lon),
+        const Location(latitude: lat, longitude: lon),
         time
       );
       
@@ -147,17 +147,17 @@ void main() {
       // Hour Angle should be -6h (270 deg).
       // RA = LST + 90.
       
-      final lat = 0.0;
-      final lon = 0.0;
-      final time = DateTime.utc(2024, 1, 1, 0, 0, 0);
-      final lst = TimeUtils.localSiderealTime(time, lon);
+      const double lat = 0;
+      const double lon = 0;
+      final DateTime time = DateTime.utc(2024, 1);
+      final double lst = TimeUtils.localSiderealTime(time, lon);
       
-      final ra = TimeUtils.normalizeDegrees(lst + 90);
-      final dec = 0.0;
+      final double ra = TimeUtils.normalizeDegrees(lst + 90);
+      const double dec = 0;
       
-      final horiz = CoordinateTransformations.equatorialToHorizontal(
+      final HorizontalCoordinates horiz = CoordinateTransformations.equatorialToHorizontal(
         EquatorialCoordinates(rightAscension: ra, declination: dec),
-        Location(latitude: lat, longitude: lon),
+        const Location(latitude: lat, longitude: lon),
         time
       );
       
@@ -168,17 +168,17 @@ void main() {
     });
     
     test('Polaris Check (Northern Hemisphere)', () {
-      final lat = 45.0;
-      final lon = 0.0;
-      final time = DateTime.utc(2024, 1, 1, 0, 0, 0); 
+      const double lat = 45;
+      const double lon = 0;
+      final DateTime time = DateTime.utc(2024, 1); 
       
       // Polaris approx J2000
-      final ra = 37.95; // 2h 31m
-      final dec = 89.26;
+      const double ra = 37.95; // 2h 31m
+      const double dec = 89.26;
       
-      final horiz = CoordinateTransformations.equatorialToHorizontal(
-        EquatorialCoordinates(rightAscension: ra, declination: dec),
-        Location(latitude: lat, longitude: lon),
+      final HorizontalCoordinates horiz = CoordinateTransformations.equatorialToHorizontal(
+        const EquatorialCoordinates(rightAscension: ra, declination: dec),
+        const Location(latitude: lat, longitude: lon),
         time
       );
       
@@ -193,17 +193,17 @@ void main() {
     });
 
     test('South Pole Check (Southern Hemisphere)', () {
-      final lat = -45.0; // South
-      final lon = 0.0;
-      final time = DateTime.utc(2024, 1, 1, 0, 0, 0); 
+      const double lat = -45; // South
+      const double lon = 0;
+      final DateTime time = DateTime.utc(2024, 1); 
       
       // Sigma Octantis (South Star) approx
-      final ra = 315.0;
-      final dec = -89.0;
+      const double ra = 315;
+      const double dec = -89;
       
-      final horiz = CoordinateTransformations.equatorialToHorizontal(
-        EquatorialCoordinates(rightAscension: ra, declination: dec),
-        Location(latitude: lat, longitude: lon),
+      final HorizontalCoordinates horiz = CoordinateTransformations.equatorialToHorizontal(
+        const EquatorialCoordinates(rightAscension: ra, declination: dec),
+        const Location(latitude: lat, longitude: lon),
         time
       );
       

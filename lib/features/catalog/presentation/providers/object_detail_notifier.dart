@@ -1,21 +1,22 @@
-import 'package:astr/core/error/failure.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
-import 'package:astr/features/catalog/domain/repositories/i_catalog_repository.dart';
-import 'package:astr/features/catalog/presentation/providers/catalog_repository_provider.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/src/either.dart';
+
+import '../../../../core/error/failure.dart';
+import '../../domain/entities/celestial_object.dart';
+import '../../domain/repositories/i_catalog_repository.dart';
+import 'catalog_repository_provider.dart';
 
 /// State for object detail screen
 class ObjectDetailState {
-  final CelestialObject? object;
-  final bool isLoading;
-  final String? error;
 
   const ObjectDetailState({
     this.object,
     this.isLoading = false,
     this.error,
   });
+  final CelestialObject? object;
+  final bool isLoading;
+  final String? error;
 
   ObjectDetailState copyWith({
     CelestialObject? object,
@@ -31,19 +32,16 @@ class ObjectDetailState {
 }
 
 /// Provider for object detail notifier
-final objectDetailNotifierProvider =
+final StateNotifierProviderFamily<ObjectDetailNotifier, ObjectDetailState, String> objectDetailNotifierProvider =
     StateNotifierProvider.family<ObjectDetailNotifier, ObjectDetailState, String>(
-  (ref, objectId) {
-    final repository = ref.read(catalogRepositoryProvider);
+  (StateNotifierProviderRef<ObjectDetailNotifier, ObjectDetailState> ref, String objectId) {
+    final ICatalogRepository repository = ref.read(catalogRepositoryProvider);
     return ObjectDetailNotifier(repository, ref, objectId);
   },
 );
 
 /// Notifier for object detail screen
 class ObjectDetailNotifier extends StateNotifier<ObjectDetailState> {
-  final ICatalogRepository _repository;
-  final Ref _ref;
-  final String objectId;
 
   ObjectDetailNotifier(
     this._repository,
@@ -52,23 +50,25 @@ class ObjectDetailNotifier extends StateNotifier<ObjectDetailState> {
   ) : super(const ObjectDetailState(isLoading: true)) {
     loadObject();
   }
+  final ICatalogRepository _repository;
+  final Ref _ref;
+  final String objectId;
 
   /// Load object by ID
   Future<void> loadObject() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true);
 
-    final result = await _repository.getObjectById(objectId);
+    final Either<Failure, CelestialObject> result = await _repository.getObjectById(objectId);
 
     result.fold(
-      (failure) => state = state.copyWith(
+      (Failure failure) => state = state.copyWith(
         isLoading: false,
         error: failure.message,
       ),
-      (object) {
+      (CelestialObject object) {
         state = state.copyWith(
           isLoading: false,
           object: object,
-          error: null,
         );
       },
     );

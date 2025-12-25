@@ -1,46 +1,47 @@
-import 'package:astr/core/widgets/cosmic_loader.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/dashboard/presentation/widgets/nebula_background.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
-import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
-import 'package:astr/features/catalog/presentation/providers/rise_set_provider.dart';
-import 'package:astr/features/catalog/presentation/widgets/visibility_graph_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/widgets/cosmic_loader.dart';
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../dashboard/presentation/widgets/nebula_background.dart';
+import '../../domain/entities/celestial_object.dart';
+import '../../domain/entities/celestial_type.dart';
+import '../providers/object_detail_notifier.dart';
+import '../providers/rise_set_provider.dart';
+import '../widgets/visibility_graph_widget.dart';
+
 /// Full-featured object detail page (AC: 1-6)
 class ObjectDetailScreen extends ConsumerWidget {
-  final String objectId;
 
   const ObjectDetailScreen({
     super.key,
     required this.objectId,
   });
+  final String objectId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(objectDetailNotifierProvider(objectId));
+    final ObjectDetailState state = ref.watch(objectDetailNotifierProvider(objectId));
 
     return Scaffold(
       backgroundColor: const Color(0xFF020204),
       extendBody: true,
       body: Stack(
-        children: [
+        children: <Widget>[
           const NebulaBackground(),
 
           // Main Content
           SafeArea(
             bottom: false,
             child: Column(
-              children: [
+              children: <Widget>[
                 // Custom Header (like HomeScreen)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () => context.pop(),
@@ -73,8 +74,8 @@ class ObjectDetailScreen extends ConsumerWidget {
                                     return const LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
-                                      colors: [Colors.transparent, Colors.white],
-                                      stops: [0.0, 0.05],
+                                      colors: <Color>[Colors.transparent, Colors.white],
+                                      stops: <double>[0, 0.05],
                                     ).createShader(bounds);
                                   },
                                   blendMode: BlendMode.dstIn,
@@ -88,7 +89,7 @@ class ObjectDetailScreen extends ConsumerWidget {
                                     ),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
+                                      children: <Widget>[
                                         // AC #3: Object Header
                                         _buildHeader(state.object!),
                                         const SizedBox(height: 32),
@@ -116,7 +117,7 @@ class ObjectDetailScreen extends ConsumerWidget {
   Widget _buildHeader(CelestialObject object) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         // Hero Icon
         Center(
           child: Container(
@@ -127,7 +128,7 @@ class ObjectDetailScreen extends ConsumerWidget {
               shape: BoxShape.circle,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10),
               child: object.iconPath.isNotEmpty
                   ? Image.asset(
                       object.iconPath,
@@ -163,7 +164,6 @@ class ObjectDetailScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: Colors.blue.withOpacity(0.5),
-              width: 1,
             ),
           ),
           child: Text(
@@ -184,21 +184,21 @@ class ObjectDetailScreen extends ConsumerWidget {
 
   /// AC #4, #5: Data cards with GlassPanel
   Widget _buildDataSection(ObjectDetailState state, WidgetRef ref) {
-    final object = state.object!;
+    final CelestialObject object = state.object!;
     
     // Use riseSetProvider for consistent data with cards
-    final riseSetAsync = ref.watch(riseSetProvider(object));
+    final AsyncValue<Map<String, DateTime?>> riseSetAsync = ref.watch(riseSetProvider(object));
     
-    final times = riseSetAsync.valueOrNull ?? {'rise': null, 'set': null};
-    final riseTime = times['rise'];
-    final setTime = times['set'];
+    final Map<String, DateTime?> times = riseSetAsync.valueOrNull ?? <String, DateTime?>{'rise': null, 'set': null};
+    final DateTime? riseTime = times['rise'];
+    final DateTime? setTime = times['set'];
 
-    final rise = riseTime != null ? DateFormat('HH:mm').format(riseTime) : '-- : --';
-    final set = setTime != null ? DateFormat('HH:mm').format(setTime) : '-- : --';
+    final String rise = riseTime != null ? DateFormat('HH:mm').format(riseTime) : '-- : --';
+    final String set = setTime != null ? DateFormat('HH:mm').format(setTime) : '-- : --';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         const Text(
           'Details',
           style: TextStyle(
@@ -215,7 +215,7 @@ class ObjectDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+              children: <Widget>[
                 const Text(
                   'Magnitude',
                   style: TextStyle(
@@ -241,7 +241,7 @@ class ObjectDetailScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               const Text(
                 'Distance',
                 style: TextStyle(
@@ -267,7 +267,7 @@ class ObjectDetailScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               const Text(
                 'Rise/Set Times',
                 style: TextStyle(

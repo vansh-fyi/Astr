@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
+import '../../../../core/widgets/glass_panel.dart';
 
 class CloudBar extends StatefulWidget {
-  final double cloudCoverPercentage; // 0-100
-  final bool isLoading;
-  final String? errorMessage;
 
   const CloudBar({
     super.key,
@@ -12,6 +9,9 @@ class CloudBar extends StatefulWidget {
     this.isLoading = false,
     this.errorMessage,
   });
+  final double cloudCoverPercentage; // 0-100
+  final bool isLoading;
+  final String? errorMessage;
 
   @override
   State<CloudBar> createState() => _CloudBarState();
@@ -25,10 +25,10 @@ class _CloudBarState extends State<CloudBar> {
     return GlassPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               Text(
                 'Cloud Cover',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white),
@@ -63,9 +63,9 @@ class _CloudBarState extends State<CloudBar> {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: LayoutBuilder(
-                builder: (context, constraints) {
+                builder: (BuildContext context, BoxConstraints constraints) {
                   return Stack(
-                    children: [
+                    children: <Widget>[
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 1000),
                         curve: Curves.easeOutCubic,
@@ -73,13 +73,12 @@ class _CloudBarState extends State<CloudBar> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
                           gradient: const LinearGradient(
-                            colors: [Colors.blue, Colors.blueAccent],
+                            colors: <Color>[Colors.blue, Colors.blueAccent],
                           ),
-                          boxShadow: [
+                          boxShadow: <BoxShadow>[
                             BoxShadow(
                               color: Colors.indigo.withOpacity(0.5),
                               blurRadius: 10,
-                              spreadRadius: 0,
                             ),
                           ],
                         ),

@@ -5,6 +5,8 @@ import 'package:astr/features/astronomy/domain/repositories/i_astro_engine.dart'
 import 'package:astr/features/catalog/data/services/visibility_service_impl.dart';
 import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
 import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
+import 'package:astr/features/catalog/domain/entities/graph_point.dart';
+import 'package:astr/features/catalog/domain/entities/visibility_graph_data.dart';
 import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -13,7 +15,7 @@ import 'package:mockito/mockito.dart';
 
 import 'visibility_service_test.mocks.dart';
 
-@GenerateMocks([IAstroEngine])
+@GenerateMocks(<Type>[IAstroEngine])
 void main() {
   late VisibilityServiceImpl visibilityService;
   late MockIAstroEngine mockAstroEngine;
@@ -33,10 +35,10 @@ void main() {
         magnitude: 0
       )),
     );
-    provideDummy<Either<Failure, double>>(const Right(0.0));
+    provideDummy<Either<Failure, double>>(const Right(0));
   });
 
-  const tCelestialObject = CelestialObject(
+  const CelestialObject tCelestialObject = CelestialObject(
     id: 'mars',
     name: 'Mars',
     type: CelestialType.planet,
@@ -45,13 +47,13 @@ void main() {
     ephemerisId: 4, // Mars
   );
 
-  const tLocation = GeoLocation(
+  const GeoLocation tLocation = GeoLocation(
     latitude: 40.7128,
     longitude: -74.0060,
     name: 'New York',
   );
 
-  final tStartTime = DateTime(2025, 11, 29, 18, 0); // 6:00 PM
+  final DateTime tStartTime = DateTime(2025, 11, 29, 18); // 6:00 PM
 
   group('calculateVisibility', () {
     test('should return VisibilityGraphData with 48 points (12h / 15min)',
@@ -93,10 +95,10 @@ void main() {
 
       // Mock moon illumination
       when(mockAstroEngine.getMoonIllumination(time: anyNamed('time')))
-          .thenAnswer((_) async => const Right(50.0));
+          .thenAnswer((_) async => const Right(50));
 
       // Act
-      final result = await visibilityService.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await visibilityService.calculateVisibility(
         object: tCelestialObject,
         location: tLocation,
         startTime: tStartTime,
@@ -104,13 +106,13 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      final graphData = result.getRight().toNullable()!;
+      final VisibilityGraphData graphData = result.getRight().toNullable()!;
       expect(graphData.objectCurve.length, 48);
       expect(graphData.moonCurve.length, 48);
       
       // Verify intervals
-      final firstPoint = graphData.objectCurve.first;
-      final secondPoint = graphData.objectCurve[1];
+      final GraphPoint firstPoint = graphData.objectCurve.first;
+      final GraphPoint secondPoint = graphData.objectCurve[1];
       expect(secondPoint.time.difference(firstPoint.time).inMinutes, 15);
     });
 
@@ -152,17 +154,17 @@ void main() {
 
       // Moon 50% illuminated
       when(mockAstroEngine.getMoonIllumination(time: anyNamed('time')))
-          .thenAnswer((_) async => const Right(50.0));
+          .thenAnswer((_) async => const Right(50));
 
       // Act
-      final result = await visibilityService.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await visibilityService.calculateVisibility(
         object: tCelestialObject,
         location: tLocation,
         startTime: tStartTime,
       );
 
       // Assert
-      final graphData = result.getRight().toNullable()!;
+      final VisibilityGraphData graphData = result.getRight().toNullable()!;
       // Expected interference: 60 * 50 / 100 = 30.0
       expect(graphData.moonCurve.first.value, 30.0);
     });
@@ -205,17 +207,17 @@ void main() {
           ));
 
       when(mockAstroEngine.getMoonIllumination(time: anyNamed('time')))
-          .thenAnswer((_) async => const Right(50.0));
+          .thenAnswer((_) async => const Right(50));
 
       // Act
-      final result = await visibilityService.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await visibilityService.calculateVisibility(
         object: tCelestialObject,
         location: tLocation,
         startTime: tStartTime,
       );
 
       // Assert
-      final graphData = result.getRight().toNullable()!;
+      final VisibilityGraphData graphData = result.getRight().toNullable()!;
       expect(graphData.optimalWindows.isNotEmpty, true);
       // Should cover the whole range since conditions are constant
       expect(graphData.optimalWindows.first.duration.inHours, 12);
@@ -258,17 +260,17 @@ void main() {
           ));
 
       when(mockAstroEngine.getMoonIllumination(time: anyNamed('time')))
-          .thenAnswer((_) async => const Right(50.0));
+          .thenAnswer((_) async => const Right(50));
 
       // Act
-      final result = await visibilityService.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await visibilityService.calculateVisibility(
         object: tCelestialObject,
         location: tLocation,
         startTime: tStartTime,
       );
 
       // Assert
-      final graphData = result.getRight().toNullable()!;
+      final VisibilityGraphData graphData = result.getRight().toNullable()!;
       expect(graphData.optimalWindows.isEmpty, true);
     });
 
@@ -309,17 +311,17 @@ void main() {
           ));
 
       when(mockAstroEngine.getMoonIllumination(time: anyNamed('time')))
-          .thenAnswer((_) async => const Right(100.0));
+          .thenAnswer((_) async => const Right(100));
 
       // Act
-      final result = await visibilityService.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await visibilityService.calculateVisibility(
         object: tCelestialObject,
         location: tLocation,
         startTime: tStartTime,
       );
 
       // Assert
-      final graphData = result.getRight().toNullable()!;
+      final VisibilityGraphData graphData = result.getRight().toNullable()!;
       expect(graphData.optimalWindows.isEmpty, true);
     });
   });

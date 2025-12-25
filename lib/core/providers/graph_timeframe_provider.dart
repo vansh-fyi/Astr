@@ -1,16 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/astronomy/domain/services/astronomy_service.dart';
+import '../../features/context/domain/entities/astr_context.dart';
 import '../../features/context/presentation/providers/astr_context_provider.dart';
 
 /// Represents a time range for graph display (Sunset to Sunrise)
 class GraphTimeframe {
-  final DateTime start;
-  final DateTime end;
 
   const GraphTimeframe({
     required this.start,
     required this.end,
   });
+  final DateTime start;
+  final DateTime end;
 
   Duration get duration => end.difference(start);
 
@@ -39,28 +40,28 @@ class GraphTimeframe {
 ///
 /// Note: This is functionally equivalent to nightWindowProvider but provides
 /// a structured GraphTimeframe object instead of a Map<String, DateTime>.
-final graphTimeframeProvider = FutureProvider.autoDispose<GraphTimeframe>(
-  (ref) async {
-    final astronomyService = ref.watch(astronomyServiceProvider);
-    final contextState = ref.watch(astrContextProvider);
+final AutoDisposeFutureProvider<GraphTimeframe> graphTimeframeProvider = FutureProvider.autoDispose<GraphTimeframe>(
+  (AutoDisposeFutureProviderRef<GraphTimeframe> ref) async {
+    final AstronomyService astronomyService = ref.watch(astronomyServiceProvider);
+    final AsyncValue<AstrContext> contextState = ref.watch(astrContextProvider);
 
     if (!contextState.hasValue) {
       // Return default window if context not ready (e.g. now to now+12h)
-      final now = DateTime.now();
+      final DateTime now = DateTime.now();
       return GraphTimeframe(
         start: now,
         end: now.add(const Duration(hours: 12)),
       );
     }
 
-    final astrContext = contextState.value!;
+    final AstrContext astrContext = contextState.value!;
 
     // Calculate the night window (sunset to sunrise)
     // getNightWindow already handles AC #2 logic:
     // - If time is before sunrise, returns yesterday's sunset → today's sunrise
     // - If time is during day, returns today's sunset → tomorrow's sunrise
     // - If time is after sunset, returns today's sunset → tomorrow's sunrise
-    final nightWindow = await astronomyService.getNightWindow(
+    final Map<String, DateTime> nightWindow = await astronomyService.getNightWindow(
       date: astrContext.selectedDate,
       lat: astrContext.location.latitude,
       long: astrContext.location.longitude,

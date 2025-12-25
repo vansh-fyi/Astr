@@ -1,21 +1,23 @@
-import 'package:astr/core/widgets/cosmic_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:astr/features/planner/presentation/providers/planner_provider.dart';
-import 'package:astr/features/planner/presentation/widgets/forecast_list_item.dart';
 import 'package:gap/gap.dart';
+
+import '../../../../core/widgets/cosmic_loader.dart';
+import '../../domain/entities/daily_forecast.dart';
+import '../providers/planner_provider.dart';
+import '../widgets/forecast_list_item.dart';
 
 class ForecastScreen extends ConsumerWidget {
   const ForecastScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final forecastAsync = ref.watch(forecastListProvider);
+    final AsyncValue<List<DailyForecast>> forecastAsync = ref.watch(forecastListProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent, // Assuming background is handled by parent or theme
       body: forecastAsync.when(
-        data: (forecasts) {
+        data: (List<DailyForecast> forecasts) {
           if (forecasts.isEmpty) {
             return const Center(
               child: Text(
@@ -29,14 +31,14 @@ class ForecastScreen extends ConsumerWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: forecasts.length,
-            separatorBuilder: (context, index) => const Gap(12),
-            itemBuilder: (context, index) {
+            separatorBuilder: (BuildContext context, int index) => const Gap(12),
+            itemBuilder: (BuildContext context, int index) {
               return ForecastListItem(forecast: forecasts[index]);
             },
           );
         },
         loading: () => const Center(child: CosmicLoader()),
-        error: (error, stack) => Center(
+        error: (Object error, StackTrace stack) => Center(
           child: Text(
             'Error loading forecast: $error',
             style: const TextStyle(color: Colors.redAccent),

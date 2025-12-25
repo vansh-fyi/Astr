@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:astr/core/engine/models/condition_quality.dart';
-import 'package:astr/core/engine/models/condition_result.dart';
+import '../../engine/models/condition_quality.dart';
+import '../../engine/models/condition_result.dart';
 
 /// Service for evaluating qualitative observing conditions
 ///
@@ -59,8 +59,8 @@ class QualitativeConditionService {
   double _normalizeMPSAS(double mpsas) {
     // Map 17.0-22.0 MPSAS range to 0.0-1.0
     // 17.0 (bright city) = 0.0, 22.0 (dark sky) = 1.0
-    const double minMPSAS = 17.0;
-    const double maxMPSAS = 22.0;
+    const double minMPSAS = 17;
+    const double maxMPSAS = 22;
     return ((mpsas - minMPSAS) / (maxMPSAS - minMPSAS)).clamp(0.0, 1.0);
   }
 

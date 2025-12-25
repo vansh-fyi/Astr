@@ -1,14 +1,15 @@
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/core/widgets/glass_toast.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
-import 'package:astr/features/context/domain/entities/geo_location.dart';
-import 'package:astr/features/profile/domain/entities/saved_location.dart';
-import 'package:astr/features/profile/presentation/providers/saved_locations_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:uuid/uuid.dart';
+
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../../core/widgets/glass_toast.dart';
+import '../../../profile/domain/entities/saved_location.dart';
+import '../../../profile/presentation/providers/saved_locations_provider.dart';
+import '../../domain/entities/astr_context.dart';
+import '../../domain/entities/geo_location.dart';
+import '../providers/astr_context_provider.dart';
 
 class LocationSheet extends ConsumerStatefulWidget {
   const LocationSheet({super.key});
@@ -22,28 +23,28 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final astrContextAsync = ref.watch(astrContextProvider);
-    final savedLocationsAsync = ref.watch(savedLocationsNotifierProvider);
+    final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
+    final AsyncValue<List<SavedLocation>> savedLocationsAsync = ref.watch(savedLocationsNotifierProvider);
     
-    final currentContext = astrContextAsync.value;
-    final isCurrentLocationActive = currentContext?.isCurrentLocation ?? false;
+    final AstrContext? currentContext = astrContextAsync.value;
+    final bool isCurrentLocationActive = currentContext?.isCurrentLocation ?? false;
 
-    return Container(
+    return DecoratedBox(
       decoration: const BoxDecoration(
         color: Color(0xFF0A0A0B),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
-          left: 20.0,
-          right: 20.0,
-          top: 24.0,
+          left: 20,
+          right: 20,
+          top: 24,
           bottom: 50.0 + MediaQuery.of(context).padding.bottom,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+          children: <Widget>[
             Container(
               alignment: Alignment.center,
               child: Container(
@@ -85,10 +86,10 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
               },
               padding: const EdgeInsets.all(16),
               border: isCurrentLocationActive 
-                  ? Border.all(color: Colors.blueAccent, width: 1)
+                  ? Border.all(color: Colors.blueAccent)
                   : null,
               child: Row(
-                children: [
+                children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -107,7 +108,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: <Widget>[
                         const Text(
                           'Current Location',
                           style: TextStyle(
@@ -142,12 +143,12 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
 
             // 2. Saved Locations List
             savedLocationsAsync.when(
-              data: (locations) {
+              data: (List<SavedLocation> locations) {
                 if (locations.isEmpty) return const SizedBox.shrink();
                 
                 return Column(
-                  children: locations.map((loc) {
-                    final isActive = !isCurrentLocationActive && 
+                  children: locations.map((SavedLocation loc) {
+                    final bool isActive = !isCurrentLocationActive && 
                         currentContext?.location.latitude == loc.latitude &&
                         currentContext?.location.longitude == loc.longitude;
 
@@ -160,7 +161,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                             return;
                           }
                           
-                          final geoLocation = GeoLocation(
+                          final GeoLocation geoLocation = GeoLocation(
                             latitude: loc.latitude,
                             longitude: loc.longitude,
                             name: loc.name,
@@ -173,10 +174,10 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                         onLongPress: () => _showLocationOptions(context, ref, loc),
                         padding: const EdgeInsets.all(16),
                         border: isActive 
-                            ? Border.all(color: Colors.blueAccent, width: 1) 
+                            ? Border.all(color: Colors.blueAccent) 
                             : null,
                         child: Row(
-                          children: [
+                          children: <Widget>[
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
@@ -189,7 +190,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
+                                children: <Widget>[
                                   Text(
                                     loc.name,
                                     style: const TextStyle(
@@ -232,7 +233,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
               },
               padding: const EdgeInsets.all(16),
               child: Row(
-                children: [
+                children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -264,11 +265,11 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
       context: context,
       useRootNavigator: true, // Ensure it shows above bottom nav
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (BuildContext context) => Container(
         padding: EdgeInsets.only(
-          left: 20.0,
-          right: 20.0,
-          top: 24.0,
+          left: 20,
+          right: 20,
+          top: 24,
           bottom: 50.0 + MediaQuery.of(context).padding.bottom,
         ),
         decoration: const BoxDecoration(
@@ -278,7 +279,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+          children: <Widget>[
             Container(
               alignment: Alignment.center,
               child: Container(
@@ -323,7 +324,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
               },
               padding: const EdgeInsets.all(16),
               child: Row(
-                children: [
+                children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -353,9 +354,9 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                 _deleteLocation(context, ref, location);
               },
               padding: const EdgeInsets.all(16),
-              border: Border.all(color: Colors.redAccent.withOpacity(0.3), width: 1),
+              border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
               child: Row(
-                children: [
+                children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -387,8 +388,8 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
     // If we delete, we should probably close the sheet or refresh it.
     // The provider watcher will refresh the list automatically.
     
-    final currentContext = ref.read(astrContextProvider).value;
-    final isCurrent = currentContext?.location.latitude == location.latitude &&
+    final AstrContext? currentContext = ref.read(astrContextProvider).value;
+    final bool isCurrent = currentContext?.location.latitude == location.latitude &&
         currentContext?.location.longitude == location.longitude;
 
     ref.read(savedLocationsNotifierProvider.notifier).deleteLocation(location.id);

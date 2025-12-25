@@ -1,5 +1,4 @@
-import 'package:astr/features/dashboard/domain/entities/weather.dart';
-import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
+
 
 class QualityCalculator {
   /// Calculates the Stargazing Quality Score (0-100)
@@ -22,19 +21,19 @@ class QualityCalculator {
     // m = -12.5, c = 112.5
     // Score = 112.5 - 12.5 * Bortle
     // Clamped between 0 and 100
-    double bortleScore = (112.5 - (12.5 * bortleScale)).clamp(0.0, 100.0);
+    final double bortleScore = (112.5 - (12.5 * bortleScale)).clamp(0.0, 100.0);
 
     // 2. Normalize Cloud Cover (0-100%) to 0-100 score
     // 0% clouds -> 100 score, 100% clouds -> 0 score
-    double cloudScore = (100.0 - cloudCover).clamp(0.0, 100.0);
+    final double cloudScore = (100.0 - cloudCover).clamp(0.0, 100.0);
 
     // 3. Normalize Moon Illumination (0-1.0) to 0-100 score
     // 0.0 illumination -> 100 score, 1.0 illumination -> 0 score
-    double moonScore = (100.0 - (moonIllumination * 100.0)).clamp(0.0, 100.0);
+    final double moonScore = (100.0 - (moonIllumination * 100.0)).clamp(0.0, 100.0);
 
     // 4. Weighted Average
     // Weights: Bortle 0.4, Cloud 0.4, Moon 0.2
-    double weightedScore = (bortleScore * 0.4) + (cloudScore * 0.4) + (moonScore * 0.2);
+    final double weightedScore = (bortleScore * 0.4) + (cloudScore * 0.4) + (moonScore * 0.2);
 
     return weightedScore.round();
   }

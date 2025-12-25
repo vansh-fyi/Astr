@@ -10,19 +10,19 @@ import 'package:riverpod/riverpod.dart';
 
 import 'saved_locations_provider_test.mocks.dart';
 
-@GenerateMocks([ProfileRepository])
+@GenerateMocks(<Type>[ProfileRepository])
 void main() {
   late MockProfileRepository mockRepository;
 
   setUp(() {
     mockRepository = MockProfileRepository();
     provideDummy<Either<Failure, void>>(const Right(null));
-    provideDummy<Either<Failure, List<SavedLocation>>>(const Right([]));
+    provideDummy<Either<Failure, List<SavedLocation>>>(const Right(<SavedLocation>[]));
   });
 
   ProviderContainer createContainer() {
-    final container = ProviderContainer(
-      overrides: [
+    final ProviderContainer container = ProviderContainer(
+      overrides: <Override>[
         profileRepositoryProvider.overrideWithValue(mockRepository),
       ],
     );
@@ -30,26 +30,26 @@ void main() {
     return container;
   }
 
-  final tSavedLocation = SavedLocation(
+  final SavedLocation tSavedLocation = SavedLocation(
     id: '1',
     name: 'Test Location',
-    latitude: 10.0,
-    longitude: 20.0,
+    latitude: 10,
+    longitude: 20,
     createdAt: DateTime.now(),
   );
 
   test('build should load locations', () async {
     // Arrange
     when(mockRepository.getSavedLocations())
-        .thenAnswer((_) async => Right([tSavedLocation]));
+        .thenAnswer((_) async => Right(<SavedLocation>[tSavedLocation]));
 
-    final container = createContainer();
+    final ProviderContainer container = createContainer();
 
     // Act
-    final locations = await container.read(savedLocationsNotifierProvider.future);
+    final List<SavedLocation> locations = await container.read(savedLocationsNotifierProvider.future);
 
     // Assert
-    expect(locations, [tSavedLocation]);
+    expect(locations, <SavedLocation>[tSavedLocation]);
     verify(mockRepository.getSavedLocations());
   });
 
@@ -58,10 +58,10 @@ void main() {
     when(mockRepository.saveLocation(any))
         .thenAnswer((_) async => const Right(null));
     when(mockRepository.getSavedLocations())
-        .thenAnswer((_) async => Right([tSavedLocation]));
+        .thenAnswer((_) async => Right(<SavedLocation>[tSavedLocation]));
 
-    final container = createContainer();
-    final notifier = container.read(savedLocationsNotifierProvider.notifier);
+    final ProviderContainer container = createContainer();
+    final SavedLocationsNotifier notifier = container.read(savedLocationsNotifierProvider.notifier);
 
     // Act
     await notifier.addLocation(tSavedLocation);
@@ -71,7 +71,7 @@ void main() {
     // Verify reload happened (getSavedLocations called twice: once for build, once for reload)
     // Actually, build is async, so it might be called once initially.
     // We can check if the state is updated.
-    final locations = await container.read(savedLocationsNotifierProvider.future);
-    expect(locations, [tSavedLocation]);
+    final List<SavedLocation> locations = await container.read(savedLocationsNotifierProvider.future);
+    expect(locations, <SavedLocation>[tSavedLocation]);
   });
 }

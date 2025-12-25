@@ -1,10 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class GeoLocation extends Equatable {
-  final double latitude;
-  final double longitude;
-  final String? name;
-  final String? placeName;
 
   const GeoLocation({
     required this.latitude,
@@ -12,9 +8,13 @@ class GeoLocation extends Equatable {
     this.name,
     this.placeName,
   });
+  final double latitude;
+  final double longitude;
+  final String? name;
+  final String? placeName;
 
   @override
-  List<Object?> get props => [latitude, longitude, name, placeName];
+  List<Object?> get props => <Object?>[latitude, longitude, name, placeName];
 
   GeoLocation copyWith({
     double? latitude,

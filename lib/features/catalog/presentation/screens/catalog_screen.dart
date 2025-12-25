@@ -1,11 +1,13 @@
-import 'package:astr/core/widgets/cosmic_loader.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
-import 'package:astr/features/catalog/presentation/providers/catalog_notifier.dart';
-import 'package:astr/features/catalog/presentation/widgets/object_list_item.dart';
-import 'package:astr/features/dashboard/presentation/widgets/nebula_background.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../core/widgets/cosmic_loader.dart';
+import '../../../dashboard/presentation/widgets/nebula_background.dart';
+import '../../domain/entities/celestial_object.dart';
+import '../../domain/entities/celestial_type.dart';
+import '../providers/catalog_notifier.dart';
+import '../widgets/object_list_item.dart';
 
 /// Main catalog screen showing list of celestial objects
 class CatalogScreen extends ConsumerWidget {
@@ -13,24 +15,24 @@ class CatalogScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(catalogNotifierProvider);
+    final CatalogState state = ref.watch(catalogNotifierProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF020204),
       body: Stack(
-        children: [
+        children: <Widget>[
           const NebulaBackground(),
           SafeArea(
             bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 // Header
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       const Text(
                         'Celestial Objects',
                         style: TextStyle(
@@ -57,8 +59,8 @@ class CatalogScreen extends ConsumerWidget {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: CelestialType.values.map((type) {
-                      final isSelected = state.selectedType == type;
+                    children: CelestialType.values.map((CelestialType type) {
+                      final bool isSelected = state.selectedType == type;
                       return Padding(
                         padding: const EdgeInsets.only(right: 12),
                         child: ChoiceChip(
@@ -93,8 +95,8 @@ class CatalogScreen extends ConsumerWidget {
                       return const LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.white],
-                        stops: [0.0, 0.05], // Soft fade at the top
+                        colors: <Color>[Colors.transparent, Colors.white],
+                        stops: <double>[0, 0.05], // Soft fade at the top
                       ).createShader(bounds);
                     },
                     blendMode: BlendMode.dstIn,
@@ -125,8 +127,8 @@ class CatalogScreen extends ConsumerWidget {
                                     ),
                                     itemCount: state.objects.length,
                                     separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                    itemBuilder: (context, index) {
-                                      final object = state.objects[index];
+                                    itemBuilder: (BuildContext context, int index) {
+                                      final CelestialObject object = state.objects[index];
                                       return ObjectListItem(
                                         object: object,
                                         onTap: () {

@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:isolate';
-import 'package:astr/core/engine/algorithms/coordinate_transformations.dart';
-import 'package:astr/core/engine/algorithms/rise_set_calculator.dart';
-import 'package:astr/core/engine/isolates/calculation_commands.dart';
-import 'package:astr/core/engine/models/coordinates.dart';
-import 'package:astr/core/engine/models/rise_set_times.dart';
+
+import '../algorithms/coordinate_transformations.dart';
+import '../algorithms/rise_set_calculator.dart';
+import '../models/coordinates.dart';
+import '../models/rise_set_times.dart';
+import 'calculation_commands.dart';
 
 /// Manages background Isolate for astronomical calculations
 ///
@@ -15,7 +16,7 @@ class EngineIsolateManager {
   Isolate? _isolate;
   SendPort? _sendPort;
   ReceivePort? _receivePort;
-  final Map<int, Completer<dynamic>> _pendingRequests = {};
+  final Map<int, Completer<dynamic>> _pendingRequests = <int, Completer>{};
   int _nextRequestId = 0;
   bool _isInitialized = false;
 
@@ -27,8 +28,8 @@ class EngineIsolateManager {
     CalculatePositionCommand command,
   ) async {
     // Measure execution time of a quick test run
-    final stopwatch = Stopwatch()..start();
-    final result = _calculatePositionSync(command);
+    final Stopwatch stopwatch = Stopwatch()..start();
+    final HorizontalCoordinates result = _calculatePositionSync(command);
     stopwatch.stop();
 
     // If calculation is fast enough, return immediately
@@ -38,7 +39,7 @@ class EngineIsolateManager {
 
     // Otherwise, offload to isolate for future calls
     return _executeInIsolate<HorizontalCoordinatesResult>(command)
-        .then((r) => r.toCoordinates());
+        .then((HorizontalCoordinatesResult r) => r.toCoordinates());
   }
 
   /// Executes a rise/set calculation, offloading to isolate if needed
@@ -46,8 +47,8 @@ class EngineIsolateManager {
     CalculateRiseSetCommand command,
   ) async {
     // Measure execution time
-    final stopwatch = Stopwatch()..start();
-    final result = _calculateRiseSetSync(command);
+    final Stopwatch stopwatch = Stopwatch()..start();
+    final RiseSetTimes result = _calculateRiseSetSync(command);
     stopwatch.stop();
 
     // If calculation is fast enough, return immediately
@@ -56,7 +57,7 @@ class EngineIsolateManager {
     }
 
     // Otherwise, offload to isolate
-    return _executeInIsolate<RiseSetTimesResult>(command).then((r) =>
+    return _executeInIsolate<RiseSetTimesResult>(command).then((RiseSetTimesResult r) =>
         RiseSetTimes(
           riseTime: r.riseTime,
           transitTime: r.transitTime,
@@ -92,8 +93,8 @@ class EngineIsolateManager {
       await _initialize();
     }
 
-    final requestId = _nextRequestId++;
-    final completer = Completer<T>();
+    final int requestId = _nextRequestId++;
+    final Completer<T> completer = Completer<T>();
     _pendingRequests[requestId] = completer;
 
     _sendPort!.send(_IsolateRequest(
@@ -116,7 +117,7 @@ class EngineIsolateManager {
     );
 
     // Wait for the isolate's SendPort
-    final completer = Completer<SendPort>();
+    final Completer<SendPort> completer = Completer<SendPort>();
     late StreamSubscription subscription;
 
     subscription = _receivePort!.listen((message) {
@@ -131,7 +132,7 @@ class EngineIsolateManager {
     // Listen for responses
     _receivePort!.listen((message) {
       if (message is _IsolateResponse) {
-        final completer = _pendingRequests.remove(message.requestId);
+        final Completer? completer = _pendingRequests.remove(message.requestId);
         if (completer != null) {
           if (message.error != null) {
             completer.completeError(
@@ -159,7 +160,7 @@ class EngineIsolateManager {
     _receivePort = null;
     _sendPort = null;
 
-    for (final completer in _pendingRequests.values) {
+    for (final Completer completer in _pendingRequests.values) {
       if (!completer.isCompleted) {
         completer.completeError(
           StateError('IsolateManager disposed while request was pending'),
@@ -173,7 +174,7 @@ class EngineIsolateManager {
 
   /// Entry point for the isolate worker
   static void _isolateEntryPoint(SendPort sendPort) {
-    final receivePort = ReceivePort();
+    final ReceivePort receivePort = ReceivePort();
     sendPort.send(receivePort.sendPort);
 
     receivePort.listen((message) {
@@ -198,7 +199,7 @@ class EngineIsolateManager {
   /// Processes a calculation command in the isolate
   static dynamic _processCommand(CalculationCommand command) {
     if (command is CalculatePositionCommand) {
-      final result = CoordinateTransformations.equatorialToHorizontal(
+      final HorizontalCoordinates result = CoordinateTransformations.equatorialToHorizontal(
         command.equatorialCoordinates,
         command.location,
         command.dateTime,
@@ -208,7 +209,7 @@ class EngineIsolateManager {
         azimuth: result.azimuth,
       );
     } else if (command is CalculateRiseSetCommand) {
-      final result = RiseSetCalculator.calculateRiseSetIterative(
+      final RiseSetTimes result = RiseSetCalculator.calculateRiseSetIterative(
         command.equatorialCoordinates,
         command.location,
         command.date,
@@ -227,21 +228,17 @@ class EngineIsolateManager {
 
 /// Request message sent to the isolate
 class _IsolateRequest {
-  final int requestId;
-  final CalculationCommand command;
 
   _IsolateRequest({
     required this.requestId,
     required this.command,
   });
+  final int requestId;
+  final CalculationCommand command;
 }
 
 /// Response message from the isolate
 class _IsolateResponse {
-  final int requestId;
-  final dynamic result;
-  final String? error;
-  final StackTrace? stackTrace;
 
   _IsolateResponse({
     required this.requestId,
@@ -249,4 +246,8 @@ class _IsolateResponse {
     this.error,
     this.stackTrace,
   });
+  final int requestId;
+  final dynamic result;
+  final String? error;
+  final StackTrace? stackTrace;
 }

@@ -1,13 +1,11 @@
 import 'package:astr/app/router/app_router.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
-import 'package:astr/features/catalog/presentation/providers/catalog_notifier.dart';
 import 'package:astr/features/catalog/presentation/screens/catalog_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CatalogScreen displays category filter chips', (tester) async {
+  testWidgets('CatalogScreen displays category filter chips', (WidgetTester tester) async {
     // Arrange
     await tester.pumpWidget(
       const ProviderScope(
@@ -27,7 +25,7 @@ void main() {
     expect(find.text('Galaxies'), findsOneWidget);
   });
 
-  testWidgets('Tapping category chip switches filter', (tester) async {
+  testWidgets('Tapping category chip switches filter', (WidgetTester tester) async {
     // Arrange
     await tester.pumpWidget(
       const ProviderScope(
@@ -51,7 +49,7 @@ void main() {
     expect(find.text('Sirius'), findsOneWidget);
   });
 
-  testWidgets('List displays objects after loading', (tester) async {
+  testWidgets('List displays objects after loading', (WidgetTester tester) async {
     // Arrange
     await tester.pumpWidget(
       const ProviderScope(
@@ -69,14 +67,14 @@ void main() {
     expect(find.text('Mars'), findsOneWidget);
   });
 
-  testWidgets('Navigation from catalog to detail page works', (tester) async {
+  testWidgets('Navigation from catalog to detail page works', (WidgetTester tester) async {
     // TODO: Skip this test due to Rive FFI issues in VM test environment
     // The route is verified to exist in app_router.dart:53-61
     // Navigation call verified in catalog_screen.dart:117
     // Detail screen functionality verified in object_detail_screen_test.dart
     return;
     // Arrange
-    final container = ProviderContainer();
+    final ProviderContainer container = ProviderContainer();
     addTearDown(container.dispose);
 
     await tester.pumpWidget(

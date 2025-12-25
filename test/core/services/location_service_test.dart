@@ -2,11 +2,11 @@ import 'package:astr/core/error/failure.dart';
 import 'package:astr/core/services/device_location_service.dart';
 import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/src/either.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:mockito/annotations.dart';
+import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
 import 'package:mockito/mockito.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
 
 
 
@@ -16,7 +16,7 @@ class MockGeolocatorPlatform extends Mock
   @override
   Future<bool> isLocationServiceEnabled() {
     return super.noSuchMethod(
-      Invocation.method(#isLocationServiceEnabled, []),
+      Invocation.method(#isLocationServiceEnabled, <Object?>[]),
       returnValue: Future.value(false),
     );
   }
@@ -24,7 +24,7 @@ class MockGeolocatorPlatform extends Mock
   @override
   Future<LocationPermission> checkPermission() {
     return super.noSuchMethod(
-      Invocation.method(#checkPermission, []),
+      Invocation.method(#checkPermission, <Object?>[]),
       returnValue: Future.value(LocationPermission.denied),
     );
   }
@@ -32,7 +32,7 @@ class MockGeolocatorPlatform extends Mock
   @override
   Future<LocationPermission> requestPermission() {
     return super.noSuchMethod(
-      Invocation.method(#requestPermission, []),
+      Invocation.method(#requestPermission, <Object?>[]),
       returnValue: Future.value(LocationPermission.denied),
     );
   }
@@ -40,8 +40,8 @@ class MockGeolocatorPlatform extends Mock
   @override
   Future<Position> getCurrentPosition({LocationSettings? locationSettings}) {
     return super.noSuchMethod(
-      Invocation.method(#getCurrentPosition, [],
-          {#locationSettings: locationSettings}),
+      Invocation.method(#getCurrentPosition, <Object?>[],
+          <Symbol, Object?>{#locationSettings: locationSettings}),
       returnValue: Future.value(Position(
           longitude: 0,
           latitude: 0,
@@ -78,26 +78,26 @@ void main() {
       when(mockGeolocatorPlatform.getCurrentPosition(
         locationSettings: anyNamed('locationSettings'),
       )).thenAnswer((_) async => Position(
-            longitude: 10.0,
-            latitude: 20.0,
+            longitude: 10,
+            latitude: 20,
             timestamp: DateTime.now(),
-            accuracy: 0.0,
-            altitude: 0.0,
-            altitudeAccuracy: 0.0,
-            heading: 0.0,
-            headingAccuracy: 0.0,
-            speed: 0.0,
-            speedAccuracy: 0.0,
+            accuracy: 0,
+            altitude: 0,
+            altitudeAccuracy: 0,
+            heading: 0,
+            headingAccuracy: 0,
+            speed: 0,
+            speedAccuracy: 0,
           ));
 
       // Act
-      final result = await service.getCurrentLocation();
+      final Either<Failure, GeoLocation> result = await service.getCurrentLocation();
 
       // Assert
       expect(result.isRight(), true);
       result.fold(
-        (l) => fail('Should be Right'),
-        (r) => expect(r, const GeoLocation(latitude: 20.0, longitude: 10.0)),
+        (Failure l) => fail('Should be Right'),
+        (GeoLocation r) => expect(r, const GeoLocation(latitude: 20, longitude: 10)),
       );
     });
 
@@ -107,13 +107,13 @@ void main() {
           .thenAnswer((_) async => false);
 
       // Act
-      final result = await service.getCurrentLocation();
+      final Either<Failure, GeoLocation> result = await service.getCurrentLocation();
 
       // Assert
       expect(result.isLeft(), true);
       result.fold(
-        (l) => expect(l, isA<LocationFailure>()),
-        (r) => fail('Should be Left'),
+        (Failure l) => expect(l, isA<LocationFailure>()),
+        (GeoLocation r) => fail('Should be Left'),
       );
     });
 
@@ -127,13 +127,13 @@ void main() {
           .thenAnswer((_) async => LocationPermission.denied);
 
       // Act
-      final result = await service.getCurrentLocation();
+      final Either<Failure, GeoLocation> result = await service.getCurrentLocation();
 
       // Assert
       expect(result.isLeft(), true);
       result.fold(
-        (l) => expect(l, isA<PermissionFailure>()),
-        (r) => fail('Should be Left'),
+        (Failure l) => expect(l, isA<PermissionFailure>()),
+        (GeoLocation r) => fail('Should be Left'),
       );
     });
   });

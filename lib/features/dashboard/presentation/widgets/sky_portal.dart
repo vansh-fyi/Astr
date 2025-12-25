@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:astr/core/engine/models/condition_result.dart';
+import '../../../../core/engine/models/condition_result.dart';
 
 class SkyPortal extends StatelessWidget {
-  final String qualityLabel;
-  final int score;
-  final VoidCallback? onTap;
-  final ConditionResult? conditionResult;
 
   const SkyPortal({
     super.key,
@@ -15,6 +11,10 @@ class SkyPortal extends StatelessWidget {
     this.onTap,
     this.conditionResult,
   });
+  final String qualityLabel;
+  final int score;
+  final VoidCallback? onTap;
+  final ConditionResult? conditionResult;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class SkyPortal extends StatelessWidget {
         onTap: onTap,
         child: Stack(
           alignment: Alignment.center,
-          children: [
+          children: <Widget>[
             // Outer Glow Rings
             Container(
               width: 300,
@@ -33,14 +33,14 @@ class SkyPortal extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.bottomLeft,
                   end: Alignment.topRight,
-                  colors: [
+                  colors: <Color>[
                     Colors.indigo.withOpacity(0.2),
                     Colors.purple.withOpacity(0.2),
                   ],
                 ),
               ),
             )
-            .animate(onPlay: (controller) => controller.repeat(reverse: true))
+            .animate(onPlay: (AnimationController controller) => controller.repeat(reverse: true))
             .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 4.seconds)
             .fade(begin: 0.5, end: 0.8, duration: 4.seconds),
 
@@ -54,12 +54,12 @@ class SkyPortal extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: <Color>[
                     Colors.white.withOpacity(0.05),
                     Colors.transparent,
                   ],
                 ),
-                boxShadow: [
+                boxShadow: <BoxShadow>[
                   BoxShadow(
                     color: Colors.indigo.withOpacity(0.15),
                     blurRadius: 50,
@@ -68,7 +68,7 @@ class SkyPortal extends StatelessWidget {
                 ],
               ),
               child: Stack(
-                children: [
+                children: <Widget>[
                    // Inner Ring
                    Positioned.fill(
                      child: Container(
@@ -89,11 +89,9 @@ class SkyPortal extends StatelessWidget {
                          shape: BoxShape.circle,
                          border: Border.all(
                            color: Colors.white.withOpacity(0.1),
-                           style: BorderStyle.solid, // Flutter doesn't support dashed borders natively on circles easily without custom painter
-                           width: 1,
                          ),
                        ),
-                     ).animate(onPlay: (controller) => controller.repeat())
+                     ).animate(onPlay: (AnimationController controller) => controller.repeat())
                       .rotate(duration: 60.seconds),
                    ),
 
@@ -101,12 +99,12 @@ class SkyPortal extends StatelessWidget {
                    Center(
                      child: Column(
                        mainAxisSize: MainAxisSize.min,
-                       children: [
+                       children: <Widget>[
                          Text(
                            'CONDITIONS',
                            style: TextStyle(
                              fontSize: 10,
-                             letterSpacing: 2.0,
+                             letterSpacing: 2,
                              color: Colors.indigo[200],
                              fontWeight: FontWeight.w500,
                            ),
@@ -117,9 +115,9 @@ class SkyPortal extends StatelessWidget {
                            style: const TextStyle(
                              fontSize: 48,
                              fontWeight: FontWeight.w500,
-                             height: 1.0,
+                             height: 1,
                              color: Colors.white,
-                             letterSpacing: -1.0,
+                             letterSpacing: -1,
                            ),
                          ).animate().shimmer(duration: 2.seconds, delay: 1.seconds),
                          const SizedBox(height: 8),
@@ -134,7 +132,7 @@ class SkyPortal extends StatelessWidget {
                              ),
                              child: Row(
                                mainAxisSize: MainAxisSize.min,
-                               children: [
+                               children: <Widget>[
                                  Container(
                                    width: 6,
                                    height: 6,
@@ -142,7 +140,7 @@ class SkyPortal extends StatelessWidget {
                                      color: conditionResult!.statusColor,
                                      shape: BoxShape.circle,
                                    ),
-                                 ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                                 ).animate(onPlay: (AnimationController controller) => controller.repeat(reverse: true))
                                   .fadeIn(duration: 1.seconds)
                                   .fadeOut(duration: 1.seconds),
                                  const SizedBox(width: 6),
@@ -168,7 +166,7 @@ class SkyPortal extends StatelessWidget {
                              ),
                              child: Row(
                                mainAxisSize: MainAxisSize.min,
-                               children: [
+                               children: <Widget>[
                                  Container(
                                    width: 6,
                                    height: 6,
@@ -176,7 +174,7 @@ class SkyPortal extends StatelessWidget {
                                      color: Colors.greenAccent,
                                      shape: BoxShape.circle,
                                    ),
-                                 ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                                 ).animate(onPlay: (AnimationController controller) => controller.repeat(reverse: true))
                                   .fadeIn(duration: 1.seconds)
                                   .fadeOut(duration: 1.seconds),
                                  const SizedBox(width: 6),

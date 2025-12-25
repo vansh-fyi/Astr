@@ -1,12 +1,12 @@
 /// Entity representing a single data point on the visibility graph
-class GraphPoint {
-  final DateTime time;
-  final double value; // Altitude in degrees (0-90) or Interference percentage (0-100)
+class GraphPoint { // Altitude in degrees (0-90) or Interference percentage (0-100)
 
   const GraphPoint({
     required this.time,
     required this.value,
   });
+  final DateTime time;
+  final double value;
 
   @override
   bool operator ==(Object other) =>

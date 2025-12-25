@@ -1,13 +1,15 @@
+import 'package:astr/core/error/failure.dart';
 import 'package:astr/features/profile/data/repositories/profile_repository.dart';
 import 'package:astr/features/profile/domain/entities/saved_location.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/src/either.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'profile_repository_test.mocks.dart';
 
-@GenerateMocks([Box])
+@GenerateMocks(<Type>[Box])
 void main() {
   late ProfileRepository repository;
   late MockBox<SavedLocation> mockBox;
@@ -17,21 +19,21 @@ void main() {
     repository = ProfileRepository(mockBox);
   });
 
-  final tSavedLocation = SavedLocation(
+  final SavedLocation tSavedLocation = SavedLocation(
     id: '1',
     name: 'Test Location',
-    latitude: 10.0,
-    longitude: 20.0,
+    latitude: 10,
+    longitude: 20,
     createdAt: DateTime.now(),
   );
 
   group('saveLocation', () {
     test('should save location to box', () async {
       // Arrange
-      when(mockBox.put(any, any)).thenAnswer((_) async => {});
+      when(mockBox.put(any, any)).thenAnswer((_) async => <dynamic, dynamic>{});
 
       // Act
-      final result = await repository.saveLocation(tSavedLocation);
+      final Either<Failure, void> result = await repository.saveLocation(tSavedLocation);
 
       // Assert
       verify(mockBox.put(tSavedLocation.id, tSavedLocation));
@@ -40,18 +42,17 @@ void main() {
 
     test('should save location with null bortleClass', () async {
       // Arrange
-      final tLocationNullBortle = SavedLocation(
+      final SavedLocation tLocationNullBortle = SavedLocation(
         id: '2',
         name: 'Null Bortle',
         latitude: 0,
         longitude: 0,
         createdAt: DateTime.now(),
-        bortleClass: null,
       );
-      when(mockBox.put(any, any)).thenAnswer((_) async => {});
+      when(mockBox.put(any, any)).thenAnswer((_) async => <dynamic, dynamic>{});
 
       // Act
-      final result = await repository.saveLocation(tLocationNullBortle);
+      final Either<Failure, void> result = await repository.saveLocation(tLocationNullBortle);
 
       // Assert
       verify(mockBox.put(tLocationNullBortle.id, tLocationNullBortle));
@@ -62,16 +63,16 @@ void main() {
   group('getSavedLocations', () {
     test('should return list of locations', () async {
       // Arrange
-      when(mockBox.values).thenReturn([tSavedLocation]);
+      when(mockBox.values).thenReturn(<SavedLocation>[tSavedLocation]);
 
       // Act
-      final result = await repository.getSavedLocations();
+      final Either<Failure, List<SavedLocation>> result = await repository.getSavedLocations();
 
       // Assert
       expect(result.isRight(), true);
       result.fold(
-        (l) => fail('Should not return failure'),
-        (r) => expect(r, [tSavedLocation]),
+        (Failure l) => fail('Should not return failure'),
+        (List<SavedLocation> r) => expect(r, <SavedLocation>[tSavedLocation]),
       );
     });
   });
@@ -79,10 +80,10 @@ void main() {
   group('deleteLocation', () {
     test('should delete location from box', () async {
       // Arrange
-      when(mockBox.delete(any)).thenAnswer((_) async => {});
+      when(mockBox.delete(any)).thenAnswer((_) async => <dynamic, dynamic>{});
 
       // Act
-      final result = await repository.deleteLocation('1');
+      final Either<Failure, void> result = await repository.deleteLocation('1');
 
       // Assert
       verify(mockBox.delete('1'));

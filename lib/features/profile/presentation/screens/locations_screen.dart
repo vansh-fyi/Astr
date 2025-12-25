@@ -1,37 +1,39 @@
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/core/widgets/glass_toast.dart';
-import 'package:astr/features/context/domain/entities/geo_location.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
-import 'package:astr/features/dashboard/presentation/widgets/nebula_background.dart';
-import 'package:astr/features/profile/domain/entities/saved_location.dart';
-import 'package:astr/features/profile/presentation/providers/saved_locations_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ionicons/ionicons.dart';
+
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../../core/widgets/glass_toast.dart';
+import '../../../context/domain/entities/astr_context.dart';
+import '../../../context/domain/entities/geo_location.dart';
+import '../../../context/presentation/providers/astr_context_provider.dart';
+import '../../../dashboard/presentation/widgets/nebula_background.dart';
+import '../../domain/entities/saved_location.dart';
+import '../providers/saved_locations_provider.dart';
 
 class LocationsScreen extends ConsumerWidget {
   const LocationsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final savedLocationsAsync = ref.watch(savedLocationsNotifierProvider);
+    final AsyncValue<List<SavedLocation>> savedLocationsAsync = ref.watch(savedLocationsNotifierProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF020204),
       body: Stack(
-        children: [
+        children: <Widget>[
           const NebulaBackground(),
           SafeArea(
             bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 // Header
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Row(
-                    children: [
+                    children: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () => context.pop(),
@@ -52,12 +54,12 @@ class LocationsScreen extends ConsumerWidget {
                 // Content
                 Expanded(
                   child: savedLocationsAsync.when(
-                    data: (locations) {
+                    data: (List<SavedLocation> locations) {
                       if (locations.isEmpty) {
                         return Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                            children: <Widget>[
                               Icon(
                                 Ionicons.location_outline,
                                 size: 64,
@@ -80,8 +82,8 @@ class LocationsScreen extends ConsumerWidget {
                           return const LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Colors.white],
-                            stops: [0.0, 0.05],
+                            colors: <Color>[Colors.transparent, Colors.white],
+                            stops: <double>[0, 0.05],
                           ).createShader(bounds);
                         },
                         blendMode: BlendMode.dstIn,
@@ -94,8 +96,8 @@ class LocationsScreen extends ConsumerWidget {
                           ),
                           itemCount: locations.length,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final location = locations[index];
+                          itemBuilder: (BuildContext context, int index) {
+                            final SavedLocation location = locations[index];
                             return Dismissible(
                               key: Key(location.id),
                               direction: DismissDirection.endToStart,
@@ -108,7 +110,7 @@ class LocationsScreen extends ConsumerWidget {
                                 ),
                                 child: const Icon(Ionicons.trash, color: Colors.white),
                               ),
-                              onDismissed: (direction) {
+                              onDismissed: (DismissDirection direction) {
                                 _deleteLocation(context, ref, location);
                               },
                               child: _LocationItem(location: location),
@@ -120,7 +122,7 @@ class LocationsScreen extends ConsumerWidget {
                     loading: () => const Center(
                       child: CircularProgressIndicator(color: Colors.white),
                     ),
-                    error: (err, stack) => Center(
+                    error: (Object err, StackTrace stack) => Center(
                       child: Text(
                         'Error: $err',
                         style: const TextStyle(color: Colors.red),
@@ -149,15 +151,15 @@ class LocationsScreen extends ConsumerWidget {
 }
 
 class _LocationItem extends ConsumerWidget {
-  final SavedLocation location;
 
   const _LocationItem({required this.location});
+  final SavedLocation location;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GlassPanel(
       onTap: () {
-        final geoLocation = GeoLocation(
+        final GeoLocation geoLocation = GeoLocation(
           latitude: location.latitude,
           longitude: location.longitude,
           name: location.name,
@@ -168,7 +170,7 @@ class _LocationItem extends ConsumerWidget {
       onLongPress: () => _showLocationOptions(context, ref, location),
       padding: const EdgeInsets.all(16),
       child: Row(
-        children: [
+        children: <Widget>[
           // Icon
           Container(
             width: 48,
@@ -191,7 +193,7 @@ class _LocationItem extends ConsumerWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 Text(
                   location.name,
                   style: const TextStyle(
@@ -253,11 +255,11 @@ class _LocationItem extends ConsumerWidget {
       context: context,
       useRootNavigator: true, // Ensure it shows above bottom nav
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (BuildContext context) => Container(
         padding: EdgeInsets.only(
-          left: 20.0,
-          right: 20.0,
-          top: 24.0,
+          left: 20,
+          right: 20,
+          top: 24,
           bottom: 50.0 + MediaQuery.of(context).padding.bottom,
         ),
         decoration: const BoxDecoration(
@@ -267,7 +269,7 @@ class _LocationItem extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+          children: <Widget>[
             Container(
               alignment: Alignment.center,
               child: Container(
@@ -308,7 +310,7 @@ class _LocationItem extends ConsumerWidget {
               },
               padding: const EdgeInsets.all(16),
               child: Row(
-                children: [
+                children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -338,9 +340,9 @@ class _LocationItem extends ConsumerWidget {
                 _deleteLocation(context, ref, location);
               },
               padding: const EdgeInsets.all(16),
-              border: Border.all(color: Colors.redAccent.withOpacity(0.3), width: 1),
+              border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
               child: Row(
-                children: [
+                children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -370,8 +372,8 @@ class _LocationItem extends ConsumerWidget {
 }
 
 void _deleteLocation(BuildContext context, WidgetRef ref, SavedLocation location) {
-  final currentContext = ref.read(astrContextProvider).value;
-  final isCurrent = currentContext?.location.latitude == location.latitude &&
+  final AstrContext? currentContext = ref.read(astrContextProvider).value;
+  final bool isCurrent = currentContext?.location.latitude == location.latitude &&
       currentContext?.location.longitude == location.longitude;
 
   ref.read(savedLocationsNotifierProvider.notifier).deleteLocation(location.id);

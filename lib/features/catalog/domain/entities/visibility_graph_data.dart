@@ -1,15 +1,8 @@
-import 'package:astr/features/catalog/domain/entities/graph_point.dart';
-import 'package:astr/features/catalog/domain/entities/time_range.dart';
+import 'graph_point.dart';
+import 'time_range.dart';
 
 /// Entity containing all data needed to render the visibility graph
 class VisibilityGraphData {
-  final List<GraphPoint> objectCurve; // Object altitude over time
-  final List<GraphPoint> moonCurve;   // Moon interference over time
-  final List<TimeRange> optimalWindows; // Time ranges where viewing is best
-  final DateTime? sunRise;
-  final DateTime? sunSet;
-  final DateTime? moonRise;
-  final DateTime? moonSet;
 
   const VisibilityGraphData({
     required this.objectCurve,
@@ -20,6 +13,13 @@ class VisibilityGraphData {
     this.moonRise,
     this.moonSet,
   });
+  final List<GraphPoint> objectCurve; // Object altitude over time
+  final List<GraphPoint> moonCurve;   // Moon interference over time
+  final List<TimeRange> optimalWindows; // Time ranges where viewing is best
+  final DateTime? sunRise;
+  final DateTime? sunSet;
+  final DateTime? moonRise;
+  final DateTime? moonSet;
 
   @override
   bool operator ==(Object other) =>

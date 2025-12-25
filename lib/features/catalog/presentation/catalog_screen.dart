@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
+
+import '../../../core/widgets/glass_panel.dart';
 import '../../app/theme/app_theme.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
 import '../../dashboard/presentation/widgets/nebula_background.dart';
 
 class CatalogScreen extends ConsumerWidget {
@@ -13,17 +14,17 @@ class CatalogScreen extends ConsumerWidget {
     return Scaffold(
       extendBody: true,
       body: Stack(
-        children: [
+        children: <Widget>[
           // Background (Nebula Gradient)
           const NebulaBackground(),
 
           // Content
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   const SizedBox(height: 20),
                   const Text(
                     'Celestial Catalog',
@@ -31,7 +32,7 @@ class CatalogScreen extends ConsumerWidget {
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      letterSpacing: -1.0,
+                      letterSpacing: -1,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -40,7 +41,7 @@ class CatalogScreen extends ConsumerWidget {
                   GlassPanel(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Row(
-                      children: [
+                      children: <Widget>[
                         Icon(Ionicons.search, color: Colors.white.withValues(alpha: 0.5)),
                         const SizedBox(width: 12),
                         Text(
@@ -60,7 +61,7 @@ class CatalogScreen extends ConsumerWidget {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: [
+                      children: <Widget>[
                         _buildCategoryChip('All', true),
                         _buildCategoryChip('Planets', false),
                         _buildCategoryChip('Stars', false),
@@ -75,14 +76,14 @@ class CatalogScreen extends ConsumerWidget {
                   Expanded(
                     child: ListView.builder(
                       itemCount: 5,
-                      itemBuilder: (context, index) {
+                      itemBuilder: (BuildContext context, int index) {
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: GlassPanel(
                             enableBlur: false,
                             padding: const EdgeInsets.all(16),
                             child: Row(
-                              children: [
+                              children: <Widget>[
                                 Container(
                                   width: 48,
                                   height: 48,
@@ -95,7 +96,7 @@ class CatalogScreen extends ConsumerWidget {
                                 const SizedBox(width: 16),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                                  children: <Widget>[
                                     Text(
                                       'Object ${index + 1}',
                                       style: const TextStyle(

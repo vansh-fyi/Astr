@@ -1,24 +1,26 @@
-import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
-import 'package:astr/features/dashboard/domain/entities/highlight_item.dart';
-import 'package:astr/features/dashboard/domain/logic/highlights_logic.dart';
-import 'package:astr/features/dashboard/presentation/providers/highlight_time_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
+
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../astronomy/domain/entities/astronomy_state.dart';
+import '../../../astronomy/presentation/providers/astronomy_provider.dart';
+import '../../domain/entities/highlight_item.dart';
+import '../../domain/logic/highlights_logic.dart';
+import '../providers/highlight_time_provider.dart';
 import 'celestial_detail_sheet.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
 
 class HighlightsFeed extends ConsumerWidget {
   const HighlightsFeed({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final astronomyState = ref.watch(astronomyProvider);
+    final AsyncValue<AstronomyState> astronomyState = ref.watch(astronomyProvider);
 
     return astronomyState.when(
-      data: (state) {
-        final highlights = HighlightsLogic.selectTop3(positions: state.positions);
+      data: (AstronomyState state) {
+        final List<HighlightItem> highlights = HighlightsLogic.selectTop3(positions: state.positions);
 
         if (highlights.isEmpty) {
           return const SizedBox.shrink();
@@ -26,11 +28,11 @@ class HighlightsFeed extends ConsumerWidget {
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                'TONIGHT\'S HIGHLIGHTS',
+                "TONIGHT'S HIGHLIGHTS",
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.5),
                   fontSize: 10,
@@ -40,7 +42,7 @@ class HighlightsFeed extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            ...highlights.map((item) => _HighlightItemWidget(item: item)),
+            ...highlights.map((HighlightItem item) => _HighlightItemWidget(item: item)),
           ],
         );
       },
@@ -51,21 +53,21 @@ class HighlightsFeed extends ConsumerWidget {
 }
 
 class _HighlightItemWidget extends ConsumerWidget {
-  final HighlightItem item;
 
   const _HighlightItemWidget({required this.item});
+  final HighlightItem item;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncTime = ref.watch(highlightTimeProvider(item.body));
-    final timeStr = asyncTime.when(
-      data: (time) => time != null ? DateFormat('HH:mm').format(time) : '--:--',
+    final AsyncValue<DateTime?> asyncTime = ref.watch(highlightTimeProvider(item.body));
+    final String timeStr = asyncTime.when(
+      data: (DateTime? time) => time != null ? DateFormat('HH:mm').format(time) : '--:--',
       loading: () => '...',
       error: (_, __) => '--:--',
     );
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.only(bottom: 10),
       child: GlassPanel(
         enableBlur: false,
         padding: const EdgeInsets.all(16),
@@ -74,16 +76,15 @@ class _HighlightItemWidget extends ConsumerWidget {
             context: context,
             backgroundColor: Colors.transparent,
             isScrollControlled: true,
-            builder: (context) => CelestialDetailSheet(
+            builder: (BuildContext context) => CelestialDetailSheet(
               objectId: item.body.name.toLowerCase(),
               title: item.body.displayName,
               subtitle: 'Best view: $timeStr',
-              themeColor: Colors.orange,
             ),
           );
         },
         child: Row(
-          children: [
+          children: <Widget>[
             // Icon Box
             Container(
               width: 40,
@@ -106,7 +107,7 @@ class _HighlightItemWidget extends ConsumerWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Text(
                     item.body.displayName,
                     style: const TextStyle(
@@ -119,7 +120,7 @@ class _HighlightItemWidget extends ConsumerWidget {
                   ),
                   const SizedBox(height: 2),
                   Row(
-                    children: [
+                    children: <Widget>[
                       Text(
                         'Best view: $timeStr',
                         style: TextStyle(

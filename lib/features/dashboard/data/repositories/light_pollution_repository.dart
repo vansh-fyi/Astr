@@ -10,18 +10,18 @@ import '../datasources/png_map_service.dart';
 /// The PNG map is based on the World Atlas of Artificial Night Sky Brightness,
 /// which is calibrated for stargazing and Bortle scale accuracy.
 class LightPollutionRepository implements ILightPollutionService {
-  final PngMapService _pngService;
 
   LightPollutionRepository(this._pngService);
+  final PngMapService _pngService;
 
   @override
   Future<Either<Failure, LightPollution>> getLightPollution(GeoLocation location) async {
     try {
-      final result = await _pngService.getLightPollution(location);
+      final LightPollution? result = await _pngService.getLightPollution(location);
       if (result != null) {
         return Right(result);
       }
-      return Left(ServerFailure('Could not determine light pollution data'));
+      return const Left(ServerFailure('Could not determine light pollution data'));
     } catch (e) {
       return Left(ServerFailure('Light pollution lookup failed: $e'));
     }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 
 import '../../../../core/config/api_config.dart';
 import '../../../../core/error/failure.dart';
@@ -9,9 +8,9 @@ import '../../domain/entities/daily_forecast.dart';
 import '../../domain/repositories/i_planner_repository.dart';
 
 class PlannerRepositoryImpl implements IPlannerRepository {
-  final http.Client client;
 
   PlannerRepositoryImpl({required this.client});
+  final http.Client client;
 
   @override
   Future<Either<Failure, List<DailyForecast>>> get7DayForecast({
@@ -19,11 +18,11 @@ class PlannerRepositoryImpl implements IPlannerRepository {
     required double longitude,
   }) async {
     try {
-      final uri = Uri.parse(
+      final Uri uri = Uri.parse(
         '${ApiConfig.weatherBaseUrl}/forecast?latitude=$latitude&longitude=$longitude&daily=weathercode,cloudcover_mean,precipitation_probability_max&timezone=auto&forecast_days=7',
       );
 
-      final response = await client.get(uri);
+      final http.Response response = await client.get(uri);
 
       if (response.statusCode != 200) {
         return Left<Failure, List<DailyForecast>>(ServerFailure('Failed to fetch forecast: ${response.statusCode}'));
@@ -31,18 +30,18 @@ class PlannerRepositoryImpl implements IPlannerRepository {
 
       final data = json.decode(response.body);
       final daily = data['daily'];
-      final dates = (daily['time'] as List).cast<String>();
-      final weatherCodes = (daily['weathercode'] as List).cast<int>();
-      final cloudCovers = (daily['cloudcover_mean'] as List).cast<num>();
+      final List<String> dates = (daily['time'] as List).cast<String>();
+      final List<int> weatherCodes = (daily['weathercode'] as List).cast<int>();
+      final List<num> cloudCovers = (daily['cloudcover_mean'] as List).cast<num>();
       // Note: Precipitation probability is fetched but currently not used in the entity as per spec, 
       // but good to have for future.
 
-      final List<DailyForecast> forecasts = [];
+      final List<DailyForecast> forecasts = <DailyForecast>[];
 
       for (int i = 0; i < dates.length; i++) {
-        final date = DateTime.parse(dates[i]);
-        final cloudCover = cloudCovers[i].toDouble();
-        final code = weatherCodes[i].toString();
+        final DateTime date = DateTime.parse(dates[i]);
+        final double cloudCover = cloudCovers[i].toDouble();
+        final String code = weatherCodes[i].toString();
 
         // Placeholder star rating logic - will be refined in PlannerLogic or here if we move logic to repo.
         // For now, let's just map the raw data. The actual "Star Rating" calculation involving Moon Phase
@@ -93,15 +92,16 @@ class PlannerRepositoryImpl implements IPlannerRepository {
         // I will initialize `starRating` to 0 or a cloud-based value here.
         
         int simpleStarRating = 1;
-        if (cloudCover < 20) simpleStarRating = 5;
-        else if (cloudCover < 40) simpleStarRating = 4;
+        if (cloudCover < 20) {
+          simpleStarRating = 5;
+        } else if (cloudCover < 40) simpleStarRating = 4;
         else if (cloudCover < 60) simpleStarRating = 3;
         else if (cloudCover < 80) simpleStarRating = 2;
 
         forecasts.add(DailyForecast(
           date: date,
           cloudCoverAvg: cloudCover,
-          moonIllumination: 0.0, // Placeholder, to be filled by Logic/UseCase
+          moonIllumination: 0, // Placeholder, to be filled by Logic/UseCase
           weatherCode: code,
           starRating: simpleStarRating, // Preliminary, based on clouds only
         ));

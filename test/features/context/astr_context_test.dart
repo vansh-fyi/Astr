@@ -12,7 +12,7 @@ import 'package:mockito/mockito.dart';
 
 import 'astr_context_test.mocks.dart';
 
-@GenerateMocks([ILocationService])
+@GenerateMocks(<Type>[ILocationService])
 void main() {
   late MockILocationService mockLocationService;
   late ProviderContainer container;
@@ -22,7 +22,7 @@ void main() {
       const Right(GeoLocation(latitude: 0, longitude: 0)),
     );
     mockLocationService = MockILocationService();
-    container = ProviderContainer(overrides: [
+    container = ProviderContainer(overrides: <Override>[
       locationServiceProvider.overrideWithValue(mockLocationService),
     ]);
   });
@@ -34,14 +34,14 @@ void main() {
   group('AstrContextNotifier', () {
     test('initial state loads current location', () async {
       // Arrange
-      final location = const GeoLocation(latitude: 10, longitude: 20);
+      const GeoLocation location = GeoLocation(latitude: 10, longitude: 20);
       when(mockLocationService.getCurrentLocation())
-          .thenAnswer((_) async => Right(location));
+          .thenAnswer((_) async => const Right(location));
 
       // Act
-      final notifier = container.read(astrContextProvider.notifier);
+      final AstrContextNotifier notifier = container.read(astrContextProvider.notifier);
       // Wait for the build to complete
-      final initialState = await container.read(astrContextProvider.future);
+      final AstrContext initialState = await container.read(astrContextProvider.future);
 
       // Assert
       expect(initialState.location, location);
@@ -50,19 +50,19 @@ void main() {
 
     test('updateDate updates the date', () async {
       // Arrange
-      final location = const GeoLocation(latitude: 10, longitude: 20);
+      const GeoLocation location = GeoLocation(latitude: 10, longitude: 20);
       when(mockLocationService.getCurrentLocation())
-          .thenAnswer((_) async => Right(location));
+          .thenAnswer((_) async => const Right(location));
       
       // Ensure initial load completes
       await container.read(astrContextProvider.future);
 
       // Act
-      final newDate = DateTime(2025, 1, 1);
+      final DateTime newDate = DateTime(2025);
       container.read(astrContextProvider.notifier).updateDate(newDate);
 
       // Assert
-      final state = container.read(astrContextProvider);
+      final AsyncValue<AstrContext> state = container.read(astrContextProvider);
       expect(state.value!.selectedDate, newDate);
     });
   });

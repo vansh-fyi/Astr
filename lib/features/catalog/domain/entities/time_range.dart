@@ -1,12 +1,12 @@
 /// Entity representing a time range (e.g., for optimal viewing windows)
 class TimeRange {
-  final DateTime start;
-  final DateTime end;
 
   const TimeRange({
     required this.start,
     required this.end,
   });
+  final DateTime start;
+  final DateTime end;
 
   /// Duration of this time range
   Duration get duration => end.difference(start);

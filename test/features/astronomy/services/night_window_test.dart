@@ -33,17 +33,17 @@ void main() {
 
     test('AC #1: Returns timeframe from Sunset to Sunrise of next day', () async {
       // Arrange - Test with a specific date in summer (June 15, 2024)
-      final testDate = DateTime(2024, 6, 15, 14, 0); // 2 PM
+      final DateTime testDate = DateTime(2024, 6, 15, 14); // 2 PM
 
       // Act
-      final nightWindow = await astronomyService.getNightWindow(
+      final Map<String, DateTime> nightWindow = await astronomyService.getNightWindow(
         date: testDate,
         lat: testLat,
         long: testLong,
       );
 
-      final start = nightWindow['start']!;
-      final end = nightWindow['end']!;
+      final DateTime start = nightWindow['start']!;
+      final DateTime end = nightWindow['end']!;
 
       // Assert
       // 1. Start should be sunset on the selected date
@@ -63,7 +63,7 @@ void main() {
       expect(end.hour, lessThanOrEqualTo(7)); // Before 7 AM
 
       // 5. Duration should be a reasonable night length (8-12 hours)
-      final duration = end.difference(start);
+      final Duration duration = end.difference(start);
       expect(duration.inHours, greaterThanOrEqualTo(8));
       expect(duration.inHours, lessThanOrEqualTo(12));
 
@@ -72,17 +72,17 @@ void main() {
 
     test('AC #2: Context Continuity - Noon shows upcoming night', () async {
       // Arrange - Current time is noon (during the day)
-      final noonTime = DateTime(2024, 6, 15, 12, 0); // Noon
+      final DateTime noonTime = DateTime(2024, 6, 15, 12); // Noon
 
       // Act
-      final nightWindow = await astronomyService.getNightWindow(
+      final Map<String, DateTime> nightWindow = await astronomyService.getNightWindow(
         date: noonTime,
         lat: testLat,
         long: testLong,
       );
 
-      final start = nightWindow['start']!;
-      final end = nightWindow['end']!;
+      final DateTime start = nightWindow['start']!;
+      final DateTime end = nightWindow['end']!;
 
       // Assert
       // When it's noon, should show the UPCOMING night
@@ -99,17 +99,17 @@ void main() {
 
     test('AC #2: Context Continuity - Early morning shows current night', () async {
       // Arrange - Current time is 3 AM (after midnight, before sunrise)
-      final earlyMorning = DateTime(2024, 6, 16, 3, 0); // 3 AM
+      final DateTime earlyMorning = DateTime(2024, 6, 16, 3); // 3 AM
 
       // Act
-      final nightWindow = await astronomyService.getNightWindow(
+      final Map<String, DateTime> nightWindow = await astronomyService.getNightWindow(
         date: earlyMorning,
         lat: testLat,
         long: testLong,
       );
 
-      final start = nightWindow['start']!;
-      final end = nightWindow['end']!;
+      final DateTime start = nightWindow['start']!;
+      final DateTime end = nightWindow['end']!;
 
       // Assert
       // When it's 3 AM, should show the CURRENT night (started yesterday evening)
@@ -125,17 +125,17 @@ void main() {
 
     test('AC #2: Context Continuity - Evening shows current night', () async {
       // Arrange - Current time is 10 PM (after sunset)
-      final eveningTime = DateTime(2024, 6, 15, 22, 0); // 10 PM
+      final DateTime eveningTime = DateTime(2024, 6, 15, 22); // 10 PM
 
       // Act
-      final nightWindow = await astronomyService.getNightWindow(
+      final Map<String, DateTime> nightWindow = await astronomyService.getNightWindow(
         date: eveningTime,
         lat: testLat,
         long: testLong,
       );
 
-      final start = nightWindow['start']!;
-      final end = nightWindow['end']!;
+      final DateTime start = nightWindow['start']!;
+      final DateTime end = nightWindow['end']!;
 
       // Assert
       // When it's 10 PM, should show the CURRENT night
@@ -152,29 +152,29 @@ void main() {
 
     test('AC #3: Consistency - Different dates same location return valid windows', () async {
       // Test multiple dates to ensure consistency
-      final dates = [
+      final List<DateTime> dates = <DateTime>[
         DateTime(2024, 1, 15), // Winter
         DateTime(2024, 3, 15), // Spring
         DateTime(2024, 6, 15), // Summer
         DateTime(2024, 9, 15), // Fall
       ];
 
-      for (final date in dates) {
-        final nightWindow = await astronomyService.getNightWindow(
+      for (final DateTime date in dates) {
+        final Map<String, DateTime> nightWindow = await astronomyService.getNightWindow(
           date: date,
           lat: testLat,
           long: testLong,
         );
 
-        final start = nightWindow['start']!;
-        final end = nightWindow['end']!;
+        final DateTime start = nightWindow['start']!;
+        final DateTime end = nightWindow['end']!;
 
         // Each window should be valid
         expect(start.isBefore(end), true,
             reason: 'Sunset must be before sunrise for ${date.month}/${date.day}');
 
         // Duration should be reasonable for any season (6-16 hours)
-        final duration = end.difference(start);
+        final Duration duration = end.difference(start);
         expect(duration.inHours, greaterThanOrEqualTo(6),
             reason: 'Night too short for ${date.month}/${date.day}');
         expect(duration.inHours, lessThanOrEqualTo(16),
@@ -186,10 +186,10 @@ void main() {
 
     test('Performance: getNightWindow completes in <100ms', () async {
       // Arrange
-      final testDate = DateTime(2024, 6, 15);
+      final DateTime testDate = DateTime(2024, 6, 15);
 
       // Act & Assert
-      final stopwatch = Stopwatch()..start();
+      final Stopwatch stopwatch = Stopwatch()..start();
       await astronomyService.getNightWindow(
         date: testDate,
         lat: testLat,

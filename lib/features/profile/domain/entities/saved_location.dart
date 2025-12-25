@@ -4,6 +4,16 @@ part 'saved_location.g.dart';
 
 @HiveType(typeId: 1)
 class SavedLocation {
+
+  SavedLocation({
+    required this.id,
+    required this.name,
+    required this.latitude,
+    required this.longitude,
+    this.bortleClass,
+    required this.createdAt,
+    this.placeName,
+  });
   @HiveField(0)
   final String id;
 
@@ -24,14 +34,4 @@ class SavedLocation {
 
   @HiveField(6)
   final String? placeName;
-
-  SavedLocation({
-    required this.id,
-    required this.name,
-    required this.latitude,
-    required this.longitude,
-    this.bortleClass,
-    required this.createdAt,
-    this.placeName,
-  });
 }

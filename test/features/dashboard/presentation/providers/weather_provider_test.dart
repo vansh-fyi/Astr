@@ -1,22 +1,22 @@
+import 'package:astr/core/error/failure.dart';
+import 'package:astr/features/context/domain/entities/astr_context.dart';
+import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
+import 'package:astr/features/dashboard/domain/entities/hourly_forecast.dart';
+import 'package:astr/features/dashboard/domain/entities/weather.dart';
+import 'package:astr/features/dashboard/domain/repositories/i_weather_repository.dart';
 import 'package:astr/features/dashboard/presentation/providers/weather_provider.dart';
 import 'package:astr/features/planner/domain/entities/daily_forecast.dart';
 import 'package:astr/features/planner/presentation/providers/planner_provider.dart';
-import 'package:astr/features/dashboard/domain/repositories/i_weather_repository.dart';
-import 'package:astr/features/dashboard/domain/entities/weather.dart';
-import 'package:astr/features/dashboard/domain/entities/hourly_forecast.dart';
-import 'package:astr/features/context/domain/entities/astr_context.dart';
-import 'package:astr/features/context/domain/entities/geo_location.dart';
-import 'package:astr/core/error/failure.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:fpdart/fpdart.dart';
 
 import 'weather_provider_test.mocks.dart';
 
-@GenerateNiceMocks([
+@GenerateNiceMocks(<MockSpec>[
   MockSpec<IWeatherRepository>(),
 ])
 void main() {
@@ -24,7 +24,7 @@ void main() {
   late ProviderContainer container;
 
   setUp(() {
-    provideDummy<Either<Failure, List<HourlyForecast>>>(const Right([]));
+    provideDummy<Either<Failure, List<HourlyForecast>>>(const Right(<HourlyForecast>[]));
     mockWeatherRepository = MockIWeatherRepository();
     // Provide dummy value for Either<Failure, Weather>
     provideDummy<Either<Failure, Weather>>(const Right(Weather(cloudCover: 0)));
@@ -32,17 +32,17 @@ void main() {
 
   test('WeatherNotifier fetches current weather when selected date is today', () async {
     // Arrange
-    final today = DateTime.now();
-    final location = GeoLocation(latitude: 0, longitude: 0);
-    final astrContext = AstrContext(selectedDate: today, location: location, isCurrentLocation: true);
+    final DateTime today = DateTime.now();
+    const GeoLocation location = GeoLocation(latitude: 0, longitude: 0);
+    final AstrContext astrContext = AstrContext(selectedDate: today, location: location);
     
     container = ProviderContainer(
-      overrides: [
+      overrides: <Override>[
         astrContextProvider.overrideWith(() => FakeAstrContextNotifier(astrContext)),
         weatherRepositoryProvider.overrideWithValue(mockWeatherRepository),
         // We don't need to override plannerProvider for this test as it shouldn't be used
         // But to be safe, we can override it with a dummy
-        forecastListProvider.overrideWith((ref) async => []),
+        forecastListProvider.overrideWith((FutureProviderRef<List<DailyForecast>> ref) async => <DailyForecast>[]),
       ],
     );
 
@@ -52,8 +52,8 @@ void main() {
     // Wait for the dependencies to initialize
     await container.read(astrContextProvider.future);
     // Wait for the provider to initialize
-    final weather = await container.read(weatherProvider.future);
-    final weatherState = container.read(weatherProvider);
+    final Weather weather = await container.read(weatherProvider.future);
+    final AsyncValue<Weather> weatherState = container.read(weatherProvider);
     
     // Assert
     expect(weatherState, isA<AsyncData<Weather>>());
@@ -63,12 +63,12 @@ void main() {
 
   test('WeatherNotifier uses planner data when selected date is in future', () async {
     // Arrange
-    final today = DateTime.now();
-    final futureDate = today.add(const Duration(days: 3));
-    final location = GeoLocation(latitude: 0, longitude: 0);
-    final astrContext = AstrContext(selectedDate: futureDate, location: location, isCurrentLocation: true);
+    final DateTime today = DateTime.now();
+    final DateTime futureDate = today.add(const Duration(days: 3));
+    const GeoLocation location = GeoLocation(latitude: 0, longitude: 0);
+    final AstrContext astrContext = AstrContext(selectedDate: futureDate, location: location);
 
-    final forecast = DailyForecast(
+    final DailyForecast forecast = DailyForecast(
       date: futureDate,
       weatherCode: 0,
       cloudCoverAvg: 50,
@@ -77,9 +77,9 @@ void main() {
     );
 
     container = ProviderContainer(
-      overrides: [
+      overrides: <Override>[
         astrContextProvider.overrideWith(() => FakeAstrContextNotifier(astrContext)),
-        forecastListProvider.overrideWith((ref) async => [forecast]),
+        forecastListProvider.overrideWith((FutureProviderRef<List<DailyForecast>> ref) async => <DailyForecast>[forecast]),
         weatherRepositoryProvider.overrideWithValue(mockWeatherRepository),
       ],
     );
@@ -90,8 +90,8 @@ void main() {
     await container.read(forecastListProvider.future);
     
     // Wait for the provider to initialize
-    final weather = await container.read(weatherProvider.future);
-    final weatherState = container.read(weatherProvider);
+    final Weather weather = await container.read(weatherProvider.future);
+    final AsyncValue<Weather> weatherState = container.read(weatherProvider);
     
     // Assert
     expect(weatherState, isA<AsyncData<Weather>>());
@@ -102,9 +102,9 @@ void main() {
 }
 
 class FakeAstrContextNotifier extends AsyncNotifier<AstrContext> implements AstrContextNotifier {
-  final AstrContext initialContext;
 
   FakeAstrContextNotifier(this.initialContext);
+  final AstrContext initialContext;
 
   @override
   Future<AstrContext> build() async {

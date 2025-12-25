@@ -1,26 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
-import 'package:astr/features/catalog/presentation/providers/rise_set_provider.dart';
-import 'celestial_detail_sheet.dart';
-import 'atmospherics_sheet.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
+
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../astronomy/domain/entities/moon_phase_info.dart';
+import '../../../catalog/domain/entities/celestial_object.dart';
+import '../../../catalog/presentation/providers/object_detail_notifier.dart';
+import '../../../catalog/presentation/providers/rise_set_provider.dart';
+import '../../domain/entities/hourly_forecast.dart';
 import '../../domain/entities/light_pollution.dart';
-import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
-import 'cloud_bar.dart';
+import '../providers/weather_provider.dart';
+import 'atmospherics_sheet.dart';
 import 'bortle_bar.dart';
-
-import 'package:astr/features/dashboard/presentation/widgets/time_card.dart';
-
-import 'dart:async';
-import 'package:astr/features/dashboard/presentation/providers/weather_provider.dart';
+import 'celestial_detail_sheet.dart';
+import 'cloud_bar.dart';
+import 'time_card.dart';
 
 class DashboardGrid extends ConsumerStatefulWidget {
-  final double cloudCover;
-  final LightPollution lightPollution;
-  final MoonPhaseInfo moonPhaseInfo;
 
   const DashboardGrid({
     super.key,
@@ -28,6 +26,9 @@ class DashboardGrid extends ConsumerStatefulWidget {
     required this.lightPollution,
     required this.moonPhaseInfo,
   });
+  final double cloudCover;
+  final LightPollution lightPollution;
+  final MoonPhaseInfo moonPhaseInfo;
 
   @override
   ConsumerState<DashboardGrid> createState() => _DashboardGridState();
@@ -40,7 +41,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
   void initState() {
     super.initState();
     // Reset every 20 minutes
-    _refreshTimer = Timer.periodic(const Duration(minutes: 20), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(minutes: 20), (Timer timer) {
       ref.invalidate(hourlyForecastProvider);
     });
   }
@@ -54,28 +55,28 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
   @override
   Widget build(BuildContext context) {
     // Fetch hourly forecast for mean calculation
-    final hourlyForecastAsync = ref.watch(hourlyForecastProvider);
+    final AsyncValue<List<HourlyForecast>> hourlyForecastAsync = ref.watch(hourlyForecastProvider);
     
     double displayedCloudCover = widget.cloudCover;
 
     if (hourlyForecastAsync.hasValue) {
-      final forecasts = hourlyForecastAsync.value!;
-      final now = DateTime.now();
-      final threeHoursLater = now.add(const Duration(hours: 3));
+      final List<HourlyForecast> forecasts = hourlyForecastAsync.value!;
+      final DateTime now = DateTime.now();
+      final DateTime threeHoursLater = now.add(const Duration(hours: 3));
       
-      final relevantForecasts = forecasts.where((f) => 
+      final List<HourlyForecast> relevantForecasts = forecasts.where((HourlyForecast f) => 
         f.time.isAfter(now.subtract(const Duration(minutes: 30))) && 
         f.time.isBefore(threeHoursLater)
       ).toList();
 
       if (relevantForecasts.isNotEmpty) {
-        final totalCloudCover = relevantForecasts.fold(0.0, (sum, f) => sum + f.cloudCover);
+        final double totalCloudCover = relevantForecasts.fold(0, (double sum, HourlyForecast f) => sum + f.cloudCover);
         displayedCloudCover = totalCloudCover / relevantForecasts.length;
       }
     }
 
     return Column(
-      children: [
+      children: <Widget>[
         // Main Forecast Strip
         GlassPanel(
           enableBlur: false,
@@ -85,18 +86,18 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
               context: context,
               backgroundColor: Colors.transparent,
               isScrollControlled: true,
-              builder: (context) => const AtmosphericsSheet(),
+              builder: (BuildContext context) => const AtmosphericsSheet(),
             );
           },
           child: Column(
-            children: [
+            children: <Widget>[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       const Text(
                         'Clear Skies',
                         style: TextStyle(
@@ -131,12 +132,12 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
 
               // Rise/Set Cards
               Consumer(
-                builder: (context, ref, child) {
-                  final sunState = ref.watch(objectDetailNotifierProvider('sun'));
-                  final moonState = ref.watch(objectDetailNotifierProvider('moon'));
+                builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                  final ObjectDetailState sunState = ref.watch(objectDetailNotifierProvider('sun'));
+                  final ObjectDetailState moonState = ref.watch(objectDetailNotifierProvider('moon'));
                   
-                  final sun = sunState.object;
-                  final moon = moonState.object;
+                  final CelestialObject? sun = sunState.object;
+                  final CelestialObject? moon = moonState.object;
 
                   DateTime? sunRise;
                   DateTime? sunSet;
@@ -144,7 +145,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                   DateTime? moonSet;
 
                   if (sun != null) {
-                      final sunTimes = ref.watch(riseSetProvider(sun)).valueOrNull;
+                      final Map<String, DateTime?>? sunTimes = ref.watch(riseSetProvider(sun)).valueOrNull;
                       if (sunTimes != null) {
                           sunRise = sunTimes['rise'];
                           sunSet = sunTimes['set'];
@@ -152,7 +153,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                   }
 
                   if (moon != null) {
-                      final moonTimes = ref.watch(riseSetProvider(moon)).valueOrNull;
+                      final Map<String, DateTime?>? moonTimes = ref.watch(riseSetProvider(moon)).valueOrNull;
                       if (moonTimes != null) {
                           moonRise = moonTimes['rise'];
                           moonSet = moonTimes['set'];
@@ -160,7 +161,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                   }
 
                   return Row(
-                    children: [
+                    children: <Widget>[
                       Expanded(child: TimeCard(label: 'SUNRISE', time: sunRise)),
                       const SizedBox(width: 8),
                       Expanded(child: TimeCard(label: 'SUNSET', time: sunSet)),
@@ -180,7 +181,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
 
         // Two Column Grid
         Row(
-          children: [
+          children: <Widget>[
             // Bortle Card
             Expanded(
               child: BortleBar(
@@ -190,7 +191,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                     context: context,
                     backgroundColor: Colors.transparent,
                     isScrollControlled: true,
-                    builder: (context) => const AtmosphericsSheet(),
+                    builder: (BuildContext context) => const AtmosphericsSheet(),
                   );
                 },
               ),
@@ -206,7 +207,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                     context: context,
                     backgroundColor: Colors.transparent,
                     isScrollControlled: true,
-                    builder: (context) => CelestialDetailSheet(
+                    builder: (BuildContext context) => CelestialDetailSheet(
                       objectId: 'moon',
                       title: 'Moon',
                       subtitle: _getMoonPhaseLabel(widget.moonPhaseInfo),
@@ -218,17 +219,17 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                   height: 150, // Match BortleBar fixed height
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: <Widget>[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
+                        children: <Widget>[
                           Text(
                             'MOON',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: Colors.white.withValues(alpha: 0.4),
-                              letterSpacing: 1.0,
+                              letterSpacing: 1,
                             ),
                           ),
                           Text(
@@ -278,7 +279,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
     // 180 = Full Moon
     // 270 = Last Quarter
 
-    final angle = info.phaseAngle;
+    final double angle = info.phaseAngle;
 
     // New Moon (0 +/- 5)
     if (angle >= 355 || angle <= 5) return 'assets/img/moon_new.webp';
@@ -308,7 +309,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
   }
 
   String _getMoonPhaseLabel(MoonPhaseInfo info) {
-    final angle = info.phaseAngle;
+    final double angle = info.phaseAngle;
     
     if (angle >= 355 || angle <= 5) return 'New Moon';
     if (angle > 5 && angle < 85) return 'Waxing Crescent';

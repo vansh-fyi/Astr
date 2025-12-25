@@ -1,15 +1,16 @@
-import 'package:astr/core/error/failure.dart';
-import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
-import 'package:astr/features/astronomy/domain/entities/celestial_position.dart';
-import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
-import 'package:astr/features/astronomy/domain/repositories/i_astro_engine.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sweph/sweph.dart';
+
+import '../../../../core/error/failure.dart';
+import '../../domain/entities/celestial_body.dart';
+import '../../domain/entities/celestial_position.dart';
+import '../../domain/entities/moon_phase_info.dart';
+import '../../domain/repositories/i_astro_engine.dart';
 
 class AstroEngineImpl implements IAstroEngine {
   
   static Future<void> initialize() async {
-    await Sweph.init(epheAssets: [
+    await Sweph.init(epheAssets: <String>[
       'packages/sweph/assets/ephe/sepl_18.se1',
       'packages/sweph/assets/ephe/semo_18.se1',
       'packages/sweph/assets/ephe/seas_18.se1',
@@ -24,22 +25,22 @@ class AstroEngineImpl implements IAstroEngine {
     required double longitude,
   }) async {
     try {
-      final jd = _getJulianDay(time);
-      final planetId = _mapBodyToSweph(body);
-      final flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
+      final double jd = _getJulianDay(time);
+      final HeavenlyBody planetId = _mapBodyToSweph(body);
+      final SwephFlag flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
 
       // Calculate Position (RA/Dec/Dist)
-      final xx = Sweph.swe_calc_ut(jd, planetId, flags);
+      final CoordinatesWithSpeed xx = Sweph.swe_calc_ut(jd, planetId, flags);
       
       // Calculate Alt/Az
-      final geopos = GeoPosition(longitude, latitude, 0.0);
-      final xin = Coordinates(xx.longitude, xx.latitude, xx.distance);
+      final GeoPosition geopos = GeoPosition(longitude, latitude);
+      final Coordinates xin = Coordinates(xx.longitude, xx.latitude, xx.distance);
       // SE_EQU2HOR: Equatorial to Horizon
-      final azalt = Sweph.swe_azalt(jd, AzAltMode.SE_EQU2HOR, geopos, 0.0, 10.0, xin);
+      final AzimuthAltitudeInfo azalt = Sweph.swe_azalt(jd, AzAltMode.SE_EQU2HOR, geopos, 0, 10, xin);
       // azalt: AzimuthAltitudeInfo
 
       // Calculate Magnitude
-      final pheno = Sweph.swe_pheno_ut(jd, planetId, flags);
+      final List<double> pheno = Sweph.swe_pheno_ut(jd, planetId, flags);
 
       return Right(CelestialPosition(
         body: body,
@@ -65,12 +66,12 @@ class AstroEngineImpl implements IAstroEngine {
     required double longitude,
   }) async {
     try {
-      final jd = _getJulianDay(time);
+      final double jd = _getJulianDay(time);
       
       // Calculate Alt/Az
-      final geopos = GeoPosition(longitude, latitude, 0.0);
+      final GeoPosition geopos = GeoPosition(longitude, latitude);
       // Distance is irrelevant for infinite distance objects, using 1.0 AU as placeholder
-      final xin = Coordinates(ra, dec, 1.0); 
+      final Coordinates xin = Coordinates(ra, dec, 1); 
       
       // SE_EQU2HOR: Equatorial to Horizon
       // For fixed objects (J2000), we might need to precess to current date if high accuracy is needed.
@@ -83,16 +84,15 @@ class AstroEngineImpl implements IAstroEngine {
       // Over 20 years (2000-2025), that's ~1000 arcsec = ~16 arcmin = ~0.25 degrees.
       // This is acceptable for this app's current scope (visual planning).
       
-      final azalt = Sweph.swe_azalt(jd, AzAltMode.SE_EQU2HOR, geopos, 0.0, 10.0, xin);
+      final AzimuthAltitudeInfo azalt = Sweph.swe_azalt(jd, AzAltMode.SE_EQU2HOR, geopos, 0, 10, xin);
 
       return Right(CelestialPosition(
-        body: null,
         name: name,
         time: time,
         altitude: azalt.trueAltitude,
         azimuth: azalt.azimuth,
-        distance: 0.0, // Infinite/Unknown
-        magnitude: 0.0, // Unknown/Variable
+        distance: 0, // Infinite/Unknown
+        magnitude: 0, // Unknown/Variable
       ));
     } catch (e) {
       return Left(CalculationFailure(e.toString()));
@@ -104,23 +104,23 @@ class AstroEngineImpl implements IAstroEngine {
     required DateTime time,
   }) async {
     try {
-      final jd = _getJulianDay(time);
-      final flags = SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
+      final double jd = _getJulianDay(time);
+      final SwephFlag flags = SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
       
       // Calculate Sun Position
-      final sunPos = Sweph.swe_calc_ut(jd, HeavenlyBody.SE_SUN, flags);
-      final sunLong = sunPos.longitude;
+      final CoordinatesWithSpeed sunPos = Sweph.swe_calc_ut(jd, HeavenlyBody.SE_SUN, flags);
+      final double sunLong = sunPos.longitude;
 
       // Calculate Moon Position
-      final moonPos = Sweph.swe_calc_ut(jd, HeavenlyBody.SE_MOON, flags);
-      final moonLong = moonPos.longitude;
+      final CoordinatesWithSpeed moonPos = Sweph.swe_calc_ut(jd, HeavenlyBody.SE_MOON, flags);
+      final double moonLong = moonPos.longitude;
 
       // Calculate Phase Angle (0-360)
       double phaseAngle = (moonLong - sunLong) % 360;
       if (phaseAngle < 0) phaseAngle += 360;
 
       // Calculate Illumination
-      final pheno = Sweph.swe_pheno_ut(jd, HeavenlyBody.SE_MOON, flags);
+      final List<double> pheno = Sweph.swe_pheno_ut(jd, HeavenlyBody.SE_MOON, flags);
       
       return Right(MoonPhaseInfo(
         phaseAngle: phaseAngle,
@@ -132,8 +132,8 @@ class AstroEngineImpl implements IAstroEngine {
   }
 
   double _getJulianDay(DateTime time) {
-    final utc = time.toUtc();
-    final hour = utc.hour + utc.minute / 60.0 + utc.second / 3600.0 + utc.millisecond / 3600000.0;
+    final DateTime utc = time.toUtc();
+    final double hour = utc.hour + utc.minute / 60.0 + utc.second / 3600.0 + utc.millisecond / 3600000.0;
     return Sweph.swe_julday(utc.year, utc.month, utc.day, hour, CalendarType.SE_GREG_CAL);
   }
 

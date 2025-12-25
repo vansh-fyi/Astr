@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('StargazingLogic', () {
     test('returns Excellent when conditions are perfect', () {
-      final result = StargazingLogic.calculate(
+      final StargazingQuality result = StargazingLogic.calculate(
         cloudCover: 5,
         moonPhase: 10,
         bortleLevel: 3,
@@ -14,7 +14,7 @@ void main() {
     });
 
     test('returns Good when conditions are slightly degraded', () {
-      final result = StargazingLogic.calculate(
+      final StargazingQuality result = StargazingLogic.calculate(
         cloudCover: 20,
         moonPhase: 40,
         bortleLevel: 5,
@@ -23,7 +23,7 @@ void main() {
     });
 
     test('returns Fair when cloud cover is moderate', () {
-      final result = StargazingLogic.calculate(
+      final StargazingQuality result = StargazingLogic.calculate(
         cloudCover: 50,
         moonPhase: 80, // High moon doesn't prevent Fair if cloud is okay
         bortleLevel: 8, // High bortle doesn't prevent Fair if cloud is okay
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('returns Poor when cloud cover is high', () {
-      final result = StargazingLogic.calculate(
+      final StargazingQuality result = StargazingLogic.calculate(
         cloudCover: 70,
         moonPhase: 0,
         bortleLevel: 1,
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('returns Good when Excellent conditions missed by one parameter (e.g. Moon)', () {
-      final result = StargazingLogic.calculate(
+      final StargazingQuality result = StargazingLogic.calculate(
         cloudCover: 5,
         moonPhase: 30, // > 25
         bortleLevel: 3,
@@ -50,7 +50,7 @@ void main() {
     });
     
     test('returns Poor when Fair conditions missed (Cloud >= 60)', () {
-       final result = StargazingLogic.calculate(
+       final StargazingQuality result = StargazingLogic.calculate(
         cloudCover: 60,
         moonPhase: 0,
         bortleLevel: 1,

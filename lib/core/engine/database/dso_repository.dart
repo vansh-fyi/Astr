@@ -1,16 +1,16 @@
-import 'package:astr/core/engine/database/database_service.dart';
-import 'package:astr/core/engine/models/result.dart';
-import 'package:astr/core/engine/models/dso.dart';
-import 'package:astr/core/error/failure.dart';
+import '../../error/failure.dart';
+import '../models/dso.dart';
+import '../models/result.dart';
+import 'database_service.dart';
 
 /// Repository for accessing Deep Sky Object (DSO) data from the local database
 ///
 /// Provides methods to search and retrieve DSOs from the SQLite database.
 /// All methods return Result<T> for consistent error handling.
 class DsoRepository {
-  final DatabaseService _databaseService;
 
   const DsoRepository(this._databaseService);
+  final DatabaseService _databaseService;
 
   /// Searches for DSOs by name (case-insensitive, supports partial matches)
   ///
@@ -18,21 +18,21 @@ class DsoRepository {
   /// AC #3: Query performance < 100ms
   Future<Result<List<DSO>>> searchByName(String query, {int limit = 20}) async {
     if (query.isEmpty) {
-      return Result.success([]);
+      return Result.success(<DSO>[]);
     }
 
-    final result = await _databaseService.query(
+    final Result<List<Map<String, dynamic>>> result = await _databaseService.query(
       'dso',
       where: 'LOWER(name) LIKE LOWER(?) OR LOWER(messier_id) LIKE LOWER(?) OR LOWER(ngc_id) LIKE LOWER(?)',
-      whereArgs: ['%$query%', '%$query%', '%$query%'],
+      whereArgs: <Object?>['%$query%', '%$query%', '%$query%'],
       orderBy: 'mag ASC', // Brightest first
       limit: limit,
     );
 
     return result.fold(
-      (rows) {
+      (List<Map<String, dynamic>> rows) {
         try {
-          final dsos = rows.map((row) => DSO.fromMap(row)).toList();
+          final List<DSO> dsos = rows.map(DSO.fromMap).toList();
           return Result.success(dsos);
         } catch (e) {
           return Result.failure(
@@ -40,7 +40,7 @@ class DsoRepository {
           );
         }
       },
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 
@@ -49,18 +49,18 @@ class DsoRepository {
     DSOType type, {
     int limit = 50,
   }) async {
-    final result = await _databaseService.query(
+    final Result<List<Map<String, dynamic>>> result = await _databaseService.query(
       'dso',
       where: 'LOWER(type) = LOWER(?)',
-      whereArgs: [type.displayName],
+      whereArgs: <Object?>[type.displayName],
       orderBy: 'mag ASC',
       limit: limit,
     );
 
     return result.fold(
-      (rows) {
+      (List<Map<String, dynamic>> rows) {
         try {
-          final dsos = rows.map((row) => DSO.fromMap(row)).toList();
+          final List<DSO> dsos = rows.map(DSO.fromMap).toList();
           return Result.success(dsos);
         } catch (e) {
           return Result.failure(
@@ -68,27 +68,27 @@ class DsoRepository {
           );
         }
       },
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 
   /// Gets a DSO by its Messier ID (e.g., "M31")
   Future<Result<DSO?>> getByMessierId(String messierId) async {
-    final result = await _databaseService.query(
+    final Result<List<Map<String, dynamic>>> result = await _databaseService.query(
       'dso',
       where: 'messier_id = ?',
-      whereArgs: [messierId],
+      whereArgs: <Object?>[messierId],
       limit: 1,
     );
 
     return result.fold(
-      (rows) {
+      (List<Map<String, dynamic>> rows) {
         if (rows.isEmpty) {
           return Result.success(null);
         }
 
         try {
-          final dso = DSO.fromMap(rows.first);
+          final DSO dso = DSO.fromMap(rows.first);
           return Result.success(dso);
         } catch (e) {
           return Result.failure(
@@ -96,27 +96,27 @@ class DsoRepository {
           );
         }
       },
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 
   /// Gets a DSO by its NGC/IC ID (e.g., "NGC224")
   Future<Result<DSO?>> getByNgcId(String ngcId) async {
-    final result = await _databaseService.query(
+    final Result<List<Map<String, dynamic>>> result = await _databaseService.query(
       'dso',
       where: 'ngc_id = ?',
-      whereArgs: [ngcId],
+      whereArgs: <Object?>[ngcId],
       limit: 1,
     );
 
     return result.fold(
-      (rows) {
+      (List<Map<String, dynamic>> rows) {
         if (rows.isEmpty) {
           return Result.success(null);
         }
 
         try {
-          final dso = DSO.fromMap(rows.first);
+          final DSO dso = DSO.fromMap(rows.first);
           return Result.success(dso);
         } catch (e) {
           return Result.failure(
@@ -124,7 +124,7 @@ class DsoRepository {
           );
         }
       },
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 
@@ -134,21 +134,21 @@ class DsoRepository {
     int limit = 50,
   }) async {
     if (constellation.isEmpty) {
-      return Result.success([]);
+      return Result.success(<DSO>[]);
     }
 
-    final result = await _databaseService.query(
+    final Result<List<Map<String, dynamic>>> result = await _databaseService.query(
       'dso',
       where: 'LOWER(constellation) = LOWER(?)',
-      whereArgs: [constellation],
+      whereArgs: <Object?>[constellation],
       orderBy: 'mag ASC',
       limit: limit,
     );
 
     return result.fold(
-      (rows) {
+      (List<Map<String, dynamic>> rows) {
         try {
-          final dsos = rows.map((row) => DSO.fromMap(row)).toList();
+          final List<DSO> dsos = rows.map(DSO.fromMap).toList();
           return Result.success(dsos);
         } catch (e) {
           return Result.failure(
@@ -156,22 +156,22 @@ class DsoRepository {
           );
         }
       },
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 
   /// Gets all DSOs (use with caution, may return large dataset)
   Future<Result<List<DSO>>> getAll({int limit = 500}) async {
-    final result = await _databaseService.query(
+    final Result<List<Map<String, dynamic>>> result = await _databaseService.query(
       'dso',
       orderBy: 'mag ASC',
       limit: limit,
     );
 
     return result.fold(
-      (rows) {
+      (List<Map<String, dynamic>> rows) {
         try {
-          final dsos = rows.map((row) => DSO.fromMap(row)).toList();
+          final List<DSO> dsos = rows.map(DSO.fromMap).toList();
           return Result.success(dsos);
         } catch (e) {
           return Result.failure(
@@ -179,7 +179,7 @@ class DsoRepository {
           );
         }
       },
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 }

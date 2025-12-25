@@ -1,13 +1,8 @@
-import 'package:astr/core/engine/models/celestial_object.dart';
-import 'package:astr/core/engine/models/coordinates.dart';
+import 'celestial_object.dart';
+import 'coordinates.dart';
 
 /// Represents a Star with Hipparcos catalog data
 class Star extends CelestialObject {
-  /// Hipparcos catalog ID
-  final int hipId;
-
-  /// Bayer designation (e.g., "Alpha CMa" for Sirius)
-  final String? bayer;
 
   const Star({
     required super.id,
@@ -34,10 +29,15 @@ class Star extends CelestialObject {
       bayer: map['bayer'] as String?,
     );
   }
+  /// Hipparcos catalog ID
+  final int hipId;
+
+  /// Bayer designation (e.g., "Alpha CMa" for Sirius)
+  final String? bayer;
 
   /// Converts Star to a map for SQLite insertion
   Map<String, dynamic> toMap() {
-    return {
+    return <String, dynamic>{
       'id': int.parse(id),
       'hip_id': hipId,
       'ra': coordinates.rightAscension,

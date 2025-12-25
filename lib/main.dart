@@ -1,19 +1,16 @@
 // ignore_for_file: always_put_control_body_on_new_line
 
+import 'package:clarity_flutter/clarity_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:clarity_flutter/clarity_flutter.dart';
-
-// Platform-specific imports - only import on non-web platforms
-import 'main_mobile.dart' if (dart.library.html) 'main_web.dart';
 
 import 'constants/strings.dart';
-import 'features/astronomy/data/repositories/astro_engine_impl.dart';
-import 'features/astronomy/domain/services/astronomy_service.dart';
 import 'hive/hive.dart';
+// Platform-specific imports - only import on non-web platforms
+import 'main_mobile.dart' if (dart.library.html) 'main_web.dart';
 import 'my_app.dart';
 
 /// Try using const constructors as much as possible!
@@ -30,7 +27,7 @@ void main() async {
   await initializePlatformSpecific();
 
   // Astronomy Service initialization now handled by SplashScreen
-  final container = ProviderContainer();
+  final ProviderContainer container = ProviderContainer();
 
   if (kReleaseMode) {
     /// Disable debugPrint in release mode
@@ -41,8 +38,8 @@ void main() async {
   }
 
   // Configure Microsoft Clarity
-  final clarityConfig = ClarityConfig(
-    projectId: "ujfp0i4u4p",
+  final ClarityConfig clarityConfig = ClarityConfig(
+    projectId: 'ujfp0i4u4p',
     logLevel: LogLevel.None, // Use LogLevel.Verbose for debugging
   );
 

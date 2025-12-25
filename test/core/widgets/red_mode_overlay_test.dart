@@ -1,9 +1,9 @@
+import 'package:astr/core/widgets/red_mode_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:astr/core/widgets/red_mode_overlay.dart';
 
 void main() {
-  testWidgets('RedModeOverlay applies ColorFiltered when enabled', (tester) async {
+  testWidgets('RedModeOverlay applies ColorFiltered when enabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: RedModeOverlay(
@@ -17,7 +17,7 @@ void main() {
     expect(find.text('Content'), findsOneWidget);
   });
 
-  testWidgets('RedModeOverlay does not apply ColorFiltered when disabled', (tester) async {
+  testWidgets('RedModeOverlay does not apply ColorFiltered when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: RedModeOverlay(

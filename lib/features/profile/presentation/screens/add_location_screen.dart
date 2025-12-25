@@ -1,36 +1,41 @@
-import 'dart:convert';
 import 'dart:async';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/core/widgets/glass_toast.dart';
-import 'package:astr/features/dashboard/presentation/widgets/nebula_background.dart';
-import 'package:astr/features/profile/domain/entities/saved_location.dart';
-import 'package:astr/features/profile/presentation/providers/saved_locations_provider.dart';
-import 'package:astr/features/context/presentation/providers/geocoding_provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/src/either.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/error/failure.dart';
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../../core/widgets/glass_toast.dart';
+import '../../../context/domain/entities/geo_location.dart';
+import '../../../context/domain/repositories/i_geocoding_repository.dart';
+import '../../../context/presentation/providers/geocoding_provider.dart';
+import '../../../dashboard/presentation/widgets/nebula_background.dart';
+import '../../domain/entities/saved_location.dart';
+import '../providers/saved_locations_provider.dart';
+
 class AddLocationScreen extends ConsumerStatefulWidget {
-  final SavedLocation? locationToEdit;
 
   const AddLocationScreen({
     super.key,
     this.locationToEdit,
   });
+  final SavedLocation? locationToEdit;
 
   @override
   ConsumerState<AddLocationScreen> createState() => _AddLocationScreenState();
 }
 
 class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
-  final _searchController = TextEditingController();
-  final _latController = TextEditingController();
-  final _lngController = TextEditingController();
-  final _nameController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _latController = TextEditingController();
+  final TextEditingController _lngController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   
-  List<dynamic> _searchResults = [];
+  List<dynamic> _searchResults = <dynamic>[];
   bool _isSearching = false;
   Timer? _debounce;
   bool _showManualEntry = false;
@@ -42,7 +47,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
   void initState() {
     super.initState();
     if (widget.locationToEdit != null) {
-      final loc = widget.locationToEdit!;
+      final SavedLocation loc = widget.locationToEdit!;
       _nameController.text = loc.name;
       _latController.text = loc.latitude.abs().toString();
       _lngController.text = loc.longitude.abs().toString();
@@ -90,7 +95,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
         _searchOSM(query);
       } else {
         setState(() {
-          _searchResults = [];
+          _searchResults = <dynamic>[];
         });
       }
     });
@@ -102,23 +107,23 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
     });
 
     try {
-      final repository = ref.read(geocodingRepositoryProvider);
-      final result = await repository.searchLocations(query);
+      final IGeocodingRepository repository = ref.read(geocodingRepositoryProvider);
+      final Either<Failure, List<GeoLocation>> result = await repository.searchLocations(query);
 
       result.fold(
-        (failure) {
+        (Failure failure) {
           debugPrint('Error searching locations: ${failure.message}');
           setState(() {
-            _searchResults = [];
+            _searchResults = <dynamic>[];
           });
         },
-        (locations) {
+        (List<GeoLocation> locations) {
           setState(() {
-            _searchResults = locations.map((loc) => {
+            _searchResults = locations.map((GeoLocation loc) => <String, Object?>{
               'display_name': loc.name,
               'lat': loc.latitude.toString(),
               'lon': loc.longitude.toString(),
-              'address': {}, // Open-Meteo doesn't return detailed address structure like OSM
+              'address': <dynamic, dynamic>{}, // Open-Meteo doesn't return detailed address structure like OSM
             }).toList();
           });
         },
@@ -133,8 +138,8 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
   }
 
   void _selectLocation(dynamic location) {
-    double lat = double.parse(location['lat']);
-    double lng = double.parse(location['lon']);
+    final double lat = double.parse(location['lat']);
+    final double lng = double.parse(location['lon']);
 
     _isNorth = lat >= 0;
     _isEast = lng >= 0;
@@ -143,7 +148,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
     _lngController.text = lng.abs().toString();
     
     // Try to get a good name
-    String name = location['display_name'];
+    final String name = location['display_name'];
     // Open-Meteo returns a clean name already, so we can use it directly or split if needed.
     // The previous logic was specific to OSM Nominatim's structure.
     
@@ -151,7 +156,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
 
     setState(() {
       _showManualEntry = true;
-      _searchResults = []; // Clear results
+      _searchResults = <dynamic>[]; // Clear results
       _placeName = location['display_name'];
     });
   }
@@ -170,8 +175,8 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
       if (!_isEast) lng = -lng;
 
       // Check for duplicates (exclude current location if editing)
-      final currentLocations = ref.read(savedLocationsNotifierProvider).value ?? [];
-      final isDuplicate = currentLocations.any((loc) {
+      final List<SavedLocation> currentLocations = ref.read(savedLocationsNotifierProvider).value ?? <SavedLocation>[];
+      final bool isDuplicate = currentLocations.any((SavedLocation loc) {
         if (widget.locationToEdit != null && loc.id == widget.locationToEdit!.id) return false;
         return (loc.latitude - lat).abs() < 0.0001 && (loc.longitude - lng).abs() < 0.0001;
       });
@@ -186,7 +191,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
         return;
       }
 
-      final newLocation = SavedLocation(
+      final SavedLocation newLocation = SavedLocation(
         id: widget.locationToEdit?.id ?? const Uuid().v4(),
         name: _nameController.text,
         latitude: lat,
@@ -216,14 +221,14 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
         title: Text(widget.locationToEdit != null ? 'Edit Location' : 'Add Location', style: const TextStyle(color: Colors.white)),
       ),
       body: Stack(
-        children: [
+        children: <Widget>[
           const NebulaBackground(),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+                children: <Widget>[
                   // Search Bar
                   GlassPanel(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -253,9 +258,9 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                   ),
                   
                   // Search Results
-                  if (_searchResults.isNotEmpty) ...[
+                  if (_searchResults.isNotEmpty) ...<Widget>[
                     const SizedBox(height: 16),
-                    Container(
+                    DecoratedBox(
                       decoration: BoxDecoration(
                         color: const Color(0xFF141419),
                         borderRadius: BorderRadius.circular(16),
@@ -297,7 +302,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                     ),
 
                   // Manual Entry Form
-                  if (_showManualEntry) ...[
+                  if (_showManualEntry) ...<Widget>[
                     const Text(
                       'Location Details',
                       style: TextStyle(
@@ -326,7 +331,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
 
                     // Latitude Row
                     Row(
-                      children: [
+                      children: <Widget>[
                         Expanded(
                           child: GlassPanel(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -343,13 +348,13 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Container(
+                        DecoratedBox(
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
-                            children: [
+                            children: <Widget>[
                               _buildDirectionButton('N', _isNorth, () => setState(() => _isNorth = true)),
                               _buildDirectionButton('S', !_isNorth, () => setState(() => _isNorth = false)),
                             ],
@@ -361,7 +366,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
 
                     // Longitude Row
                     Row(
-                      children: [
+                      children: <Widget>[
                         Expanded(
                           child: GlassPanel(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -378,13 +383,13 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Container(
+                        DecoratedBox(
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
-                            children: [
+                            children: <Widget>[
                               _buildDirectionButton('E', _isEast, () => setState(() => _isEast = true)),
                               _buildDirectionButton('W', !_isEast, () => setState(() => _isEast = false)),
                             ],

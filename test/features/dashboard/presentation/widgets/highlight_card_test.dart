@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('HighlightCard renders correctly', (tester) async {
-    const item = HighlightItem(
+  testWidgets('HighlightCard renders correctly', (WidgetTester tester) async {
+    const HighlightItem item = HighlightItem(
       body: CelestialBody.jupiter,
-      altitude: 45.0,
-      magnitude: -2.0,
+      altitude: 45,
+      magnitude: -2,
       isVisible: true,
     );
 
@@ -26,11 +26,11 @@ void main() {
     expect(find.byIcon(Icons.public), findsOneWidget);
   });
 
-  testWidgets('HighlightCard shows "Below Horizon" when not visible', (tester) async {
-    const item = HighlightItem(
+  testWidgets('HighlightCard shows "Below Horizon" when not visible', (WidgetTester tester) async {
+    const HighlightItem item = HighlightItem(
       body: CelestialBody.mars,
-      altitude: -5.0,
-      magnitude: 1.0,
+      altitude: -5,
+      magnitude: 1,
       isVisible: false,
     );
 

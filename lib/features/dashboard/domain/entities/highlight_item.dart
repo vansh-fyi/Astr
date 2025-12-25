@@ -1,10 +1,6 @@
-import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
+import '../../../astronomy/domain/entities/celestial_body.dart';
 
 class HighlightItem {
-  final CelestialBody body;
-  final double altitude;
-  final double magnitude;
-  final bool isVisible;
 
   const HighlightItem({
     required this.body,
@@ -12,6 +8,10 @@ class HighlightItem {
     required this.magnitude,
     required this.isVisible,
   });
+  final CelestialBody body;
+  final double altitude;
+  final double magnitude;
+  final bool isVisible;
 
   @override
   bool operator ==(Object other) {

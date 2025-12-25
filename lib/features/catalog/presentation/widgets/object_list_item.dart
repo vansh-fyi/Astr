@@ -1,21 +1,22 @@
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
-import 'package:astr/features/catalog/presentation/providers/rise_set_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/widgets/glass_panel.dart';
+import '../../domain/entities/celestial_object.dart';
+import '../../domain/entities/celestial_type.dart';
+import '../providers/rise_set_provider.dart';
+
 /// Widget displaying a single celestial object in the catalog list
 class ObjectListItem extends StatelessWidget {
-  final CelestialObject object;
-  final VoidCallback onTap;
 
   const ObjectListItem({
     super.key,
     required this.object,
     required this.onTap,
   });
+  final CelestialObject object;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class ObjectListItem extends StatelessWidget {
         enableBlur: false,
         padding: const EdgeInsets.all(16),
         child: Row(
-          children: [
+          children: <Widget>[
             // Icon
             Container(
               width: 56,
@@ -54,7 +55,7 @@ class ObjectListItem extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Text(
                     object.name,
                     style: const TextStyle(
@@ -83,13 +84,13 @@ class ObjectListItem extends StatelessWidget {
                   const SizedBox(height: 4),
                   // Rise/Set Time
                   Consumer(
-                    builder: (context, ref, child) {
-                      final asyncTimes = ref.watch(riseSetProvider(object));
+                    builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                      final AsyncValue<Map<String, DateTime?>> asyncTimes = ref.watch(riseSetProvider(object));
                       
                       return asyncTimes.when(
-                        data: (times) {
-                          final rise = times['rise'] != null ? DateFormat('HH:mm').format(times['rise']!) : '-- : --';
-                          final set = times['set'] != null ? DateFormat('HH:mm').format(times['set']!) : '-- : --';
+                        data: (Map<String, DateTime?> times) {
+                          final String rise = times['rise'] != null ? DateFormat('HH:mm').format(times['rise']!) : '-- : --';
+                          final String set = times['set'] != null ? DateFormat('HH:mm').format(times['set']!) : '-- : --';
                           return Text(
                             '↑ $rise | ↓ $set',
                             style: TextStyle(

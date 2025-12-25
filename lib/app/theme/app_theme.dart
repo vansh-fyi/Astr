@@ -11,7 +11,7 @@ class AppTheme {
   static const Color accentCyan = Color(0xFF4CC9F0);
 
   // Glassmorphism Constants
-  static const double glassBlur = 16.0;
+  static const double glassBlur = 16;
   static const double glassOpacity = 0.12;
   static const Color glassColor = Colors.white;
   static const BorderRadius glassRadius = BorderRadius.all(Radius.circular(16));
@@ -27,7 +27,6 @@ class AppTheme {
       secondary: accentPurple,
       onSecondary: starlight,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
-      useMaterial3: true,
       fontFamily: 'Satoshi',
       subThemesData: const FlexSubThemesData(
         blendOnLevel: 20,

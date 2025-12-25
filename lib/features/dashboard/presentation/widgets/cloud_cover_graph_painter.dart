@@ -1,18 +1,9 @@
-import 'package:astr/features/dashboard/domain/entities/hourly_forecast.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class CloudCoverGraphPainter extends CustomPainter {
-  final List<HourlyForecast> data;
-  final DateTime startTime;
-  final DateTime endTime;
-  final Color cloudColor;
-  final Color nowIndicatorColor;
+import '../../domain/entities/hourly_forecast.dart';
 
-  // Cache Paint objects to avoid recreation in paint()
-  late final Paint _fillPaint;
-  late final Paint _strokePaint;
-  late final Paint _nowDotPaint;
+class CloudCoverGraphPainter extends CustomPainter {
 
   CloudCoverGraphPainter({
     required this.data,
@@ -32,6 +23,16 @@ class CloudCoverGraphPainter extends CustomPainter {
 
     _nowDotPaint = Paint()..color = nowIndicatorColor;
   }
+  final List<HourlyForecast> data;
+  final DateTime startTime;
+  final DateTime endTime;
+  final Color cloudColor;
+  final Color nowIndicatorColor;
+
+  // Cache Paint objects to avoid recreation in paint()
+  late final Paint _fillPaint;
+  late final Paint _strokePaint;
+  late final Paint _nowDotPaint;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -45,22 +46,22 @@ class CloudCoverGraphPainter extends CustomPainter {
   }
 
   void _drawCloudCover(Canvas canvas, Size size) {
-    final path = Path();
-    final width = size.width;
-    final height = size.height;
-    final totalDuration = endTime.difference(startTime).inMinutes;
+    final Path path = Path();
+    final double width = size.width;
+    final double height = size.height;
+    final int totalDuration = endTime.difference(startTime).inMinutes;
 
     if (totalDuration == 0) return;
 
     path.moveTo(0, height);
 
     bool isFirst = true;
-    for (final point in data) {
+    for (final HourlyForecast point in data) {
       if (point.time.isBefore(startTime) || point.time.isAfter(endTime)) continue;
 
-      final minutesFromStart = point.time.difference(startTime).inMinutes;
-      final x = (minutesFromStart / totalDuration) * width;
-      final y = height - (point.weather.cloudCover / 100 * height);
+      final int minutesFromStart = point.time.difference(startTime).inMinutes;
+      final double x = (minutesFromStart / totalDuration) * width;
+      final double y = height - (point.weather.cloudCover / 100 * height);
 
       if (isFirst) {
         path.lineTo(x, y);
@@ -77,9 +78,9 @@ class CloudCoverGraphPainter extends CustomPainter {
     // We should probably interpolate or just draw lines between points.
     
     // Let's ensure we close it at the bottom right
-    final lastPoint = data.lastWhere((p) => !p.time.isAfter(endTime), orElse: () => data.last);
-    final lastMinutes = lastPoint.time.difference(startTime).inMinutes;
-    final lastX = (lastMinutes / totalDuration) * width;
+    final HourlyForecast lastPoint = data.lastWhere((HourlyForecast p) => !p.time.isAfter(endTime), orElse: () => data.last);
+    final int lastMinutes = lastPoint.time.difference(startTime).inMinutes;
+    final double lastX = (lastMinutes / totalDuration) * width;
     
     path.lineTo(lastX, height);
     path.close();
@@ -87,14 +88,14 @@ class CloudCoverGraphPainter extends CustomPainter {
     canvas.drawPath(path, _fillPaint);
       
     // Re-create open path for stroke
-    final strokePath = Path();
+    final Path strokePath = Path();
     isFirst = true;
-    for (final point in data) {
+    for (final HourlyForecast point in data) {
       if (point.time.isBefore(startTime) || point.time.isAfter(endTime)) continue;
 
-      final minutesFromStart = point.time.difference(startTime).inMinutes;
-      final x = (minutesFromStart / totalDuration) * width;
-      final y = height - (point.weather.cloudCover / 100 * height);
+      final int minutesFromStart = point.time.difference(startTime).inMinutes;
+      final double x = (minutesFromStart / totalDuration) * width;
+      final double y = height - (point.weather.cloudCover / 100 * height);
 
       if (isFirst) {
         strokePath.moveTo(x, y);
@@ -107,24 +108,24 @@ class CloudCoverGraphPainter extends CustomPainter {
   }
 
   void _drawNowIndicator(Canvas canvas, Size size) {
-    final now = DateTime.now();
+    final DateTime now = DateTime.now();
     if (now.isBefore(startTime) || now.isAfter(endTime)) return;
 
-    final totalDuration = endTime.difference(startTime).inMinutes;
-    final minutesFromStart = now.difference(startTime).inMinutes;
-    final x = (minutesFromStart / totalDuration) * size.width;
-    final height = size.height;
+    final int totalDuration = endTime.difference(startTime).inMinutes;
+    final int minutesFromStart = now.difference(startTime).inMinutes;
+    final double x = (minutesFromStart / totalDuration) * size.width;
+    final double height = size.height;
     
-    final topY = 20.0; // Leave space for label
+    const double topY = 20; // Leave space for label
 
     // Gradient Line
-    final nowLinePaint = Paint()
+    final Paint nowLinePaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
+        colors: <Color>[
           nowIndicatorColor.withOpacity(0.5),
-          nowIndicatorColor.withOpacity(0.0),
+          nowIndicatorColor.withOpacity(0),
         ],
       ).createShader(Rect.fromLTWH(x, topY, 1, height - topY));
 
@@ -135,7 +136,7 @@ class CloudCoverGraphPainter extends CustomPainter {
     );
     
     // Label
-    final textPainter = TextPainter(
+    final TextPainter textPainter = TextPainter(
       text: TextSpan(
         text: 'NOW',
         style: TextStyle(

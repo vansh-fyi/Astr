@@ -1,6 +1,6 @@
 // Web stub implementation for database service
-import 'package:astr/core/engine/models/result.dart';
-import 'package:astr/core/error/failure.dart';
+import '../../error/failure.dart';
+import '../models/result.dart';
 
 Future<Result<dynamic>> initializePlatformDatabase({
   required String? testDatabasePath,

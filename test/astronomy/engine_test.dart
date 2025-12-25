@@ -1,6 +1,9 @@
+import 'package:astr/core/error/failure.dart';
 import 'package:astr/features/astronomy/data/repositories/astro_engine_impl.dart';
 import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
+import 'package:astr/features/astronomy/domain/entities/celestial_position.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/src/either.dart';
 
 void main() {
   late AstroEngineImpl engine;
@@ -29,11 +32,11 @@ void main() {
     }
     // ...
     // Greenwich Observatory
-    final lat = 51.4769;
-    final long = 0.0;
-    final time = DateTime.utc(2024, 1, 1, 12, 0, 0); // Noon UTC
+    const double lat = 51.4769;
+    const double long = 0;
+    final DateTime time = DateTime.utc(2024, 1, 1, 12); // Noon UTC
 
-    final result = await engine.getPosition(
+    final Either<Failure, CelestialPosition> result = await engine.getPosition(
       body: CelestialBody.sun,
       time: time,
       latitude: lat,
@@ -41,7 +44,7 @@ void main() {
     );
 
     expect(result.isRight(), true);
-    final position = result.getOrElse((_) => throw Exception('Failed'));
+    final CelestialPosition position = result.getOrElse((_) => throw Exception('Failed'));
     
     print('Sun Position: $position');
 
@@ -55,11 +58,11 @@ void main() {
       markTestSkipped('Sweph not available in this environment');
       return;
     }
-    final lat = 0.0;
-    final long = 0.0;
-    final time = DateTime.utc(2024, 1, 1, 0, 0, 0);
+    const double lat = 0;
+    const double long = 0;
+    final DateTime time = DateTime.utc(2024, 1);
 
-    final result = await engine.getPosition(
+    final Either<Failure, CelestialPosition> result = await engine.getPosition(
       body: CelestialBody.moon,
       time: time,
       latitude: lat,
@@ -67,7 +70,7 @@ void main() {
     );
 
     expect(result.isRight(), true);
-    final position = result.getOrElse((_) => throw Exception('Failed'));
+    final CelestialPosition position = result.getOrElse((_) => throw Exception('Failed'));
     print('Moon Position: $position');
     
     expect(position.distance, greaterThan(0));
@@ -78,11 +81,11 @@ void main() {
       markTestSkipped('Sweph not available in this environment');
       return;
     }
-    final lat = 0.0;
-    final long = 0.0;
-    final time = DateTime.now();
+    const double lat = 0;
+    const double long = 0;
+    final DateTime time = DateTime.now();
 
-    final stopwatch = Stopwatch()..start();
+    final Stopwatch stopwatch = Stopwatch()..start();
     await engine.getPosition(
       body: CelestialBody.jupiter,
       time: time,

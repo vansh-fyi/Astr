@@ -16,7 +16,7 @@ enum BortleScale {
 
   static BortleScale fromValue(int value) {
     return BortleScale.values.firstWhere(
-      (e) => e.value == value,
+      (BortleScale e) => e.value == value,
       orElse: () => BortleScale.class9, // Default to worst case if out of bounds
     );
   }

@@ -1,19 +1,20 @@
 import 'dart:math';
-import 'package:astr/features/dashboard/domain/entities/hourly_forecast.dart';
-import 'package:astr/features/catalog/domain/entities/graph_point.dart';
-import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
+
+import '../../features/astronomy/domain/entities/moon_phase_info.dart';
+import '../../features/catalog/domain/entities/graph_point.dart';
+import '../../features/dashboard/domain/entities/hourly_forecast.dart';
 
 /// Represents the optimal observing window
-class PrimeViewWindow {
-  final DateTime start;
-  final DateTime end;
-  final double score; // 0.0 (perfect) to 1.0 (terrible)
+class PrimeViewWindow { // 0.0 (perfect) to 1.0 (terrible)
 
   const PrimeViewWindow({
     required this.start,
     required this.end,
     required this.score,
   });
+  final DateTime start;
+  final DateTime end;
+  final double score;
 
   /// Duration of the prime view window
   Duration get duration => end.difference(start);
@@ -51,23 +52,23 @@ class PrimeViewCalculator {
     if (cloudCoverData.isEmpty) return null;
 
     // Filter data to night window
-    final relevantForecasts = cloudCoverData
-        .where((f) => !f.time.isBefore(startTime) && !f.time.isAfter(endTime))
+    final List<HourlyForecast> relevantForecasts = cloudCoverData
+        .where((HourlyForecast f) => !f.time.isBefore(startTime) && !f.time.isAfter(endTime))
         .toList()
-      ..sort((a, b) => a.time.compareTo(b.time));
+      ..sort((HourlyForecast a, HourlyForecast b) => a.time.compareTo(b.time));
 
     if (relevantForecasts.isEmpty) return null;
 
     // Calculate scores for each hourly point
-    final scores = <_ScoredPoint>[];
-    for (final forecast in relevantForecasts) {
-      final cloudScore = forecast.cloudCover / 100.0; // 0.0 to 1.0
+    final List<_ScoredPoint> scores = <_ScoredPoint>[];
+    for (final HourlyForecast forecast in relevantForecasts) {
+      final double cloudScore = forecast.cloudCover / 100.0; // 0.0 to 1.0
 
       // Calculate moon interference
-      double moonScore = 0.0;
+      double moonScore = 0;
       if (moonCurve != null && moonCurve.isNotEmpty) {
         // Find moon altitude at this time
-        final moonAltitude = _getMoonAltitudeAt(forecast.time, moonCurve);
+        final double moonAltitude = _getMoonAltitudeAt(forecast.time, moonCurve);
         if (moonAltitude > 0) {
           // Moon is above horizon - calculate interference
           // Interference = illumination × (altitude/90) × seeing impact factor
@@ -76,7 +77,7 @@ class PrimeViewCalculator {
         }
       }
 
-      final totalScore = _calculateCombinedScore(cloudScore, moonScore);
+      final double totalScore = _calculateCombinedScore(cloudScore, moonScore);
       scores.add(_ScoredPoint(time: forecast.time, score: totalScore));
     }
 
@@ -89,20 +90,20 @@ class PrimeViewCalculator {
   /// Combines cloud and moon scores with appropriate weighting
   /// Cloud cover is weighted more heavily (70%) than moon (30%)
   double _calculateCombinedScore(double cloudScore, double moonScore) {
-    const cloudWeight = 0.7;
-    const moonWeight = 0.3;
+    const double cloudWeight = 0.7;
+    const double moonWeight = 0.3;
     return (cloudScore * cloudWeight) + (moonScore * moonWeight);
   }
 
   /// Gets moon altitude at specific time by interpolating from curve
   double _getMoonAltitudeAt(DateTime time, List<GraphPoint> moonCurve) {
-    if (moonCurve.isEmpty) return 0.0;
+    if (moonCurve.isEmpty) return 0;
 
     // Find surrounding points
     GraphPoint? before;
     GraphPoint? after;
 
-    for (final point in moonCurve) {
+    for (final GraphPoint point in moonCurve) {
       if (point.time.isBefore(time) || point.time.isAtSameMomentAs(time)) {
         before = point;
       }
@@ -114,29 +115,29 @@ class PrimeViewCalculator {
 
     // Exact match
     if (before != null && before.time.isAtSameMomentAs(time)) {
-      return max(0.0, before.value);
+      return max(0, before.value);
     }
     if (after != null && after.time.isAtSameMomentAs(time)) {
-      return max(0.0, after.value);
+      return max(0, after.value);
     }
 
     // Interpolate between points
     if (before != null && after != null) {
-      final totalDuration = after.time.difference(before.time).inSeconds;
-      if (totalDuration == 0) return max(0.0, before.value);
+      final int totalDuration = after.time.difference(before.time).inSeconds;
+      if (totalDuration == 0) return max(0, before.value);
 
-      final elapsed = time.difference(before.time).inSeconds;
-      final ratio = elapsed / totalDuration;
+      final int elapsed = time.difference(before.time).inSeconds;
+      final double ratio = elapsed / totalDuration;
 
-      final interpolated = before.value + (after.value - before.value) * ratio;
-      return max(0.0, interpolated);
+      final double interpolated = before.value + (after.value - before.value) * ratio;
+      return max(0, interpolated);
     }
 
     // Extrapolate from closest point
-    if (before != null) return max(0.0, before.value);
-    if (after != null) return max(0.0, after.value);
+    if (before != null) return max(0, before.value);
+    if (after != null) return max(0, after.value);
 
-    return 0.0;
+    return 0;
   }
 
   /// Finds the best contiguous window meeting minimum duration
@@ -154,7 +155,7 @@ class PrimeViewCalculator {
     // Window size in number of hourly points
     // Need minHours + 1 points to span minHours duration
     // (e.g., 3 points span 2 hours: 8PM, 9PM, 10PM = 8-10PM = 2 hours)
-    final minWindowSize = minHours + 1;
+    final int minWindowSize = minHours + 1;
 
     // Ensure we have enough points for minimum window
     if (scores.length < minWindowSize) return null;
@@ -162,8 +163,8 @@ class PrimeViewCalculator {
     for (int windowSize = minWindowSize; windowSize <= scores.length; windowSize++) {
       // Slide window across the scores
       for (int i = 0; i <= scores.length - windowSize; i++) {
-        final windowScores = scores.sublist(i, i + windowSize);
-        final avgScore = windowScores.map((s) => s.score).reduce((a, b) => a + b) / windowSize;
+        final List<_ScoredPoint> windowScores = scores.sublist(i, i + windowSize);
+        final double avgScore = windowScores.map((_ScoredPoint s) => s.score).reduce((double a, double b) => a + b) / windowSize;
 
         if (avgScore < bestScore) {
           bestScore = avgScore;
@@ -187,8 +188,8 @@ class PrimeViewCalculator {
 
 /// Internal class for tracking scored time points
 class _ScoredPoint {
-  final DateTime time;
-  final double score;
 
   _ScoredPoint({required this.time, required this.score});
+  final DateTime time;
+  final double score;
 }

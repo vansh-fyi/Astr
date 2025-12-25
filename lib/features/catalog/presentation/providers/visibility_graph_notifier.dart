@@ -1,25 +1,27 @@
-import 'package:astr/features/catalog/domain/entities/visibility_graph_data.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
-import 'package:astr/features/catalog/domain/entities/graph_point.dart';
-import 'package:astr/features/catalog/domain/services/i_visibility_service.dart';
-import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
-import 'package:astr/features/catalog/presentation/providers/visibility_service_provider.dart';
-import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:math';
+import 'package:fpdart/src/either.dart';
+
+import '../../../../core/error/failure.dart';
+import '../../../astronomy/domain/services/astronomy_service.dart';
+import '../../../context/domain/entities/astr_context.dart';
+import '../../../context/presentation/providers/astr_context_provider.dart';
+import '../../domain/entities/celestial_object.dart';
+import '../../domain/entities/visibility_graph_data.dart';
+import '../../domain/services/i_visibility_service.dart';
+import 'object_detail_notifier.dart';
+import 'visibility_service_provider.dart';
 
 /// State for visibility graph
 class VisibilityGraphState {
-  final VisibilityGraphData? graphData;
-  final bool isLoading;
-  final String? error;
 
   const VisibilityGraphState({
     this.graphData,
     this.isLoading = false,
     this.error,
   });
+  final VisibilityGraphData? graphData;
+  final bool isLoading;
+  final String? error;
 
   VisibilityGraphState copyWith({
     VisibilityGraphData? graphData,
@@ -36,12 +38,6 @@ class VisibilityGraphState {
 
 /// Notifier for visibility graph data
 class VisibilityGraphNotifier extends StateNotifier<VisibilityGraphState> {
-  final IVisibilityService _visibilityService;
-  final Ref _ref;
-  final String objectId;
-  final CelestialObject? _object;
-
-  final AstronomyService _astronomyService;
 
   VisibilityGraphNotifier(
     this._visibilityService,
@@ -52,13 +48,19 @@ class VisibilityGraphNotifier extends StateNotifier<VisibilityGraphState> {
   ) : super(const VisibilityGraphState(isLoading: true)) {
     calculateGraph();
   }
+  final IVisibilityService _visibilityService;
+  final Ref _ref;
+  final String objectId;
+  final CelestialObject? _object;
+
+  final AstronomyService _astronomyService;
 
   /// Calculate visibility graph data
   Future<void> calculateGraph() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true);
 
     // Use the passed object
-    final object = _object;
+    final CelestialObject? object = _object;
 
     if (object == null) {
       // If object is null, it might be loading or not found.
@@ -77,17 +79,17 @@ class VisibilityGraphNotifier extends StateNotifier<VisibilityGraphState> {
 
     try {
       // Wait for context to be loaded
-      final context = await _ref.read(astrContextProvider.future);
+      final AstrContext context = await _ref.read(astrContextProvider.future);
 
       // Calculate night window
-      final nightWindow = await _astronomyService.getNightWindow(
+      final Map<String, DateTime> nightWindow = await _astronomyService.getNightWindow(
         date: context.selectedDate,
         lat: context.location.latitude,
         long: context.location.longitude,
       );
 
       // Calculate visibility graph
-      final result = await _visibilityService.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await _visibilityService.calculateVisibility(
         object: object,
         location: context.location,
         startTime: nightWindow['start']!, // Use calculated night start
@@ -95,14 +97,13 @@ class VisibilityGraphNotifier extends StateNotifier<VisibilityGraphState> {
       );
 
       result.fold(
-        (failure) => state = state.copyWith(
+        (Failure failure) => state = state.copyWith(
           isLoading: false,
           error: failure.message,
         ),
-        (graphData) => state = state.copyWith(
+        (VisibilityGraphData graphData) => state = state.copyWith(
           isLoading: false,
           graphData: graphData,
-          error: null,
         ),
       );
     } catch (err) {
@@ -121,17 +122,17 @@ class VisibilityGraphNotifier extends StateNotifier<VisibilityGraphState> {
 
 /// Provider for visibility graph notifier
 /// Family provider to support multiple objects
-final visibilityGraphProvider =
+final StateNotifierProviderFamily<VisibilityGraphNotifier, VisibilityGraphState, String> visibilityGraphProvider =
     StateNotifierProvider.family<VisibilityGraphNotifier, VisibilityGraphState, String>(
-  (ref, objectId) {
-    final visibilityService = ref.read(visibilityServiceProvider);
+  (StateNotifierProviderRef<VisibilityGraphNotifier, VisibilityGraphState> ref, String objectId) {
+    final IVisibilityService visibilityService = ref.read(visibilityServiceProvider);
     // Watch context to trigger rebuild when location/date changes
     ref.watch(astrContextProvider);
     
-    final astronomyService = ref.read(astronomyServiceProvider);
+    final AstronomyService astronomyService = ref.read(astronomyServiceProvider);
     
     // Watch object detail to trigger rebuild when object is loaded
-    final objectState = ref.watch(objectDetailNotifierProvider(objectId));
+    final ObjectDetailState objectState = ref.watch(objectDetailNotifierProvider(objectId));
     
     return VisibilityGraphNotifier(visibilityService, astronomyService, ref, objectId, objectState.object);
   },

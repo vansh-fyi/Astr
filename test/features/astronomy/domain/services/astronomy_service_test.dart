@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:sweph/sweph.dart';
 
 void main() {
@@ -28,39 +28,39 @@ void main() {
   });
 
   test('getNightWindow returns correct window for day time', () async {
-    final service = MockAstronomyService();
-    final date = DateTime(2023, 10, 27, 14, 0); // 2 PM
-    final lat = 51.5;
-    final long = -0.1;
+    final MockAstronomyService service = MockAstronomyService();
+    final DateTime date = DateTime(2023, 10, 27, 14); // 2 PM
+    const double lat = 51.5;
+    const double long = -0.1;
 
-    final window = await service.getNightWindow(date: date, lat: lat, long: long);
+    final Map<String, DateTime> window = await service.getNightWindow(date: date, lat: lat, long: long);
 
-    expect(window['start'], DateTime(2023, 10, 27, 18, 0)); // Today Sunset
-    expect(window['end'], DateTime(2023, 10, 28, 6, 0)); // Tomorrow Sunrise
+    expect(window['start'], DateTime(2023, 10, 27, 18)); // Today Sunset
+    expect(window['end'], DateTime(2023, 10, 28, 6)); // Tomorrow Sunrise
   });
 
   test('getNightWindow returns correct window for early morning (pre-dawn)', () async {
-    final service = MockAstronomyService();
-    final date = DateTime(2023, 10, 27, 4, 0); // 4 AM
-    final lat = 51.5;
-    final long = -0.1;
+    final MockAstronomyService service = MockAstronomyService();
+    final DateTime date = DateTime(2023, 10, 27, 4); // 4 AM
+    const double lat = 51.5;
+    const double long = -0.1;
 
-    final window = await service.getNightWindow(date: date, lat: lat, long: long);
+    final Map<String, DateTime> window = await service.getNightWindow(date: date, lat: lat, long: long);
 
-    expect(window['start'], DateTime(2023, 10, 26, 18, 0)); // Yesterday Sunset
-    expect(window['end'], DateTime(2023, 10, 27, 6, 0)); // Today Sunrise
+    expect(window['start'], DateTime(2023, 10, 26, 18)); // Yesterday Sunset
+    expect(window['end'], DateTime(2023, 10, 27, 6)); // Today Sunrise
   });
 
   test('getNightWindow returns correct window for late night (post-sunset)', () async {
-    final service = MockAstronomyService();
-    final date = DateTime(2023, 10, 27, 22, 0); // 10 PM
-    final lat = 51.5;
-    final long = -0.1;
+    final MockAstronomyService service = MockAstronomyService();
+    final DateTime date = DateTime(2023, 10, 27, 22); // 10 PM
+    const double lat = 51.5;
+    const double long = -0.1;
 
-    final window = await service.getNightWindow(date: date, lat: lat, long: long);
+    final Map<String, DateTime> window = await service.getNightWindow(date: date, lat: lat, long: long);
 
-    expect(window['start'], DateTime(2023, 10, 27, 18, 0)); // Today Sunset
-    expect(window['end'], DateTime(2023, 10, 28, 6, 0)); // Tomorrow Sunrise
+    expect(window['start'], DateTime(2023, 10, 27, 18)); // Today Sunset
+    expect(window['end'], DateTime(2023, 10, 28, 6)); // Tomorrow Sunrise
   });
 }
 
@@ -85,10 +85,10 @@ class MockAstronomyService extends AstronomyService {
   }) {
     // Return fixed times for testing logic
     // Rise: 6 AM, Set: 6 PM
-    return {
-      'rise': DateTime(date.year, date.month, date.day, 6, 0),
-      'set': DateTime(date.year, date.month, date.day, 18, 0),
-      'transit': DateTime(date.year, date.month, date.day, 12, 0),
+    return <String, DateTime?>{
+      'rise': DateTime(date.year, date.month, date.day, 6),
+      'set': DateTime(date.year, date.month, date.day, 18),
+      'transit': DateTime(date.year, date.month, date.day, 12),
     };
   }
 }

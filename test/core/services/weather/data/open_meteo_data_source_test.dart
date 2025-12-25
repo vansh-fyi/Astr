@@ -1,13 +1,14 @@
+import 'package:astr/core/engine/models/location.dart';
+import 'package:astr/core/services/weather/data/open_meteo_data_source.dart';
+import 'package:astr/core/services/weather/i_weather_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:astr/core/engine/models/location.dart';
-import 'package:astr/core/services/weather/data/open_meteo_data_source.dart';
 
 import 'open_meteo_data_source_test.mocks.dart';
 
-@GenerateMocks([http.Client])
+@GenerateMocks(<Type>[http.Client])
 void main() {
   late OpenMeteoDataSource dataSource;
   late MockClient mockClient;
@@ -22,7 +23,7 @@ void main() {
   group('OpenMeteoDataSource', () {
     test('Parses valid JSON response correctly (AC#2)', () async {
       // Arrange
-      const validResponse = '''
+      const String validResponse = '''
       {
         "current": {
           "temperature_2m": 15.5,
@@ -35,7 +36,7 @@ void main() {
           .thenAnswer((_) async => http.Response(validResponse, 200));
 
       // Act
-      final weather = await dataSource.getWeather(testLocation);
+      final Weather? weather = await dataSource.getWeather(testLocation);
 
       // Assert
       expect(weather, isNotNull);
@@ -49,7 +50,7 @@ void main() {
       when(mockClient.get(any)).thenThrow(Exception('Network error'));
 
       // Act
-      final weather = await dataSource.getWeather(testLocation);
+      final Weather? weather = await dataSource.getWeather(testLocation);
 
       // Assert
       expect(weather, isNull);
@@ -65,7 +66,7 @@ void main() {
       );
 
       // Act
-      final weather = await dataSource.getWeather(testLocation);
+      final Weather? weather = await dataSource.getWeather(testLocation);
 
       // Assert
       expect(weather, isNull);
@@ -77,7 +78,7 @@ void main() {
           .thenAnswer((_) async => http.Response('Error', 500));
 
       // Act
-      final weather = await dataSource.getWeather(testLocation);
+      final Weather? weather = await dataSource.getWeather(testLocation);
 
       // Assert
       expect(weather, isNull);
@@ -89,7 +90,7 @@ void main() {
           .thenAnswer((_) async => http.Response('not json', 200));
 
       // Act
-      final weather = await dataSource.getWeather(testLocation);
+      final Weather? weather = await dataSource.getWeather(testLocation);
 
       // Assert
       expect(weather, isNull);
@@ -97,7 +98,7 @@ void main() {
 
     test('Returns null when missing required fields', () async {
       // Arrange
-      const incompleteResponse = '''
+      const String incompleteResponse = '''
       {
         "current": {
           "temperature_2m": 15.5
@@ -109,7 +110,7 @@ void main() {
           .thenAnswer((_) async => http.Response(incompleteResponse, 200));
 
       // Act
-      final weather = await dataSource.getWeather(testLocation);
+      final Weather? weather = await dataSource.getWeather(testLocation);
 
       // Assert
       expect(weather, isNull);
@@ -124,7 +125,7 @@ void main() {
       await dataSource.getWeather(testLocation);
 
       // Assert
-      final captured = verify(mockClient.get(captureAny)).captured.single as Uri;
+      final Uri captured = verify(mockClient.get(captureAny)).captured.single as Uri;
       expect(captured.toString(), contains('latitude=40.7128'));
       expect(captured.toString(), contains('longitude=-74.006'));
       expect(captured.toString(), contains('current=temperature_2m,cloud_cover'));

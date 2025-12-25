@@ -1,4 +1,5 @@
 import 'package:astr/features/catalog/domain/entities/graph_point.dart';
+import 'package:astr/features/catalog/domain/entities/time_range.dart';
 import 'package:astr/features/catalog/domain/entities/visibility_graph_data.dart';
 import 'package:astr/features/catalog/presentation/providers/visibility_graph_notifier.dart';
 import 'package:astr/features/catalog/presentation/widgets/visibility_graph_widget.dart';
@@ -10,21 +11,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('VisibilityGraphWidget renders with cloud cover data', (tester) async {
-    final now = DateTime.now();
-    final startTime = now;
-    final endTime = now.add(const Duration(hours: 12));
+  testWidgets('VisibilityGraphWidget renders with cloud cover data', (WidgetTester tester) async {
+    final DateTime now = DateTime.now();
+    final DateTime startTime = now;
+    final DateTime endTime = now.add(const Duration(hours: 12));
 
-    final mockGraphData = VisibilityGraphData(
-      objectCurve: List.generate(13, (i) => GraphPoint(time: startTime.add(Duration(hours: i)), value: 45.0)),
-      moonCurve: [],
-      optimalWindows: [],
+    final VisibilityGraphData mockGraphData = VisibilityGraphData(
+      objectCurve: List.generate(13, (int i) => GraphPoint(time: startTime.add(Duration(hours: i)), value: 45)),
+      moonCurve: <GraphPoint>[],
+      optimalWindows: <TimeRange>[],
     );
 
-    final mockCloudCoverData = List.generate(13, (index) {
+    final List<HourlyForecast> mockCloudCoverData = List.generate(13, (int index) {
       return HourlyForecast(
         time: startTime.add(Duration(hours: index)),
-        cloudCover: 50.0,
+        cloudCover: 50,
         temperatureC: 20,
         humidity: 50,
         windSpeedKph: 10,
@@ -35,9 +36,9 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          visibilityGraphProvider('test-object').overrideWith((ref) => MockVisibilityGraphNotifier(mockGraphData)),
-          hourlyForecastProvider.overrideWith((ref) async => mockCloudCoverData),
+        overrides: <Override>[
+          visibilityGraphProvider('test-object').overrideWith((StateNotifierProviderRef<VisibilityGraphNotifier, VisibilityGraphState> ref) => MockVisibilityGraphNotifier(mockGraphData)),
+          hourlyForecastProvider.overrideWith((FutureProviderRef<List<HourlyForecast>> ref) async => mockCloudCoverData),
         ],
         child: const MaterialApp(
           home: Scaffold(
@@ -56,9 +57,9 @@ void main() {
 }
 
 class MockVisibilityGraphNotifier extends StateNotifier<VisibilityGraphState> implements VisibilityGraphNotifier {
-  final VisibilityGraphData _data;
 
   MockVisibilityGraphNotifier(this._data) : super(VisibilityGraphState(graphData: _data));
+  final VisibilityGraphData _data;
 
   @override
   Future<void> calculateGraph() async {}

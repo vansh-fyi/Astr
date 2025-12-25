@@ -1,5 +1,5 @@
-import 'package:astr/core/engine/models/location.dart';
-import 'package:astr/core/engine/models/result.dart';
+import '../../engine/models/location.dart';
+import '../../engine/models/result.dart';
 
 /// Interface for Light Pollution Service
 /// Returns Bortle class (1-9) for a given location

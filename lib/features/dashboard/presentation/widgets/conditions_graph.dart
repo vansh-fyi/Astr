@@ -1,17 +1,12 @@
-import 'package:astr/features/catalog/domain/entities/graph_point.dart';
-import 'package:astr/features/dashboard/domain/entities/hourly_forecast.dart';
-import 'package:astr/core/engine/prime_view_calculator.dart';
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 
+import '../../../../core/engine/prime_view_calculator.dart';
+import '../../../catalog/domain/entities/graph_point.dart';
+import '../../domain/entities/hourly_forecast.dart';
+
 class ConditionsGraph extends StatelessWidget {
-  final Color themeColor;
-  final DateTime? moonRiseTime;
-  final List<GraphPoint>? moonCurve;
-  final List<HourlyForecast>? cloudCoverData;
-  final DateTime startTime;
-  final DateTime endTime;
-  final PrimeViewWindow? primeViewWindow;
 
   const ConditionsGraph({
     super.key,
@@ -23,11 +18,18 @@ class ConditionsGraph extends StatelessWidget {
     required this.endTime,
     this.primeViewWindow,
   });
+  final Color themeColor;
+  final DateTime? moonRiseTime;
+  final List<GraphPoint>? moonCurve;
+  final List<HourlyForecast>? cloudCoverData;
+  final DateTime startTime;
+  final DateTime endTime;
+  final PrimeViewWindow? primeViewWindow;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: [
+      children: <Widget>[
         // Graph Painter
         CustomPaint(
           size: Size.infinite,
@@ -58,11 +60,11 @@ class ConditionsGraph extends StatelessWidget {
   }
 
   List<Widget> _buildTimeLabels() {
-    final labels = <Widget>[];
-    final duration = endTime.difference(startTime);
+    final List<Widget> labels = <Widget>[];
+    final Duration duration = endTime.difference(startTime);
     for (int i = 0; i <= 4; i++) {
-        final time = startTime.add(Duration(minutes: (duration.inMinutes * (i / 4)).round()));
-        final isMidnight = time.hour == 0;
+        final DateTime time = startTime.add(Duration(minutes: (duration.inMinutes * (i / 4)).round()));
+        final bool isMidnight = time.hour == 0;
         labels.add(
             Text(
                 '${time.hour.toString().padLeft(2, '0')}:00',
@@ -79,13 +81,6 @@ class ConditionsGraph extends StatelessWidget {
 }
 
 class _ConditionsGraphPainter extends CustomPainter {
-  final Color themeColor;
-  final DateTime? moonRiseTime;
-  final List<GraphPoint>? moonCurve;
-  final List<HourlyForecast>? cloudCoverData;
-  final DateTime startTime;
-  final DateTime endTime;
-  final PrimeViewWindow? primeViewWindow;
 
   _ConditionsGraphPainter({
     required this.themeColor,
@@ -96,11 +91,18 @@ class _ConditionsGraphPainter extends CustomPainter {
     required this.endTime,
     this.primeViewWindow,
   });
+  final Color themeColor;
+  final DateTime? moonRiseTime;
+  final List<GraphPoint>? moonCurve;
+  final List<HourlyForecast>? cloudCoverData;
+  final DateTime startTime;
+  final DateTime endTime;
+  final PrimeViewWindow? primeViewWindow;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final width = size.width;
-    final height = size.height - 30; // Reserve space for labels
+    final double width = size.width;
+    final double height = size.height - 30; // Reserve space for labels
 
     // 1. Draw Grid
     _drawGrid(canvas, width, height);
@@ -115,13 +117,13 @@ class _ConditionsGraphPainter extends CustomPainter {
 
     // 4. Moon Rise Indicator
     if (moonRiseTime != null && moonRiseTime!.isBefore(endTime) && moonRiseTime!.isAfter(startTime)) {
-        final totalMinutes = endTime.difference(startTime).inMinutes;
-        final moonMinutes = moonRiseTime!.difference(startTime).inMinutes;
-        final moonX = (moonMinutes / totalMinutes) * width;
-        final labelY = height * 0.75; // Low position
+        final int totalMinutes = endTime.difference(startTime).inMinutes;
+        final int moonMinutes = moonRiseTime!.difference(startTime).inMinutes;
+        final double moonX = (moonMinutes / totalMinutes) * width;
+        final double labelY = height * 0.75; // Low position
         
         // Vertical Line (Short, up to label)
-        final linePaint = Paint()
+        final Paint linePaint = Paint()
           ..color = const Color(0xFF6366F1).withValues(alpha: 0.5) // Indigo-500
           ..strokeWidth = 1;
         
@@ -153,24 +155,24 @@ class _ConditionsGraphPainter extends CustomPainter {
     }
 
     // 6. Current Time Indicator
-    final now = DateTime.now();
+    final DateTime now = DateTime.now();
     if (now.isAfter(startTime) && now.isBefore(endTime)) {
-        final totalMinutes = endTime.difference(startTime).inMinutes;
-        final nowMinutes = now.difference(startTime).inMinutes;
-        final nowX = (nowMinutes / totalMinutes) * width;
+        final int totalMinutes = endTime.difference(startTime).inMinutes;
+        final int nowMinutes = now.difference(startTime).inMinutes;
+        final double nowX = (nowMinutes / totalMinutes) * width;
         
         // Height constraint: Higher up (approx 35% from top)
-        final indicatorHeight = height * 0.65; 
-        final topY = height * 0.35;
+        final double indicatorHeight = height * 0.65; 
+        final double topY = height * 0.35;
 
         // Gradient Line for Now
-        final nowLinePaint = Paint()
+        final Paint nowLinePaint = Paint()
           ..shader = LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
+            colors: <Color>[
               const Color(0xFFF97316).withValues(alpha: 0.5), // Orange-500/50
-              const Color(0xFFF97316).withValues(alpha: 0.0), // Transparent
+              const Color(0xFFF97316).withValues(alpha: 0), // Transparent
             ],
           ).createShader(Rect.fromLTWH(nowX, topY, 1, indicatorHeight));
 
@@ -188,27 +190,27 @@ class _ConditionsGraphPainter extends CustomPainter {
   void _drawMoonCurve(Canvas canvas, double width, double height) {
     if (moonCurve == null || moonCurve!.isEmpty) return;
 
-    final path = Path();
-    final paint = Paint()
+    final Path path = Path();
+    final Paint paint = Paint()
       ..color = const Color(0xFF1E1B4B).withValues(alpha: 0.5) // Dark Indigo (Matches Visibility Graph)
       ..style = PaintingStyle.fill;
 
-    final strokePaint = Paint()
+    final Paint strokePaint = Paint()
       ..color = const Color(0xFF6366F1).withValues(alpha: 0.5) // Indigo-500
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
-    final totalDuration = endTime.difference(startTime).inMinutes;
+    final int totalDuration = endTime.difference(startTime).inMinutes;
     
     path.moveTo(0, height);
     
     bool isFirst = true;
-    for (final point in moonCurve!) {
-      final minutesFromStart = point.time.difference(startTime).inMinutes;
-      final x = (minutesFromStart / totalDuration) * width;
+    for (final GraphPoint point in moonCurve!) {
+      final int minutesFromStart = point.time.difference(startTime).inMinutes;
+      final double x = (minutesFromStart / totalDuration) * width;
       // Scale moon altitude (0-90) to graph height, clamping to 0 (horizon)
-      final altitude = max(0.0, point.value);
-      final y = height - (altitude / 90 * height); 
+      final double altitude = max(0, point.value);
+      final double y = height - (altitude / 90 * height); 
       
       if (isFirst) {
         path.lineTo(x, y);
@@ -223,13 +225,13 @@ class _ConditionsGraphPainter extends CustomPainter {
     canvas.drawPath(path, paint);
     
     // Draw Stroke
-    final strokePath = Path();
+    final Path strokePath = Path();
     isFirst = true;
-    for (final point in moonCurve!) {
-      final minutesFromStart = point.time.difference(startTime).inMinutes;
-      final x = (minutesFromStart / totalDuration) * width;
-      final altitude = max(0.0, point.value);
-      final y = height - (altitude / 90 * height); 
+    for (final GraphPoint point in moonCurve!) {
+      final int minutesFromStart = point.time.difference(startTime).inMinutes;
+      final double x = (minutesFromStart / totalDuration) * width;
+      final double altitude = max(0, point.value);
+      final double y = height - (altitude / 90 * height); 
       
       if (isFirst) {
         strokePath.moveTo(x, y);
@@ -244,28 +246,28 @@ class _ConditionsGraphPainter extends CustomPainter {
   void _drawCloudCover(Canvas canvas, double width, double height) {
     if (cloudCoverData == null || cloudCoverData!.isEmpty) return;
 
-    final path = Path();
+    final Path path = Path();
     path.moveTo(0, height); // Start bottom-left
     
-    final totalDuration = endTime.difference(startTime).inMinutes;
+    final int totalDuration = endTime.difference(startTime).inMinutes;
     if (totalDuration == 0) return;
 
-    bool isFirst = true;
+    const bool isFirst = true;
     // Filter and sort data to ensure correct drawing order
-    final relevantData = cloudCoverData!.where((d) => 
+    final List<HourlyForecast> relevantData = cloudCoverData!.where((HourlyForecast d) => 
         !d.time.isBefore(startTime.subtract(const Duration(hours: 1))) && 
         !d.time.isAfter(endTime.add(const Duration(hours: 1)))
-    ).toList()..sort((a, b) => a.time.compareTo(b.time));
+    ).toList()..sort((HourlyForecast a, HourlyForecast b) => a.time.compareTo(b.time));
 
     if (relevantData.isEmpty) return;
 
     if (relevantData.isEmpty) return;
 
-    final points = <Offset>[];
-    for (final point in relevantData) {
-      final minutesFromStart = point.time.difference(startTime).inMinutes;
-      final x = (minutesFromStart / totalDuration) * width;
-      final y = height - (point.cloudCover / 100 * height);
+    final List<Offset> points = <Offset>[];
+    for (final HourlyForecast point in relevantData) {
+      final int minutesFromStart = point.time.difference(startTime).inMinutes;
+      final double x = (minutesFromStart / totalDuration) * width;
+      final double y = height - (point.cloudCover / 100 * height);
       points.add(Offset(x, y));
     }
 
@@ -275,13 +277,13 @@ class _ConditionsGraphPainter extends CustomPainter {
     path.lineTo(points.first.dx, points.first.dy);
 
     for (int i = 0; i < points.length - 1; i++) {
-      final p0 = points[max(0, i - 1)];
-      final p1 = points[i];
-      final p2 = points[i + 1];
-      final p3 = points[min(points.length - 1, i + 2)];
+      final Offset p0 = points[max(0, i - 1)];
+      final Offset p1 = points[i];
+      final Offset p2 = points[i + 1];
+      final Offset p3 = points[min(points.length - 1, i + 2)];
 
-      final cp1 = p1 + (p2 - p0) * 0.2; // Tension 0.2
-      final cp2 = p2 - (p3 - p1) * 0.2;
+      final Offset cp1 = p1 + (p2 - p0) * 0.2; // Tension 0.2
+      final Offset cp2 = p2 - (p3 - p1) * 0.2;
 
       path.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, p2.dx, p2.dy);
     }
@@ -292,11 +294,11 @@ class _ConditionsGraphPainter extends CustomPainter {
     path.close();
 
     // Fill Gradient
-    final paint = Paint()
+    final Paint paint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
+        colors: <Color>[
           Colors.white.withValues(alpha: 0.25),
           Colors.white.withValues(alpha: 0.05),
         ],
@@ -305,23 +307,23 @@ class _ConditionsGraphPainter extends CustomPainter {
     canvas.drawPath(path, paint);
     
     // Stroke
-    final strokePaint = Paint()
+    final Paint strokePaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
       
     // Re-create open path for stroke
-    final strokePath = Path();
+    final Path strokePath = Path();
     strokePath.moveTo(points.first.dx, points.first.dy);
     
     for (int i = 0; i < points.length - 1; i++) {
-      final p0 = points[max(0, i - 1)];
-      final p1 = points[i];
-      final p2 = points[i + 1];
-      final p3 = points[min(points.length - 1, i + 2)];
+      final Offset p0 = points[max(0, i - 1)];
+      final Offset p1 = points[i];
+      final Offset p2 = points[i + 1];
+      final Offset p3 = points[min(points.length - 1, i + 2)];
 
-      final cp1 = p1 + (p2 - p0) * 0.2;
-      final cp2 = p2 - (p3 - p1) * 0.2;
+      final Offset cp1 = p1 + (p2 - p0) * 0.2;
+      final Offset cp2 = p2 - (p3 - p1) * 0.2;
 
       strokePath.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, p2.dx, p2.dy);
     }
@@ -332,23 +334,23 @@ class _ConditionsGraphPainter extends CustomPainter {
   void _drawPrimeViewHighlight(Canvas canvas, double width, double height) {
     if (primeViewWindow == null) return;
 
-    final totalDuration = endTime.difference(startTime).inMinutes;
+    final int totalDuration = endTime.difference(startTime).inMinutes;
     if (totalDuration == 0) return;
 
     // Calculate X positions for the window
-    final windowStartMinutes = primeViewWindow!.start.difference(startTime).inMinutes;
-    final windowEndMinutes = primeViewWindow!.end.difference(startTime).inMinutes;
+    final int windowStartMinutes = primeViewWindow!.start.difference(startTime).inMinutes;
+    final int windowEndMinutes = primeViewWindow!.end.difference(startTime).inMinutes;
 
-    final startX = (windowStartMinutes / totalDuration) * width;
-    final endX = (windowEndMinutes / totalDuration) * width;
-    final centerX = (startX + endX) / 2;
+    final double startX = (windowStartMinutes / totalDuration) * width;
+    final double endX = (windowEndMinutes / totalDuration) * width;
+    final double centerX = (startX + endX) / 2;
 
     // Draw subtle background highlight
-    final highlightPaint = Paint()
+    final Paint highlightPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
+        colors: <Color>[
           const Color(0xFF10B981).withValues(alpha: 0.08), // Emerald-500/8
           const Color(0xFF10B981).withValues(alpha: 0.02), // Emerald-500/2
         ],
@@ -360,13 +362,13 @@ class _ConditionsGraphPainter extends CustomPainter {
     );
 
     // Draw vertical line at center with gradient
-    final centerLinePaint = Paint()
+    final Paint centerLinePaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
+        colors: <Color>[
           const Color(0xFF10B981).withValues(alpha: 0.5), // Emerald-500/50
-          const Color(0xFF10B981).withValues(alpha: 0.0), // Transparent
+          const Color(0xFF10B981).withValues(alpha: 0), // Transparent
         ],
       ).createShader(Rect.fromLTWH(centerX, height - 40, 1, 40));
 
@@ -377,7 +379,7 @@ class _ConditionsGraphPainter extends CustomPainter {
   }
 
   void _drawMoonLabel(Canvas canvas, double x, double y) {
-    final textPainter = TextPainter(
+    final TextPainter textPainter = TextPainter(
       text: const TextSpan(
         text: 'MOON RISE',
         style: TextStyle(
@@ -391,14 +393,14 @@ class _ConditionsGraphPainter extends CustomPainter {
     );
     textPainter.layout();
 
-    final padding = 4.0;
-    final rect = Rect.fromLTWH(x, y, textPainter.width + padding * 2, textPainter.height + padding);
+    const double padding = 4;
+    final Rect rect = Rect.fromLTWH(x, y, textPainter.width + padding * 2, textPainter.height + padding);
 
-    final bgPaint = Paint()
+    final Paint bgPaint = Paint()
       ..color = const Color(0xFF312E81).withValues(alpha: 0.5) // Indigo-900/50
       ..style = PaintingStyle.fill;
 
-    final borderPaint = Paint()
+    final Paint borderPaint = Paint()
       ..color = const Color(0xFF6366F1).withValues(alpha: 0.3) // Indigo-500/30
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
@@ -410,11 +412,11 @@ class _ConditionsGraphPainter extends CustomPainter {
   }
 
   void _drawPrimeViewBadge(Canvas canvas, double centerX, double bottomY) {
-    const paddingHorizontal = 10.0;
-    const paddingVertical = 4.0;
+    const double paddingHorizontal = 10;
+    const double paddingVertical = 4;
     
-    final textSpan = TextSpan(
-      children: [
+    final TextSpan textSpan = TextSpan(
+      children: <InlineSpan>[
         TextSpan(
           text: String.fromCharCode(Icons.auto_awesome.codePoint),
           style: TextStyle(
@@ -437,31 +439,31 @@ class _ConditionsGraphPainter extends CustomPainter {
       ],
     );
 
-    final textPainter = TextPainter(
+    final TextPainter textPainter = TextPainter(
       text: textSpan,
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
 
-    final badgeWidth = textPainter.width + (paddingHorizontal * 2);
-    final badgeHeight = textPainter.height + (paddingVertical * 2);
+    final double badgeWidth = textPainter.width + (paddingHorizontal * 2);
+    final double badgeHeight = textPainter.height + (paddingVertical * 2);
     
-    final badgeRect = Rect.fromCenter(
+    final Rect badgeRect = Rect.fromCenter(
       center: Offset(centerX, bottomY - badgeHeight / 2),
       width: badgeWidth,
       height: badgeHeight,
     );
 
-    final bgPaint = Paint()
+    final Paint bgPaint = Paint()
       ..color = const Color(0xFF10B981).withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
       
-    final borderPaint = Paint()
+    final Paint borderPaint = Paint()
       ..color = const Color(0xFF10B981).withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
-    final shadowPaint = Paint()
+    final Paint shadowPaint = Paint()
       ..color = const Color(0xFF10B981).withValues(alpha: 0.1)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
     
@@ -473,7 +475,7 @@ class _ConditionsGraphPainter extends CustomPainter {
   }
 
   void _drawNowLabel(Canvas canvas, double x, double y) {
-    final textPainter = TextPainter(
+    final TextPainter textPainter = TextPainter(
       text: const TextSpan(
         text: 'NOW',
         style: TextStyle(
@@ -486,15 +488,15 @@ class _ConditionsGraphPainter extends CustomPainter {
     );
     textPainter.layout();
 
-    final padding = 4.0;
+    const double padding = 4;
     // Position label to the right of the line
-    final rect = Rect.fromLTWH(x + 6, y, textPainter.width + padding * 2, textPainter.height + padding);
+    final Rect rect = Rect.fromLTWH(x + 6, y, textPainter.width + padding * 2, textPainter.height + padding);
 
-    final bgPaint = Paint()
+    final Paint bgPaint = Paint()
       ..color = const Color(0xFFF97316).withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
 
-    final borderPaint = Paint()
+    final Paint borderPaint = Paint()
       ..color = const Color(0xFFF97316).withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
@@ -509,17 +511,17 @@ class _ConditionsGraphPainter extends CustomPainter {
   }
 
   void _drawGrid(Canvas canvas, double width, double height) {
-    final paint = Paint()
+    final Paint paint = Paint()
       ..color = Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 1;
 
     for (int i = 1; i < 5; i++) {
-      final x = width * (i / 4);
+      final double x = width * (i / 4);
       canvas.drawLine(Offset(x, 0), Offset(x, height), paint);
     }
 
     for (int i = 1; i < 4; i++) {
-      final y = height * (i / 4);
+      final double y = height * (i / 4);
       canvas.drawLine(Offset(0, y), Offset(width, y), paint);
     }
   }

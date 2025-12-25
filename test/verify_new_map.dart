@@ -1,37 +1,38 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 
 void main() async {
-  final file = File('/Users/hp/Desktop/Work/Repositories/Astr/assets/maps/world_atlas_2015_bortle.png');
-  final bytes = await file.readAsBytes();
-  final image = img.decodePng(bytes)!;
+  final File file = File('/Users/hp/Desktop/Work/Repositories/Astr/assets/maps/world_atlas_2015_bortle.png');
+  final Uint8List bytes = await file.readAsBytes();
+  final img.Image image = img.decodePng(bytes)!;
 
   print('New map loaded: ${image.width}x${image.height}');
   print('');
 
-  final cities = [
-    {'name': 'New Delhi', 'lat': 28.6139, 'lng': 77.2090, 'expected': 'Bortle 8-9'},
-    {'name': 'New York City', 'lat': 40.7128, 'lng': -74.0060, 'expected': 'Bortle 8-9'},
-    {'name': 'Tokyo', 'lat': 35.6762, 'lng': 139.6503, 'expected': 'Bortle 8-9'},
-    {'name': 'London', 'lat': 51.5074, 'lng': -0.1278, 'expected': 'Bortle 7-8'},
-    {'name': 'Sahara Desert', 'lat': 25.0, 'lng': 10.0, 'expected': 'Bortle 1-2'},
-    {'name': 'Rural India', 'lat': 30.33, 'lng': 78.04, 'expected': 'Bortle 3-4'},
+  final List<Map<String, Object>> cities = <Map<String, Object>>[
+    <String, Object>{'name': 'New Delhi', 'lat': 28.6139, 'lng': 77.2090, 'expected': 'Bortle 8-9'},
+    <String, Object>{'name': 'New York City', 'lat': 40.7128, 'lng': -74.0060, 'expected': 'Bortle 8-9'},
+    <String, Object>{'name': 'Tokyo', 'lat': 35.6762, 'lng': 139.6503, 'expected': 'Bortle 8-9'},
+    <String, Object>{'name': 'London', 'lat': 51.5074, 'lng': -0.1278, 'expected': 'Bortle 7-8'},
+    <String, Object>{'name': 'Sahara Desert', 'lat': 25.0, 'lng': 10.0, 'expected': 'Bortle 1-2'},
+    <String, Object>{'name': 'Rural India', 'lat': 30.33, 'lng': 78.04, 'expected': 'Bortle 3-4'},
   ];
 
-  for (final city in cities) {
-    final lat = city['lat'] as double;
-    final lng = city['lng'] as double;
+  for (final Map<String, Object> city in cities) {
+    final double lat = city['lat']! as double;
+    final double lng = city['lng']! as double;
 
-    int x = ((lng + 180.0) * (image.width / 360.0)).round().clamp(0, image.width - 1);
-    int y = ((90.0 - lat) * (image.height / 180.0)).round().clamp(0, image.height - 1);
+    final int x = ((lng + 180.0) * (image.width / 360.0)).round().clamp(0, image.width - 1);
+    final int y = ((90.0 - lat) * (image.height / 180.0)).round().clamp(0, image.height - 1);
 
-    final pixel = image.getPixel(x, y);
-    final r = pixel.r.toInt();
-    final g = pixel.g.toInt();
-    final b = pixel.b.toInt();
+    final img.Pixel pixel = image.getPixel(x, y);
+    final int r = pixel.r.toInt();
+    final int g = pixel.g.toInt();
+    final int b = pixel.b.toInt();
 
     // Map RGB back to Bortle value
-    final rgbToBortle = {
+    final Map<String, int> rgbToBortle = <String, int>{
       '20,47,114': 1,    // Dark blue
       '33,84,216': 2,    // Blue
       '15,87,20': 3,     // Dark green
@@ -44,10 +45,10 @@ void main() async {
       '0,0,0': 0,        // Black (no data/water)
     };
 
-    final rgbKey = '$r,$g,$b';
-    final bortleValue = rgbToBortle[rgbKey] ?? -1;
+    final String rgbKey = '$r,$g,$b';
+    final int bortleValue = rgbToBortle[rgbKey] ?? -1;
 
-    final expected = city['expected'] as String;
+    final String expected = city['expected']! as String;
 
     print('${city['name']} (expected: $expected):');
     print('  Pixel: ($x, $y)');

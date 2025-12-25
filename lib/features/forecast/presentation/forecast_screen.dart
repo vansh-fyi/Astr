@@ -8,12 +8,12 @@ class ForecastScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF020204),
+    return const Scaffold(
+      backgroundColor: Color(0xFF020204),
       body: Stack(
-        children: [
-          const NebulaBackground(),
-          const Center(
+        children: <Widget>[
+          NebulaBackground(),
+          Center(
             child: Text(
               'Forecast Screen',
               style: TextStyle(color: Colors.white),

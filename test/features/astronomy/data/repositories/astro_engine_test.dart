@@ -1,6 +1,9 @@
+import 'package:astr/core/error/failure.dart';
 import 'package:astr/features/astronomy/data/repositories/astro_engine_impl.dart';
 import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
+import 'package:astr/features/astronomy/domain/entities/celestial_position.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/src/either.dart';
 
 /// Tests for AstroEngineImpl
 /// Validates Swiss Ephemeris calculations (Moon Phase, Position)
@@ -23,8 +26,8 @@ void main() {
     test('should map CelestialBody to correct Sweph ID', () {
       // This is a private method, but we can test the public getPosition
       // to ensure it doesn't throw invalid ID errors.
-      final time = DateTime.now();
-      final result = engine.getPosition(
+      final DateTime time = DateTime.now();
+      final Future<Either<Failure, CelestialPosition>> result = engine.getPosition(
         body: CelestialBody.moon,
         time: time,
         latitude: 0,
@@ -46,13 +49,13 @@ void main() {
     });
 
     test('getDeepSkyPosition should be callable', () async {
-      final result = await engine.getDeepSkyPosition(
+      final Either<Failure, CelestialPosition> result = await engine.getDeepSkyPosition(
         ra: 101.25, // Sirius
         dec: -16.7,
         name: 'Sirius',
         time: DateTime.now(),
-        latitude: 34.0,
-        longitude: -118.0,
+        latitude: 34,
+        longitude: -118,
       );
       // We expect it to fail with "Sweph not initialized" or similar if not set up,
       // or succeed if set up.

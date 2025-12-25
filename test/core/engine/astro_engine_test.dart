@@ -3,6 +3,8 @@ import 'package:astr/core/engine/models/celestial_object.dart';
 import 'package:astr/core/engine/models/coordinates.dart';
 import 'package:astr/core/engine/models/location.dart';
 import 'package:astr/core/engine/models/result.dart';
+import 'package:astr/core/engine/models/rise_set_times.dart';
+import 'package:astr/core/error/failure.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -19,7 +21,7 @@ void main() {
 
     group('calculatePosition', () {
       test('returns Success with valid coordinates', () async {
-        final sirius = CelestialObject(
+        const CelestialObject sirius = CelestialObject(
           id: 'HIP32349',
           name: 'Sirius',
           type: CelestialObjectType.star,
@@ -30,14 +32,14 @@ void main() {
           magnitude: -1.46,
         );
 
-        final location = Location(
+        const Location location = Location(
           latitude: 40.7128,
           longitude: -74.0060,
         );
 
-        final dateTime = DateTime.utc(2024, 12, 3, 2, 0, 0);
+        final DateTime dateTime = DateTime.utc(2024, 12, 3, 2);
 
-        final result = await engine.calculatePosition(sirius, location, dateTime);
+        final Result<HorizontalCoordinates> result = await engine.calculatePosition(sirius, location, dateTime);
 
         expect(result.isSuccess, true);
         expect(result.value.altitude, greaterThan(-90.0));
@@ -47,21 +49,21 @@ void main() {
       });
 
       test('calculates consistent positions for the same inputs', () async {
-        final object = CelestialObject(
+        const CelestialObject object = CelestialObject(
           id: 'test',
           name: 'Test Object',
           type: CelestialObjectType.star,
           coordinates: EquatorialCoordinates(
-            rightAscension: 150.0,
-            declination: 30.0,
+            rightAscension: 150,
+            declination: 30,
           ),
         );
 
-        final location = Location(latitude: 40.0, longitude: -75.0);
-        final dateTime = DateTime.utc(2024, 12, 3, 12, 0, 0);
+        const Location location = Location(latitude: 40, longitude: -75);
+        final DateTime dateTime = DateTime.utc(2024, 12, 3, 12);
 
-        final result1 = await engine.calculatePosition(object, location, dateTime);
-        final result2 = await engine.calculatePosition(object, location, dateTime);
+        final Result<HorizontalCoordinates> result1 = await engine.calculatePosition(object, location, dateTime);
+        final Result<HorizontalCoordinates> result2 = await engine.calculatePosition(object, location, dateTime);
 
         expect(result1.isSuccess, true);
         expect(result2.isSuccess, true);
@@ -70,52 +72,52 @@ void main() {
       });
 
       test('returns Failure when engine is disposed', () async {
-        final object = CelestialObject(
+        const CelestialObject object = CelestialObject(
           id: 'test',
           name: 'Test',
           type: CelestialObjectType.star,
           coordinates: EquatorialCoordinates(
-            rightAscension: 0.0,
-            declination: 0.0,
+            rightAscension: 0,
+            declination: 0,
           ),
         );
 
-        final location = Location(latitude: 0.0, longitude: 0.0);
-        final dateTime = DateTime.utc(2024, 12, 3);
+        const Location location = Location(latitude: 0, longitude: 0);
+        final DateTime dateTime = DateTime.utc(2024, 12, 3);
 
         await engine.dispose();
 
-        final result = await engine.calculatePosition(object, location, dateTime);
+        final Result<HorizontalCoordinates> result = await engine.calculatePosition(object, location, dateTime);
 
         expect(result.isFailure, true);
         expect(result.failure.message, contains('disposed'));
       });
 
       test('position changes over time for the same object', () async {
-        final object = CelestialObject(
+        const CelestialObject object = CelestialObject(
           id: 'test',
           name: 'Test Object',
           type: CelestialObjectType.star,
           coordinates: EquatorialCoordinates(
-            rightAscension: 150.0,
-            declination: 30.0,
+            rightAscension: 150,
+            declination: 30,
           ),
         );
 
-        final location = Location(latitude: 40.0, longitude: -75.0);
+        const Location location = Location(latitude: 40, longitude: -75);
 
-        final time1 = DateTime.utc(2024, 12, 3, 12, 0, 0);
-        final time2 = DateTime.utc(2024, 12, 3, 18, 0, 0);
+        final DateTime time1 = DateTime.utc(2024, 12, 3, 12);
+        final DateTime time2 = DateTime.utc(2024, 12, 3, 18);
 
-        final result1 = await engine.calculatePosition(object, location, time1);
-        final result2 = await engine.calculatePosition(object, location, time2);
+        final Result<HorizontalCoordinates> result1 = await engine.calculatePosition(object, location, time1);
+        final Result<HorizontalCoordinates> result2 = await engine.calculatePosition(object, location, time2);
 
         expect(result1.isSuccess, true);
         expect(result2.isSuccess, true);
 
         // Position should be different after 6 hours
-        final altDiff = (result1.value.altitude - result2.value.altitude).abs();
-        final azDiff = (result1.value.azimuth - result2.value.azimuth).abs();
+        final double altDiff = (result1.value.altitude - result2.value.altitude).abs();
+        final double azDiff = (result1.value.azimuth - result2.value.azimuth).abs();
 
         expect(altDiff, greaterThan(1.0)); // Should differ by more than 1 degree
       });
@@ -123,7 +125,7 @@ void main() {
 
     group('calculateRiseSet', () {
       test('returns Success with valid rise/set times', () async {
-        final sirius = CelestialObject(
+        const CelestialObject sirius = CelestialObject(
           id: 'HIP32349',
           name: 'Sirius',
           type: CelestialObjectType.star,
@@ -134,14 +136,14 @@ void main() {
           magnitude: -1.46,
         );
 
-        final location = Location(
+        const Location location = Location(
           latitude: 40.7128,
           longitude: -74.0060,
         );
 
-        final date = DateTime.utc(2024, 12, 3);
+        final DateTime date = DateTime.utc(2024, 12, 3);
 
-        final result = await engine.calculateRiseSet(sirius, location, date);
+        final Result<RiseSetTimes> result = await engine.calculateRiseSet(sirius, location, date);
 
         expect(result.isSuccess, true);
         expect(result.value.isCircumpolar, false);
@@ -152,7 +154,7 @@ void main() {
       });
 
       test('identifies circumpolar objects', () async {
-        final polaris = CelestialObject(
+        const CelestialObject polaris = CelestialObject(
           id: 'polaris',
           name: 'Polaris',
           type: CelestialObjectType.star,
@@ -160,17 +162,17 @@ void main() {
             rightAscension: 37.95,
             declination: 89.26,
           ),
-          magnitude: 2.0,
+          magnitude: 2,
         );
 
-        final location = Location(
+        const Location location = Location(
           latitude: 40.7128,
           longitude: -74.0060,
         );
 
-        final date = DateTime.utc(2024, 12, 3);
+        final DateTime date = DateTime.utc(2024, 12, 3);
 
-        final result = await engine.calculateRiseSet(polaris, location, date);
+        final Result<RiseSetTimes> result = await engine.calculateRiseSet(polaris, location, date);
 
         expect(result.isSuccess, true);
         expect(result.value.isCircumpolar, true);
@@ -179,24 +181,24 @@ void main() {
       });
 
       test('identifies objects that never rise', () async {
-        final southernObject = CelestialObject(
+        const CelestialObject southernObject = CelestialObject(
           id: 'southern',
           name: 'Southern Object',
           type: CelestialObjectType.star,
           coordinates: EquatorialCoordinates(
-            rightAscension: 0.0,
-            declination: -85.0,
+            rightAscension: 0,
+            declination: -85,
           ),
         );
 
-        final location = Location(
-          latitude: 60.0,
-          longitude: 0.0,
+        const Location location = Location(
+          latitude: 60,
+          longitude: 0,
         );
 
-        final date = DateTime.utc(2024, 12, 3);
+        final DateTime date = DateTime.utc(2024, 12, 3);
 
-        final result = await engine.calculateRiseSet(southernObject, location, date);
+        final Result<RiseSetTimes> result = await engine.calculateRiseSet(southernObject, location, date);
 
         expect(result.isSuccess, true);
         expect(result.value.neverRises, true);
@@ -205,22 +207,22 @@ void main() {
       });
 
       test('returns Failure when engine is disposed', () async {
-        final object = CelestialObject(
+        const CelestialObject object = CelestialObject(
           id: 'test',
           name: 'Test',
           type: CelestialObjectType.star,
           coordinates: EquatorialCoordinates(
-            rightAscension: 0.0,
-            declination: 0.0,
+            rightAscension: 0,
+            declination: 0,
           ),
         );
 
-        final location = Location(latitude: 0.0, longitude: 0.0);
-        final date = DateTime.utc(2024, 12, 3);
+        const Location location = Location(latitude: 0, longitude: 0);
+        final DateTime date = DateTime.utc(2024, 12, 3);
 
         await engine.dispose();
 
-        final result = await engine.calculateRiseSet(object, location, date);
+        final Result<RiseSetTimes> result = await engine.calculateRiseSet(object, location, date);
 
         expect(result.isFailure, true);
         expect(result.failure.message, contains('disposed'));
@@ -229,52 +231,52 @@ void main() {
 
     group('Result pattern usage', () {
       test('Success result provides value', () async {
-        final object = CelestialObject(
+        const CelestialObject object = CelestialObject(
           id: 'test',
           name: 'Test',
           type: CelestialObjectType.star,
           coordinates: EquatorialCoordinates(
-            rightAscension: 0.0,
-            declination: 0.0,
+            rightAscension: 0,
+            declination: 0,
           ),
         );
 
-        final location = Location(latitude: 0.0, longitude: 0.0);
-        final dateTime = DateTime.utc(2024, 12, 3);
+        const Location location = Location(latitude: 0, longitude: 0);
+        final DateTime dateTime = DateTime.utc(2024, 12, 3);
 
-        final result = await engine.calculatePosition(object, location, dateTime);
+        final Result<HorizontalCoordinates> result = await engine.calculatePosition(object, location, dateTime);
 
         // Test fold method
-        final folded = result.fold(
-          (value) => 'Success: ${value.altitude}',
-          (failure) => 'Failure: ${failure.message}',
+        final String folded = result.fold(
+          (HorizontalCoordinates value) => 'Success: ${value.altitude}',
+          (Failure failure) => 'Failure: ${failure.message}',
         );
 
         expect(folded, startsWith('Success:'));
       });
 
       test('Failure result provides error information', () async {
-        final object = CelestialObject(
+        const CelestialObject object = CelestialObject(
           id: 'test',
           name: 'Test',
           type: CelestialObjectType.star,
           coordinates: EquatorialCoordinates(
-            rightAscension: 0.0,
-            declination: 0.0,
+            rightAscension: 0,
+            declination: 0,
           ),
         );
 
-        final location = Location(latitude: 0.0, longitude: 0.0);
-        final dateTime = DateTime.utc(2024, 12, 3);
+        const Location location = Location(latitude: 0, longitude: 0);
+        final DateTime dateTime = DateTime.utc(2024, 12, 3);
 
         await engine.dispose();
 
-        final result = await engine.calculatePosition(object, location, dateTime);
+        final Result<HorizontalCoordinates> result = await engine.calculatePosition(object, location, dateTime);
 
         // Test fold method with failure
-        final folded = result.fold(
-          (value) => 'Success',
-          (failure) => 'Failure: ${failure.message}',
+        final String folded = result.fold(
+          (HorizontalCoordinates value) => 'Success',
+          (Failure failure) => 'Failure: ${failure.message}',
         );
 
         expect(folded, startsWith('Failure:'));
@@ -284,9 +286,9 @@ void main() {
 
     group('performance requirements (AC #3)', () {
       test('engine can handle multiple calculations quickly', () async {
-        final objects = List.generate(
+        final List<CelestialObject> objects = List.generate(
           10,
-          (i) => CelestialObject(
+          (int i) => CelestialObject(
             id: 'star$i',
             name: 'Star $i',
             type: CelestialObjectType.star,
@@ -297,13 +299,13 @@ void main() {
           ),
         );
 
-        final location = Location(latitude: 40.0, longitude: -75.0);
-        final dateTime = DateTime.utc(2024, 12, 3, 12, 0, 0);
+        const Location location = Location(latitude: 40, longitude: -75);
+        final DateTime dateTime = DateTime.utc(2024, 12, 3, 12);
 
-        final stopwatch = Stopwatch()..start();
+        final Stopwatch stopwatch = Stopwatch()..start();
 
-        for (final object in objects) {
-          final result = await engine.calculatePosition(object, location, dateTime);
+        for (final CelestialObject object in objects) {
+          final Result<HorizontalCoordinates> result = await engine.calculatePosition(object, location, dateTime);
           expect(result.isSuccess, true);
         }
 
@@ -321,17 +323,17 @@ void main() {
         await engine.dispose(); // Should not throw
 
         // Verify engine is disposed
-        final result = await engine.calculatePosition(
-          CelestialObject(
+        final Result<HorizontalCoordinates> result = await engine.calculatePosition(
+          const CelestialObject(
             id: 'test',
             name: 'Test',
             type: CelestialObjectType.star,
             coordinates: EquatorialCoordinates(
-              rightAscension: 0.0,
-              declination: 0.0,
+              rightAscension: 0,
+              declination: 0,
             ),
           ),
-          Location(latitude: 0.0, longitude: 0.0),
+          const Location(latitude: 0, longitude: 0),
           DateTime.utc(2024, 12, 3),
         );
 

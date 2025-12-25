@@ -1,27 +1,31 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:astr/core/services/qualitative/qualitative_condition_service.dart';
-import 'package:astr/core/engine/models/condition_result.dart';
-import 'package:astr/features/dashboard/presentation/providers/weather_provider.dart';
-import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
-import 'package:astr/features/dashboard/presentation/providers/light_pollution_provider.dart';
+
+import '../../../../core/engine/models/condition_result.dart';
+import '../../../../core/services/qualitative/qualitative_condition_service.dart';
+import '../../../astronomy/domain/entities/astronomy_state.dart';
+import '../../../astronomy/presentation/providers/astronomy_provider.dart';
+import '../../domain/entities/light_pollution.dart';
+import '../../domain/entities/weather.dart';
+import 'light_pollution_provider.dart';
+import 'weather_provider.dart';
 
 /// Provider for the qualitative condition evaluation service
-final qualitativeConditionServiceProvider = Provider<QualitativeConditionService>((ref) {
+final Provider<QualitativeConditionService> qualitativeConditionServiceProvider = Provider<QualitativeConditionService>((ProviderRef<QualitativeConditionService> ref) {
   return QualitativeConditionService();
 });
 
 /// Provider that evaluates current observing conditions and returns qualitative result
-final conditionQualityProvider = FutureProvider<ConditionResult>((ref) async {
+final FutureProvider<ConditionResult> conditionQualityProvider = FutureProvider<ConditionResult>((FutureProviderRef<ConditionResult> ref) async {
   // Get required data
-  final weather = await ref.watch(weatherProvider.future);
-  final astronomy = await ref.watch(astronomyProvider.future);
+  final Weather weather = await ref.watch(weatherProvider.future);
+  final AstronomyState astronomy = await ref.watch(astronomyProvider.future);
 
   // Get base MPSAS from light pollution (without moon adjustment)
   // QualitativeConditionService handles moon separately to avoid double-counting
-  final lightPollution = ref.watch(lightPollutionProvider);
+  final LightPollution lightPollution = ref.watch(lightPollutionProvider);
 
   // Get the service
-  final service = ref.watch(qualitativeConditionServiceProvider);
+  final QualitativeConditionService service = ref.watch(qualitativeConditionServiceProvider);
 
   // Evaluate conditions using base MPSAS
   // The service will account for moon illumination in its weighted calculation

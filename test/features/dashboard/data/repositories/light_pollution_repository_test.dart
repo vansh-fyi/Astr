@@ -11,7 +11,7 @@ import 'package:mockito/mockito.dart';
 
 import 'light_pollution_repository_test.mocks.dart';
 
-@GenerateMocks([Dio, PngMapService])
+@GenerateMocks(<Type>[Dio, PngMapService])
 void main() {
   late LightPollutionRepository repository;
   late MockDio mockDio;
@@ -23,13 +23,13 @@ void main() {
     repository = LightPollutionRepository(mockDio, mockPngService);
   });
 
-  const tLocation = GeoLocation(latitude: 0, longitude: 0);
-  const tLightPollution = LightPollution(
+  const GeoLocation tLocation = GeoLocation(latitude: 0, longitude: 0);
+  const LightPollution tLightPollution = LightPollution(
     visibilityIndex: 4,
-    brightnessRatio: 0.0,
+    brightnessRatio: 0,
     mpsas: 20.8,
     source: LightPollutionSource.precise,
-    zone: "4",
+    zone: '4',
   );
 
   group('getLightPollution', () {
@@ -37,18 +37,18 @@ void main() {
       // Arrange
       when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
           .thenAnswer((_) async => Response(
-                requestOptions: RequestOptions(path: ''),
+                requestOptions: RequestOptions(),
                 statusCode: 200,
-                data: {'bortle': 4, 'mpsas': 20.8},
+                data: <String, num>{'bortle': 4, 'mpsas': 20.8},
               ));
 
       // Act
-      final result = await repository.getLightPollution(tLocation);
+      final Either<Failure, LightPollution> result = await repository.getLightPollution(tLocation);
 
       // Assert
       verify(mockDio.get(
         'https://astr-backend.vercel.app/api/light-pollution',
-        queryParameters: {'lat': 0.0, 'lon': 0.0},
+        queryParameters: <String, dynamic>{'lat': 0.0, 'lon': 0.0},
       ));
       expect(result, equals(const Right(tLightPollution)));
       verifyZeroInteractions(mockPngService);
@@ -57,12 +57,12 @@ void main() {
     test('should return PNG fallback when API call fails', () async {
       // Arrange
       when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
-          .thenThrow(DioException(requestOptions: RequestOptions(path: '')));
+          .thenThrow(DioException(requestOptions: RequestOptions()));
       when(mockPngService.getLightPollution(any))
           .thenAnswer((_) async => tLightPollution);
 
       // Act
-      final result = await repository.getLightPollution(tLocation);
+      final Either<Failure, LightPollution> result = await repository.getLightPollution(tLocation);
 
       // Assert
       verify(mockDio.get(any, queryParameters: anyNamed('queryParameters')));
@@ -73,11 +73,11 @@ void main() {
     test('should return Failure when both API and Fallback fail', () async {
       // Arrange
       when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
-          .thenThrow(DioException(requestOptions: RequestOptions(path: '')));
+          .thenThrow(DioException(requestOptions: RequestOptions()));
       when(mockPngService.getLightPollution(any)).thenThrow(Exception());
 
       // Act
-      final result = await repository.getLightPollution(tLocation);
+      final Either<Failure, LightPollution> result = await repository.getLightPollution(tLocation);
 
       // Assert
       expect(result.isLeft(), true);

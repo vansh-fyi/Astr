@@ -1,42 +1,45 @@
-import 'package:astr/core/widgets/cosmic_loader.dart';
 import 'dart:ui';
-import 'package:astr/core/widgets/glass_toast.dart';
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:ionicons/ionicons.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
-import 'package:astr/features/context/presentation/widgets/location_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:ionicons/ionicons.dart';
+
+import '../../core/providers/global_loading_provider.dart';
+import '../../core/widgets/cosmic_loader.dart';
+import '../../core/widgets/glass_panel.dart';
+import '../../core/widgets/glass_toast.dart';
+import '../../features/context/domain/entities/astr_context.dart';
+import '../../features/context/presentation/providers/astr_context_provider.dart';
+import '../../features/context/presentation/widgets/location_sheet.dart';
 import '../theme/app_theme.dart';
-import 'package:astr/core/providers/global_loading_provider.dart';
 
 class ScaffoldWithNavBar extends ConsumerWidget {
-  final StatefulNavigationShell navigationShell;
 
   const ScaffoldWithNavBar({
     required this.navigationShell,
     super.key,
   });
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final astrContextAsync = ref.watch(astrContextProvider);
-    final selectedDate = astrContextAsync.value?.selectedDate ?? DateTime.now();
-    final isToday = DateUtils.isSameDay(selectedDate, DateTime.now());
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
+    final DateTime selectedDate = astrContextAsync.value?.selectedDate ?? DateTime.now();
+    final bool isToday = DateUtils.isSameDay(selectedDate, DateTime.now());
     
-    final locationName = astrContextAsync.value?.isCurrentLocation == true 
+    final String locationName = astrContextAsync.value?.isCurrentLocation ?? false 
         ? 'Current Location' 
         : (astrContextAsync.value?.location.name ?? 'Current Location');
 
-    final topPadding = MediaQuery.of(context).padding.top;
-    final isLoading = ref.watch(globalLoadingProvider);
+    final double topPadding = MediaQuery.of(context).padding.top;
+    final bool isLoading = ref.watch(globalLoadingProvider);
 
     return Scaffold(
       body: Stack(
-        children: [
+        children: <Widget>[
           // Page Content (Pushed down to be visible below header)
           Padding(
             padding: const EdgeInsets.only(top: 55), 
@@ -63,13 +66,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                     border: Border(
                       bottom: BorderSide(
                         color: Colors.white.withOpacity(0.1),
-                        width: 1,
                       ),
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: <Widget>[
                       // Location Group
                       Flexible(
                         flex: 4, // Increased flex to ensure "Current Location" fits
@@ -80,12 +82,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                             showModalBottomSheet(
                               context: context,
                               useRootNavigator: true,
-                              builder: (context) => const LocationSheet(),
+                              builder: (BuildContext context) => const LocationSheet(),
                             );
                           },
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: [
+                            children: <Widget>[
                               Icon(
                                 Ionicons.location_outline, 
                                 color: (astrContextAsync.value?.isCurrentLocation ?? true) 
@@ -122,15 +124,15 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
-                          children: [
+                          children: <Widget>[
                             // Prev Button - AC#3: Restricted to -10 days
                             GlassPanel(
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(30),
                               onTap: () {
-                                final now = DateTime.now();
-                                final minDate = now.subtract(const Duration(days: 10));
-                                final nextDate = selectedDate.subtract(const Duration(days: 1));
+                                final DateTime now = DateTime.now();
+                                final DateTime minDate = now.subtract(const Duration(days: 10));
+                                final DateTime nextDate = selectedDate.subtract(const Duration(days: 1));
                                 if (nextDate.isBefore(minDate)) {
                                   showGlassToast(context, 'Cloud cover forecast unavailable beyond 10 days in the past');
                                   return;
@@ -153,27 +155,25 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                                 borderRadius: BorderRadius.circular(30),
                                 onTap: () async {
-                                  final now = DateTime.now();
+                                  final DateTime now = DateTime.now();
                                   // AC#3: Restrict to +/-10 days for cloud cover data
-                                  final minDate = now.subtract(const Duration(days: 10));
-                                  final maxDate = now.add(const Duration(days: 10));
+                                  final DateTime minDate = now.subtract(const Duration(days: 10));
+                                  final DateTime maxDate = now.add(const Duration(days: 10));
                                   
-                                  final pickedDate = await showDatePicker(
+                                  final DateTime? pickedDate = await showDatePicker(
                                     context: context,
                                     initialDate: selectedDate,
                                     firstDate: minDate,
                                     lastDate: maxDate,
                                     helpText: 'Cloud cover forecast available for ±10 days',
-                                    builder: (context, child) {
+                                    builder: (BuildContext context, Widget? child) {
                                       return Theme(
                                         data: Theme.of(context).copyWith(
                                           colorScheme: const ColorScheme.dark(
                                             primary: Colors.blueAccent,
                                             onPrimary: Colors.white,
-                                            surface: const Color(0xFF141419),
-                                            onSurface: Colors.white,
-                                          ),
-                                          dialogBackgroundColor: const Color(0xFF0A0A0B),
+                                            surface: Color(0xFF141419),
+                                          ), dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF0A0A0B)),
                                         ),
                                         child: child!,
                                       );
@@ -205,9 +205,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(30),
                               onTap: () {
-                                final now = DateTime.now();
-                                final maxDate = now.add(const Duration(days: 10));
-                                final nextDate = selectedDate.add(const Duration(days: 1));
+                                final DateTime now = DateTime.now();
+                                final DateTime maxDate = now.add(const Duration(days: 10));
+                                final DateTime nextDate = selectedDate.add(const Duration(days: 1));
                                 if (nextDate.isAfter(maxDate)) {
                                   showGlassToast(context, 'Cloud cover forecast unavailable beyond 10 days in the future');
                                   return;
@@ -246,7 +246,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       bottomNavigationBar: Stack(
         alignment: Alignment.topCenter,
         clipBehavior: Clip.none,
-        children: [
+        children: <Widget>[
           ClipPath(
             clipper: NavBarClipper(),
             child: BackdropFilter(
@@ -262,7 +262,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                   type: MaterialType.transparency,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
+                    children: <Widget>[
                       _NavBarItem(
                         icon: Ionicons.home_outline,
                         activeIcon: Ionicons.home,
@@ -314,7 +314,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     if (!isLoading) return const SizedBox.shrink();
 
     return Positioned.fill(
-      child: Container(
+      child: ColoredBox(
         color: Colors.black.withOpacity(0.5),
         child: const Center(
           child: CosmicLoader(),
@@ -334,8 +334,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 class NavBarClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    final path = Path();
-    final center = size.width / 2;
+    final Path path = Path();
+    final double center = size.width / 2;
     
     // Start from top-left
     path.moveTo(0, 0);
@@ -375,28 +375,28 @@ class NavBarClipper extends CustomClipper<Path> {
 class NotchShinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    final Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
 
     // Gradient to create the "shine" effect
     // Fades out at the ends (top) and bottom, concentrating the shine in the middle
-    final shader = LinearGradient(
+    final Shader shader = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [
-        Colors.blueAccent.withOpacity(0.0),
+      colors: <Color>[
+        Colors.blueAccent.withOpacity(0),
         Colors.blueAccent.withOpacity(0.8),
-        Colors.blueAccent.withOpacity(0.0),
+        Colors.blueAccent.withOpacity(0),
       ],
-      stops: const [0.0, 0.5, 1.0],
+      stops: const <double>[0, 0.5, 1],
     ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     paint.shader = shader;
 
-    final path = Path();
-    final center = size.width / 2;
+    final Path path = Path();
+    final double center = size.width / 2;
     
     // We draw a curve that follows the notch shape.
     // Starting from the top edge (y=0) and curving down.
@@ -424,11 +424,6 @@ class NotchShinePainter extends CustomPainter {
 }
 
 class _NavBarItem extends StatelessWidget {
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
 
   const _NavBarItem({
     required this.icon,
@@ -437,19 +432,24 @@ class _NavBarItem extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
   });
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? Colors.white : Colors.white.withOpacity(0.5);
+    final Color color = isSelected ? Colors.white : Colors.white.withOpacity(0.5);
     
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             Icon(
               isSelected ? activeIcon : icon,
               color: color,

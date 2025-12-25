@@ -1,11 +1,12 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:math' as math;
-import 'package:flutter/services.dart';
-import 'package:astr/core/engine/models/location.dart';
 import 'dart:convert';
-import 'package:astr/core/engine/algorithms/kd_tree.dart';
+import 'dart:io';
+import 'dart:math' as math;
+
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
+
+import '../../../engine/algorithms/kd_tree.dart';
+import '../../../engine/models/location.dart';
 
 /// Offline data source for light pollution data
 /// Reads Bortle class from local PNG asset using pixel color mapping
@@ -20,35 +21,35 @@ class OfflineLPDataSource {
   /// Reference colors for Lorenz Light Pollution Zones
   /// These map to approximate Bortle Scale equivalents (1-9)
   /// Color progression: Dark Blue → Light Blue → Green → Yellow → Orange → Red → White
-  static final List<_ZoneColor> _zoneColors = [
+  static final List<_ZoneColor> _zoneColors = <_ZoneColor>[
     // Zone 0-1: Dark Blue (Bortle 1 - Excellent dark sky)
-    _ZoneColor(rgb: [0, 0, 50], bortle: 1),    // Very dark blue
-    _ZoneColor(rgb: [0, 24, 73], bortle: 1),   // Dark blue
+    const _ZoneColor(rgb: <int>[0, 0, 50], bortle: 1),    // Very dark blue
+    const _ZoneColor(rgb: <int>[0, 24, 73], bortle: 1),   // Dark blue
     
     // Zone 2: Light Blue (Bortle 2 - Typical dark sky)
-    _ZoneColor(rgb: [0, 61, 102], bortle: 2),  // Medium blue
-    _ZoneColor(rgb: [0, 85, 127], bortle: 2),  // Light blue
+    const _ZoneColor(rgb: <int>[0, 61, 102], bortle: 2),  // Medium blue
+    const _ZoneColor(rgb: <int>[0, 85, 127], bortle: 2),  // Light blue
     
     // Zone 3: Green (Bortle 3-4 - Rural sky)
-    _ZoneColor(rgb: [0, 110, 51], bortle: 3),  // Dark green
-    _ZoneColor(rgb: [61, 153, 61], bortle: 4), // Light green
+    const _ZoneColor(rgb: <int>[0, 110, 51], bortle: 3),  // Dark green
+    const _ZoneColor(rgb: <int>[61, 153, 61], bortle: 4), // Light green
     
     // Zone 4: Yellow (Bortle 4-5 - Rural/suburban transition)
-    _ZoneColor(rgb: [153, 153, 0], bortle: 4), // Dark yellow
-    _ZoneColor(rgb: [204, 204, 0], bortle: 5), // Light yellow
+    const _ZoneColor(rgb: <int>[153, 153, 0], bortle: 4), // Dark yellow
+    const _ZoneColor(rgb: <int>[204, 204, 0], bortle: 5), // Light yellow
     
     // Zone 5: Orange (Bortle 5-6 - Suburban sky)
-    _ZoneColor(rgb: [204, 102, 0], bortle: 5), // Dark orange
-    _ZoneColor(rgb: [255, 153, 51], bortle: 6), // Light orange
+    const _ZoneColor(rgb: <int>[204, 102, 0], bortle: 5), // Dark orange
+    const _ZoneColor(rgb: <int>[255, 153, 51], bortle: 6), // Light orange
     
     // Zone 6-7: Red (Bortle 6-8 - Urban sky)
-    _ZoneColor(rgb: [204, 0, 0], bortle: 7),   // Dark red
-    _ZoneColor(rgb: [255, 51, 51], bortle: 8), // Light red
+    const _ZoneColor(rgb: <int>[204, 0, 0], bortle: 7),   // Dark red
+    const _ZoneColor(rgb: <int>[255, 51, 51], bortle: 8), // Light red
     
     // Zone 8-9: White/Pink (Bortle 8-9 - Inner city)
-    _ZoneColor(rgb: [255, 153, 153], bortle: 8), // Pink
-    _ZoneColor(rgb: [255, 204, 204], bortle: 9), // Light pink
-    _ZoneColor(rgb: [255, 255, 255], bortle: 9), // White - extreme pollution
+    const _ZoneColor(rgb: <int>[255, 153, 153], bortle: 8), // Pink
+    const _ZoneColor(rgb: <int>[255, 204, 204], bortle: 9), // Light pink
+    const _ZoneColor(rgb: <int>[255, 255, 255], bortle: 9), // White - extreme pollution
   ];
 
   /// Get Bortle class from offline PNG map
@@ -78,7 +79,7 @@ class OfflineLPDataSource {
 
       if (_kdTree != null) {
         // Search for nearest city within 10km
-        final nearest = _kdTree!.nearest(location.latitude, location.longitude, 10.0);
+        final KDNode? nearest = _kdTree!.nearest(location.latitude, location.longitude, 10);
         if (nearest != null) {
           return nearest.bortle;
         }
@@ -92,7 +93,7 @@ class OfflineLPDataSource {
     try {
       if (_cachedImage == null && !_isLoading) {
         _isLoading = true;
-        final bytes = await _loadImageBytes();
+        final Uint8List? bytes = await _loadImageBytes();
         if (bytes == null) {
           _isLoading = false;
           return null;
@@ -107,9 +108,9 @@ class OfflineLPDataSource {
 
       if (_cachedImage == null) return null;
 
-      final image = _cachedImage!;
-      final x = ((location.longitude + 180) * (image.width / 360)).toInt();
-      final y = ((90 - location.latitude) * (image.height / 180)).toInt();
+      final img.Image image = _cachedImage!;
+      final int x = ((location.longitude + 180) * (image.width / 360)).toInt();
+      final int y = ((90 - location.latitude) * (image.height / 180)).toInt();
 
       if (x < 0 || x >= image.width || y < 0 || y >= image.height) return null;
 
@@ -125,16 +126,13 @@ class OfflineLPDataSource {
       String? jsonString;
       try {
         // Try file first (tests)
-        final file = File(_cityDbPath);
+        final File file = File(_cityDbPath);
         if (await file.exists()) {
           jsonString = await file.readAsString();
         }
       } catch (_) {}
 
-      if (jsonString == null) {
-        // Fallback to asset bundle
-        jsonString = await rootBundle.loadString(_cityDbPath);
-      }
+      jsonString ??= await rootBundle.loadString(_cityDbPath);
 
       final List<dynamic> data = jsonDecode(jsonString);
       _kdTree = KDTree.fromFlatList(data);
@@ -146,19 +144,19 @@ class OfflineLPDataSource {
   /// Map pixel color to Bortle class (1-9) using nearest-color matching
   /// Based on David Lorenz's Light Pollution Zone color scheme
   int _colorToBortleClass(img.Pixel pixel) {
-    final r = pixel.r.toInt();
-    final g = pixel.g.toInt();
-    final b = pixel.b.toInt();
+    final int r = pixel.r.toInt();
+    final int g = pixel.g.toInt();
+    final int b = pixel.b.toInt();
 
     // Find nearest zone color using Euclidean distance in RGB space
     double minDist = double.infinity;
     int bestBortle = 5; // Default to mid-range if no good match
 
-    for (final zone in _zoneColors) {
-      final dr = r - zone.rgb[0];
-      final dg = g - zone.rgb[1];
-      final db = b - zone.rgb[2];
-      final dist = math.sqrt(dr * dr + dg * dg + db * db);
+    for (final _ZoneColor zone in _zoneColors) {
+      final int dr = r - zone.rgb[0];
+      final int dg = g - zone.rgb[1];
+      final int db = b - zone.rgb[2];
+      final double dist = math.sqrt(dr * dr + dg * dg + db * db);
 
       if (dist < minDist) {
         minDist = dist;
@@ -181,9 +179,9 @@ class OfflineLPDataSource {
   Future<Uint8List?> _loadImageBytes() async {
     try {
       // Try File (works in tests)
-      final file = File(_assetPath);
+      final File file = File(_assetPath);
       if (await file.exists()) {
-        final bytes = await file.readAsBytes();
+        final Uint8List bytes = await file.readAsBytes();
         return Uint8List.fromList(bytes);
       }
     } catch (_) {
@@ -192,7 +190,7 @@ class OfflineLPDataSource {
 
     try {
       // Fallback to rootBundle (works in production)
-      final data = await rootBundle.load(_assetPath);
+      final ByteData data = await rootBundle.load(_assetPath);
       return data.buffer.asUint8List();
     } catch (_) {
       return null;
@@ -202,8 +200,8 @@ class OfflineLPDataSource {
 
 /// Helper class to store zone color and corresponding Bortle class
 class _ZoneColor {
-  final List<int> rgb;
-  final int bortle;
   
   const _ZoneColor({required this.rgb, required this.bortle});
+  final List<int> rgb;
+  final int bortle;
 }

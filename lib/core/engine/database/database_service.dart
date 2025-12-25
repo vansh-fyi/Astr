@@ -1,9 +1,8 @@
-import 'package:astr/core/engine/models/result.dart';
-import 'package:astr/core/error/failure.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:path/path.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 
+import '../../error/failure.dart';
+import '../models/result.dart';
 // Conditional imports for platform-specific code
 import 'database_service_mobile.dart'
     if (dart.library.html) 'database_service_web.dart';
@@ -15,6 +14,12 @@ import 'database_service_mobile.dart'
 ///
 /// On web, this provides a stub implementation since SQLite is not supported.
 class DatabaseService {
+
+  /// Creates a DatabaseService instance
+  ///
+  /// [testDatabasePath] is optional and should only be used in tests to provide
+  /// a direct path to a test database file, bypassing asset loading.
+  DatabaseService({this.testDatabasePath});
   static const String _dbName = 'astr.db';
   static const String _assetPath = 'assets/db/$_dbName';
 
@@ -23,12 +28,6 @@ class DatabaseService {
 
   /// Optional test database path (for testing only)
   final String? testDatabasePath;
-
-  /// Creates a DatabaseService instance
-  ///
-  /// [testDatabasePath] is optional and should only be used in tests to provide
-  /// a direct path to a test database file, bypassing asset loading.
-  DatabaseService({this.testDatabasePath});
 
   /// Gets the database instance (initializes if needed)
   Future<Result<dynamic>> getDatabase() async {
@@ -39,16 +38,16 @@ class DatabaseService {
     }
 
     if (_database != null && await _isDatabaseOpen(_database)) {
-      return Result.success(_database!);
+      return Result.success(_database);
     }
 
-    final initResult = await initialize();
+    final Result<void> initResult = await initialize();
     return initResult.fold(
       (_) => _database != null
-          ? Result.success(_database!)
+          ? Result.success(_database)
           : Result.failure(const DatabaseFailure(
               'Database not initialized after initialization attempt')),
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 
@@ -72,19 +71,19 @@ class DatabaseService {
     }
 
     try {
-      final result = await initializePlatformDatabase(
+      final Result<Database> result = await initializePlatformDatabase(
         testDatabasePath: testDatabasePath,
         dbName: _dbName,
         assetPath: _assetPath,
       );
 
       return result.fold(
-        (db) {
+        (Database db) {
           _database = db;
           _isInitialized = true;
           return Result.success(null);
         },
-        (failure) => Result.failure(failure),
+        Result.failure,
       );
     } catch (e) {
       return Result.failure(
@@ -114,11 +113,11 @@ class DatabaseService {
       );
     }
 
-    final dbResult = await getDatabase();
+    final Result dbResult = await getDatabase();
     return dbResult.fold(
       (db) async {
         try {
-          final results = await queryPlatformDatabase(
+          final List<Map<String, dynamic>> results = await queryPlatformDatabase(
             db,
             table,
             distinct: distinct,
@@ -138,7 +137,7 @@ class DatabaseService {
           );
         }
       },
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 
@@ -153,11 +152,11 @@ class DatabaseService {
       );
     }
 
-    final dbResult = await getDatabase();
+    final Result dbResult = await getDatabase();
     return dbResult.fold(
       (db) async {
         try {
-          final results = await rawQueryPlatformDatabase(db, sql, arguments);
+          final List<Map<String, dynamic>> results = await rawQueryPlatformDatabase(db, sql, arguments);
           return Result.success(results);
         } catch (e) {
           return Result.failure(
@@ -165,7 +164,7 @@ class DatabaseService {
           );
         }
       },
-      (failure) => Result.failure(failure),
+      Result.failure,
     );
   }
 
@@ -187,6 +186,6 @@ class DatabaseService {
 
   Future<bool> _isDatabaseOpen(dynamic db) async {
     if (kIsWeb) return false;
-    return await isPlatformDatabaseOpen(db);
+    return isPlatformDatabaseOpen(db);
   }
 }

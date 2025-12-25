@@ -1,8 +1,9 @@
-import 'package:astr/core/error/failure.dart';
-import 'package:astr/features/profile/domain/entities/saved_location.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../../core/error/failure.dart';
+import '../../domain/entities/saved_location.dart';
 
 part 'profile_repository.g.dart';
 
@@ -12,9 +13,9 @@ ProfileRepository profileRepository(ProfileRepositoryRef ref) {
 }
 
 class ProfileRepository {
-  final Box<SavedLocation> _locationsBox;
 
   ProfileRepository(this._locationsBox);
+  final Box<SavedLocation> _locationsBox;
 
   Future<Either<Failure, void>> saveLocation(SavedLocation location) async {
     try {
@@ -27,7 +28,7 @@ class ProfileRepository {
 
   Future<Either<Failure, List<SavedLocation>>> getSavedLocations() async {
     try {
-      final locations = _locationsBox.values.toList();
+      final List<SavedLocation> locations = _locationsBox.values.toList();
       return Right(locations);
     } catch (e) {
       return Left(CacheFailure(e.toString()));

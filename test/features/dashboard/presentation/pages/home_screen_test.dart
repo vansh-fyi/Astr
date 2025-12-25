@@ -1,12 +1,12 @@
 import 'package:astr/features/astronomy/domain/entities/astronomy_state.dart';
 import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
+import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
 import 'package:astr/features/context/domain/entities/astr_context.dart';
 import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
 import 'package:astr/features/dashboard/domain/entities/bortle_scale.dart';
 import 'package:astr/features/dashboard/domain/entities/weather.dart';
 import 'package:astr/features/dashboard/presentation/home_screen.dart';
-import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
 import 'package:astr/features/dashboard/presentation/providers/bortle_provider.dart';
 import 'package:astr/features/dashboard/presentation/providers/weather_provider.dart';
 import 'package:flutter/material.dart';
@@ -26,19 +26,19 @@ void main() {
     };
   });
 
-  testWidgets('HomeScreen shows banner for future date', (tester) async {
+  testWidgets('HomeScreen shows banner for future date', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(2400, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final futureDate = DateTime.now().add(const Duration(days: 3));
+    final DateTime futureDate = DateTime.now().add(const Duration(days: 3));
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          weatherProvider.overrideWith(() => FakeWeatherNotifier()),
-          astronomyProvider.overrideWith(() => FakeAstronomyNotifier()),
+        overrides: <Override>[
+          weatherProvider.overrideWith(FakeWeatherNotifier.new),
+          astronomyProvider.overrideWith(FakeAstronomyNotifier.new),
           bortleProvider.overrideWithValue(BortleScale.class4),
           astrContextProvider.overrideWith(() => FakeAstrContextNotifier(futureDate)),
         ],
@@ -63,19 +63,19 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('HomeScreen does NOT show banner for today', (tester) async {
+  testWidgets('HomeScreen does NOT show banner for today', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(2400, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final today = DateTime.now();
+    final DateTime today = DateTime.now();
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          weatherProvider.overrideWith(() => FakeWeatherNotifier()),
-          astronomyProvider.overrideWith(() => FakeAstronomyNotifier()),
+        overrides: <Override>[
+          weatherProvider.overrideWith(FakeWeatherNotifier.new),
+          astronomyProvider.overrideWith(FakeAstronomyNotifier.new),
           bortleProvider.overrideWithValue(BortleScale.class4),
           astrContextProvider.overrideWith(() => FakeAstrContextNotifier(today)),
         ],
@@ -100,15 +100,14 @@ void main() {
 }
 
 class FakeAstrContextNotifier extends AstrContextNotifier {
-  final DateTime _date;
   FakeAstrContextNotifier(this._date);
+  final DateTime _date;
 
   @override
   Future<AstrContext> build() async {
     return AstrContext(
       selectedDate: _date,
       location: const GeoLocation(latitude: 0, longitude: 0, name: 'Test'),
-      isCurrentLocation: true,
     );
   }
 }
@@ -124,8 +123,7 @@ class FakeAstronomyNotifier extends AstronomyNotifier {
   @override
   Future<AstronomyState> build() async {
     return const AstronomyState(
-      moonPhaseInfo: MoonPhaseInfo(illumination: 0.5, phaseAngle: 0.0),
-      positions: [],
+      moonPhaseInfo: MoonPhaseInfo(illumination: 0.5, phaseAngle: 0),
     );
   }
 }

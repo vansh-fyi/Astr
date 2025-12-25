@@ -5,7 +5,7 @@ import 'visibility_provider.dart';
 /// Provides the Light Pollution data.
 ///
 /// Derives from [visibilityProvider] which manages the repository call and state.
-final lightPollutionProvider = Provider<LightPollution>((ref) {
-  final visibilityState = ref.watch(visibilityProvider);
+final Provider<LightPollution> lightPollutionProvider = Provider<LightPollution>((ProviderRef<LightPollution> ref) {
+  final VisibilityState visibilityState = ref.watch(visibilityProvider);
   return visibilityState.lightPollution;
 });

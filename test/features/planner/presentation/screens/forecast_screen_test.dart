@@ -1,17 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:astr/features/planner/presentation/screens/forecast_screen.dart';
-import 'package:astr/features/planner/presentation/providers/planner_provider.dart';
 import 'package:astr/features/planner/domain/entities/daily_forecast.dart';
+import 'package:astr/features/planner/presentation/providers/planner_provider.dart';
+import 'package:astr/features/planner/presentation/screens/forecast_screen.dart';
 import 'package:astr/features/planner/presentation/widgets/forecast_list_item.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ForecastScreen renders loading state', (tester) async {
+  testWidgets('ForecastScreen renders loading state', (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          forecastListProvider.overrideWith((ref) => Future.value([])), // Initial loading
+        overrides: <Override>[
+          forecastListProvider.overrideWith((FutureProviderRef<List<DailyForecast>> ref) => Future.value(<DailyForecast>[])), // Initial loading
         ],
         child: const MaterialApp(home: ForecastScreen()),
       ),
@@ -25,11 +25,11 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('ForecastScreen renders list of forecasts', (tester) async {
-    final forecasts = List.generate(7, (index) {
+  testWidgets('ForecastScreen renders list of forecasts', (WidgetTester tester) async {
+    final List<DailyForecast> forecasts = List.generate(7, (int index) {
       return DailyForecast(
-        date: DateTime(2025, 12, 1).add(Duration(days: index)),
-        cloudCoverAvg: 10.0,
+        date: DateTime(2025, 12).add(Duration(days: index)),
+        cloudCoverAvg: 10,
         moonIllumination: 0.5,
         weatherCode: 0,
         starRating: 4,
@@ -38,8 +38,8 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          forecastListProvider.overrideWith((ref) => forecasts),
+        overrides: <Override>[
+          forecastListProvider.overrideWith((FutureProviderRef<List<DailyForecast>> ref) => forecasts),
         ],
         child: const MaterialApp(home: ForecastScreen()),
       ),
@@ -52,11 +52,11 @@ void main() {
     expect(find.text('10%'), findsWidgets);
   });
 
-  testWidgets('ForecastScreen renders error state', (tester) async {
+  testWidgets('ForecastScreen renders error state', (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          forecastListProvider.overrideWith((ref) => Future.error('API Error')),
+        overrides: <Override>[
+          forecastListProvider.overrideWith((FutureProviderRef<List<DailyForecast>> ref) => Future.error('API Error')),
         ],
         child: const MaterialApp(home: ForecastScreen()),
       ),

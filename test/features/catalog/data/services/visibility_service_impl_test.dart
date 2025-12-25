@@ -1,3 +1,4 @@
+import 'package:astr/core/error/failure.dart';
 import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
 import 'package:astr/features/catalog/data/services/visibility_service_impl.dart';
 import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
@@ -12,12 +13,12 @@ import 'package:mockito/mockito.dart';
 
 import 'visibility_service_impl_test.mocks.dart';
 
-@GenerateMocks([AstronomyService])
+@GenerateMocks(<Type>[AstronomyService])
 void main() {
   late MockAstronomyService mockAstronomyService;
   late VisibilityServiceImpl service;
 
-  const testObject = CelestialObject(
+  const CelestialObject testObject = CelestialObject(
     id: 'mars',
     name: 'Mars',
     type: CelestialType.planet,
@@ -26,7 +27,7 @@ void main() {
     ephemerisId: 4, // Mars
   );
 
-  const testDSO = CelestialObject(
+  const CelestialObject testDSO = CelestialObject(
     id: 'andromeda',
     name: 'Andromeda',
     type: CelestialType.galaxy,
@@ -36,13 +37,13 @@ void main() {
     dec: 41.27,
   );
 
-  const testLocation = GeoLocation(
+  const GeoLocation testLocation = GeoLocation(
     latitude: 37.7749,
     longitude: -122.4194,
     name: 'San Francisco',
   );
 
-  final testStartTime = DateTime(2025, 11, 29, 18, 0); // 6 PM
+  final DateTime testStartTime = DateTime(2025, 11, 29, 18); // 6 PM
 
   setUp(() {
     mockAstronomyService = MockAstronomyService();
@@ -59,24 +60,24 @@ void main() {
         lat: anyNamed('lat'),
         long: anyNamed('long'),
         duration: anyNamed('duration'),
-      )).thenAnswer((_) async => List.generate(48, (i) => GraphPoint(time: testStartTime, value: 45.0)));
+      )).thenAnswer((_) async => List.generate(48, (int i) => GraphPoint(time: testStartTime, value: 45)));
 
       when(mockAstronomyService.calculateMoonTrajectory(
         startTime: anyNamed('startTime'),
         lat: anyNamed('lat'),
         long: anyNamed('long'),
         duration: anyNamed('duration'),
-      )).thenAnswer((_) async => List.generate(48, (i) => GraphPoint(time: testStartTime, value: 0.0)));
+      )).thenAnswer((_) async => List.generate(48, (int i) => GraphPoint(time: testStartTime, value: 0)));
 
       when(mockAstronomyService.calculateRiseSetTransit(
         body: anyNamed('body'),
         date: anyNamed('date'),
         lat: anyNamed('lat'),
         long: anyNamed('long'),
-      )).thenAnswer((_) async => {'rise': null, 'set': null});
+      )).thenAnswer((_) async => <String, DateTime?>{'rise': null, 'set': null});
 
       // Act
-      final result = await service.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await service.calculateVisibility(
         object: testObject,
         location: testLocation,
         startTime: testStartTime,
@@ -84,7 +85,7 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      final graphData = result.getRight().getOrElse(() => throw Exception());
+      final VisibilityGraphData graphData = result.getRight().getOrElse(() => throw Exception());
       expect(graphData.objectCurve.length, 48);
       expect(graphData.moonCurve.length, 48);
     });
@@ -98,7 +99,7 @@ void main() {
         lat: anyNamed('lat'),
         long: anyNamed('long'),
         duration: anyNamed('duration'),
-      )).thenAnswer((_) async => List.generate(48, (i) {
+      )).thenAnswer((_) async => List.generate(48, (int i) {
             // First half: altitude > 30° (optimal)
             // Second half: altitude < 30° (not optimal)
             return GraphPoint(time: testStartTime.add(Duration(minutes: i * 15)), value: i < 24 ? 45.0 : 25.0);
@@ -109,17 +110,17 @@ void main() {
         lat: anyNamed('lat'),
         long: anyNamed('long'),
         duration: anyNamed('duration'),
-      )).thenAnswer((_) async => List.generate(48, (i) => GraphPoint(time: testStartTime, value: 0.0)));
+      )).thenAnswer((_) async => List.generate(48, (int i) => GraphPoint(time: testStartTime, value: 0)));
 
       when(mockAstronomyService.calculateRiseSetTransit(
         body: anyNamed('body'),
         date: anyNamed('date'),
         lat: anyNamed('lat'),
         long: anyNamed('long'),
-      )).thenAnswer((_) async => {'rise': null, 'set': null});
+      )).thenAnswer((_) async => <String, DateTime?>{'rise': null, 'set': null});
 
       // Act
-      final result = await service.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await service.calculateVisibility(
         object: testObject,
         location: testLocation,
         startTime: testStartTime,
@@ -127,7 +128,7 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      final graphData = result.getRight().getOrElse(() => throw Exception());
+      final VisibilityGraphData graphData = result.getRight().getOrElse(() => throw Exception());
       expect(graphData.optimalWindows.isNotEmpty, true);
     });
 
@@ -140,24 +141,24 @@ void main() {
         lat: anyNamed('lat'),
         long: anyNamed('long'),
         duration: anyNamed('duration'),
-      )).thenAnswer((_) async => List.generate(48, (i) => GraphPoint(time: testStartTime, value: 50.0)));
+      )).thenAnswer((_) async => List.generate(48, (int i) => GraphPoint(time: testStartTime, value: 50)));
 
       when(mockAstronomyService.calculateMoonTrajectory(
         startTime: anyNamed('startTime'),
         lat: anyNamed('lat'),
         long: anyNamed('long'),
         duration: anyNamed('duration'),
-      )).thenAnswer((_) async => List.generate(48, (i) => GraphPoint(time: testStartTime, value: 0.0)));
+      )).thenAnswer((_) async => List.generate(48, (int i) => GraphPoint(time: testStartTime, value: 0)));
 
       when(mockAstronomyService.calculateRiseSetTransit(
         body: anyNamed('body'),
         date: anyNamed('date'),
         lat: anyNamed('lat'),
         long: anyNamed('long'),
-      )).thenAnswer((_) async => {'rise': null, 'set': null});
+      )).thenAnswer((_) async => <String, DateTime?>{'rise': null, 'set': null});
 
       // Act
-      final result = await service.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await service.calculateVisibility(
         object: testDSO,
         location: testLocation,
         startTime: testStartTime,
@@ -165,12 +166,12 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      final graphData = result.getRight().getOrElse(() => throw Exception());
+      final VisibilityGraphData graphData = result.getRight().getOrElse(() => throw Exception());
       expect(graphData.objectCurve.length, 48);
       // Verify calculateFixedObjectTrajectory was called
       verify(mockAstronomyService.calculateFixedObjectTrajectory(
-        ra: testDSO.ra!,
-        dec: testDSO.dec!,
+        ra: testDSO.ra,
+        dec: testDSO.dec,
         startTime: anyNamed('startTime'),
         lat: anyNamed('lat'),
         long: anyNamed('long'),
@@ -189,7 +190,7 @@ void main() {
       )).thenThrow(Exception('Engine error'));
 
       // Act
-      final result = await service.calculateVisibility(
+      final Either<Failure, VisibilityGraphData> result = await service.calculateVisibility(
         object: testObject,
         location: testLocation,
         startTime: testStartTime,
@@ -209,25 +210,25 @@ void main() {
         lat: anyNamed('lat'),
         long: anyNamed('long'),
         duration: anyNamed('duration'),
-      )).thenAnswer((_) async => List.generate(48, (i) => GraphPoint(time: testStartTime, value: 45.0)));
+      )).thenAnswer((_) async => List.generate(48, (int i) => GraphPoint(time: testStartTime, value: 45)));
 
       when(mockAstronomyService.calculateMoonTrajectory(
         startTime: anyNamed('startTime'),
         lat: anyNamed('lat'),
         long: anyNamed('long'),
         duration: anyNamed('duration'),
-      )).thenAnswer((_) async => List.generate(48, (i) => GraphPoint(time: testStartTime, value: 0.0)));
+      )).thenAnswer((_) async => List.generate(48, (int i) => GraphPoint(time: testStartTime, value: 0)));
 
       when(mockAstronomyService.calculateRiseSetTransit(
         body: anyNamed('body'),
         date: anyNamed('date'),
         lat: anyNamed('lat'),
         long: anyNamed('long'),
-      )).thenAnswer((_) async => {'rise': null, 'set': null});
+      )).thenAnswer((_) async => <String, DateTime?>{'rise': null, 'set': null});
 
       // Act
-      final stopwatch = Stopwatch()..start();
-      final result = await service.calculateVisibility(
+      final Stopwatch stopwatch = Stopwatch()..start();
+      final Either<Failure, VisibilityGraphData> result = await service.calculateVisibility(
         object: testObject,
         location: testLocation,
         startTime: testStartTime,

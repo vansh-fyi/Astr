@@ -1,32 +1,36 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
-import '../providers/weather_provider.dart';
+
+import '../../../../core/engine/prime_view_calculator.dart';
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../catalog/domain/entities/celestial_object.dart';
+import '../../../catalog/domain/entities/graph_point.dart';
+import '../../../catalog/presentation/providers/object_detail_notifier.dart';
+import '../../../catalog/presentation/providers/rise_set_provider.dart';
+import '../../../catalog/presentation/providers/visibility_graph_notifier.dart';
+import '../../domain/entities/hourly_forecast.dart';
+import '../../domain/entities/weather.dart';
 import '../providers/darkness_provider.dart';
+import '../providers/night_window_provider.dart';
 import '../providers/prime_view_provider.dart';
+import '../providers/weather_provider.dart';
+import '../theme/graph_theme.dart';
 import 'conditions_graph.dart';
-import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
-import 'package:astr/features/catalog/presentation/providers/rise_set_provider.dart';
-import 'package:astr/features/catalog/presentation/providers/visibility_graph_notifier.dart';
-import 'package:intl/intl.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/dashboard/presentation/widgets/time_card.dart';
-import 'package:astr/features/dashboard/presentation/widgets/graph_legend_item.dart';
-import 'package:astr/features/dashboard/presentation/theme/graph_theme.dart';
-import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
-import 'package:astr/features/dashboard/presentation/providers/night_window_provider.dart';
+import 'graph_legend_item.dart';
+import 'time_card.dart';
 
 class AtmosphericsSheet extends ConsumerWidget {
   const AtmosphericsSheet({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final weatherAsync = ref.watch(weatherProvider);
-    final darknessAsync = ref.watch(darknessProvider);
-    final screenHeight = MediaQuery.of(context).size.height;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final AsyncValue<Weather> weatherAsync = ref.watch(weatherProvider);
+    final AsyncValue<DarknessState> darknessAsync = ref.watch(darknessProvider);
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
       constraints: BoxConstraints(
@@ -38,7 +42,7 @@ class AtmosphericsSheet extends ConsumerWidget {
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         child: Stack(
-          children: [
+          children: <Widget>[
             // 1. Background (Fixed)
             Positioned.fill(
               child: BackdropFilter(
@@ -56,10 +60,10 @@ class AtmosphericsSheet extends ConsumerWidget {
                 padding: EdgeInsets.fromLTRB(24, 130, 24, 48 + bottomPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     // Legend
                     const Row(
-                      children: [
+                      children: <Widget>[
                         GraphLegendItem(label: 'MOON', color: GraphTheme.moonColor),
                         SizedBox(width: 12),
                         GraphLegendItem(label: 'CLOUD COVER', color: GraphTheme.cloudCoverColor),
@@ -70,37 +74,37 @@ class AtmosphericsSheet extends ConsumerWidget {
                     // Conditions Graph
                     // Conditions Graph
                     Consumer(
-                      builder: (context, ref, child) {
-                        final nightWindowAsync = ref.watch(nightWindowProvider);
+                      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                        final AsyncValue<Map<String, DateTime>> nightWindowAsync = ref.watch(nightWindowProvider);
                         
                         return nightWindowAsync.when(
-                          data: (nightWindow) {
-                            final startTime = nightWindow['start']!;
-                            final endTime = nightWindow['end']!;
+                          data: (Map<String, DateTime> nightWindow) {
+                            final DateTime startTime = nightWindow['start']!;
+                            final DateTime endTime = nightWindow['end']!;
 
-                            final moonState = ref.watch(objectDetailNotifierProvider('moon'));
-                            final moon = moonState.object;
+                            final ObjectDetailState moonState = ref.watch(objectDetailNotifierProvider('moon'));
+                            final CelestialObject? moon = moonState.object;
                             
                             DateTime? moonRise;
                             if (moon != null) {
-                                final riseSetAsync = ref.watch(riseSetProvider(moon));
-                                final times = riseSetAsync.valueOrNull;
+                                final AsyncValue<Map<String, DateTime?>> riseSetAsync = ref.watch(riseSetProvider(moon));
+                                final Map<String, DateTime?>? times = riseSetAsync.valueOrNull;
                                 if (times != null && times['rise'] != null) {
                                     moonRise = times['rise'];
                                 }
                             }
 
                             // Fetch Moon Graph Data for the curve
-                            final moonGraphState = ref.watch(visibilityGraphProvider('moon'));
-                            final moonCurve = moonGraphState.graphData?.objectCurve;
+                            final VisibilityGraphState moonGraphState = ref.watch(visibilityGraphProvider('moon'));
+                            final List<GraphPoint>? moonCurve = moonGraphState.graphData?.objectCurve;
 
                             // Fetch Cloud Cover Data
-                            final hourlyForecastAsync = ref.watch(hourlyForecastProvider);
-                            final cloudCoverData = hourlyForecastAsync.valueOrNull;
+                            final AsyncValue<List<HourlyForecast>> hourlyForecastAsync = ref.watch(hourlyForecastProvider);
+                            final List<HourlyForecast>? cloudCoverData = hourlyForecastAsync.valueOrNull;
 
                             // Fetch Prime View Window
-                            final primeViewAsync = ref.watch(primeViewProvider);
-                            final primeViewWindow = primeViewAsync.valueOrNull;
+                            final AsyncValue<PrimeViewWindow?> primeViewAsync = ref.watch(primeViewProvider);
+                            final PrimeViewWindow? primeViewWindow = primeViewAsync.valueOrNull;
 
                             return Container(
                               height: 200,
@@ -113,12 +117,11 @@ class AtmosphericsSheet extends ConsumerWidget {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(24),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.all(16),
                                   child: ConditionsGraph(
                                       startTime: startTime,
                                       endTime: endTime,
                                       moonRiseTime: moonRise,
-                                      themeColor: Colors.indigo,
                                       moonCurve: moonCurve,
                                       cloudCoverData: cloudCoverData,
                                       primeViewWindow: primeViewWindow,
@@ -131,7 +134,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                             height: 200,
                             child: Center(child: CircularProgressIndicator()),
                           ),
-                          error: (err, stack) => SizedBox(
+                          error: (Object err, StackTrace stack) => SizedBox(
                             height: 200,
                             child: Center(child: Text('Error: $err', style: const TextStyle(color: Colors.red))),
                           ),
@@ -141,12 +144,12 @@ class AtmosphericsSheet extends ConsumerWidget {
 
                     // Rise/Set Cards
                     Consumer(
-                      builder: (context, ref, child) {
-                        final sunState = ref.watch(objectDetailNotifierProvider('sun'));
-                        final moonState = ref.watch(objectDetailNotifierProvider('moon'));
+                      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                        final ObjectDetailState sunState = ref.watch(objectDetailNotifierProvider('sun'));
+                        final ObjectDetailState moonState = ref.watch(objectDetailNotifierProvider('moon'));
                         
-                        final sun = sunState.object;
-                        final moon = moonState.object;
+                        final CelestialObject? sun = sunState.object;
+                        final CelestialObject? moon = moonState.object;
 
                         DateTime? sunRise;
                         DateTime? sunSet;
@@ -154,7 +157,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                         DateTime? moonSet;
 
                         if (sun != null) {
-                            final sunTimes = ref.watch(riseSetProvider(sun)).valueOrNull;
+                            final Map<String, DateTime?>? sunTimes = ref.watch(riseSetProvider(sun)).valueOrNull;
                             if (sunTimes != null) {
                                 sunRise = sunTimes['rise'];
                                 sunSet = sunTimes['set'];
@@ -162,7 +165,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                         }
 
                         if (moon != null) {
-                            final moonTimes = ref.watch(riseSetProvider(moon)).valueOrNull;
+                            final Map<String, DateTime?>? moonTimes = ref.watch(riseSetProvider(moon)).valueOrNull;
                             if (moonTimes != null) {
                                 moonRise = moonTimes['rise'];
                                 moonSet = moonTimes['set'];
@@ -172,7 +175,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 32),
                           child: Row(
-                            children: [
+                            children: <Widget>[
                               Expanded(child: TimeCard(label: 'SUNRISE', time: sunRise)),
                               const SizedBox(width: 8),
                               Expanded(child: TimeCard(label: 'SUNSET', time: sunSet)),
@@ -188,7 +191,7 @@ class AtmosphericsSheet extends ConsumerWidget {
 
                     // Grid
                     weatherAsync.when(
-                      data: (weather) {
+                      data: (Weather weather) {
                         // Seeing Color Logic
                         Color seeingColor = Colors.white;
                         if (weather.seeingScore != null) {
@@ -208,7 +211,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                           mainAxisSpacing: 16,
                           crossAxisSpacing: 16,
                           childAspectRatio: 1.4,
-                          children: [
+                          children: <Widget>[
                             // Seeing
                             _buildMetricCard(
                               icon: Ionicons.eye_outline,
@@ -221,7 +224,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                             ),
                             // Darkness
                             darknessAsync.when(
-                              data: (darkness) => _buildMetricCard(
+                              data: (DarknessState darkness) => _buildMetricCard(
                                 icon: Ionicons.moon_outline,
                                 label: 'Darkness',
                                 value: darkness.mpsas.toStringAsFixed(1),
@@ -262,7 +265,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                         );
                       },
                       loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (err, stack) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.red))),
+                      error: (Object err, StackTrace stack) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.red))),
                     ),
                   ],
                 ),
@@ -288,10 +291,10 @@ class AtmosphericsSheet extends ConsumerWidget {
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: <Widget>[
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                          children: <Widget>[
                             const Text(
                               'Atmospherics',
                               style: TextStyle(
@@ -302,7 +305,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                               ),
                             ),
                             Row(
-                              children: [
+                              children: <Widget>[
                                 IconButton(
                                   onPressed: () {
                                     ref.read(weatherProvider.notifier).refresh();
@@ -357,17 +360,17 @@ class AtmosphericsSheet extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+        children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               Text(
                 label.toUpperCase(),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: Colors.white.withOpacity(0.5),
-                  letterSpacing: 1.0,
+                  letterSpacing: 1,
                 ),
               ),
               Icon(icon, color: iconColor ?? Colors.white, size: 18),
@@ -375,7 +378,7 @@ class AtmosphericsSheet extends ConsumerWidget {
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               Text(
                 value,
                 style: const TextStyle(

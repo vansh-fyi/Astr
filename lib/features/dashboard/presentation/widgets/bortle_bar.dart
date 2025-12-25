@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
+import '../../../../core/widgets/glass_panel.dart';
 import '../../domain/entities/light_pollution.dart';
 
 class BortleBar extends StatefulWidget {
-  final LightPollution lightPollution;
-  final VoidCallback? onTap;
 
   const BortleBar({
     super.key,
     required this.lightPollution,
     this.onTap,
   });
+  final LightPollution lightPollution;
+  final VoidCallback? onTap;
 
   @override
   State<BortleBar> createState() => _BortleBarState();
@@ -29,18 +29,18 @@ class _BortleBarState extends State<BortleBar> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             // Top Row: Header and Badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+              children: <Widget>[
                 Text(
                   'VISIBILITY',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     color: Colors.white.withOpacity(0.4),
-                    letterSpacing: 1.0,
+                    letterSpacing: 1,
                   ),
                 ),
                 Container(
@@ -50,13 +50,11 @@ class _BortleBarState extends State<BortleBar> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.blueAccent.withOpacity(0.5),
-                      width: 1,
                     ),
-                    boxShadow: [
+                    boxShadow: <BoxShadow>[
                       BoxShadow(
                         color: Colors.blueAccent.withOpacity(0.2),
                         blurRadius: 8,
-                        spreadRadius: 0,
                       ),
                     ],
                   ),
@@ -89,10 +87,10 @@ class _BortleBarState extends State<BortleBar> {
             // Bottom: MPSAS and Scale
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                  children: <Widget>[
                     Text(
                       '${widget.lightPollution.mpsas.toStringAsFixed(2)} MPSAS',
                       style: TextStyle(
@@ -106,8 +104,8 @@ class _BortleBarState extends State<BortleBar> {
                 const SizedBox(height: 6),
                 // Segmented Bar
                 Row(
-                  children: List.generate(5, (index) {
-                    final isActive = index == ((widget.lightPollution.visibilityIndex - 1) / 2).floor();
+                  children: List.generate(5, (int index) {
+                    final bool isActive = index == ((widget.lightPollution.visibilityIndex - 1) / 2).floor();
                     return Expanded(
                       child: Container(
                         height: 4,
@@ -115,7 +113,7 @@ class _BortleBarState extends State<BortleBar> {
                         decoration: BoxDecoration(
                           color: isActive ? Colors.blue : Colors.white.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(2),
-                          boxShadow: isActive ? [
+                          boxShadow: isActive ? <BoxShadow>[
                             BoxShadow(
                               color: Colors.blue.withOpacity(0.6),
                               blurRadius: 8,

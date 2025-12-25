@@ -13,24 +13,24 @@ class DeviceLocationService implements ILocationService {
     // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Left(const LocationFailure('Location services are disabled.'));
+      return const Left(LocationFailure('Location services are disabled.'));
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return Left(const PermissionFailure('Location permissions are denied'));
+        return const Left(PermissionFailure('Location permissions are denied'));
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Left(const PermissionFailure(
+      return const Left(PermissionFailure(
           'Location permissions are permanently denied, we cannot request permissions.'));
     }
 
     try {
-      final position = await Geolocator.getCurrentPosition();
+      final Position position = await Geolocator.getCurrentPosition();
       return Right(GeoLocation(
         latitude: position.latitude,
         longitude: position.longitude,

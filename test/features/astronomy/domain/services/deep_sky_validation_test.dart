@@ -1,6 +1,5 @@
 import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sweph/sweph.dart';
 
 void main() {
   late AstronomyService astronomyService;
@@ -30,13 +29,13 @@ void main() {
     
     // However, I can write the test logic.
     
-    final startTime = DateTime.utc(2025, 12, 2, 22, 0); // 10 PM UTC
-    final lat = 51.48; // Greenwich
-    final long = 0.0;
+    final DateTime startTime = DateTime.utc(2025, 12, 2, 22); // 10 PM UTC
+    const double lat = 51.48; // Greenwich
+    const double long = 0;
     
     // Andromeda M31
-    final ra = 10.68;
-    final dec = 41.27;
+    const double ra = 10.68;
+    const double dec = 41.27;
     
     // Expectation: At 10 PM in December in Greenwich, Andromeda should be high in the sky.
     // It transits around 9-10 PM in late autumn/early winter.

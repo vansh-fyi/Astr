@@ -22,7 +22,7 @@ class TimeCard extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
+        children: <Widget>[
           Text(
             label,
             style: const TextStyle(

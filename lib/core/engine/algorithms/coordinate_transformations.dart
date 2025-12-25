@@ -1,7 +1,8 @@
 import 'dart:math' as math;
-import 'package:astr/core/engine/algorithms/time_utils.dart';
-import 'package:astr/core/engine/models/coordinates.dart';
-import 'package:astr/core/engine/models/location.dart';
+
+import '../models/coordinates.dart';
+import '../models/location.dart';
+import 'time_utils.dart';
 
 /// Coordinate transformation algorithms for astronomical calculations
 /// Based on Jean Meeus "Astronomical Algorithms"
@@ -123,7 +124,7 @@ class CoordinateTransformations {
   }) {
     if (apparentAltitude < -1.0) {
       // Object is well below horizon, no meaningful refraction
-      return 0.0;
+      return 0;
     }
 
     // Convert to radians

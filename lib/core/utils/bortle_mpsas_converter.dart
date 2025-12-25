@@ -40,7 +40,7 @@ class BortleMpsasConverter {
         return 16.50; // Inner city (<17.0)
       default:
         // Default to mid-range if invalid input
-        return 19.00;
+        return 19;
     }
   }
 

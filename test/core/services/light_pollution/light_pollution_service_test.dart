@@ -1,15 +1,15 @@
+import 'package:astr/core/engine/models/location.dart';
+import 'package:astr/core/engine/models/result.dart';
+import 'package:astr/core/services/light_pollution/data/offline_lp_data_source.dart';
+import 'package:astr/core/services/light_pollution/data/online_lp_data_source.dart';
+import 'package:astr/core/services/light_pollution/light_pollution_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:astr/core/engine/models/location.dart';
-import 'package:astr/core/engine/models/result.dart';
-import 'package:astr/core/services/light_pollution/light_pollution_service.dart';
-import 'package:astr/core/services/light_pollution/data/online_lp_data_source.dart';
-import 'package:astr/core/services/light_pollution/data/offline_lp_data_source.dart';
 
 import 'light_pollution_service_test.mocks.dart';
 
-@GenerateMocks([OnlineLPDataSource, OfflineLPDataSource])
+@GenerateMocks(<Type>[OnlineLPDataSource, OfflineLPDataSource])
 void main() {
   late LightPollutionService service;
   late MockOnlineLPDataSource mockOnlineSource;
@@ -33,7 +33,7 @@ void main() {
           .thenAnswer((_) async => 5);
 
       // Act
-      final result = await service.getBortleClass(testLocation);
+      final Result<int> result = await service.getBortleClass(testLocation);
 
       // Assert
       expect(result.isSuccess, true);
@@ -50,7 +50,7 @@ void main() {
           .thenAnswer((_) async => 7);
 
       // Act
-      final result = await service.getBortleClass(testLocation);
+      final Result<int> result = await service.getBortleClass(testLocation);
 
       // Assert
       expect(result.isSuccess, true);
@@ -69,7 +69,7 @@ void main() {
           .thenAnswer((_) async => null);
 
       // Act
-      final result = await service.getBortleClass(testLocation);
+      final Result<int> result = await service.getBortleClass(testLocation);
 
       // Assert
       expect(result.isFailure, true);
@@ -89,7 +89,7 @@ void main() {
           .thenAnswer((_) async => 3);
 
       // Act
-      final result = await service.getBortleClass(testLocation);
+      final Result<int> result = await service.getBortleClass(testLocation);
 
       // Assert
       expect(result.isSuccess, true);
@@ -100,8 +100,8 @@ void main() {
   group('Multiple Locations', () {
     test('Correctly handles different locations', () async {
       // Arrange
-      final nyc = const Location(latitude: 40.7128, longitude: -74.0060);
-      final desert = const Location(latitude: 35.0, longitude: -110.0);
+      const Location nyc = Location(latitude: 40.7128, longitude: -74.0060);
+      const Location desert = Location(latitude: 35, longitude: -110);
 
       when(mockOnlineSource.getBortleClass(nyc))
           .thenAnswer((_) async => 9);
@@ -109,8 +109,8 @@ void main() {
           .thenAnswer((_) async => 1);
 
       // Act
-      final nycResult = await service.getBortleClass(nyc);
-      final desertResult = await service.getBortleClass(desert);
+      final Result<int> nycResult = await service.getBortleClass(nyc);
+      final Result<int> desertResult = await service.getBortleClass(desert);
 
       // Assert
       expect(nycResult.value, 9);

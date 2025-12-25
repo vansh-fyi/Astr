@@ -1,13 +1,13 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
-import 'package:http/http.dart' as http;
 import 'package:astr/core/engine/models/location.dart';
 import 'package:astr/core/services/light_pollution/data/online_lp_data_source.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
 import 'online_lp_data_source_test.mocks.dart';
 
-@GenerateMocks([http.Client])
+@GenerateMocks(<Type>[http.Client])
 void main() {
   late OnlineLPDataSource dataSource;
   late MockClient mockClient;
@@ -27,8 +27,8 @@ void main() {
   group('OnlineLPDataSource (AC#2)', () {
     test('Successful API response → Returns Bortle class', () async {
       // Arrange
-      final location = const Location(latitude: 40.7, longitude: -74.0);
-      final uri = Uri.parse(
+      const Location location = Location(latitude: 40.7, longitude: -74);
+      final Uri uri = Uri.parse(
         'https://test-api.com/api/light-pollution?lat=40.7&lon=-74.0',
       );
       
@@ -37,7 +37,7 @@ void main() {
       );
 
       // Act
-      final result = await dataSource.getBortleClass(location);
+      final int? result = await dataSource.getBortleClass(location);
 
       // Assert
       expect(result, 5);
@@ -46,8 +46,8 @@ void main() {
 
     test('Invalid response (non-200) → Returns null', () async {
       // Arrange
-      final location = const Location(latitude: 40.7, longitude: -74.0);
-      final uri = Uri.parse(
+      const Location location = Location(latitude: 40.7, longitude: -74);
+      final Uri uri = Uri.parse(
         'https://test-api.com/api/light-pollution?lat=40.7&lon=-74.0',
       );
       
@@ -56,7 +56,7 @@ void main() {
       );
 
       // Act
-      final result = await dataSource.getBortleClass(location);
+      final int? result = await dataSource.getBortleClass(location);
 
       // Assert
       expect(result, null);
@@ -64,8 +64,8 @@ void main() {
 
     test('Malformed JSON → Returns null', () async {
       // Arrange
-      final location = const Location(latitude: 40.7, longitude: -74.0);
-      final uri = Uri.parse(
+      const Location location = Location(latitude: 40.7, longitude: -74);
+      final Uri uri = Uri.parse(
         'https://test-api.com/api/light-pollution?lat=40.7&lon=-74.0',
       );
       
@@ -74,7 +74,7 @@ void main() {
       );
 
       // Act
-      final result = await dataSource.getBortleClass(location);
+      final int? result = await dataSource.getBortleClass(location);
 
       // Assert
       expect(result, null);
@@ -82,8 +82,8 @@ void main() {
 
     test('Timeout (> 3s) → Returns null', () async {
       // Arrange
-      final location = const Location(latitude: 40.7, longitude: -74.0);
-      final uri = Uri.parse(
+      const Location location = Location(latitude: 40.7, longitude: -74);
+      final Uri uri = Uri.parse(
         'https://test-api.com/api/light-pollution?lat=40.7&lon=-74.0',
       );
       
@@ -95,7 +95,7 @@ void main() {
       );
 
       // Act
-      final result = await dataSource.getBortleClass(location);
+      final int? result = await dataSource.getBortleClass(location);
 
       // Assert
       expect(result, null);
@@ -103,8 +103,8 @@ void main() {
 
     test('Invalid Bortle class (out of range) → Returns null', () async {
       // Arrange
-      final location = const Location(latitude: 40.7, longitude: -74.0);
-      final uri = Uri.parse(
+      const Location location = Location(latitude: 40.7, longitude: -74);
+      final Uri uri = Uri.parse(
         'https://test-api.com/api/light-pollution?lat=40.7&lon=-74.0',
       );
       
@@ -113,7 +113,7 @@ void main() {
       );
 
       // Act
-      final result = await dataSource.getBortleClass(location);
+      final int? result = await dataSource.getBortleClass(location);
 
       // Assert
       expect(result, null);
@@ -121,8 +121,8 @@ void main() {
 
     test('Missing bortleClass field → Returns null', () async {
       // Arrange
-      final location = const Location(latitude: 40.7, longitude: -74.0);
-      final uri = Uri.parse(
+      const Location location = Location(latitude: 40.7, longitude: -74);
+      final Uri uri = Uri.parse(
         'https://test-api.com/api/light-pollution?lat=40.7&lon=-74.0',
       );
       
@@ -131,7 +131,7 @@ void main() {
       );
 
       // Act
-      final result = await dataSource.getBortleClass(location);
+      final int? result = await dataSource.getBortleClass(location);
 
       // Assert
       expect(result, null);

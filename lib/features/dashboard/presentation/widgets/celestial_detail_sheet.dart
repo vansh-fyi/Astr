@@ -1,19 +1,18 @@
 import 'dart:ui';
-import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
-import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
-import 'package:astr/features/catalog/presentation/providers/rise_set_provider.dart';
-import 'package:astr/features/catalog/presentation/providers/visibility_graph_notifier.dart';
-import 'package:astr/features/catalog/presentation/widgets/visibility_graph_widget.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 
+import '../../../catalog/domain/entities/celestial_object.dart';
+import '../../../catalog/domain/entities/visibility_graph_data.dart';
+import '../../../catalog/presentation/providers/object_detail_notifier.dart';
+import '../../../catalog/presentation/providers/rise_set_provider.dart';
+import '../../../catalog/presentation/providers/visibility_graph_notifier.dart';
+import '../../../catalog/presentation/widgets/visibility_graph_widget.dart';
+
 class CelestialDetailSheet extends ConsumerWidget {
-  final String objectId;
-  final String title;
-  final String subtitle;
-  final Color themeColor;
 
   const CelestialDetailSheet({
     super.key,
@@ -22,21 +21,25 @@ class CelestialDetailSheet extends ConsumerWidget {
     required this.subtitle,
     this.themeColor = Colors.orange,
   });
+  final String objectId;
+  final String title;
+  final String subtitle;
+  final Color themeColor;
 
   @override
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 1. Fetch Object Data (for Type, etc.)
-    final objectState = ref.watch(objectDetailNotifierProvider(objectId));
-    final object = objectState.object;
+    final ObjectDetailState objectState = ref.watch(objectDetailNotifierProvider(objectId));
+    final CelestialObject? object = objectState.object;
 
     // 2. Fetch Rise/Set/Transit Times
     String transitTime = '--:--';
     String setTime = '--:--';
     
     if (object != null) {
-      final riseSetAsync = ref.watch(riseSetProvider(object));
-      final times = riseSetAsync.valueOrNull;
+      final AsyncValue<Map<String, DateTime?>> riseSetAsync = ref.watch(riseSetProvider(object));
+      final Map<String, DateTime?>? times = riseSetAsync.valueOrNull;
       if (times != null) {
         if (times['transit'] != null) {
           transitTime = DateFormat('HH:mm').format(times['transit']!);
@@ -47,8 +50,8 @@ class CelestialDetailSheet extends ConsumerWidget {
       }
     }
 
-    final screenHeight = MediaQuery.of(context).size.height;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
       constraints: BoxConstraints(
@@ -60,7 +63,7 @@ class CelestialDetailSheet extends ConsumerWidget {
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         child: Stack(
-          children: [
+          children: <Widget>[
             // 1. Background (Fixed)
             Positioned.fill(
               child: BackdropFilter(
@@ -84,7 +87,7 @@ class CelestialDetailSheet extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     // Visibility Graph (Real Data)
                     VisibilityGraphWidget(
                       objectId: objectId,
@@ -104,14 +107,14 @@ class CelestialDetailSheet extends ConsumerWidget {
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                        children: <Widget>[
                           Text(
                             'OBSERVING CONDITIONS',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: Colors.white.withValues(alpha: 0.5),
-                              letterSpacing: 1.0,
+                              letterSpacing: 1,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -126,14 +129,14 @@ class CelestialDetailSheet extends ConsumerWidget {
                           const SizedBox(height: 16),
                           // Rise/Set Cards
                           Consumer(
-                            builder: (context, ref, child) {
-                              final visibilityState = ref.watch(visibilityGraphProvider(objectId));
-                              final data = visibilityState.graphData;
+                            builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                              final VisibilityGraphState visibilityState = ref.watch(visibilityGraphProvider(objectId));
+                              final VisibilityGraphData? data = visibilityState.graphData;
                               
                               if (data == null) return const SizedBox.shrink();
 
                               return Row(
-                                children: [
+                                children: <Widget>[
                                   Expanded(child: _buildTimeCard('SUNRISE', data.sunRise)),
                                   const SizedBox(width: 8),
                                   Expanded(child: _buildTimeCard('SUNSET', data.sunSet)),
@@ -152,7 +155,7 @@ class CelestialDetailSheet extends ConsumerWidget {
 
                     // Grid Stats
                     Row(
-                      children: [
+                      children: <Widget>[
                         // _buildStat('Altitude', altitude, Colors.white), // Removed for now as we don't have real current altitude easily
                         _buildStat('Transit', transitTime, themeColor),
                         _buildStat('Set', setTime, Colors.white),
@@ -183,17 +186,17 @@ class CelestialDetailSheet extends ConsumerWidget {
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                      children: <Widget>[
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                          children: <Widget>[
                             Text(
                               title,
                               style: const TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                letterSpacing: -1.0,
+                                letterSpacing: -1,
                               ),
                             ),
                             Text(
@@ -225,14 +228,14 @@ class CelestialDetailSheet extends ConsumerWidget {
   Widget _buildStat(String label, String value, Color valueColor) {
     return Expanded(
       child: Column(
-        children: [
+        children: <Widget>[
           Text(
             label.toUpperCase(),
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: Colors.white.withValues(alpha: 0.5),
-              letterSpacing: 1.0,
+              letterSpacing: 1,
             ),
           ),
           const SizedBox(height: 4),
@@ -259,7 +262,7 @@ class CelestialDetailSheet extends ConsumerWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
+        children: <Widget>[
           Text(
             label,
             style: const TextStyle(

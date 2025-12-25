@@ -1,20 +1,21 @@
-import 'package:astr/core/error/failure.dart';
-import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
-import 'package:astr/features/catalog/domain/entities/graph_point.dart';
-import 'package:astr/features/catalog/domain/entities/time_range.dart';
-import 'package:astr/features/catalog/domain/entities/visibility_graph_data.dart';
-import 'package:astr/features/catalog/domain/services/i_visibility_service.dart';
-import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sweph/sweph.dart';
 
+import '../../../../core/error/failure.dart';
+import '../../../astronomy/domain/services/astronomy_service.dart';
+import '../../../context/domain/entities/geo_location.dart';
+import '../../domain/entities/celestial_object.dart';
+import '../../domain/entities/celestial_type.dart';
+import '../../domain/entities/graph_point.dart';
+import '../../domain/entities/time_range.dart';
+import '../../domain/entities/visibility_graph_data.dart';
+import '../../domain/services/i_visibility_service.dart';
+
 /// Implementation of visibility service for calculating visibility graph data
 class VisibilityServiceImpl implements IVisibilityService {
-  final AstronomyService _astronomyService;
 
   const VisibilityServiceImpl(this._astronomyService);
+  final AstronomyService _astronomyService;
 
   @override
   Future<Either<Failure, VisibilityGraphData>> calculateVisibility({
@@ -24,7 +25,7 @@ class VisibilityServiceImpl implements IVisibilityService {
     DateTime? endTime,
   }) async {
     try {
-      final duration = endTime != null 
+      final Duration duration = endTime != null 
           ? endTime.difference(startTime) 
           : const Duration(hours: 12);
 
@@ -33,7 +34,7 @@ class VisibilityServiceImpl implements IVisibilityService {
       
       // Check for Ephemeris ID first (Planets, Sun, Moon)
       if (object.ephemerisId != null) {
-        final body = _mapToHeavenlyBody(object);
+        final HeavenlyBody? body = _mapToHeavenlyBody(object);
         if (body != null) {
         objectCurve = await _astronomyService.calculateAltitudeTrajectory(
             body: body,
@@ -61,7 +62,7 @@ class VisibilityServiceImpl implements IVisibilityService {
       }
 
       // 2. Calculate Moon Trajectory
-      final moonCurve = await _astronomyService.calculateMoonTrajectory(
+      final List<GraphPoint> moonCurve = await _astronomyService.calculateMoonTrajectory(
         startTime: startTime,
         lat: location.latitude,
         long: location.longitude,
@@ -71,20 +72,20 @@ class VisibilityServiceImpl implements IVisibilityService {
       // 3. Calculate Optimal Windows
       // Logic: Object Altitude > 30 AND Moon Interference < 30 (arbitrary threshold, maybe 10?)
       // Let's use 30 for now as per previous mock logic.
-      const double minObjectAltitude = 30.0;
-      const double maxMoonInterference = 30.0;
-      final optimalRanges = <TimeRange>[];
+      const double minObjectAltitude = 30;
+      const double maxMoonInterference = 30;
+      final List<TimeRange> optimalRanges = <TimeRange>[];
       DateTime? windowStart;
 
       for (int i = 0; i < objectCurve.length; i++) {
-        final objectPoint = objectCurve[i];
+        final GraphPoint objectPoint = objectCurve[i];
         // Ensure we have a matching moon point (should be same length)
-        final moonPoint = i < moonCurve.length ? moonCurve[i] : GraphPoint(time: objectPoint.time, value: 0);
+        final GraphPoint moonPoint = i < moonCurve.length ? moonCurve[i] : GraphPoint(time: objectPoint.time, value: 0);
         
-        final objectAlt = objectPoint.value;
-        final moonInterference = moonPoint.value;
+        final double objectAlt = objectPoint.value;
+        final double moonInterference = moonPoint.value;
 
-        final isOptimal = objectAlt > minObjectAltitude && moonInterference < maxMoonInterference;
+        final bool isOptimal = objectAlt > minObjectAltitude && moonInterference < maxMoonInterference;
 
         if (isOptimal && windowStart == null) {
           windowStart = objectPoint.time;
@@ -100,14 +101,14 @@ class VisibilityServiceImpl implements IVisibilityService {
       }
 
       // 4. Calculate Sun/Moon Rise/Set Times
-      final sunTimes = await _astronomyService.calculateRiseSetTransit(
+      final Map<String, DateTime?> sunTimes = await _astronomyService.calculateRiseSetTransit(
         body: HeavenlyBody.SE_SUN,
         date: startTime,
         lat: location.latitude,
         long: location.longitude,
       );
       
-      final moonTimes = await _astronomyService.calculateRiseSetTransit(
+      final Map<String, DateTime?> moonTimes = await _astronomyService.calculateRiseSetTransit(
         body: HeavenlyBody.SE_MOON,
         date: startTime,
         lat: location.latitude,
@@ -124,12 +125,12 @@ class VisibilityServiceImpl implements IVisibilityService {
         moonSet: moonTimes['set'],
       ));
     } catch (e) {
-      return Left(CalculationFailure('Error calculating visibility: ${e.toString()}'));
+      return Left(CalculationFailure('Error calculating visibility: $e'));
     }
   }
 
   HeavenlyBody? _mapToHeavenlyBody(CelestialObject object) {
-    final name = object.name.toLowerCase();
+    final String name = object.name.toLowerCase();
     switch (name) {
       case 'sun': return HeavenlyBody.SE_SUN;
       case 'moon': return HeavenlyBody.SE_MOON;

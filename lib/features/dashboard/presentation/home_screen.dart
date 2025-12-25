@@ -1,24 +1,25 @@
-import 'package:astr/core/widgets/cosmic_loader.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ionicons/ionicons.dart';
-import 'package:astr/features/dashboard/domain/services/quality_calculator.dart';
-import 'package:astr/features/dashboard/presentation/providers/weather_provider.dart';
-import 'package:astr/features/dashboard/presentation/providers/visibility_provider.dart';
-import 'package:astr/features/dashboard/presentation/providers/condition_quality_provider.dart';
-import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
-import 'package:astr/features/dashboard/domain/entities/light_pollution.dart';
-
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:astr/core/widgets/glass_panel.dart' as core;
-import 'package:astr/features/context/presentation/widgets/location_sheet.dart';
-import 'widgets/sky_portal.dart';
+import 'package:ionicons/ionicons.dart';
+
+import '../../../core/engine/models/condition_result.dart';
+import '../../../core/widgets/cosmic_loader.dart';
+import '../../astronomy/domain/entities/astronomy_state.dart';
+import '../../astronomy/presentation/providers/astronomy_provider.dart';
+import '../../context/domain/entities/astr_context.dart';
+import '../../context/presentation/providers/astr_context_provider.dart';
+import '../domain/entities/weather.dart';
+import '../domain/services/quality_calculator.dart';
+import 'providers/condition_quality_provider.dart';
+import 'providers/visibility_provider.dart';
+import 'providers/weather_provider.dart';
 import 'widgets/dashboard_grid.dart';
 import 'widgets/highlights_feed.dart';
 import 'widgets/nebula_background.dart';
-
-import 'dart:async';
+import 'widgets/sky_portal.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -46,8 +47,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     ).animate(CurvedAnimation(parent: _bannerController, curve: Curves.easeOutBack));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final contextAsync = ref.read(astrContextProvider);
-      final selectedDate = contextAsync.value?.selectedDate;
+      final AsyncValue<AstrContext> contextAsync = ref.read(astrContextProvider);
+      final DateTime? selectedDate = contextAsync.value?.selectedDate;
       if (selectedDate != null && !DateUtils.isSameDay(selectedDate, DateTime.now())) {
         _handleDateChange(selectedDate);
       }
@@ -84,17 +85,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final weatherAsync = ref.watch(weatherProvider);
-    final astronomyAsync = ref.watch(astronomyProvider);
-    final visibilityState = ref.watch(visibilityProvider);
-    final astrContextAsync = ref.watch(astrContextProvider);
+    final AsyncValue<Weather> weatherAsync = ref.watch(weatherProvider);
+    final AsyncValue<AstronomyState> astronomyAsync = ref.watch(astronomyProvider);
+    final VisibilityState visibilityState = ref.watch(visibilityProvider);
+    final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
     
-    final selectedDate = astrContextAsync.value?.selectedDate ?? DateTime.now();
-    final isToday = DateUtils.isSameDay(selectedDate, DateTime.now());
+    final DateTime selectedDate = astrContextAsync.value?.selectedDate ?? DateTime.now();
+    final bool isToday = DateUtils.isSameDay(selectedDate, DateTime.now());
 
     // Listen for changes to trigger animation
-    ref.listen(astrContextProvider, (previous, next) {
-      final newDate = next.value?.selectedDate;
+    ref.listen(astrContextProvider, (AsyncValue<AstrContext>? previous, AsyncValue<AstrContext> next) {
+      final DateTime? newDate = next.value?.selectedDate;
       if (newDate != null) {
         _handleDateChange(newDate);
       }
@@ -104,7 +105,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       extendBody: true,
       backgroundColor: const Color(0xFF020204),
       body: Stack(
-        children: [
+        children: <Widget>[
           // Background Elements
           const NebulaBackground(),
 
@@ -112,7 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           SafeArea(
             bottom: false,
             child: Column(
-              children: [
+              children: <Widget>[
                 // Header / Navigation removed (moved to global nav bar)
                 // Future Date Banner
                 SlideTransition(
@@ -125,7 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       bottom: false,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                        children: <Widget>[
                           const Icon(Ionicons.time_outline, color: Colors.white, size: 16),
                           const SizedBox(width: 8),
                           Text(
@@ -151,15 +152,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       return const LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.white],
-                        stops: [0.0, 0.05], // Soft fade at the top
+                        colors: <Color>[Colors.transparent, Colors.white],
+                        stops: <double>[0, 0.05], // Soft fade at the top
                       ).createShader(bounds);
                     },
                     blendMode: BlendMode.dstIn,
                     child: RefreshIndicator(
                       onRefresh: () async {
                         // Refresh all data
-                        await Future.wait([
+                        await Future.wait(<Future<void>>[
                           ref.read(astrContextProvider.notifier).refreshLocation(),
                           ref.read(weatherProvider.notifier).refresh(),
                         ]);
@@ -169,29 +170,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
                           child: Column(
-                            children: [
+                            children: <Widget>[
                               const SizedBox(height: 20),
                               
                               const SizedBox(height: 20),
                               
                               // Sky Portal (Main Visual)
                               // Sky Portal (Hero)
-                              if (weatherAsync.hasValue && astronomyAsync.hasValue) ...[
+                              if (weatherAsync.hasValue && astronomyAsync.hasValue) ...<Widget>[
                                 Consumer(
-                                  builder: (context, ref, child) {
-                                    final weather = weatherAsync.value!;
-                                    final astronomy = astronomyAsync.value!;
+                                  builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                                    final Weather weather = weatherAsync.value!;
+                                    final AstronomyState astronomy = astronomyAsync.value!;
 
-                                    final score = QualityCalculator.calculateScore(
+                                    final int score = QualityCalculator.calculateScore(
                                       bortleScale: visibilityState.lightPollution.visibilityIndex.toDouble(),
                                       cloudCover: weather.cloudCover,
                                       moonIllumination: astronomy.moonPhaseInfo.illumination,
                                     );
 
                                     // Watch the qualitative condition provider
-                                    final conditionAsync = ref.watch(conditionQualityProvider);
+                                    final AsyncValue<ConditionResult> conditionAsync = ref.watch(conditionQualityProvider);
 
                                     return SkyPortal(
                                       qualityLabel: conditionAsync.valueOrNull?.shortSummary ?? 'Loading...',
@@ -203,7 +204,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                                     );
                                   },
                                 ),
-                              ] else ...[
+                              ] else ...<Widget>[
                                  const SizedBox(
                                    height: 300,
                                    child: CosmicLoader(),
@@ -213,11 +214,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                               const SizedBox(height: 40),
 
                               // Dashboard Grid
-                              if (weatherAsync.hasValue && astronomyAsync.hasValue) ...[
+                              if (weatherAsync.hasValue && astronomyAsync.hasValue) ...<Widget>[
                                  Builder(
-                                  builder: (context) {
-                                    final weather = weatherAsync.value!;
-                                    final astronomy = astronomyAsync.value!;
+                                  builder: (BuildContext context) {
+                                    final Weather weather = weatherAsync.value!;
+                                    final AstronomyState astronomy = astronomyAsync.value!;
 
                                     return DashboardGrid(
                                       cloudCover: weather.cloudCover,

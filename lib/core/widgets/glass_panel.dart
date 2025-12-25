@@ -8,14 +8,6 @@ import 'package:flutter/material.dart';
 /// - Static blur sigma values reduce GPU overhead
 /// - Const constructors where possible
 class GlassPanel extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
-  final BorderRadius? borderRadius;
-  final BoxBorder? border;
-
-  final bool enableBlur;
 
   const GlassPanel({
     super.key,
@@ -27,21 +19,28 @@ class GlassPanel extends StatelessWidget {
     this.border,
     this.enableBlur = true,
   });
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final BorderRadius? borderRadius;
+  final BoxBorder? border;
+
+  final bool enableBlur;
 
   @override
   Widget build(BuildContext context) {
-    final radius = borderRadius ?? BorderRadius.circular(24);
+    final BorderRadius radius = borderRadius ?? BorderRadius.circular(24);
 
     // Optimized Style for Non-Blur (Performance Mode)
     // Higher opacity to mask background since we don't blur it
-    final backgroundColor = enableBlur 
+    final Color backgroundColor = enableBlur 
         ? const Color(0xFF121212).withValues(alpha: 0.8) 
         : const Color(0xFF121212).withValues(alpha: 0.95);
 
     // Subtle border for definition
-    final borderColor = border ?? Border.all(
+    final BoxBorder borderColor = border ?? Border.all(
       color: Colors.white.withValues(alpha: enableBlur ? 0.08 : 0.12),
-      width: 1,
     );
 
     Widget content = Container(

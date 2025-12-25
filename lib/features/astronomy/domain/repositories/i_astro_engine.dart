@@ -1,8 +1,9 @@
-import 'package:astr/core/error/failure.dart';
-import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
-import 'package:astr/features/astronomy/domain/entities/celestial_position.dart';
-import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
 import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/error/failure.dart';
+import '../entities/celestial_body.dart';
+import '../entities/celestial_position.dart';
+import '../entities/moon_phase_info.dart';
 
 abstract class IAstroEngine {
   /// Calculates the position of a celestial body for a given time and location.

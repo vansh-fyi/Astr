@@ -1,13 +1,6 @@
-import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
+import 'celestial_body.dart';
 
-class CelestialPosition {
-  final CelestialBody? body;
-  final String name;
-  final DateTime time;
-  final double altitude; // Degrees
-  final double azimuth; // Degrees
-  final double distance; // AU (Astronomical Units)
-  final double magnitude; // Apparent magnitude
+class CelestialPosition { // Apparent magnitude
 
   const CelestialPosition({
     this.body,
@@ -18,6 +11,13 @@ class CelestialPosition {
     required this.distance,
     required this.magnitude,
   });
+  final CelestialBody? body;
+  final String name;
+  final DateTime time;
+  final double altitude; // Degrees
+  final double azimuth; // Degrees
+  final double distance; // AU (Astronomical Units)
+  final double magnitude;
 
   @override
   String toString() {

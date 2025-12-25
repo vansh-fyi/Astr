@@ -1,7 +1,7 @@
+import 'package:astr/core/widgets/astr_rive_animation.dart';
+import 'package:astr/features/dashboard/presentation/widgets/cloud_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:astr/features/dashboard/presentation/widgets/cloud_bar.dart';
-import 'package:astr/core/widgets/astr_rive_animation.dart';
 
 void main() {
   setUp(() {
@@ -10,7 +10,7 @@ void main() {
 
   testWidgets('CloudBar displays percentage and handles loading state', (WidgetTester tester) async {
     // arrange
-    const tPercentage = 75.0;
+    const double tPercentage = 75;
 
     // act
     await tester.pumpWidget(

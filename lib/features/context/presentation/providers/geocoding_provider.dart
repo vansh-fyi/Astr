@@ -4,16 +4,16 @@ import '../../data/datasources/geocoding_service.dart';
 import '../../data/repositories/geocoding_repository_impl.dart';
 import '../../domain/repositories/i_geocoding_repository.dart';
 
-final dioProvider = Provider<Dio>((ref) {
+final Provider<Dio> dioProvider = Provider<Dio>((ProviderRef<Dio> ref) {
   return Dio();
 });
 
-final geocodingServiceProvider = Provider<GeocodingService>((ref) {
-  final dio = ref.watch(dioProvider);
+final Provider<GeocodingService> geocodingServiceProvider = Provider<GeocodingService>((ProviderRef<GeocodingService> ref) {
+  final Dio dio = ref.watch(dioProvider);
   return GeocodingService(dio);
 });
 
-final geocodingRepositoryProvider = Provider<IGeocodingRepository>((ref) {
-  final service = ref.watch(geocodingServiceProvider);
+final Provider<IGeocodingRepository> geocodingRepositoryProvider = Provider<IGeocodingRepository>((ProviderRef<IGeocodingRepository> ref) {
+  final GeocodingService service = ref.watch(geocodingServiceProvider);
   return GeocodingRepositoryImpl(service);
 });

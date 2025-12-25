@@ -1,4 +1,6 @@
+import 'package:fpdart/src/either.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../../core/error/failure.dart';
 import '../../data/repositories/settings_repository.dart';
 
 part 'tos_provider.g.dart';
@@ -11,9 +13,9 @@ class TosNotifier extends _$TosNotifier {
   }
 
   Future<void> accept() async {
-    final result = await ref.read(settingsRepositoryProvider).setTosAccepted(true);
+    final Either<Failure, void> result = await ref.read(settingsRepositoryProvider).setTosAccepted(true);
     result.fold(
-      (failure) {
+      (Failure failure) {
         // Ideally log error or show snackbar, but for now just don't update state
         // or maybe throw to let UI handle it?
         // Given the simplicity, we'll just log it if we had a logger.

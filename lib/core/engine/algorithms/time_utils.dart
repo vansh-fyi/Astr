@@ -11,7 +11,7 @@ class TimeUtils {
   /// Algorithm from Meeus, Chapter 7
   static double dateTimeToJulianDate(DateTime dateTime) {
     // Convert to UTC
-    final utc = dateTime.toUtc();
+    final DateTime utc = dateTime.toUtc();
 
     int year = utc.year;
     int month = utc.month;
@@ -59,8 +59,8 @@ class TimeUtils {
 
     final double day = b - d - (30.6001 * e).floor() + f;
 
-    int month = e < 14 ? e - 1 : e - 13;
-    int year = month > 2 ? c - 4716 : c - 4715;
+    final int month = e < 14 ? e - 1 : e - 13;
+    final int year = month > 2 ? c - 4716 : c - 4715;
 
     final int dayInt = day.floor();
     final double fractionalDay = day - dayInt;

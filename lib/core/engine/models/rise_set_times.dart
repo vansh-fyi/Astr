@@ -1,5 +1,16 @@
 /// Represents the rise, transit, and set times for a celestial object
 class RiseSetTimes {
+
+  const RiseSetTimes({
+    this.riseTime,
+    this.transitTime,
+    this.setTime,
+    this.isCircumpolar = false,
+    this.neverRises = false,
+  }) : assert(
+         !(isCircumpolar && neverRises),
+         'Object cannot be both circumpolar and never rising',
+       );
   /// The time when the object rises above the horizon (null if circumpolar or never rises)
   final DateTime? riseTime;
 
@@ -14,17 +25,6 @@ class RiseSetTimes {
 
   /// True if the object never rises above the horizon
   final bool neverRises;
-
-  const RiseSetTimes({
-    this.riseTime,
-    this.transitTime,
-    this.setTime,
-    this.isCircumpolar = false,
-    this.neverRises = false,
-  }) : assert(
-         !(isCircumpolar && neverRises),
-         'Object cannot be both circumpolar and never rising',
-       );
 
   @override
   String toString() {

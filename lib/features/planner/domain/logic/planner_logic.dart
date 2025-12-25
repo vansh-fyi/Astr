@@ -1,6 +1,7 @@
+import '../../../../core/engine/models/condition_quality.dart';
+import '../../../../core/engine/models/condition_result.dart';
 import '../../../../core/services/qualitative/qualitative_condition_service.dart';
 import '../../../../core/utils/bortle_mpsas_converter.dart';
-import '../../../../core/engine/models/condition_quality.dart';
 
 class PlannerLogic {
   final QualitativeConditionService _conditionService = QualitativeConditionService();
@@ -19,10 +20,10 @@ class PlannerLogic {
     required int bortleScale,
   }) {
     // Convert Bortle to MPSAS
-    final mpsas = BortleMpsasConverter.bortleToMpsas(bortleScale);
+    final double mpsas = BortleMpsasConverter.bortleToMpsas(bortleScale);
 
     // Evaluate conditions using the same service as home screen
-    final result = _conditionService.evaluate(
+    final ConditionResult result = _conditionService.evaluate(
       cloudCover: cloudCoverAvg,
       moonIllumination: moonIllumination,
       mpsas: mpsas,

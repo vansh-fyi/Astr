@@ -1,6 +1,5 @@
 import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sweph/sweph.dart';
 
 void main() {
   late AstronomyService astronomyService;

@@ -12,7 +12,7 @@ import 'package:mockito/mockito.dart';
 
 import 'astr_context_provider_test.mocks.dart';
 
-@GenerateMocks([ILocationService])
+@GenerateMocks(<Type>[ILocationService])
 void main() {
   late MockILocationService mockLocationService;
 
@@ -24,8 +24,8 @@ void main() {
   });
 
   ProviderContainer makeProviderContainer(MockILocationService locationService) {
-    final container = ProviderContainer(
-      overrides: [
+    final ProviderContainer container = ProviderContainer(
+      overrides: <Override>[
         locationServiceProvider.overrideWithValue(locationService),
       ],
     );
@@ -36,48 +36,48 @@ void main() {
   group('AstrContextNotifier', () {
     test('initial state loads current location', () async {
       // Arrange
-      const tLocation = GeoLocation(
-        latitude: 10.0,
-        longitude: 20.0,
+      const GeoLocation tLocation = GeoLocation(
+        latitude: 10,
+        longitude: 20,
         name: 'Test City',
       );
       when(mockLocationService.getCurrentLocation())
           .thenAnswer((_) async => const Right(tLocation));
 
-      final container = makeProviderContainer(mockLocationService);
-      final listener = container.listen(astrContextProvider, (previous, next) {});
+      final ProviderContainer container = makeProviderContainer(mockLocationService);
+      final ProviderSubscription<AsyncValue<AstrContext>> listener = container.listen(astrContextProvider, (AsyncValue<AstrContext>? previous, AsyncValue<AstrContext> next) {});
 
       // Act
       // Wait for the async build to complete
       await container.read(astrContextProvider.future);
 
       // Assert
-      final state = container.read(astrContextProvider);
+      final AsyncValue<AstrContext> state = container.read(astrContextProvider);
       expect(state.value?.location, tLocation);
       expect(state.value?.isCurrentLocation, true);
     });
 
     test('updateDate updates the selectedDate in state', () async {
       // Arrange
-      const tLocation = GeoLocation(
-        latitude: 10.0,
-        longitude: 20.0,
+      const GeoLocation tLocation = GeoLocation(
+        latitude: 10,
+        longitude: 20,
         name: 'Test City',
       );
       when(mockLocationService.getCurrentLocation())
           .thenAnswer((_) async => const Right(tLocation));
 
-      final container = makeProviderContainer(mockLocationService);
+      final ProviderContainer container = makeProviderContainer(mockLocationService);
       
       // Wait for initialization
       await container.read(astrContextProvider.future);
 
       // Act
-      final newDate = DateTime(2025, 12, 25);
+      final DateTime newDate = DateTime(2025, 12, 25);
       container.read(astrContextProvider.notifier).updateDate(newDate);
 
       // Assert
-      final state = container.read(astrContextProvider);
+      final AsyncValue<AstrContext> state = container.read(astrContextProvider);
       expect(state.value?.selectedDate, newDate);
     });
   });

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('SummaryText', () {
-    testWidgets('displays correct text for Excellent', (tester) async {
+    testWidgets('displays correct text for Excellent', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -19,7 +19,7 @@ void main() {
       expect(find.text('Excellent'), findsOneWidget);
     });
 
-    testWidgets('displays correct text for Poor', (tester) async {
+    testWidgets('displays correct text for Poor', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -32,7 +32,7 @@ void main() {
       expect(find.text('Poor'), findsOneWidget);
     });
 
-    testWidgets('applies animation only for Excellent', (tester) async {
+    testWidgets('applies animation only for Excellent', (WidgetTester tester) async {
       // Excellent case
       await tester.pumpWidget(
         const MaterialApp(

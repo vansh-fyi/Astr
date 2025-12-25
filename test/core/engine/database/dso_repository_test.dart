@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:astr/core/engine/database/database_service.dart';
 import 'package:astr/core/engine/database/dso_repository.dart';
 import 'package:astr/core/engine/models/dso.dart';
+import 'package:astr/core/engine/models/result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -19,9 +20,9 @@ void main() {
 
     setUpAll(() async {
       // Copy database from assets to test directory
-      final testDir = await Directory.systemTemp.createTemp('astr_test_');
-      final testDbPath = join(testDir.path, 'astr_test.db');
-      final assetDb = File('assets/db/astr.db');
+      final Directory testDir = await Directory.systemTemp.createTemp('astr_test_');
+      final String testDbPath = join(testDir.path, 'astr_test.db');
+      final File assetDb = File('assets/db/astr.db');
       await assetDb.copy(testDbPath);
 
       databaseService = DatabaseService(testDatabasePath: testDbPath);
@@ -35,12 +36,12 @@ void main() {
 
     group('searchByName (AC #2)', () {
       test('searching for "Andromeda" returns correct DSO object', () async {
-        final result = await repository.searchByName('Andromeda');
+        final Result<List<DSO>> result = await repository.searchByName('Andromeda');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
 
-        final andromeda = result.value.first;
+        final DSO andromeda = result.value.first;
         expect(andromeda, isA<DSO>());
         expect(andromeda.name, contains('Andromeda'));
         expect(andromeda.messierId, 'M31');
@@ -50,7 +51,7 @@ void main() {
       });
 
       test('searching by Messier ID works', () async {
-        final result = await repository.searchByName('M31');
+        final Result<List<DSO>> result = await repository.searchByName('M31');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -58,7 +59,7 @@ void main() {
       });
 
       test('searching by NGC ID works', () async {
-        final result = await repository.searchByName('NGC224');
+        final Result<List<DSO>> result = await repository.searchByName('NGC224');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -66,7 +67,7 @@ void main() {
       });
 
       test('partial name search works', () async {
-        final result = await repository.searchByName('Orion');
+        final Result<List<DSO>> result = await repository.searchByName('Orion');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -74,21 +75,21 @@ void main() {
       });
 
       test('case-insensitive search works', () async {
-        final result = await repository.searchByName('andromeda');
+        final Result<List<DSO>> result = await repository.searchByName('andromeda');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
       });
 
       test('empty query returns empty list', () async {
-        final result = await repository.searchByName('');
+        final Result<List<DSO>> result = await repository.searchByName('');
 
         expect(result.isSuccess, true);
         expect(result.value, isEmpty);
       });
 
       test('non-existent DSO returns empty list', () async {
-        final result = await repository.searchByName('NonExistentDSO12345');
+        final Result<List<DSO>> result = await repository.searchByName('NonExistentDSO12345');
 
         expect(result.isSuccess, true);
         expect(result.value, isEmpty);
@@ -97,34 +98,34 @@ void main() {
 
     group('searchByType', () {
       test('finds galaxies', () async {
-        final result = await repository.searchByType(DSOType.galaxy);
+        final Result<List<DSO>> result = await repository.searchByType(DSOType.galaxy);
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
 
-        for (final dso in result.value) {
+        for (final DSO dso in result.value) {
           expect(dso.dsoType, DSOType.galaxy);
         }
       });
 
       test('finds nebulae', () async {
-        final result = await repository.searchByType(DSOType.nebula);
+        final Result<List<DSO>> result = await repository.searchByType(DSOType.nebula);
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
 
-        for (final dso in result.value) {
+        for (final DSO dso in result.value) {
           expect(dso.dsoType, DSOType.nebula);
         }
       });
 
       test('finds clusters', () async {
-        final result = await repository.searchByType(DSOType.cluster);
+        final Result<List<DSO>> result = await repository.searchByType(DSOType.cluster);
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
 
-        for (final dso in result.value) {
+        for (final DSO dso in result.value) {
           expect(dso.dsoType, DSOType.cluster);
         }
       });
@@ -132,7 +133,7 @@ void main() {
 
     group('getByMessierId', () {
       test('gets Andromeda by Messier ID', () async {
-        final result = await repository.getByMessierId('M31');
+        final Result<DSO?> result = await repository.getByMessierId('M31');
 
         expect(result.isSuccess, true);
         expect(result.value, isNotNull);
@@ -141,7 +142,7 @@ void main() {
       });
 
       test('gets Orion Nebula by Messier ID', () async {
-        final result = await repository.getByMessierId('M42');
+        final Result<DSO?> result = await repository.getByMessierId('M42');
 
         expect(result.isSuccess, true);
         expect(result.value, isNotNull);
@@ -149,7 +150,7 @@ void main() {
       });
 
       test('non-existent Messier ID returns null', () async {
-        final result = await repository.getByMessierId('M999');
+        final Result<DSO?> result = await repository.getByMessierId('M999');
 
         expect(result.isSuccess, true);
         expect(result.value, isNull);
@@ -158,7 +159,7 @@ void main() {
 
     group('getByNgcId', () {
       test('gets Andromeda by NGC ID', () async {
-        final result = await repository.getByNgcId('NGC224');
+        final Result<DSO?> result = await repository.getByNgcId('NGC224');
 
         expect(result.isSuccess, true);
         expect(result.value, isNotNull);
@@ -166,7 +167,7 @@ void main() {
       });
 
       test('non-existent NGC ID returns null', () async {
-        final result = await repository.getByNgcId('NGC99999');
+        final Result<DSO?> result = await repository.getByNgcId('NGC99999');
 
         expect(result.isSuccess, true);
         expect(result.value, isNull);
@@ -175,7 +176,7 @@ void main() {
 
     group('searchByConstellation', () {
       test('finds DSOs in Andromeda constellation', () async {
-        final result = await repository.searchByConstellation('Andromeda');
+        final Result<List<DSO>> result = await repository.searchByConstellation('Andromeda');
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -183,7 +184,7 @@ void main() {
       });
 
       test('empty constellation returns empty list', () async {
-        final result = await repository.searchByConstellation('');
+        final Result<List<DSO>> result = await repository.searchByConstellation('');
 
         expect(result.isSuccess, true);
         expect(result.value, isEmpty);
@@ -192,7 +193,7 @@ void main() {
 
     group('getAll', () {
       test('returns multiple DSOs', () async {
-        final result = await repository.getAll(limit: 10);
+        final Result<List<DSO>> result = await repository.getAll(limit: 10);
 
         expect(result.isSuccess, true);
         expect(result.value.length, greaterThan(0));
@@ -201,7 +202,7 @@ void main() {
 
     group('performance (AC #3)', () {
       test('search query completes in < 100ms', () async {
-        final stopwatch = Stopwatch()..start();
+        final Stopwatch stopwatch = Stopwatch()..start();
 
         await repository.searchByName('Andromeda');
 

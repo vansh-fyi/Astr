@@ -4,6 +4,13 @@ import 'condition_quality.dart';
 
 /// Result of qualitative condition evaluation
 class ConditionResult extends Equatable {
+
+  const ConditionResult({
+    required this.quality,
+    required this.shortSummary,
+    required this.detailedAdvice,
+    required this.statusColor,
+  });
   /// The overall quality assessment
   final ConditionQuality quality;
 
@@ -16,13 +23,6 @@ class ConditionResult extends Equatable {
   /// Color representing the condition quality
   final Color statusColor;
 
-  const ConditionResult({
-    required this.quality,
-    required this.shortSummary,
-    required this.detailedAdvice,
-    required this.statusColor,
-  });
-
   @override
-  List<Object?> get props => [quality, shortSummary, detailedAdvice, statusColor];
+  List<Object?> get props => <Object?>[quality, shortSummary, detailedAdvice, statusColor];
 }

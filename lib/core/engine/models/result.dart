@@ -1,4 +1,4 @@
-import 'package:astr/core/error/failure.dart';
+import '../../error/failure.dart';
 
 /// A Result type that represents either a success or a failure.
 /// This pattern ensures explicit error handling without throwing exceptions.
@@ -63,8 +63,9 @@ sealed class Result<T> {
 
 /// Represents a successful result containing a value
 final class Success<T> extends Result<T> {
-  final T value;
   const Success(this.value);
+  @override
+  final T value;
 
   @override
   String toString() => 'Success($value)';
@@ -82,8 +83,9 @@ final class Success<T> extends Result<T> {
 
 /// Represents a failed result containing a Failure
 final class Failed<T> extends Result<T> {
-  final Failure failure;
   const Failed(this.failure);
+  @override
+  final Failure failure;
 
   @override
   String toString() => 'Failed($failure)';

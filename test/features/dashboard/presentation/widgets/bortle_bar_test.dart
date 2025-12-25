@@ -11,12 +11,12 @@ void main() {
 
   testWidgets('BortleBar displays correct text and Rive animation', (WidgetTester tester) async {
     // arrange
-    const tLightPollution = LightPollution(
+    const LightPollution tLightPollution = LightPollution(
       visibilityIndex: 4,
       zone: 'Rural/suburban transition',
       mpsas: 20.49,
       source: LightPollutionSource.estimated,
-      brightnessRatio: 1.0, // Added required parameter
+      brightnessRatio: 1, // Added required parameter
     );
 
     // act

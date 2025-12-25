@@ -1,16 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/src/either.dart';
+
+import '../../../../core/error/failure.dart';
+import '../../../../features/context/domain/entities/geo_location.dart';
 import '../../../../features/context/presentation/providers/astr_context_provider.dart';
+import '../../../context/domain/entities/astr_context.dart';
 import '../../data/datasources/png_map_service.dart';
 import '../../data/repositories/light_pollution_repository.dart';
 import '../../domain/entities/light_pollution.dart';
 import '../../domain/repositories/i_light_pollution_service.dart';
-import '../../../../features/context/domain/entities/geo_location.dart';
 
 // Services
-final pngMapServiceProvider = Provider((ref) => PngMapService());
+final Provider<PngMapService> pngMapServiceProvider = Provider((ProviderRef<PngMapService> ref) => PngMapService());
 
 // Repository - Uses PNG Light Pollution Atlas only (removed VIIRS API)
-final lightPollutionRepositoryProvider = Provider<ILightPollutionService>((ref) {
+final Provider<ILightPollutionService> lightPollutionRepositoryProvider = Provider<ILightPollutionService>((ProviderRef<ILightPollutionService> ref) {
   return LightPollutionRepository(
     ref.watch(pngMapServiceProvider),
   );
@@ -18,9 +22,6 @@ final lightPollutionRepositoryProvider = Provider<ILightPollutionService>((ref) 
 
 // State
 class VisibilityState {
-  final LightPollution lightPollution;
-  final bool isLoading;
-  final String? error;
 
   const VisibilityState({
     required this.lightPollution,
@@ -29,6 +30,9 @@ class VisibilityState {
   });
 
   factory VisibilityState.initial() => VisibilityState(lightPollution: LightPollution.unknown());
+  final LightPollution lightPollution;
+  final bool isLoading;
+  final String? error;
 
   VisibilityState copyWith({
     LightPollution? lightPollution,
@@ -45,9 +49,9 @@ class VisibilityState {
 
 // Notifier
 class VisibilityNotifier extends StateNotifier<VisibilityState> {
-  final ILightPollutionService _repository;
 
   VisibilityNotifier(this._repository) : super(VisibilityState.initial());
+  final ILightPollutionService _repository;
 
   Future<void> fetchData(GeoLocation location) async {
     // Avoid unnecessary fetches if loading
@@ -55,23 +59,23 @@ class VisibilityNotifier extends StateNotifier<VisibilityState> {
     
     state = state.copyWith(isLoading: true);
 
-    final result = await _repository.getLightPollution(location);
+    final Either<Failure, LightPollution> result = await _repository.getLightPollution(location);
 
     result.fold(
-      (failure) => state = state.copyWith(isLoading: false, error: failure.message),
-      (data) => state = state.copyWith(isLoading: false, lightPollution: data),
+      (Failure failure) => state = state.copyWith(isLoading: false, error: failure.message),
+      (LightPollution data) => state = state.copyWith(isLoading: false, lightPollution: data),
     );
   }
 }
 
-final visibilityProvider = StateNotifierProvider<VisibilityNotifier, VisibilityState>((ref) {
-  final repository = ref.watch(lightPollutionRepositoryProvider);
-  final notifier = VisibilityNotifier(repository);
+final StateNotifierProvider<VisibilityNotifier, VisibilityState> visibilityProvider = StateNotifierProvider<VisibilityNotifier, VisibilityState>((StateNotifierProviderRef<VisibilityNotifier, VisibilityState> ref) {
+  final ILightPollutionService repository = ref.watch(lightPollutionRepositoryProvider);
+  final VisibilityNotifier notifier = VisibilityNotifier(repository);
 
   // Listen to location changes
-  final astrContextAsync = ref.watch(astrContextProvider);
+  final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
   
-  astrContextAsync.whenData((context) {
+  astrContextAsync.whenData((AstrContext context) {
     // When we have a valid location, fetch data
     // We use a microtask or similar to avoid "setState during build" if strictly needed,
     // but usually calling a method on the notifier is safe here if it doesn't trigger immediate side-effects during build.

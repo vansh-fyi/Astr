@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
-import 'package:sweph/sweph.dart';
 
 void main() async {
   print('Starting Visibility Graph Math Verification...');

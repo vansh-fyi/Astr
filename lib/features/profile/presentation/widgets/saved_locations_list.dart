@@ -1,22 +1,22 @@
-import 'package:astr/features/context/domain/entities/geo_location.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
-import 'package:astr/features/profile/domain/entities/saved_location.dart';
-import 'package:astr/features/profile/presentation/providers/saved_locations_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/core/widgets/glass_toast.dart';
+
+import '../../../../core/widgets/glass_toast.dart';
+import '../../../context/domain/entities/geo_location.dart';
+import '../../../context/presentation/providers/astr_context_provider.dart';
+import '../../domain/entities/saved_location.dart';
+import '../providers/saved_locations_provider.dart';
 
 class SavedLocationsList extends ConsumerWidget {
   const SavedLocationsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final savedLocationsAsync = ref.watch(savedLocationsNotifierProvider);
+    final AsyncValue<List<SavedLocation>> savedLocationsAsync = ref.watch(savedLocationsNotifierProvider);
 
     return savedLocationsAsync.when(
-      data: (locations) {
+      data: (List<SavedLocation> locations) {
         if (locations.isEmpty) {
           return const ListTile(
             title: Text('No saved locations'),
@@ -25,20 +25,20 @@ class SavedLocationsList extends ConsumerWidget {
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             const Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16),
               child: Text(
                 'Saved Locations',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-            ...locations.map((location) => _SavedLocationTile(location: location)),
+            ...locations.map((SavedLocation location) => _SavedLocationTile(location: location)),
           ],
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => ListTile(
+      error: (Object err, StackTrace stack) => ListTile(
         title: Text('Error loading locations: $err'),
         leading: const Icon(Icons.error),
       ),
@@ -47,9 +47,9 @@ class SavedLocationsList extends ConsumerWidget {
 }
 
 class _SavedLocationTile extends ConsumerWidget {
-  final SavedLocation location;
 
   const _SavedLocationTile({required this.location});
+  final SavedLocation location;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,7 +63,7 @@ class _SavedLocationTile extends ConsumerWidget {
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20.0),
+        padding: const EdgeInsets.only(right: 20),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       child: ListTile(
@@ -74,7 +74,7 @@ class _SavedLocationTile extends ConsumerWidget {
           '${location.bortleClass != null ? ' • Bortle ${location.bortleClass}' : ''}',
         ),
         onTap: () {
-          final geoLocation = GeoLocation(
+          final GeoLocation geoLocation = GeoLocation(
             latitude: location.latitude,
             longitude: location.longitude,
             name: location.name,

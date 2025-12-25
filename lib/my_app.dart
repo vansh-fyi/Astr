@@ -27,7 +27,7 @@ class MyApp extends ConsumerWidget {
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      builder: (context, child) {
+      builder: (BuildContext context, Widget? child) {
         return RedModeOverlay(
           enabled: redMode,
           child: child ?? const SizedBox.shrink(),

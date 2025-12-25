@@ -12,7 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 void main() {
-  testWidgets('ForecastScreen displays loading indicator initially', (tester) async {
+  testWidgets('ForecastScreen displays loading indicator initially', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(
@@ -23,44 +23,44 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('ForecastScreen displays list and handles tap', (tester) async {
-    final tDate = DateTime.now();
-    final tForecasts = [
+  testWidgets('ForecastScreen displays list and handles tap', (WidgetTester tester) async {
+    final DateTime tDate = DateTime.now();
+    final List<DailyForecast> tForecasts = <DailyForecast>[
       DailyForecast(
         date: tDate,
-        cloudCoverAvg: 10.0,
-        moonIllumination: 0.0,
+        cloudCoverAvg: 10,
+        moonIllumination: 0,
         weatherCode: '0',
         starRating: 5,
       ),
       DailyForecast(
         date: tDate.add(const Duration(days: 1)),
-        cloudCoverAvg: 90.0,
+        cloudCoverAvg: 90,
         moonIllumination: 0.5,
         weatherCode: '3',
         starRating: 1,
       ),
     ];
 
-    final mockNotifier = MockAstrContextNotifier();
+    final MockAstrContextNotifier mockNotifier = MockAstrContextNotifier();
 
-    final router = GoRouter(
+    final GoRouter router = GoRouter(
       initialLocation: '/forecast',
-      routes: [
+      routes: <RouteBase>[
         GoRoute(
           path: '/forecast',
-          builder: (context, state) => const ForecastScreen(),
+          builder: (BuildContext context, GoRouterState state) => const ForecastScreen(),
         ),
         GoRoute(
           path: '/',
-          builder: (context, state) => const Scaffold(body: Text('Home Screen')),
+          builder: (BuildContext context, GoRouterState state) => const Scaffold(body: Text('Home Screen')),
         ),
       ],
     );
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
+        overrides: <Override>[
           plannerProvider.overrideWith(() => FakePlanner(tForecasts)),
           astrContextProvider.overrideWith(() => mockNotifier),
         ],
@@ -90,8 +90,8 @@ void main() {
 }
 
 class FakePlanner extends Planner {
-  final List<DailyForecast> _data;
   FakePlanner(this._data);
+  final List<DailyForecast> _data;
 
   @override
   FutureOr<List<DailyForecast>> build() {
@@ -107,7 +107,6 @@ class MockAstrContextNotifier extends AstrContextNotifier {
     return AstrContext(
       selectedDate: DateTime.now(),
       location: const GeoLocation(latitude: 0, longitude: 0, name: 'Test'),
-      isCurrentLocation: true,
     );
   }
 

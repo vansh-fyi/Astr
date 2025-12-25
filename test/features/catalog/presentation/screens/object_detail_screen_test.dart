@@ -1,7 +1,8 @@
 import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
 import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
+import 'package:astr/features/catalog/domain/entities/graph_point.dart';
+import 'package:astr/features/catalog/domain/entities/time_range.dart';
 import 'package:astr/features/catalog/domain/entities/visibility_graph_data.dart';
-import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
 import 'package:astr/features/catalog/presentation/providers/object_detail_notifier.dart';
 import 'package:astr/features/catalog/presentation/providers/visibility_graph_notifier.dart';
 import 'package:astr/features/catalog/presentation/screens/object_detail_screen.dart';
@@ -11,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Mock object data
-  const tObject = CelestialObject(
+  const CelestialObject tObject = CelestialObject(
     id: 'mars',
     name: 'Mars',
     type: CelestialType.planet,
@@ -20,7 +21,7 @@ void main() {
     ephemerisId: 4,
   );
 
-  testWidgets('Object detail page displays object name and type', (tester) async {
+  testWidgets('Object detail page displays object name and type', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(1200, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -29,14 +30,14 @@ void main() {
     // Arrange
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
+        overrides: <Override>[
           // Override object detail to return data immediately
           objectDetailNotifierProvider('mars').overrideWith(
-            (ref) => FakeObjectDetailNotifier(tObject),
+            (StateNotifierProviderRef<ObjectDetailNotifier, ObjectDetailState> ref) => FakeObjectDetailNotifier(tObject),
           ),
           // Override visibility graph to avoid async hang
           visibilityGraphProvider('mars').overrideWith(
-            (ref) => FakeVisibilityGraphNotifier(),
+            (StateNotifierProviderRef<VisibilityGraphNotifier, VisibilityGraphState> ref) => FakeVisibilityGraphNotifier(),
           ),
         ],
         child: const MaterialApp(
@@ -55,7 +56,7 @@ void main() {
     expect(find.text('Planet'), findsOneWidget);
   });
 
-  testWidgets('Detail page shows Visibility Graph', (tester) async {
+  testWidgets('Detail page shows Visibility Graph', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(1200, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -64,12 +65,12 @@ void main() {
     // Arrange
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
+        overrides: <Override>[
           objectDetailNotifierProvider('mars').overrideWith(
-            (ref) => FakeObjectDetailNotifier(tObject),
+            (StateNotifierProviderRef<ObjectDetailNotifier, ObjectDetailState> ref) => FakeObjectDetailNotifier(tObject),
           ),
           visibilityGraphProvider('mars').overrideWith(
-            (ref) => FakeVisibilityGraphNotifier(),
+            (StateNotifierProviderRef<VisibilityGraphNotifier, VisibilityGraphState> ref) => FakeVisibilityGraphNotifier(),
           ),
         ],
         child: const MaterialApp(
@@ -84,7 +85,7 @@ void main() {
     expect(find.text('Visibility'), findsOneWidget);
   });
 
-  testWidgets('Detail page displays magnitude', (tester) async {
+  testWidgets('Detail page displays magnitude', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(1200, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -93,12 +94,12 @@ void main() {
     // Arrange
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
+        overrides: <Override>[
           objectDetailNotifierProvider('mars').overrideWith(
-            (ref) => FakeObjectDetailNotifier(tObject),
+            (StateNotifierProviderRef<ObjectDetailNotifier, ObjectDetailState> ref) => FakeObjectDetailNotifier(tObject),
           ),
           visibilityGraphProvider('mars').overrideWith(
-            (ref) => FakeVisibilityGraphNotifier(),
+            (StateNotifierProviderRef<VisibilityGraphNotifier, VisibilityGraphState> ref) => FakeVisibilityGraphNotifier(),
           ),
         ],
         child: const MaterialApp(
@@ -117,7 +118,7 @@ void main() {
 class FakeObjectDetailNotifier extends StateNotifier<ObjectDetailState> 
     implements ObjectDetailNotifier {
   FakeObjectDetailNotifier(CelestialObject object) 
-      : super(ObjectDetailState(isLoading: false, object: object));
+      : super(ObjectDetailState(object: object));
       
   @override
   Future<void> loadObject() async {} // No-op
@@ -130,8 +131,7 @@ class FakeVisibilityGraphNotifier extends StateNotifier<VisibilityGraphState>
     implements VisibilityGraphNotifier {
   FakeVisibilityGraphNotifier() 
       : super(const VisibilityGraphState(
-          isLoading: false, 
-          graphData: VisibilityGraphData(objectCurve: [], moonCurve: [], optimalWindows: [])
+          graphData: VisibilityGraphData(objectCurve: <GraphPoint>[], moonCurve: <GraphPoint>[], optimalWindows: <TimeRange>[])
         ));
         
   @override

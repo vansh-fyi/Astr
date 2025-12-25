@@ -1,8 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/src/either.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:riverpod/src/async_notifier.dart';
+import '../../../../core/error/failure.dart';
+import '../../../../core/services/i_location_service.dart';
 import '../../../../core/services/location_service_provider.dart';
 import '../../domain/entities/astr_context.dart';
 import '../../domain/entities/geo_location.dart';
+import '../../domain/repositories/i_geocoding_repository.dart';
 import 'geocoding_provider.dart';
 
 /// AC#5: Storage keys for persistent state
@@ -13,7 +18,7 @@ const String _kLastDate = 'last_date';
 const String _kUsePersistedLocation = 'use_persisted_location';
 
 class AstrContextNotifier extends AsyncNotifier<AstrContext> {
-  final _storage = GetStorage();
+  final GetStorage _storage = GetStorage();
 
   @override
   Future<AstrContext> build() async {
@@ -21,19 +26,19 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
   }
 
   Future<AstrContext> _loadInitialContext() async {
-    final now = DateTime.now();
+    final DateTime now = DateTime.now();
     
     // AC#5: Try to restore persisted state first
-    final usePersistedLocation = _storage.read<bool>(_kUsePersistedLocation) ?? false;
+    final bool usePersistedLocation = _storage.read<bool>(_kUsePersistedLocation) ?? false;
     
     if (usePersistedLocation) {
-      final lat = _storage.read<double>(_kLastLatitude);
-      final lng = _storage.read<double>(_kLastLongitude);
-      final name = _storage.read<String>(_kLastLocationName);
-      final dateStr = _storage.read<String>(_kLastDate);
+      final double? lat = _storage.read<double>(_kLastLatitude);
+      final double? lng = _storage.read<double>(_kLastLongitude);
+      final String? name = _storage.read<String>(_kLastLocationName);
+      final String? dateStr = _storage.read<String>(_kLastDate);
       
       if (lat != null && lng != null) {
-        final restoredDate = dateStr != null 
+        final DateTime restoredDate = dateStr != null 
             ? DateTime.tryParse(dateStr) ?? now 
             : now;
         
@@ -50,31 +55,30 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
     }
     
     // Fall back to device location
-    final locationService = ref.read(locationServiceProvider);
-    final result = await locationService.getCurrentLocation();
+    final ILocationService locationService = ref.read(locationServiceProvider);
+    final Either<Failure, GeoLocation> result = await locationService.getCurrentLocation();
 
     return result.fold(
-      (failure) => AstrContext(
+      (Failure failure) => AstrContext(
         selectedDate: now,
-        location: const GeoLocation(latitude: 0, longitude: 0, name: "Default"),
+        location: const GeoLocation(latitude: 0, longitude: 0, name: 'Default'),
         isCurrentLocation: false,
       ),
-      (location) async {
+      (GeoLocation location) async {
         // Fetch place name if missing
         String? placeName = location.placeName;
         if (placeName == null) {
-          final geocodingRepo = ref.read(geocodingRepositoryProvider);
-          final nameResult = await geocodingRepo.getPlaceName(
+          final IGeocodingRepository geocodingRepo = ref.read(geocodingRepositoryProvider);
+          final Either<Failure, String> nameResult = await geocodingRepo.getPlaceName(
             location.latitude,
             location.longitude,
           );
-          placeName = nameResult.fold((l) => null, (r) => r);
+          placeName = nameResult.fold((Failure l) => null, (String r) => r);
         }
 
         return AstrContext(
           selectedDate: now,
           location: location.copyWith(placeName: placeName),
-          isCurrentLocation: true,
         );
       },
     );
@@ -84,11 +88,11 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
     // AC#5: Clear persisted location when explicitly refreshing
     await _storage.write(_kUsePersistedLocation, false);
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _loadInitialContext());
+    state = await AsyncValue.guard(_loadInitialContext);
   }
 
   void updateDate(DateTime date) {
-    final currentValue = state.value;
+    final AstrContext? currentValue = state.value;
     if (currentValue != null) {
       state = AsyncValue.data(currentValue.copyWith(selectedDate: date));
       // AC#5: Persist selected date
@@ -98,7 +102,7 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
   }
 
   Future<void> updateLocation(GeoLocation location) async {
-    final currentValue = state.value;
+    final AstrContext? currentValue = state.value;
     if (currentValue != null) {
       // Optimistic update
       state = AsyncValue.data(currentValue.copyWith(
@@ -114,16 +118,16 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
 
       // Fetch place name if missing
       if (location.placeName == null) {
-        final geocodingRepo = ref.read(geocodingRepositoryProvider);
-        final result = await geocodingRepo.getPlaceName(
+        final IGeocodingRepository geocodingRepo = ref.read(geocodingRepositoryProvider);
+        final Either<Failure, String> result = await geocodingRepo.getPlaceName(
           location.latitude,
           location.longitude,
         );
         
         result.fold(
-          (l) => null, // Ignore error
-          (name) {
-             final updatedLocation = location.copyWith(placeName: name);
+          (Failure l) => null, // Ignore error
+          (String name) {
+             final GeoLocation updatedLocation = location.copyWith(placeName: name);
              // Update state again with place name
              state = AsyncValue.data(currentValue.copyWith(
                location: updatedLocation,
@@ -138,7 +142,7 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
   }
 }
 
-final astrContextProvider =
+final AsyncNotifierProviderImpl<AstrContextNotifier, AstrContext> astrContextProvider =
     AsyncNotifierProvider<AstrContextNotifier, AstrContext>(() {
   return AstrContextNotifier();
 });

@@ -1,8 +1,8 @@
+import 'package:astr/core/widgets/glass_panel.dart';
 import 'package:astr/features/astronomy/domain/entities/astronomy_state.dart';
 import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
 import 'package:astr/features/astronomy/domain/entities/celestial_position.dart';
 import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
 import 'package:astr/features/dashboard/presentation/widgets/highlights_feed.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,44 +18,44 @@ class MockAstronomyNotifier extends AsyncNotifier<AstronomyState>
 }
 
 void main() {
-  testWidgets('HighlightsFeed displays items when data is available', (tester) async {
-    final now = DateTime.now();
-    final positions = [
+  testWidgets('HighlightsFeed displays items when data is available', (WidgetTester tester) async {
+    final DateTime now = DateTime.now();
+    final List<CelestialPosition> positions = <CelestialPosition>[
       CelestialPosition(
         body: CelestialBody.jupiter,
         time: now,
-        altitude: 45.0,
-        azimuth: 180.0,
-        distance: 5.0,
-        magnitude: -2.0,
+        altitude: 45,
+        azimuth: 180,
+        distance: 5,
+        magnitude: -2,
       ),
       CelestialPosition(
         body: CelestialBody.venus,
         time: now,
-        altitude: 30.0,
-        azimuth: 90.0,
+        altitude: 30,
+        azimuth: 90,
         distance: 0.7,
-        magnitude: -4.0,
+        magnitude: -4,
       ),
       CelestialPosition(
         body: CelestialBody.mars,
         time: now,
-        altitude: 60.0,
-        azimuth: 270.0,
+        altitude: 60,
+        azimuth: 270,
         distance: 1.5,
-        magnitude: 0.0,
+        magnitude: 0,
       ),
     ];
 
-    final state = AstronomyState(
+    final AstronomyState state = AstronomyState(
       moonIllumination: 0.5,
       positions: positions,
     );
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          astronomyProvider.overrideWith(() => MockAstronomyNotifier()),
+        overrides: <Override>[
+          astronomyProvider.overrideWith(MockAstronomyNotifier.new),
         ],
         child: const MaterialApp(
           home: Scaffold(
@@ -70,28 +70,27 @@ void main() {
     expect(find.byType(GlassPanel), findsNothing);
 
     // Update state
-    final container = ProviderScope.containerOf(tester.element(find.byType(HighlightsFeed)));
+    final ProviderContainer container = ProviderScope.containerOf(tester.element(find.byType(HighlightsFeed)));
     container.read(astronomyProvider.notifier).state = AsyncValue.data(state);
     
     await tester.pump();
 
-    expect(find.text('TONIGHT\'S HIGHLIGHTS'), findsOneWidget);
+    expect(find.text("TONIGHT'S HIGHLIGHTS"), findsOneWidget);
     expect(find.byType(GlassPanel), findsNWidgets(3));
     expect(find.text('Venus'), findsOneWidget); // Brightest first
     expect(find.text('Jupiter'), findsOneWidget);
     expect(find.text('Mars'), findsOneWidget);
   });
 
-  testWidgets('HighlightsFeed hides when no highlights available', (tester) async {
-    final state = AstronomyState(
+  testWidgets('HighlightsFeed hides when no highlights available', (WidgetTester tester) async {
+    const AstronomyState state = AstronomyState(
       moonIllumination: 0.5,
-      positions: [], // No positions
     );
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          astronomyProvider.overrideWith(() => MockAstronomyNotifier()),
+        overrides: <Override>[
+          astronomyProvider.overrideWith(MockAstronomyNotifier.new),
         ],
         child: const MaterialApp(
           home: Scaffold(
@@ -101,12 +100,12 @@ void main() {
       ),
     );
 
-    final container = ProviderScope.containerOf(tester.element(find.byType(HighlightsFeed)));
-    container.read(astronomyProvider.notifier).state = AsyncValue.data(state);
+    final ProviderContainer container = ProviderScope.containerOf(tester.element(find.byType(HighlightsFeed)));
+    container.read(astronomyProvider.notifier).state = const AsyncValue.data(state);
     
     await tester.pump();
 
-    expect(find.text('TONIGHT\'S HIGHLIGHTS'), findsNothing);
+    expect(find.text("TONIGHT'S HIGHLIGHTS"), findsNothing);
     expect(find.byType(GlassPanel), findsNothing);
   });
 }

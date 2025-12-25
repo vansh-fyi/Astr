@@ -5,9 +5,9 @@ import 'package:sweph/sweph.dart';
 
 Future<void> initializeSwephPlatform() async {
   // Native Initialization
-  final docsDir = await getApplicationDocumentsDirectory();
-  final ephePath = '${docsDir.path}/ephe_files';
-  final epheDir = Directory(ephePath);
+  final Directory docsDir = await getApplicationDocumentsDirectory();
+  final String ephePath = '${docsDir.path}/ephe_files';
+  final Directory epheDir = Directory(ephePath);
 
   if (!await epheDir.exists()) {
     await epheDir.create(recursive: true);

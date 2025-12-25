@@ -4,12 +4,12 @@ import 'package:lottie/lottie.dart';
 /// Splash screen with Lottie animation
 /// AC#9: Loops animation exactly 3 times before transitioning
 class SplashScreen extends StatefulWidget {
-  final VoidCallback onInitializationComplete;
 
   const SplashScreen({
     super.key,
     required this.onInitializationComplete,
   });
+  final VoidCallback onInitializationComplete;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: Lottie.asset(
           'assets/lottie/logo.json',
           controller: _controller,
-          onLoaded: (composition) {
+          onLoaded: (LottieComposition composition) {
             _controller
               ..duration = composition.duration
               ..forward(); // Start first loop

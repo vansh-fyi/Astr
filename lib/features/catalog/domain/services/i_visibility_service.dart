@@ -1,8 +1,9 @@
-import 'package:astr/core/error/failure.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
-import 'package:astr/features/catalog/domain/entities/visibility_graph_data.dart';
-import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/error/failure.dart';
+import '../../../context/domain/entities/geo_location.dart';
+import '../entities/celestial_object.dart';
+import '../entities/visibility_graph_data.dart';
 
 /// Service interface for calculating visibility graph data for celestial objects
 abstract class IVisibilityService {

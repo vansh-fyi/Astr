@@ -5,18 +5,18 @@ part 'settings_provider.g.dart';
 
 @riverpod
 class SettingsNotifier extends _$SettingsNotifier {
-  static const _boxName = 'settings';
-  static const _keyRedMode = 'red_mode';
+  static const String _boxName = 'settings';
+  static const String _keyRedMode = 'red_mode';
 
   @override
   bool build() {
-    final box = Hive.box(_boxName);
+    final Box box = Hive.box(_boxName);
     return box.get(_keyRedMode, defaultValue: false) as bool;
   }
 
   void toggleRedMode() {
-    final box = Hive.box(_boxName);
-    final newValue = !state;
+    final Box box = Hive.box(_boxName);
+    final bool newValue = !state;
     box.put(_keyRedMode, newValue);
     state = newValue;
   }

@@ -1,26 +1,28 @@
 import 'dart:async';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/catalog/domain/entities/visibility_graph_data.dart';
-import 'package:astr/features/catalog/presentation/providers/visibility_graph_notifier.dart';
-import 'package:astr/features/catalog/presentation/widgets/visibility_graph_painter.dart';
-import 'package:astr/features/dashboard/domain/entities/hourly_forecast.dart';
-import 'package:astr/features/dashboard/presentation/providers/weather_provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:astr/features/dashboard/presentation/widgets/graph_legend_item.dart';
-import 'package:astr/features/dashboard/presentation/theme/graph_theme.dart';
+
+import '../../../dashboard/domain/entities/hourly_forecast.dart';
+import '../../../dashboard/presentation/providers/weather_provider.dart';
+import '../../../dashboard/presentation/theme/graph_theme.dart';
+import '../../../dashboard/presentation/widgets/graph_legend_item.dart';
+import '../../domain/entities/graph_point.dart';
+import '../../domain/entities/visibility_graph_data.dart';
+import '../providers/visibility_graph_notifier.dart';
+import 'visibility_graph_painter.dart';
 
 /// Widget that displays the visibility graph using CustomPaint
 class VisibilityGraphWidget extends ConsumerStatefulWidget {
-  final String objectId;
-  final Color? highlightColor;
 
   const VisibilityGraphWidget({
     super.key,
     required this.objectId,
     this.highlightColor,
   });
+  final String objectId;
+  final Color? highlightColor;
 
   @override
   ConsumerState<VisibilityGraphWidget> createState() =>
@@ -29,7 +31,7 @@ class VisibilityGraphWidget extends ConsumerStatefulWidget {
 
 class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
   // Scrubber position (0.0 to 1.0)
-  double _scrubberPosition = -1.0;
+  double _scrubberPosition = -1;
   DateTime? _scrubbedTime;
   double? _scrubbedAltitude;
 
@@ -58,18 +60,18 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
 
   void _updateScrubber(double dx, double width, VisibilityGraphData data) {
     if (width <= 0) return;
-    final position = (dx / width).clamp(0.0, 1.0);
+    final double position = (dx / width).clamp(0.0, 1.0);
     
-    final totalDuration = data.objectCurve.last.time.difference(data.objectCurve.first.time).inMinutes;
-    final minutesFromStart = (position * totalDuration).round();
-    final time = data.objectCurve.first.time.add(Duration(minutes: minutesFromStart));
+    final int totalDuration = data.objectCurve.last.time.difference(data.objectCurve.first.time).inMinutes;
+    final int minutesFromStart = (position * totalDuration).round();
+    final DateTime time = data.objectCurve.first.time.add(Duration(minutes: minutesFromStart));
 
     // Find closest altitude point
     double? altitude;
     try {
-      final point = data.objectCurve.reduce((a, b) {
-        final diffA = a.time.difference(time).abs();
-        final diffB = b.time.difference(time).abs();
+      final GraphPoint point = data.objectCurve.reduce((GraphPoint a, GraphPoint b) {
+        final Duration diffA = a.time.difference(time).abs();
+        final Duration diffB = b.time.difference(time).abs();
         return diffA < diffB ? a : b;
       });
       altitude = point.value;
@@ -86,24 +88,24 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(visibilityGraphProvider(widget.objectId));
+    final VisibilityGraphState state = ref.watch(visibilityGraphProvider(widget.objectId));
     
     // Fetch Cloud Cover Data
-    final hourlyForecastAsync = ref.watch(hourlyForecastProvider);
-    final cloudCoverData = hourlyForecastAsync.valueOrNull;
+    final AsyncValue<List<HourlyForecast>> hourlyForecastAsync = ref.watch(hourlyForecastProvider);
+    final List<HourlyForecast>? cloudCoverData = hourlyForecastAsync.valueOrNull;
 
-    final highlightColor = widget.highlightColor ?? const Color(0xFF3B82F6);
+    final Color highlightColor = widget.highlightColor ?? const Color(0xFF3B82F6);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         // Header & Legend
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
+            children: <Widget>[
+              Text(
                 'Visibility',
                 style: TextStyle(
                   color: Colors.white,
@@ -112,11 +114,11 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
                 ),
               ),
               Row(
-                children: [
+                children: <Widget>[
                   GraphLegendItem(label: 'OBJECT', color: GraphTheme.objectCurveColor),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   GraphLegendItem(label: 'MOON', color: GraphTheme.moonColor),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   GraphLegendItem(label: 'CLOUD', color: GraphTheme.cloudCoverColor),
                 ],
               ),
@@ -149,11 +151,11 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
   }
 
   Widget _buildGraph(VisibilityGraphData data, Color highlightColor, List<HourlyForecast>? cloudCoverData) {
-    final startTime = data.objectCurve.first.time;
-    final endTime = data.objectCurve.last.time;
+    final DateTime startTime = data.objectCurve.first.time;
+    final DateTime endTime = data.objectCurve.last.time;
 
     return Column(
-      children: [
+      children: <Widget>[
         // Graph Area
         Container(
           height: 200,
@@ -166,7 +168,7 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: Stack(
-              children: [
+              children: <Widget>[
                 // Gradient Background
                 Positioned.fill(
                   child: Container(
@@ -174,7 +176,7 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
+                        colors: <Color>[
                           highlightColor.withValues(alpha: 0.1),
                           Colors.transparent,
                         ],
@@ -185,11 +187,11 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
                 
                 // Interactive Graph
                 LayoutBuilder(
-                  builder: (context, constraints) {
+                  builder: (BuildContext context, BoxConstraints constraints) {
                     return GestureDetector(
-                      onHorizontalDragStart: (details) =>
+                      onHorizontalDragStart: (DragStartDetails details) =>
                           _updateScrubber(details.localPosition.dx, constraints.maxWidth, data),
-                      onHorizontalDragUpdate: (details) =>
+                      onHorizontalDragUpdate: (DragUpdateDetails details) =>
                           _updateScrubber(details.localPosition.dx, constraints.maxWidth, data),
                       onHorizontalDragEnd: (_) {
                         setState(() {
@@ -198,7 +200,7 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
                           _scrubbedAltitude = null;
                         });
                       },
-                      onTapDown: (details) =>
+                      onTapDown: (TapDownDetails details) =>
                           _updateScrubber(details.localPosition.dx, constraints.maxWidth, data),
                       onTapUp: (_) {
                         setState(() {
@@ -208,7 +210,7 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
                         });
                       },
                       child: Stack(
-                        children: [
+                        children: <Widget>[
                           CustomPaint(
                             size: Size(constraints.maxWidth, 200),
                             painter: VisibilityGraphPainter(
@@ -236,7 +238,7 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                                  children: <Widget>[
                                     Text(
                                       DateFormat.jm().format(_scrubbedTime!),
                                       style: const TextStyle(
@@ -276,11 +278,11 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
   
   List<Widget> _buildTimeLabels(DateTime start, DateTime end) {
     // Generate 5 labels evenly spaced
-    final duration = end.difference(start);
-    final interval = duration.inMinutes ~/ 4;
+    final Duration duration = end.difference(start);
+    final int interval = duration.inMinutes ~/ 4;
     
-    return List.generate(5, (index) {
-      final time = start.add(Duration(minutes: interval * index));
+    return List.generate(5, (int index) {
+      final DateTime time = start.add(Duration(minutes: interval * index));
       return Text(
         DateFormat.j().format(time), // e.g., 6 PM
         style: TextStyle(

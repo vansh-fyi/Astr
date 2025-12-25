@@ -1,9 +1,11 @@
 import 'dart:math';
+
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
+
+import '../../../../core/utils/bortle_mpsas_converter.dart';
 import '../../../../features/context/domain/entities/geo_location.dart';
 import '../../domain/entities/light_pollution.dart';
-import '../../../../core/utils/bortle_mpsas_converter.dart';
 
 class PngMapService {
   img.Image? _mapImage;
@@ -24,14 +26,14 @@ class PngMapService {
     if (_mapImage == null) await loadMap();
     if (_mapImage == null) return null;
 
-    final lat = location.latitude;
-    final lng = location.longitude;
+    final double lat = location.latitude;
+    final double lng = location.longitude;
 
     // Equirectangular Projection
     // Map dimensions: 4000x2000 (assumed for world2024_low3.png, need to verify)
     // Actually, let's check the image size dynamically.
-    final width = _mapImage!.width;
-    final height = _mapImage!.height;
+    final int width = _mapImage!.width;
+    final int height = _mapImage!.height;
 
     // x = (lng + 180) * (width / 360)
     // y = (90 - lat) * (height / 180)
@@ -43,26 +45,26 @@ class PngMapService {
     x = x.clamp(0, width - 1);
     y = y.clamp(0, height - 1);
 
-    final pixel = _mapImage!.getPixel(x, y);
+    final img.Pixel pixel = _mapImage!.getPixel(x, y);
 
     // Map Color to Bortle using Light Pollution Atlas color scheme
     // Color progression: Dark Blue → Light Blue → Green → Yellow → Orange → Red → White
     // Based on David Lorenz's Light Pollution Atlas
-    final r = pixel.r.toInt();
-    final g = pixel.g.toInt();
-    final b = pixel.b.toInt();
+    final int r = pixel.r.toInt();
+    final int g = pixel.g.toInt();
+    final int b = pixel.b.toInt();
 
-    final bortleClass = _colorToBortleClass(r, g, b);
+    final int bortleClass = _colorToBortleClass(r, g, b);
     
     // Debug logging for troubleshooting
     print('PngMapService: lat=$lat, lng=$lng, pixel=($x,$y), RGB=($r,$g,$b) → Bortle $bortleClass');
 
     // Convert Bortle to MPSAS using standard astronomical conversion
-    final mpsas = BortleMpsasConverter.bortleToMpsas(bortleClass);
+    final double mpsas = BortleMpsasConverter.bortleToMpsas(bortleClass);
 
     return LightPollution(
       visibilityIndex: bortleClass,
-      brightnessRatio: 0.0, // Unknown in fallback
+      brightnessRatio: 0, // Unknown in fallback
       mpsas: mpsas,
       source: LightPollutionSource.fallback,
       zone: bortleClass.toString(),
@@ -98,31 +100,31 @@ class PngMapService {
     if (r == 251 && g == 153 && b == 138) return 9; // Light pink
 
     // Fallback: use nearest color matching
-    final zoneColors = [
-      _ZoneColor(rgb: [0, 0, 0], bortle: 1),
-      _ZoneColor(rgb: [34, 34, 34], bortle: 1),
-      _ZoneColor(rgb: [66, 66, 66], bortle: 2),
-      _ZoneColor(rgb: [20, 47, 114], bortle: 1),
-      _ZoneColor(rgb: [33, 84, 216], bortle: 1),
-      _ZoneColor(rgb: [15, 87, 20], bortle: 2),
-      _ZoneColor(rgb: [31, 161, 42], bortle: 3),
-      _ZoneColor(rgb: [110, 100, 30], bortle: 5),
-      _ZoneColor(rgb: [184, 166, 37], bortle: 7),
-      _ZoneColor(rgb: [191, 100, 30], bortle: 7),
-      _ZoneColor(rgb: [253, 150, 80], bortle: 8),
-      _ZoneColor(rgb: [251, 90, 73], bortle: 8),
-      _ZoneColor(rgb: [251, 153, 138], bortle: 9),
+    final List<_ZoneColor> zoneColors = <_ZoneColor>[
+      const _ZoneColor(rgb: <int>[0, 0, 0], bortle: 1),
+      const _ZoneColor(rgb: <int>[34, 34, 34], bortle: 1),
+      const _ZoneColor(rgb: <int>[66, 66, 66], bortle: 2),
+      const _ZoneColor(rgb: <int>[20, 47, 114], bortle: 1),
+      const _ZoneColor(rgb: <int>[33, 84, 216], bortle: 1),
+      const _ZoneColor(rgb: <int>[15, 87, 20], bortle: 2),
+      const _ZoneColor(rgb: <int>[31, 161, 42], bortle: 3),
+      const _ZoneColor(rgb: <int>[110, 100, 30], bortle: 5),
+      const _ZoneColor(rgb: <int>[184, 166, 37], bortle: 7),
+      const _ZoneColor(rgb: <int>[191, 100, 30], bortle: 7),
+      const _ZoneColor(rgb: <int>[253, 150, 80], bortle: 8),
+      const _ZoneColor(rgb: <int>[251, 90, 73], bortle: 8),
+      const _ZoneColor(rgb: <int>[251, 153, 138], bortle: 9),
     ];
 
     // Find nearest color using Euclidean distance in RGB space
     double minDist = double.infinity;
     int bestBortle = 5; // Default to mid-range
 
-    for (final zone in zoneColors) {
-      final dr = r - zone.rgb[0];
-      final dg = g - zone.rgb[1];
-      final db = b - zone.rgb[2];
-      final dist = sqrt(dr * dr + dg * dg + db * db);
+    for (final _ZoneColor zone in zoneColors) {
+      final int dr = r - zone.rgb[0];
+      final int dg = g - zone.rgb[1];
+      final int db = b - zone.rgb[2];
+      final double dist = sqrt(dr * dr + dg * dg + db * db);
 
       if (dist < minDist) {
         minDist = dist;
@@ -136,8 +138,8 @@ class PngMapService {
 
 /// Helper class for color-to-Bortle mapping
 class _ZoneColor {
-  final List<int> rgb;
-  final int bortle;
 
   const _ZoneColor({required this.rgb, required this.bortle});
+  final List<int> rgb;
+  final int bortle;
 }

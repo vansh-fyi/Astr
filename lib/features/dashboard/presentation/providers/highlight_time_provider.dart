@@ -1,26 +1,28 @@
-import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
-import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sweph/sweph.dart';
 
-final highlightTimeProvider = FutureProvider.family<DateTime?, CelestialBody>((ref, body) async {
-  final astronomyService = ref.watch(astronomyServiceProvider);
-  final contextState = ref.watch(astrContextProvider);
+import '../../../astronomy/domain/entities/celestial_body.dart';
+import '../../../astronomy/domain/services/astronomy_service.dart';
+import '../../../context/domain/entities/astr_context.dart';
+import '../../../context/presentation/providers/astr_context_provider.dart';
+
+final FutureProviderFamily<DateTime?, CelestialBody> highlightTimeProvider = FutureProvider.family<DateTime?, CelestialBody>((FutureProviderRef<DateTime?> ref, CelestialBody body) async {
+  final AstronomyService astronomyService = ref.watch(astronomyServiceProvider);
+  final AsyncValue<AstrContext> contextState = ref.watch(astrContextProvider);
   
   if (!contextState.hasValue) {
     return null;
   }
   
-  final astrContext = contextState.value!;
-  final heavenlyBody = _mapToHeavenlyBody(body);
+  final AstrContext astrContext = contextState.value!;
+  final HeavenlyBody heavenlyBody = _mapToHeavenlyBody(body);
   
   try {
-    final times = await astronomyService.calculateRiseSetTransit(
+    final Map<String, DateTime?> times = await astronomyService.calculateRiseSetTransit(
       body: heavenlyBody,
       date: astrContext.selectedDate,
-      lat: astrContext.location!.latitude,
-      long: astrContext.location!.longitude,
+      lat: astrContext.location.latitude,
+      long: astrContext.location.longitude,
     );
     return times['transit'];
   } catch (e) {

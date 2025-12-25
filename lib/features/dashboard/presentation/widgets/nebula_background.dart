@@ -6,7 +6,7 @@ class NebulaBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: [
+      children: <Widget>[
         // Base Color
         Container(
           color: const Color(0xFF020204),
@@ -21,7 +21,7 @@ class NebulaBackground extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
-                colors: [
+                colors: <Color>[
                   Colors.indigo.withValues(alpha: 0.4),
                   Colors.transparent,
                 ],
@@ -40,7 +40,7 @@ class NebulaBackground extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
-                colors: [
+                colors: <Color>[
                   Colors.purple.withValues(alpha: 0.4),
                   Colors.transparent,
                 ],

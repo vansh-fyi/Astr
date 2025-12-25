@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class RedModeOverlay extends StatelessWidget {
-  final Widget child;
-  final bool enabled;
 
   const RedModeOverlay({
     super.key,
     required this.child,
     required this.enabled,
   });
+  final Widget child;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {

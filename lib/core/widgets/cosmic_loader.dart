@@ -5,14 +5,14 @@ import 'package:lottie/lottie.dart';
 /// AC#10: Custom Loading Indicator with Lottie animation and cycling text
 /// Replaces standard CircularProgressIndicator with "cosmic" theme
 class CosmicLoader extends StatefulWidget {
-  final double size;
-  final bool showText;
 
   const CosmicLoader({
     super.key,
     this.size = 60,
     this.showText = true,
   });
+  final double size;
+  final bool showText;
 
   @override
   State<CosmicLoader> createState() => _CosmicLoaderState();
@@ -22,7 +22,7 @@ class _CosmicLoaderState extends State<CosmicLoader> {
   int _textIndex = 0;
   Timer? _timer;
 
-  static const List<String> _loadingTexts = [
+  static const List<String> _loadingTexts = <String>[
     'Connecting to NASA',
     'Calculating Light Pollution',
     'Looking out for clouds',
@@ -38,7 +38,7 @@ class _CosmicLoaderState extends State<CosmicLoader> {
   }
 
   void _startTextCycle() {
-    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 2), (Timer timer) {
       if (mounted) {
         setState(() {
           _textIndex = (_textIndex + 1) % _loadingTexts.length;
@@ -57,7 +57,7 @@ class _CosmicLoaderState extends State<CosmicLoader> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: [
+      children: <Widget>[
         SizedBox(
           width: widget.size,
           height: widget.size,
@@ -66,7 +66,7 @@ class _CosmicLoaderState extends State<CosmicLoader> {
             fit: BoxFit.contain,
           ),
         ),
-        if (widget.showText) ...[
+        if (widget.showText) ...<Widget>[
           const SizedBox(height: 16),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),

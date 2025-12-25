@@ -1,5 +1,5 @@
-import 'package:astr/core/engine/models/celestial_object.dart';
-import 'package:astr/core/engine/models/coordinates.dart';
+import 'celestial_object.dart';
+import 'coordinates.dart';
 
 /// Type of Deep Sky Object
 enum DSOType {
@@ -14,9 +14,9 @@ enum DSOType {
   /// Parse from string (case-insensitive)
   static DSOType fromString(String? value) {
     if (value == null || value.isEmpty) return unknown;
-    final normalized = value.toLowerCase();
+    final String normalized = value.toLowerCase();
 
-    for (final type in DSOType.values) {
+    for (final DSOType type in DSOType.values) {
       if (type.displayName.toLowerCase() == normalized) {
         return type;
       }
@@ -27,14 +27,6 @@ enum DSOType {
 
 /// Represents a Deep Sky Object (Messier, NGC, IC catalogs)
 class DSO extends CelestialObject {
-  /// Messier ID (e.g., "M31")
-  final String? messierId;
-
-  /// NGC/IC ID (e.g., "NGC224")
-  final String? ngcId;
-
-  /// Type of DSO
-  final DSOType dsoType;
 
   const DSO({
     required super.id,
@@ -63,10 +55,18 @@ class DSO extends CelestialObject {
       constellation: map['constellation'] as String?,
     );
   }
+  /// Messier ID (e.g., "M31")
+  final String? messierId;
+
+  /// NGC/IC ID (e.g., "NGC224")
+  final String? ngcId;
+
+  /// Type of DSO
+  final DSOType dsoType;
 
   /// Converts DSO to a map for SQLite insertion
   Map<String, dynamic> toMap() {
-    return {
+    return <String, dynamic>{
       'id': int.parse(id),
       'messier_id': messierId,
       'ngc_id': ngcId,

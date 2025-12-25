@@ -1,4 +1,4 @@
-import 'package:astr/core/error/failure.dart';
+import 'failure.dart';
 
 /// Weather-specific failure type
 class WeatherFailure extends Failure {

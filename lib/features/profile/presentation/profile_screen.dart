@@ -1,12 +1,12 @@
-import 'package:astr/constants/external_urls.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/dashboard/presentation/widgets/nebula_background.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../constants/external_urls.dart';
+import '../../../core/widgets/glass_panel.dart';
+import '../../dashboard/presentation/widgets/nebula_background.dart';
 import 'providers/settings_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -19,13 +19,13 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF020204),
       body: Stack(
-        children: [
+        children: <Widget>[
           const NebulaBackground(),
           SafeArea(
             bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 const Padding(
                   padding: EdgeInsets.all(20),
                   child: Text(
@@ -43,8 +43,8 @@ class ProfileScreen extends ConsumerWidget {
                       return const LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.white],
-                        stops: [0.0, 0.05], // Soft fade at the top
+                        colors: <Color>[Colors.transparent, Colors.white],
+                        stops: <double>[0, 0.05], // Soft fade at the top
                       ).createShader(bounds);
                     },
                     blendMode: BlendMode.dstIn,
@@ -55,13 +55,13 @@ class ProfileScreen extends ConsumerWidget {
                         top: 20,
                         bottom: 70 + MediaQuery.of(context).padding.bottom + 20,
                       ),
-                      children: [
+                      children: <Widget>[
                         // Red Mode Card
                         GlassPanel(
                           enableBlur: false,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           child: Row(
-                            children: [
+                            children: <Widget>[
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
@@ -74,7 +74,7 @@ class ProfileScreen extends ConsumerWidget {
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                                  children: <Widget>[
                                     const Text(
                                       'Red Mode',
                                       style: TextStyle(
@@ -99,7 +99,7 @@ class ProfileScreen extends ConsumerWidget {
                                 onChanged: (bool value) {
                                   ref.read(settingsNotifierProvider.notifier).toggleRedMode();
                                 },
-                                activeColor: Colors.redAccent,
+                                activeThumbColor: Colors.redAccent,
                                 activeTrackColor: Colors.redAccent.withOpacity(0.3),
                               ),
                             ],
@@ -114,7 +114,7 @@ class ProfileScreen extends ConsumerWidget {
                           onTap: () => context.push('/settings/locations'),
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                           child: Row(
-                            children: [
+                            children: <Widget>[
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
@@ -156,7 +156,7 @@ class ProfileScreen extends ConsumerWidget {
                           },
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           child: Row(
-                            children: [
+                            children: <Widget>[
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
@@ -169,7 +169,7 @@ class ProfileScreen extends ConsumerWidget {
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                                  children: <Widget>[
                                     const Text(
                                       'Support Astr',
                                       style: TextStyle(

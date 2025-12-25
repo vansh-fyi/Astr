@@ -1,12 +1,12 @@
-import 'package:astr/core/engine/interfaces/i_astro_engine.dart';
-import 'package:astr/core/engine/models/celestial_object.dart';
-import 'package:astr/core/engine/models/coordinates.dart';
-import 'package:astr/core/engine/models/location.dart';
-import 'package:astr/core/engine/models/result.dart';
-import 'package:astr/core/engine/models/rise_set_times.dart';
-import 'package:astr/core/error/failure.dart';
-import 'package:astr/core/engine/isolates/engine_isolate_manager.dart';
-import 'package:astr/core/engine/isolates/calculation_commands.dart';
+import '../error/failure.dart';
+import 'interfaces/i_astro_engine.dart';
+import 'isolates/calculation_commands.dart';
+import 'isolates/engine_isolate_manager.dart';
+import 'models/celestial_object.dart';
+import 'models/coordinates.dart';
+import 'models/location.dart';
+import 'models/result.dart';
+import 'models/rise_set_times.dart';
 
 /// Implementation of the astronomical calculation engine
 ///
@@ -14,11 +14,11 @@ import 'package:astr/core/engine/isolates/calculation_commands.dart';
 /// Meeus algorithms and automatically offloads heavy computations (>16ms)
 /// to Isolates for optimal UI performance.
 class AstroEngine implements IAstroEngine {
-  final EngineIsolateManager _isolateManager;
-  bool _isDisposed = false;
 
   AstroEngine({EngineIsolateManager? isolateManager})
       : _isolateManager = isolateManager ?? EngineIsolateManager();
+  final EngineIsolateManager _isolateManager;
+  bool _isDisposed = false;
 
   @override
   Future<Result<HorizontalCoordinates>> calculatePosition(
@@ -34,7 +34,7 @@ class AstroEngine implements IAstroEngine {
 
     try {
       // Create command with serializable data
-      final command = CalculatePositionCommand(
+      final CalculatePositionCommand command = CalculatePositionCommand(
         rightAscension: object.coordinates.rightAscension,
         declination: object.coordinates.declination,
         latitude: location.latitude,
@@ -48,7 +48,7 @@ class AstroEngine implements IAstroEngine {
       );
 
       // EngineIsolateManager automatically offloads to isolate if >16ms (AC #3)
-      final coordinates = await _isolateManager.calculatePosition(command);
+      final HorizontalCoordinates coordinates = await _isolateManager.calculatePosition(command);
 
       return Result.success(coordinates);
     } catch (e, stackTrace) {
@@ -72,7 +72,7 @@ class AstroEngine implements IAstroEngine {
 
     try {
       // Create command with serializable data
-      final command = CalculateRiseSetCommand(
+      final CalculateRiseSetCommand command = CalculateRiseSetCommand(
         rightAscension: object.coordinates.rightAscension,
         declination: object.coordinates.declination,
         latitude: location.latitude,
@@ -83,7 +83,7 @@ class AstroEngine implements IAstroEngine {
       );
 
       // EngineIsolateManager automatically offloads to isolate if >16ms (AC #3)
-      final times = await _isolateManager.calculateRiseSet(command);
+      final RiseSetTimes times = await _isolateManager.calculateRiseSet(command);
 
       return Result.success(times);
     } catch (e, stackTrace) {

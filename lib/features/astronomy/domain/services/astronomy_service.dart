@@ -1,14 +1,14 @@
-import 'package:astr/features/catalog/domain/entities/graph_point.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sweph/sweph.dart';
 
+import '../../../catalog/domain/entities/graph_point.dart';
 // Conditional imports for platform-specific functionality
 import 'astronomy_service_mobile.dart'
     if (dart.library.html) 'astronomy_service_web.dart';
 
 /// Provider for the AstronomyService
-final astronomyServiceProvider = Provider<AstronomyService>((ref) {
+final Provider<AstronomyService> astronomyServiceProvider = Provider<AstronomyService>((ProviderRef<AstronomyService> ref) {
   return AstronomyService();
 });
 
@@ -47,11 +47,11 @@ class AstronomyService {
 
     // Calculate JD for the start of the day (Local Midnight -> UTC)
     // This ensures we find events for the selected date, not tomorrow.
-    final localMidnight = DateTime(date.year, date.month, date.day);
-    final utcStart = localMidnight.toUtc();
+    final DateTime localMidnight = DateTime(date.year, date.month, date.day);
+    final DateTime utcStart = localMidnight.toUtc();
 
     // Convert UTC DateTime to Julian Day
-    final jd = Sweph.swe_julday(
+    final double jd = Sweph.swe_julday(
       utcStart.year,
       utcStart.month,
       utcStart.day,
@@ -60,19 +60,19 @@ class AstronomyService {
     );
 
     // Flags: Swiss Ephemeris, Topocentric (observer location)
-    final flags = SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_TOPOCTR;
+    final SwephFlag flags = SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_TOPOCTR;
 
     // GeoPosition for the observer
-    final geopos = GeoPosition(long, lat);
+    final GeoPosition geopos = GeoPosition(long, lat);
 
     // Calculate Rise
-    final rise = _calcEvent(body, jd, flags, RiseSetTransitFlag.SE_CALC_RISE, geopos);
+    final double? rise = _calcEvent(body, jd, flags, RiseSetTransitFlag.SE_CALC_RISE, geopos);
     // Calculate Set
-    final set = _calcEvent(body, jd, flags, RiseSetTransitFlag.SE_CALC_SET, geopos);
+    final double? set = _calcEvent(body, jd, flags, RiseSetTransitFlag.SE_CALC_SET, geopos);
     // Calculate Transit (Meridian Crossing)
-    final transit = _calcEvent(body, jd, flags, RiseSetTransitFlag.SE_CALC_MTRANSIT, geopos);
+    final double? transit = _calcEvent(body, jd, flags, RiseSetTransitFlag.SE_CALC_MTRANSIT, geopos);
 
-    return {
+    return <String, DateTime?>{
       'rise': _jdToDateTime(rise),
       'set': _jdToDateTime(set),
       'transit': _jdToDateTime(transit),
@@ -93,19 +93,19 @@ class AstronomyService {
     Duration duration = const Duration(hours: 12),
   }) async {
     await checkInitialized();
-    final points = <GraphPoint>[];
-    final geopos = GeoPosition(long, lat);
+    final List<GraphPoint> points = <GraphPoint>[];
+    final GeoPosition geopos = GeoPosition(long, lat);
 
-    final totalMinutes = duration.inMinutes;
-    final intervals = (totalMinutes / 15).ceil();
+    final int totalMinutes = duration.inMinutes;
+    final int intervals = (totalMinutes / 15).ceil();
 
     for (int i = 0; i <= intervals; i++) {
-      final time = startTime.add(Duration(minutes: i * 15));
+      final DateTime time = startTime.add(Duration(minutes: i * 15));
       if (time.difference(startTime) > duration) break;
 
-      final utcTime = time.toUtc();
+      final DateTime utcTime = time.toUtc();
 
-      final jd = Sweph.swe_julday(
+      final double jd = Sweph.swe_julday(
         utcTime.year,
         utcTime.month,
         utcTime.day,
@@ -114,17 +114,17 @@ class AstronomyService {
       );
 
       // Calculate Equatorial Position
-      final flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
-      final xx = Sweph.swe_calc_ut(jd, body, flags);
+      final SwephFlag flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
+      final CoordinatesWithSpeed xx = Sweph.swe_calc_ut(jd, body, flags);
 
       // Convert to Horizon Coordinates
-      final xin = Coordinates(xx.longitude, xx.latitude, xx.distance);
-      final azAlt = Sweph.swe_azalt(
+      final Coordinates xin = Coordinates(xx.longitude, xx.latitude, xx.distance);
+      final AzimuthAltitudeInfo azAlt = Sweph.swe_azalt(
         jd,
         AzAltMode.SE_EQU2HOR,
         geopos,
-        0.0,
-        10.0,
+        0,
+        10,
         xin,
       );
 
@@ -147,19 +147,19 @@ class AstronomyService {
     Duration duration = const Duration(hours: 12),
   }) async {
     await checkInitialized();
-    final points = <GraphPoint>[];
-    final geopos = GeoPosition(long, lat);
+    final List<GraphPoint> points = <GraphPoint>[];
+    final GeoPosition geopos = GeoPosition(long, lat);
 
-    final totalMinutes = duration.inMinutes;
-    final intervals = (totalMinutes / 15).ceil();
+    final int totalMinutes = duration.inMinutes;
+    final int intervals = (totalMinutes / 15).ceil();
 
     for (int i = 0; i <= intervals; i++) {
-      final time = startTime.add(Duration(minutes: i * 15));
+      final DateTime time = startTime.add(Duration(minutes: i * 15));
       if (time.difference(startTime) > duration) break;
 
-      final utcTime = time.toUtc();
+      final DateTime utcTime = time.toUtc();
 
-      final jd = Sweph.swe_julday(
+      final double jd = Sweph.swe_julday(
         utcTime.year,
         utcTime.month,
         utcTime.day,
@@ -167,14 +167,14 @@ class AstronomyService {
         CalendarType.SE_GREG_CAL,
       );
 
-      final xin = Coordinates(ra, dec, 1.0);
+      final Coordinates xin = Coordinates(ra, dec, 1);
 
-      final azAlt = Sweph.swe_azalt(
+      final AzimuthAltitudeInfo azAlt = Sweph.swe_azalt(
         jd,
         AzAltMode.SE_EQU2HOR,
         geopos,
-        0.0,
-        10.0,
+        0,
+        10,
         xin,
       );
 
@@ -196,19 +196,19 @@ class AstronomyService {
     Duration duration = const Duration(hours: 12),
   }) async {
     await checkInitialized();
-    final points = <GraphPoint>[];
-    final geopos = GeoPosition(long, lat);
+    final List<GraphPoint> points = <GraphPoint>[];
+    final GeoPosition geopos = GeoPosition(long, lat);
 
-    final totalMinutes = duration.inMinutes;
-    final intervals = (totalMinutes / 15).ceil();
+    final int totalMinutes = duration.inMinutes;
+    final int intervals = (totalMinutes / 15).ceil();
 
     for (int i = 0; i <= intervals; i++) {
-      final time = startTime.add(Duration(minutes: i * 15));
+      final DateTime time = startTime.add(Duration(minutes: i * 15));
       if (time.difference(startTime) > duration) break;
 
-      final utcTime = time.toUtc();
+      final DateTime utcTime = time.toUtc();
 
-      final jd = Sweph.swe_julday(
+      final double jd = Sweph.swe_julday(
         utcTime.year,
         utcTime.month,
         utcTime.day,
@@ -217,31 +217,31 @@ class AstronomyService {
       );
 
       // Calculate Moon Position
-      final flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
-      final xx = Sweph.swe_calc_ut(jd, HeavenlyBody.SE_MOON, flags);
+      final SwephFlag flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
+      final CoordinatesWithSpeed xx = Sweph.swe_calc_ut(jd, HeavenlyBody.SE_MOON, flags);
 
       // Calculate Moon Altitude
-      final xin = Coordinates(xx.longitude, xx.latitude, xx.distance);
-      final azAlt = Sweph.swe_azalt(
+      final Coordinates xin = Coordinates(xx.longitude, xx.latitude, xx.distance);
+      final AzimuthAltitudeInfo azAlt = Sweph.swe_azalt(
         jd,
         AzAltMode.SE_EQU2HOR,
         geopos,
-        0.0,
-        10.0,
+        0,
+        10,
         xin,
       );
 
       // Calculate Moon Phase
-      final pheno = Sweph.swe_pheno_ut(jd, HeavenlyBody.SE_MOON, flags);
+      final List<double> pheno = Sweph.swe_pheno_ut(jd, HeavenlyBody.SE_MOON, flags);
 
-      double illumination = 0.0;
+      double illumination = 0;
       if (pheno.length > 1) {
         illumination = pheno[1];
       }
 
       // Calculate Interference
-      double altitude = azAlt.trueAltitude;
-      double interference = 0.0;
+      final double altitude = azAlt.trueAltitude;
+      double interference = 0;
 
       if (altitude > 0) {
         interference = altitude * illumination;
@@ -256,7 +256,7 @@ class AstronomyService {
   /// Helper to calculate a specific event (Rise/Set/Transit)
   double? _calcEvent(HeavenlyBody body, double jd, SwephFlag flags, RiseSetTransitFlag transitFlag, GeoPosition geopos) {
     try {
-      final result = Sweph.swe_rise_trans(
+      final double? result = Sweph.swe_rise_trans(
         jd,
         body,
         flags,
@@ -281,8 +281,8 @@ class AstronomyService {
   /// Calculate Moon Phase (Illumination 0.0-1.0) for a specific time
   Future<double> getMoonPhase(DateTime time) async {
     await checkInitialized();
-    final utcTime = time.toUtc();
-    final jd = Sweph.swe_julday(
+    final DateTime utcTime = time.toUtc();
+    final double jd = Sweph.swe_julday(
       utcTime.year,
       utcTime.month,
       utcTime.day,
@@ -290,8 +290,8 @@ class AstronomyService {
       CalendarType.SE_GREG_CAL,
     );
 
-    final flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
-    final pheno = Sweph.swe_pheno_ut(jd, HeavenlyBody.SE_MOON, flags);
+    final SwephFlag flags = SwephFlag.SEFLG_EQUATORIAL | SwephFlag.SEFLG_SWIEPH | SwephFlag.SEFLG_SPEED;
+    final List<double> pheno = Sweph.swe_pheno_ut(jd, HeavenlyBody.SE_MOON, flags);
 
     if (pheno.length > 1) {
       return pheno[1];
@@ -309,35 +309,35 @@ class AstronomyService {
     await checkInitialized();
 
     // Calculate events for the given date
-    final todayEvents = await calculateRiseSetTransit(
+    final Map<String, DateTime?> todayEvents = await calculateRiseSetTransit(
       body: HeavenlyBody.SE_SUN,
       date: date,
       lat: lat,
       long: long,
     );
 
-    final todaySet = todayEvents['set'];
-    final todayRise = todayEvents['rise'];
+    final DateTime? todaySet = todayEvents['set'];
+    final DateTime? todayRise = todayEvents['rise'];
 
     // Calculate events for tomorrow
-    final tomorrow = date.add(const Duration(days: 1));
-    final tomorrowEvents = await calculateRiseSetTransit(
+    final DateTime tomorrow = date.add(const Duration(days: 1));
+    final Map<String, DateTime?> tomorrowEvents = await calculateRiseSetTransit(
       body: HeavenlyBody.SE_SUN,
       date: tomorrow,
       lat: lat,
       long: long,
     );
-    final tomorrowRise = tomorrowEvents['rise'];
+    final DateTime? tomorrowRise = tomorrowEvents['rise'];
 
     // Calculate events for yesterday
-    final yesterday = date.subtract(const Duration(days: 1));
-    final yesterdayEvents = await calculateRiseSetTransit(
+    final DateTime yesterday = date.subtract(const Duration(days: 1));
+    final Map<String, DateTime?> yesterdayEvents = await calculateRiseSetTransit(
       body: HeavenlyBody.SE_SUN,
       date: yesterday,
       lat: lat,
       long: long,
     );
-    final yesterdaySet = yesterdayEvents['set'];
+    final DateTime? yesterdaySet = yesterdayEvents['set'];
 
     DateTime start;
     DateTime end;
@@ -359,7 +359,7 @@ class AstronomyService {
         end = tomorrowRise ?? date.add(const Duration(hours: 12));
     }
 
-    return {'start': start, 'end': end};
+    return <String, DateTime>{'start': start, 'end': end};
   }
 
   Future<void> checkInitialized() async {

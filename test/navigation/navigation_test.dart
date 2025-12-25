@@ -1,13 +1,12 @@
-import 'dart:async';
 import 'package:astr/app/router/app_router.dart';
 import 'package:astr/core/error/failure.dart';
 import 'package:astr/core/services/i_location_service.dart';
 import 'package:astr/core/services/location_service_provider.dart';
+import 'package:astr/core/widgets/astr_rive_animation.dart';
 import 'package:astr/features/astronomy/domain/entities/astronomy_state.dart';
 import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
 import 'package:astr/features/astronomy/domain/services/astronomy_service.dart';
 import 'package:astr/features/astronomy/presentation/providers/astronomy_provider.dart';
-import 'package:sweph/sweph.dart';
 import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:astr/features/dashboard/domain/entities/bortle_scale.dart';
 import 'package:astr/features/dashboard/domain/entities/light_pollution.dart';
@@ -22,7 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:astr/core/widgets/astr_rive_animation.dart';
+import 'package:go_router/src/router.dart';
+import 'package:sweph/sweph.dart';
 
 class MockLocationService implements ILocationService {
   @override
@@ -39,8 +39,7 @@ class MockWeatherNotifier extends WeatherNotifier {
 class MockAstronomyNotifier extends AstronomyNotifier {
   @override
   Future<AstronomyState> build() async => const AstronomyState(
-    moonPhaseInfo: MoonPhaseInfo(illumination: 0.2, phaseAngle: 0.0),
-    positions: [],
+    moonPhaseInfo: MoonPhaseInfo(illumination: 0.2, phaseAngle: 0),
   );
 }
 
@@ -61,7 +60,7 @@ class MockAstronomyService implements AstronomyService {
     required double long,
     String? starName,
   }) async {
-    return {
+    return <String, DateTime?>{
       'rise': date.add(const Duration(hours: 6)),
       'set': date.add(const Duration(hours: 18)),
       'transit': date.add(const Duration(hours: 12)),
@@ -88,31 +87,31 @@ void main() {
     AstrRiveAnimation.testMode = false;
   });
 
-  testWidgets('Navigation Shell Test', (tester) async {
+  testWidgets('Navigation Shell Test', (WidgetTester tester) async {
     // Build the app with the router
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
+        overrides: <Override>[
           locationServiceProvider.overrideWithValue(MockLocationService()),
-          weatherProvider.overrideWith(() => MockWeatherNotifier()),
-          astronomyProvider.overrideWith(() => MockAstronomyNotifier()),
+          weatherProvider.overrideWith(MockWeatherNotifier.new),
+          astronomyProvider.overrideWith(MockAstronomyNotifier.new),
           astronomyServiceProvider.overrideWithValue(MockAstronomyService()),
-          visibilityProvider.overrideWith((ref) => MockVisibilityNotifier()),
+          visibilityProvider.overrideWith((StateNotifierProviderRef<VisibilityNotifier, VisibilityState> ref) => MockVisibilityNotifier()),
           bortleProvider.overrideWithValue(BortleScale.class4),
-          settingsNotifierProvider.overrideWith(() => MockSettingsNotifier()),
-          forecastListProvider.overrideWith((ref) async => [
+          settingsNotifierProvider.overrideWith(MockSettingsNotifier.new),
+          forecastListProvider.overrideWith((FutureProviderRef<List<DailyForecast>> ref) async => <DailyForecast>[
             DailyForecast(
               date: DateTime.now(),
-              cloudCoverAvg: 10.0,
-              moonIllumination: 0.0,
+              cloudCoverAvg: 10,
+              moonIllumination: 0,
               weatherCode: 0,
               starRating: 5,
             ),
           ]),
         ],
         child: Consumer(
-          builder: (context, ref, child) {
-            final router = ref.watch(goRouterProvider);
+          builder: (BuildContext context, WidgetRef ref, Widget? child) {
+            final GoRouter router = ref.watch(goRouterProvider);
             return MaterialApp.router(
               routerConfig: router,
             );

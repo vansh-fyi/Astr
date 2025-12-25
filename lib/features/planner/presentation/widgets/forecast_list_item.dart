@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/planner/domain/entities/daily_forecast.dart';
+import '../../../../core/widgets/glass_panel.dart';
+import '../../domain/entities/daily_forecast.dart';
 
 class ForecastListItem extends StatelessWidget {
-  final DailyForecast forecast;
 
   const ForecastListItem({
     super.key,
     required this.forecast,
   });
+  final DailyForecast forecast;
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('EEE, MMM d');
-    final dateStr = dateFormat.format(forecast.date);
+    final DateFormat dateFormat = DateFormat('EEE, MMM d');
+    final String dateStr = dateFormat.format(forecast.date);
 
     return GlassPanel(
       enableBlur: false,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
-        children: [
+        children: <Widget>[
           // Date
           Expanded(
             flex: 3,
@@ -48,7 +48,7 @@ class ForecastListItem extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Row(
-              children: [
+              children: <Widget>[
                 const Icon(Ionicons.cloud_outline, size: 16, color: Colors.white54),
                 const SizedBox(width: 4),
                 Text(
@@ -66,7 +66,7 @@ class ForecastListItem extends StatelessWidget {
             flex: 3,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: List.generate(5, (index) {
+              children: List.generate(5, (int index) {
                 return Icon(
                   index < forecast.starRating ? Ionicons.star : Ionicons.star_outline,
                   size: 16,

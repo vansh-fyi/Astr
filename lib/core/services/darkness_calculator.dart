@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:fpdart/fpdart.dart';
 
 /// Service for calculating the Darkness Quality metric (MPSAS).
 ///
@@ -22,7 +21,7 @@ class DarknessCalculator {
     required double moonPhase,
     required double moonAltitude,
   }) {
-    double moonPenalty = 0.0;
+    double moonPenalty = 0;
 
     if (moonAltitude > 0) {
       // Only penalize if moon is above horizon

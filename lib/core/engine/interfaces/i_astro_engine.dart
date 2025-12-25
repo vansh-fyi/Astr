@@ -1,8 +1,9 @@
-import 'package:astr/core/engine/models/celestial_object.dart';
-import 'package:astr/core/engine/models/coordinates.dart';
-import 'package:astr/core/engine/models/location.dart';
-import 'package:astr/core/engine/models/result.dart';
-import 'package:astr/core/engine/models/rise_set_times.dart';
+import '../../error/failure.dart' show CalculationFailure;
+import '../models/celestial_object.dart';
+import '../models/coordinates.dart';
+import '../models/location.dart';
+import '../models/result.dart';
+import '../models/rise_set_times.dart';
 
 /// Interface for astronomical calculation engine
 ///

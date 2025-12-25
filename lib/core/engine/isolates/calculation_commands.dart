@@ -1,5 +1,5 @@
-import 'package:astr/core/engine/models/coordinates.dart';
-import 'package:astr/core/engine/models/location.dart';
+import '../models/coordinates.dart';
+import '../models/location.dart';
 
 /// Base class for calculation commands that can be sent to isolates
 abstract class CalculationCommand {
@@ -8,16 +8,6 @@ abstract class CalculationCommand {
 
 /// Command to calculate horizontal coordinates from equatorial coordinates
 class CalculatePositionCommand extends CalculationCommand {
-  final double rightAscension;
-  final double declination;
-  final double latitude;
-  final double longitude;
-  final int year;
-  final int month;
-  final int day;
-  final int hour;
-  final int minute;
-  final int second;
 
   const CalculatePositionCommand({
     required this.rightAscension,
@@ -31,6 +21,16 @@ class CalculatePositionCommand extends CalculationCommand {
     required this.minute,
     required this.second,
   });
+  final double rightAscension;
+  final double declination;
+  final double latitude;
+  final double longitude;
+  final int year;
+  final int month;
+  final int day;
+  final int hour;
+  final int minute;
+  final int second;
 
   EquatorialCoordinates get equatorialCoordinates =>
       EquatorialCoordinates(
@@ -49,13 +49,6 @@ class CalculatePositionCommand extends CalculationCommand {
 
 /// Command to calculate rise/set times
 class CalculateRiseSetCommand extends CalculationCommand {
-  final double rightAscension;
-  final double declination;
-  final double latitude;
-  final double longitude;
-  final int year;
-  final int month;
-  final int day;
 
   const CalculateRiseSetCommand({
     required this.rightAscension,
@@ -66,6 +59,13 @@ class CalculateRiseSetCommand extends CalculationCommand {
     required this.month,
     required this.day,
   });
+  final double rightAscension;
+  final double declination;
+  final double latitude;
+  final double longitude;
+  final int year;
+  final int month;
+  final int day;
 
   EquatorialCoordinates get equatorialCoordinates =>
       EquatorialCoordinates(
@@ -83,13 +83,13 @@ class CalculateRiseSetCommand extends CalculationCommand {
 
 /// Result container for horizontal coordinates calculation
 class HorizontalCoordinatesResult {
-  final double altitude;
-  final double azimuth;
 
   const HorizontalCoordinatesResult({
     required this.altitude,
     required this.azimuth,
   });
+  final double altitude;
+  final double azimuth;
 
   HorizontalCoordinates toCoordinates() => HorizontalCoordinates(
         altitude: altitude,
@@ -99,11 +99,6 @@ class HorizontalCoordinatesResult {
 
 /// Result container for rise/set times calculation
 class RiseSetTimesResult {
-  final DateTime? riseTime;
-  final DateTime? transitTime;
-  final DateTime? setTime;
-  final bool isCircumpolar;
-  final bool neverRises;
 
   const RiseSetTimesResult({
     this.riseTime,
@@ -112,4 +107,9 @@ class RiseSetTimesResult {
     this.isCircumpolar = false,
     this.neverRises = false,
   });
+  final DateTime? riseTime;
+  final DateTime? transitTime;
+  final DateTime? setTime;
+  final bool isCircumpolar;
+  final bool neverRises;
 }

@@ -3,15 +3,15 @@ import '../../../../core/config/api_config.dart';
 import '../../domain/entities/geo_location.dart';
 
 class GeocodingService {
-  final Dio _dio;
 
   GeocodingService(this._dio);
+  final Dio _dio;
 
   Future<List<GeoLocation>> searchLocations(String query) async {
     try {
-      final response = await _dio.get(
+      final Response response = await _dio.get(
         '${ApiConfig.geocodingBaseUrl}/search',
-        queryParameters: {
+        queryParameters: <String, dynamic>{
           'name': query,
           'count': 10,
           'format': 'json',
@@ -30,7 +30,7 @@ class GeocodingService {
             );
           }).toList();
         }
-        return [];
+        return <GeoLocation>[];
       } else {
         throw Exception('Failed to search locations');
       }
@@ -40,15 +40,15 @@ class GeocodingService {
   }
   Future<String> getPlaceName(double lat, double lon) async {
     try {
-      final response = await _dio.get(
+      final Response response = await _dio.get(
         'https://nominatim.openstreetmap.org/reverse',
-        queryParameters: {
+        queryParameters: <String, dynamic>{
           'lat': lat,
           'lon': lon,
           'format': 'json',
         },
         options: Options(
-          headers: {
+          headers: <String, dynamic>{
             'User-Agent': 'Astr/1.0', // Mandatory for Nominatim
           },
         ),
@@ -72,9 +72,9 @@ class GeocodingService {
           } else if (country != null) {
             return country;
           }
-           return "Unknown Location";
+           return 'Unknown Location';
         }
-        return "Unknown Location";
+        return 'Unknown Location';
       } else {
         throw Exception('Nominatim Error: ${response.statusCode}');
       }

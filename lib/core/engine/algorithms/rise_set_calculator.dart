@@ -1,9 +1,10 @@
 import 'dart:math' as math;
-import 'package:astr/core/engine/algorithms/coordinate_transformations.dart';
-import 'package:astr/core/engine/algorithms/time_utils.dart';
-import 'package:astr/core/engine/models/coordinates.dart';
-import 'package:astr/core/engine/models/location.dart';
-import 'package:astr/core/engine/models/rise_set_times.dart';
+
+import '../models/coordinates.dart';
+import '../models/location.dart';
+import '../models/rise_set_times.dart';
+import 'coordinate_transformations.dart';
+import 'time_utils.dart';
 
 /// Calculates rise, transit, and set times for celestial objects
 /// Based on Jean Meeus "Astronomical Algorithms", Chapter 15
@@ -44,7 +45,7 @@ class RiseSetCalculator {
       );
     }
     if (check.neverRises) {
-      return RiseSetTimes(neverRises: true);
+      return const RiseSetTimes(neverRises: true);
     }
 
     // Calculate approximate hour angles for rise and set
@@ -54,7 +55,7 @@ class RiseSetCalculator {
     final DateTime? transit = _calculateTransit(ra, lon, date);
     if (transit == null) {
       // Shouldn't happen, but handle gracefully
-      return RiseSetTimes(neverRises: true);
+      return const RiseSetTimes(neverRises: true);
     }
 
     // Calculate rise and set times relative to transit
@@ -93,13 +94,13 @@ class RiseSetCalculator {
 
     if (cosH0 > 1.0) {
       // Object never rises above the horizon
-      return CircumpolarCheck(neverRises: true);
+      return const CircumpolarCheck(neverRises: true);
     } else if (cosH0 < -1.0) {
       // Object is circumpolar (always above horizon)
-      return CircumpolarCheck(isCircumpolar: true);
+      return const CircumpolarCheck(isCircumpolar: true);
     }
 
-    return CircumpolarCheck();
+    return const CircumpolarCheck();
   }
 
   /// Calculates the hour angle at rise/set
@@ -178,7 +179,7 @@ class RiseSetCalculator {
     int maxIterations = 3,
   }) {
     // Start with approximate times
-    RiseSetTimes approximate = calculateRiseSet(
+    final RiseSetTimes approximate = calculateRiseSet(
       coordinates,
       location,
       date,
@@ -219,8 +220,6 @@ class RiseSetCalculator {
       riseTime: refinedRise,
       transitTime: approximate.transitTime,
       setTime: refinedSet,
-      isCircumpolar: false,
-      neverRises: false,
     );
   }
 
@@ -250,7 +249,7 @@ class RiseSetCalculator {
     // Estimate time correction
     // Typical altitude change rate is ~15 degrees per hour near horizon
     // But this varies with declination and latitude
-    final double estimatedRate = 15.0; // degrees per hour
+    const double estimatedRate = 15; // degrees per hour
     final double timeCorrection = -altitudeError / estimatedRate; // hours
 
     // Apply correction
@@ -264,11 +263,11 @@ class RiseSetCalculator {
 
 /// Helper class to represent circumpolar check results
 class CircumpolarCheck {
-  final bool isCircumpolar;
-  final bool neverRises;
 
   const CircumpolarCheck({
     this.isCircumpolar = false,
     this.neverRises = false,
   });
+  final bool isCircumpolar;
+  final bool neverRises;
 }

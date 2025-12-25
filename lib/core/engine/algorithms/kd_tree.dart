@@ -2,11 +2,6 @@ import 'dart:math' as math;
 
 /// Node for 2D KD-Tree
 class KDNode {
-  final double lat;
-  final double lon;
-  final int bortle;
-  KDNode? left;
-  KDNode? right;
 
   KDNode({
     required this.lat,
@@ -15,18 +10,22 @@ class KDNode {
     this.left,
     this.right,
   });
+  final double lat;
+  final double lon;
+  final int bortle;
+  KDNode? left;
+  KDNode? right;
 }
 
 /// 2-Dimensional K-D Tree for geospatial points
 /// specialized for (Lat, Lon) nearest neighbor search.
 class KDTree {
-  KDNode? root;
 
   KDTree(this.root);
 
   /// Build a tree from a flat list of [lat, lon, bortle, ...]
   factory KDTree.fromFlatList(List<dynamic> data) {
-    final points = <_Point>[];
+    final List<_Point> points = <_Point>[];
     for (int i = 0; i < data.length; i += 3) {
       points.add(_Point(
         lat: (data[i] as num).toDouble(), 
@@ -36,19 +35,20 @@ class KDTree {
     }
     return KDTree(_buildRecursive(points, 0));
   }
+  KDNode? root;
 
   static KDNode? _buildRecursive(List<_Point> points, int depth) {
     if (points.isEmpty) return null;
 
-    final axis = depth % 2; // 0 = lat, 1 = lon
+    final int axis = depth % 2; // 0 = lat, 1 = lon
     
     // Sort points by current axis to find median
-    points.sort((a, b) => axis == 0 
+    points.sort((_Point a, _Point b) => axis == 0 
         ? a.lat.compareTo(b.lat) 
         : a.lon.compareTo(b.lon));
 
-    final medianIndex = points.length ~/ 2;
-    final median = points[medianIndex];
+    final int medianIndex = points.length ~/ 2;
+    final _Point median = points[medianIndex];
 
     return KDNode(
       lat: median.lat,
@@ -85,7 +85,7 @@ class KDTree {
     double bestDistKm,
   ) {
     // Calculate distance to current node
-    final dist = _haversine(targetLat, targetLon, node.lat, node.lon);
+    final double dist = _haversine(targetLat, targetLon, node.lat, node.lon);
     
     // Update best if current is closer (and valid)
     if (dist < bestDistKm) { // We update bestDist regardless of maxDist to find absolute nearest, check maxDist at end?
@@ -95,18 +95,18 @@ class KDTree {
        bestNode = node;
     }
 
-    final axis = depth % 2;
-    final diff = axis == 0 ? targetLat - node.lat : targetLon - node.lon;
+    final int axis = depth % 2;
+    final double diff = axis == 0 ? targetLat - node.lat : targetLon - node.lon;
 
     // Determine which side to search first
-    final near = diff <= 0 ? node.left : node.right;
-    final far = diff <= 0 ? node.right : node.left;
+    final KDNode? near = diff <= 0 ? node.left : node.right;
+    final KDNode? far = diff <= 0 ? node.right : node.left;
 
     // Search near side
     if (near != null) {
-      final result = _nearestRecursive(near, targetLat, targetLon, maxDistKm, depth + 1, bestNode, bestDistKm);
+      final KDNode? result = _nearestRecursive(near, targetLat, targetLon, maxDistKm, depth + 1, bestNode, bestDistKm);
       if (result != null) {
-          final d = _haversine(targetLat, targetLon, result.lat, result.lon);
+          final double d = _haversine(targetLat, targetLon, result.lat, result.lon);
           if (d < bestDistKm) {
               bestDistKm = d;
               bestNode = result;
@@ -126,7 +126,7 @@ class KDTree {
     
     // Convert bestDistKm to rough degrees for plane check (conservative estimate)
     // 1 deg ~ 111km. So diff (deg) * 111 approx= dist (km)
-    final planeDistKm = diff.abs() * 111.0 * math.cos(math.min(targetLat.abs(), 80) * math.pi / 180); 
+    final double planeDistKm = diff.abs() * 111.0 * math.cos(math.min(targetLat.abs(), 80) * math.pi / 180); 
     // Cos lat factor for longitude. For Lat (axis 0), cos factor is 1.
 
     // Better: Just use 1 deg = 111km as upper bound for safety.
@@ -138,9 +138,9 @@ class KDTree {
     }
 
     if (distToPlane < bestDistKm && far != null) {
-       final result = _nearestRecursive(far, targetLat, targetLon, maxDistKm, depth + 1, bestNode, bestDistKm);
+       final KDNode? result = _nearestRecursive(far, targetLat, targetLon, maxDistKm, depth + 1, bestNode, bestDistKm);
        if (result != null) {
-          final d = _haversine(targetLat, targetLon, result.lat, result.lon);
+          final double d = _haversine(targetLat, targetLon, result.lat, result.lon);
           if (d < bestDistKm) {
               bestDistKm = d;
               bestNode = result;
@@ -153,24 +153,24 @@ class KDTree {
   }
 
   double _haversine(double lat1, double lon1, double lat2, double lon2) {
-    const r = 6371.0; // Earth radius in km
-    final phi1 = lat1 * math.pi / 180;
-    final phi2 = lat2 * math.pi / 180;
-    final deltaPhi = (lat2 - lat1) * math.pi / 180;
-    final deltaLambda = (lon2 - lon1) * math.pi / 180;
+    const double r = 6371; // Earth radius in km
+    final double phi1 = lat1 * math.pi / 180;
+    final double phi2 = lat2 * math.pi / 180;
+    final double deltaPhi = (lat2 - lat1) * math.pi / 180;
+    final double deltaLambda = (lon2 - lon1) * math.pi / 180;
 
-    final a = math.sin(deltaPhi / 2) * math.sin(deltaPhi / 2) +
+    final double a = math.sin(deltaPhi / 2) * math.sin(deltaPhi / 2) +
         math.cos(phi1) * math.cos(phi2) *
         math.sin(deltaLambda / 2) * math.sin(deltaLambda / 2);
-    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
 
     return r * c;
   }
 }
 
 class _Point {
+  _Point({required this.lat, required this.lon, required this.bortle});
   final double lat;
   final double lon;
   final int bortle;
-  _Point({required this.lat, required this.lon, required this.bortle});
 }

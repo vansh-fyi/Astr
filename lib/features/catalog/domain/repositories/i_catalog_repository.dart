@@ -1,7 +1,8 @@
-import 'package:astr/core/error/failure.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_object.dart';
-import 'package:astr/features/catalog/domain/entities/celestial_type.dart';
 import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/error/failure.dart';
+import '../entities/celestial_object.dart';
+import '../entities/celestial_type.dart';
 
 /// Repository interface for accessing celestial object catalog
 abstract class ICatalogRepository {

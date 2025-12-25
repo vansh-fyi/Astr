@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/widgets/glass_panel.dart';
+
 import '../../../../app/theme/app_theme.dart';
+import '../../../../core/widgets/glass_panel.dart';
 import '../providers/tos_provider.dart';
 
 class ToSScreen extends ConsumerWidget {
@@ -13,11 +14,11 @@ class ToSScreen extends ConsumerWidget {
       backgroundColor: AppTheme.deepCosmos,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: GlassPanel(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
+              children: <Widget>[
                 Text(
                   'Terms of Service',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(

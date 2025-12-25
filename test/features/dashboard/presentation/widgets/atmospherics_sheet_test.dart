@@ -7,13 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ionicons/ionicons.dart';
 
 void main() {
-  testWidgets('AtmosphericsSheet displays Seeing score and label correctly', (tester) async {
+  testWidgets('AtmosphericsSheet displays Seeing score and label correctly', (WidgetTester tester) async {
     // Set a large screen size to avoid overflow
     tester.view.physicalSize = const Size(1200, 2400);
     tester.view.devicePixelRatio = 1.0;
 
     // Arrange
-    const weather = Weather(
+    const Weather weather = Weather(
       cloudCover: 10,
       temperatureC: 15,
       humidity: 60,
@@ -24,7 +24,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
+        overrides: <Override>[
           weatherProvider.overrideWith(() => MockWeatherNotifier(weather)),
         ],
         child: const MaterialApp(
@@ -50,11 +50,11 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
   });
 
-  testWidgets('AtmosphericsSheet displays correct color for Excellent Seeing', (tester) async {
+  testWidgets('AtmosphericsSheet displays correct color for Excellent Seeing', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(1200, 2400);
     tester.view.devicePixelRatio = 1.0;
 
-    const weather = Weather(
+    const Weather weather = Weather(
       cloudCover: 0,
       seeingScore: 9,
       seeingLabel: 'Excellent',
@@ -65,7 +65,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
+        overrides: <Override>[
           weatherProvider.overrideWith(() => MockWeatherNotifier(weather)),
         ],
         child: const MaterialApp(
@@ -78,26 +78,26 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final seeingCardFinder = find.ancestor(
+    final Finder seeingCardFinder = find.ancestor(
       of: find.text('SEEING'),
       matching: find.byType(GlassPanel),
     );
-    final labelFinder = find.descendant(
+    final Finder labelFinder = find.descendant(
       of: seeingCardFinder,
       matching: find.text('Excellent'),
     );
-    final textWidget = tester.widget<Text>(labelFinder);
+    final Text textWidget = tester.widget<Text>(labelFinder);
     expect(textWidget.style?.color, Colors.greenAccent);
 
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
   });
 
-  testWidgets('AtmosphericsSheet displays correct color for Poor Seeing', (tester) async {
+  testWidgets('AtmosphericsSheet displays correct color for Poor Seeing', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(1200, 2400);
     tester.view.devicePixelRatio = 1.0;
 
-    const weather = Weather(
+    const Weather weather = Weather(
       cloudCover: 0,
       seeingScore: 3,
       seeingLabel: 'Poor',
@@ -108,7 +108,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
+        overrides: <Override>[
           weatherProvider.overrideWith(() => MockWeatherNotifier(weather)),
         ],
         child: const MaterialApp(
@@ -121,15 +121,15 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final seeingCardFinder = find.ancestor(
+    final Finder seeingCardFinder = find.ancestor(
       of: find.text('SEEING'),
       matching: find.byType(GlassPanel),
     );
-    final labelFinder = find.descendant(
+    final Finder labelFinder = find.descendant(
       of: seeingCardFinder,
       matching: find.text('Poor'),
     );
-    final textWidget = tester.widget<Text>(labelFinder);
+    final Text textWidget = tester.widget<Text>(labelFinder);
     expect(textWidget.style?.color, Colors.redAccent);
 
     addTearDown(tester.view.resetPhysicalSize);
@@ -138,9 +138,9 @@ void main() {
 }
 
 class MockWeatherNotifier extends AsyncNotifier<Weather> implements WeatherNotifier {
-  final Weather _initialState;
 
   MockWeatherNotifier(this._initialState);
+  final Weather _initialState;
 
   @override
   Future<Weather> build() async {

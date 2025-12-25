@@ -1,10 +1,5 @@
 /// Represents equatorial coordinates (RA/Dec)
 class EquatorialCoordinates {
-  /// Right Ascension in degrees (0-360)
-  final double rightAscension;
-
-  /// Declination in degrees (-90 to +90)
-  final double declination;
 
   const EquatorialCoordinates({
     required this.rightAscension,
@@ -22,10 +17,15 @@ class EquatorialCoordinates {
     required double decSeconds,
     bool isNegative = false,
   }) {
-    final ra = (hours + minutes / 60.0 + seconds / 3600.0) * 15.0; // Convert hours to degrees
-    final dec = (decDegrees + decMinutes / 60.0 + decSeconds / 3600.0) * (isNegative ? -1 : 1);
+    final double ra = (hours + minutes / 60.0 + seconds / 3600.0) * 15.0; // Convert hours to degrees
+    final double dec = (decDegrees + decMinutes / 60.0 + decSeconds / 3600.0) * (isNegative ? -1 : 1);
     return EquatorialCoordinates(rightAscension: ra, declination: dec);
   }
+  /// Right Ascension in degrees (0-360)
+  final double rightAscension;
+
+  /// Declination in degrees (-90 to +90)
+  final double declination;
 
   @override
   String toString() => 'EquatorialCoordinates(RA: ${rightAscension.toStringAsFixed(4)}°, Dec: ${declination.toStringAsFixed(4)}°)';
@@ -44,17 +44,17 @@ class EquatorialCoordinates {
 
 /// Represents horizontal coordinates (Alt/Az)
 class HorizontalCoordinates {
-  /// Altitude in degrees (-90 to +90, horizon is 0)
-  final double altitude;
-
-  /// Azimuth in degrees (0-360, North is 0, East is 90)
-  final double azimuth;
 
   const HorizontalCoordinates({
     required this.altitude,
     required this.azimuth,
   }) : assert(altitude >= -90 && altitude <= 90, 'Altitude must be between -90 and 90'),
        assert(azimuth >= 0 && azimuth <= 360, 'Azimuth must be between 0 and 360');
+  /// Altitude in degrees (-90 to +90, horizon is 0)
+  final double altitude;
+
+  /// Azimuth in degrees (0-360, North is 0, East is 90)
+  final double azimuth;
 
   @override
   String toString() => 'HorizontalCoordinates(Alt: ${altitude.toStringAsFixed(4)}°, Az: ${azimuth.toStringAsFixed(4)}°)';

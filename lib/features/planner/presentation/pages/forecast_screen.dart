@@ -1,14 +1,15 @@
 import 'dart:async';
-import 'package:astr/core/widgets/glass_panel.dart';
-import 'package:astr/features/dashboard/presentation/widgets/nebula_background.dart';
-import 'package:astr/features/planner/domain/entities/daily_forecast.dart';
-import 'package:astr/features/planner/presentation/providers/planner_provider.dart';
-import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:ionicons/ionicons.dart';
+
+import '../../../../core/widgets/glass_panel.dart';
+import '../../../context/presentation/providers/astr_context_provider.dart';
+import '../../../dashboard/presentation/widgets/nebula_background.dart';
+import '../../domain/entities/daily_forecast.dart';
+import '../providers/planner_provider.dart';
 
 class ForecastScreen extends ConsumerStatefulWidget {
   const ForecastScreen({super.key});
@@ -63,24 +64,24 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    final forecastAsync = ref.watch(forecastListProvider);
+    final AsyncValue<List<DailyForecast>> forecastAsync = ref.watch(forecastListProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF020204),
       body: Stack(
-        children: [
+        children: <Widget>[
           const NebulaBackground(),
           SafeArea(
             bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 // Header (Matching Catalog Screen)
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: <Widget>[
                       const Text(
                         'Forecast',
                         style: TextStyle(
@@ -108,13 +109,13 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> with SingleTick
                       return const LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.white],
-                        stops: [0.0, 0.05], // Soft fade at the top
+                        colors: <Color>[Colors.transparent, Colors.white],
+                        stops: <double>[0, 0.05], // Soft fade at the top
                       ).createShader(bounds);
                     },
                     blendMode: BlendMode.dstIn,
                     child: forecastAsync.when(
-                      data: (forecasts) {
+                      data: (List<DailyForecast> forecasts) {
                         return ListView.separated(
                           padding: EdgeInsets.only(
                             left: 20, 
@@ -124,9 +125,9 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> with SingleTick
                           ),
                           itemCount: forecasts.length,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final forecast = forecasts[index];
-                            final isToday = index == 0;
+                          itemBuilder: (BuildContext context, int index) {
+                            final DailyForecast forecast = forecasts[index];
+                            final bool isToday = index == 0;
                             
                             return _ForecastItem(
                               forecast: forecast, 
@@ -140,7 +141,7 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> with SingleTick
                         );
                       },
                       loading: () => const Center(child: CircularProgressIndicator(color: Colors.white)),
-                      error: (err, stack) => Center(
+                      error: (Object err, StackTrace stack) => Center(
                         child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
                       ),
                     ),
@@ -165,15 +166,15 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> with SingleTick
 }
 
 class _ForecastItem extends StatelessWidget {
-  final DailyForecast forecast;
-  final bool isToday;
-  final VoidCallback onTap;
 
   const _ForecastItem({
     required this.forecast,
     required this.isToday,
     required this.onTap,
   });
+  final DailyForecast forecast;
+  final bool isToday;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -186,19 +187,15 @@ class _ForecastItem extends StatelessWidget {
       case 5:
         label = 'Excellent';
         activeSegmentIndex = 4;
-        break;
       case 4:
         label = 'Good';
         activeSegmentIndex = 3;
-        break;
       case 3:
         label = 'Fair';
         activeSegmentIndex = 2;
-        break;
       case 2:
         label = 'Poor';
         activeSegmentIndex = 1;
-        break;
       default:
         label = 'Bad';
         activeSegmentIndex = 0;
@@ -209,13 +206,13 @@ class _ForecastItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Row(
-          children: [
+          children: <Widget>[
             // Date
             Expanded(
               flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Text(
                     isToday ? 'Today' : DateFormat('EEEE').format(forecast.date),
                     style: const TextStyle(
@@ -239,7 +236,7 @@ class _ForecastItem extends StatelessWidget {
             // Rating Column
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
+              children: <Widget>[
                 Text(
                   label.toUpperCase(),
                   style: const TextStyle(
@@ -254,9 +251,9 @@ class _ForecastItem extends StatelessWidget {
                 SizedBox(
                   width: 120, // Fixed width for the bar
                   child: Row(
-                    children: List.generate(5, (index) {
+                    children: List.generate(5, (int index) {
                       // Cumulative logic: all bars up to activeSegmentIndex are active
-                      final isActive = index <= activeSegmentIndex;
+                      final bool isActive = index <= activeSegmentIndex;
                       return Expanded(
                         child: Container(
                           height: 4,
@@ -264,7 +261,7 @@ class _ForecastItem extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isActive ? const Color(0xFF3B82F6) : Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(2),
-                            boxShadow: isActive ? [
+                            boxShadow: isActive ? <BoxShadow>[
                               BoxShadow(
                                 color: const Color(0xFF3B82F6).withOpacity(0.6),
                                 blurRadius: 8,
