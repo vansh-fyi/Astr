@@ -5,8 +5,8 @@ import 'package:ionicons/ionicons.dart';
 
 import '../../../../core/widgets/glass_panel.dart';
 import '../../../../core/widgets/glass_toast.dart';
-import '../../../profile/domain/entities/saved_location.dart';
-import '../../../profile/presentation/providers/saved_locations_provider.dart';
+import '../../../profile/domain/entities/user_location.dart';
+import '../../../profile/presentation/providers/user_locations_provider.dart';
 import '../../domain/entities/astr_context.dart';
 import '../../domain/entities/geo_location.dart';
 import '../providers/astr_context_provider.dart';
@@ -24,16 +24,13 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
   @override
   Widget build(BuildContext context) {
     final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
-    final AsyncValue<List<SavedLocation>> savedLocationsAsync = ref.watch(savedLocationsNotifierProvider);
+    final AsyncValue<List<UserLocation>> savedLocationsAsync = ref.watch(userLocationsNotifierProvider);
     
     final AstrContext? currentContext = astrContextAsync.value;
     final bool isCurrentLocationActive = currentContext?.isCurrentLocation ?? false;
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Color(0xFF0A0A0B),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      decoration: _buildBottomSheetDecoration(),
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
           left: 20,
@@ -45,17 +42,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
-              alignment: Alignment.center,
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
+            _buildDragHandle(),
             const SizedBox(height: 24),
             const Text(
               'Select Location',
@@ -143,14 +130,15 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
 
             // 2. Saved Locations List
             savedLocationsAsync.when(
-              data: (List<SavedLocation> locations) {
+              data: (List<UserLocation> locations) {
                 if (locations.isEmpty) return const SizedBox.shrink();
                 
                 return Column(
-                  children: locations.map((SavedLocation loc) {
+                  children: locations.map((UserLocation loc) {
                     final bool isActive = !isCurrentLocationActive && 
-                        currentContext?.location.latitude == loc.latitude &&
-                        currentContext?.location.longitude == loc.longitude;
+                        currentContext != null &&
+                        _isSameLocation(currentContext.location, loc);
+                    final bool isStale = UserLocationsNotifier.isStale(loc);
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -159,13 +147,12 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                           if (isActive) {
                             Navigator.pop(context);
                             return;
-                          }
+                           }
                           
                           final GeoLocation geoLocation = GeoLocation(
                             latitude: loc.latitude,
                             longitude: loc.longitude,
                             name: loc.name,
-                            placeName: loc.placeName,
                           );
                           
                           ref.read(astrContextProvider.notifier).updateLocation(geoLocation);
@@ -178,33 +165,87 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                             : null,
                         child: Row(
                           children: <Widget>[
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Ionicons.location, color: Colors.white, size: 20),
+                            // Location icon with pin badge overlay
+                            Stack(
+                              children: <Widget>[
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Ionicons.location, 
+                                    color: isStale ? Colors.white.withOpacity(0.5) : Colors.white, 
+                                    size: 20,
+                                  ),
+                                ),
+                                // Pin badge (top-right corner)
+                                if (loc.isPinned)
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.amber,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Ionicons.pin,
+                                        size: 8,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text(
-                                    loc.name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
+                                  Row(
+                                    children: <Widget>[
+                                      Flexible(
+                                        child: Text(
+                                          loc.name,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: isStale ? Colors.white.withOpacity(0.6) : Colors.white,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      // Stale badge
+                                      if (isStale)
+                                        Container(
+                                          margin: const EdgeInsets.only(left: 8),
+                                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange.withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(4),
+                                            border: Border.all(color: Colors.orange.withOpacity(0.6), width: 1),
+                                          ),
+                                          child: const Text(
+                                            'Stale',
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              color: Colors.orange,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    loc.placeName ?? '${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}',
+                                    '${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.white.withOpacity(0.7),
+                                      color: Colors.white.withOpacity(isStale ? 0.4 : 0.7),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -260,10 +301,9 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
     );
   }
 
-  void _showLocationOptions(BuildContext context, WidgetRef ref, SavedLocation location) {
+  void _showLocationOptions(BuildContext context, WidgetRef ref, UserLocation location) {
     showModalBottomSheet(
       context: context,
-      useRootNavigator: true, // Ensure it shows above bottom nav
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) => Container(
         padding: EdgeInsets.only(
@@ -272,25 +312,12 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
           top: 24,
           bottom: 50.0 + MediaQuery.of(context).padding.bottom,
         ),
-        decoration: const BoxDecoration(
-          color: Color(0xFF0A0A0B),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+        decoration: _buildBottomSheetDecoration(),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
-              alignment: Alignment.center,
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
+            _buildDragHandle(),
             const SizedBox(height: 24),
             Text(
               location.name,
@@ -303,7 +330,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
             ),
             const SizedBox(height: 8),
             Text(
-              location.placeName ?? '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
+              '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.5),
                 fontSize: 14,
@@ -383,16 +410,18 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
     );
   }
 
-  void _deleteLocation(BuildContext context, WidgetRef ref, SavedLocation location) {
+  void _deleteLocation(BuildContext context, WidgetRef ref, UserLocation location) {
     // We are in LocationSheet.
     // If we delete, we should probably close the sheet or refresh it.
     // The provider watcher will refresh the list automatically.
     
     final AstrContext? currentContext = ref.read(astrContextProvider).value;
-    final bool isCurrent = currentContext?.location.latitude == location.latitude &&
-        currentContext?.location.longitude == location.longitude;
+    
+    // Robust comparison using epsilon
+    final bool isCurrent = currentContext != null && 
+        _isSameLocation(currentContext.location, location);
 
-    ref.read(savedLocationsNotifierProvider.notifier).deleteLocation(location.id);
+    ref.read(userLocationsNotifierProvider.notifier).deleteLocation(location.id);
 
     if (isCurrent) {
       ref.read(astrContextProvider.notifier).refreshLocation();
@@ -400,5 +429,33 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
     } else {
       showGlassToast(context, '${location.name} deleted');
     }
+  }
+
+  /// Robust coordinate comparison to handle floating point precision issues.
+  bool _isSameLocation(GeoLocation active, UserLocation saved) {
+    const double epsilon = 0.0001; // Approx 11 meters
+    return (active.latitude - saved.latitude).abs() < epsilon &&
+           (active.longitude - saved.longitude).abs() < epsilon;
+  }
+
+  BoxDecoration _buildBottomSheetDecoration() {
+    return const BoxDecoration(
+      color: Color(0xFF0A0A0B),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    );
+  }
+
+  Widget _buildDragHandle() {
+    return Container(
+      alignment: Alignment.center,
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
   }
 }

@@ -68,9 +68,9 @@ class GeocodingService {
           if (city != null && country != null) {
              return '$city, $country';
           } else if (city != null) {
-            return city;
+            return city as String;
           } else if (country != null) {
-            return country;
+            return country as String;
           }
            return 'Unknown Location';
         }

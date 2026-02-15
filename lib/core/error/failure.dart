@@ -29,3 +29,7 @@ class PermissionFailure extends Failure {
 class DatabaseFailure extends Failure {
   const DatabaseFailure(super.message);
 }
+
+class TimeoutFailure extends Failure {
+  const TimeoutFailure(super.message);
+}

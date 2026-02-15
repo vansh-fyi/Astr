@@ -57,14 +57,14 @@ void main() {
     
     // Verify Glow
     verify(canvas.drawCircle(
-      const Offset(100, 100), 
+      const Offset(100, 130.0), 
       8, 
       argThat(isA<Paint>()),
     )).called(1);
 
     // Verify Stroke & Fill (Radius 5)
     verify(canvas.drawCircle(
-      const Offset(100, 100), 
+      const Offset(100, 130.0), 
       5, 
       argThat(isA<Paint>()),
     )).called(2);

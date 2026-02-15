@@ -151,6 +151,12 @@ class _VisibilityGraphWidgetState extends ConsumerState<VisibilityGraphWidget> {
   }
 
   Widget _buildGraph(VisibilityGraphData data, Color highlightColor, List<HourlyForecast>? cloudCoverData) {
+    if (data.objectCurve.isEmpty) {
+      return const SizedBox(
+        height: 200,
+        child: Center(child: Text('No visibility data', style: TextStyle(color: Colors.white54))),
+      );
+    }
     final DateTime startTime = data.objectCurve.first.time;
     final DateTime endTime = data.objectCurve.last.time;
 

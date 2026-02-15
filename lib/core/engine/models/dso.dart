@@ -45,7 +45,7 @@ class DSO extends CelestialObject {
       id: map['id'].toString(),
       messierId: map['messier_id'] as String?,
       ngcId: map['ngc_id'] as String?,
-      name: map['name'] as String? ?? (map['messier_id'] ?? map['ngc_id'] ?? 'Unknown'),
+      name: map['name'] as String? ?? ((map['messier_id'] ?? map['ngc_id'] ?? 'Unknown') as String),
       dsoType: DSOType.fromString(map['type'] as String?),
       coordinates: EquatorialCoordinates(
         rightAscension: (map['ra'] as num).toDouble(),

@@ -5,9 +5,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import 'constants/strings.dart';
+import 'core/platform/background_sync_handler.dart';
+import 'features/dashboard/data/models/weather_cache_entry.dart';
+import 'features/dashboard/data/services/weather_cache_pruning_service.dart';
 import 'hive/hive.dart';
 // Platform-specific imports - only import on non-web platforms
 import 'main_mobile.dart' if (dart.library.html) 'main_web.dart';
@@ -20,6 +24,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await initHive();
+
+  // FR-10: Prune old cache entries on app start (fire-and-forget)
+  _pruneOldCacheEntries();
+
+  // Story 3.4: Initialize background sync (WorkManager/BGTaskScheduler)
+  initializeBackgroundSync();
+
   // await AstroEngineImpl.initialize(); // Disabled for visual testing
   await setPreferredOrientations();
 
@@ -68,4 +79,21 @@ void main() async {
     if (stack is stack_trace.Chain) return stack.toTrace().vmTrace;
     return stack;
   };
+}
+
+/// Prunes old cache entries on app start (FR-10).
+///
+/// Uses fire-and-forget pattern to avoid blocking app startup.
+void _pruneOldCacheEntries() {
+  try {
+    final Box<WeatherCacheEntry> cacheBox = Hive.box<WeatherCacheEntry>('weatherCache');
+    final WeatherCachePruningService pruningService = WeatherCachePruningService(
+      cacheBox: cacheBox,
+    );
+    // Fire-and-forget - don't await
+    pruningService.pruneOldEntries().ignore();
+  } catch (e) {
+    // Silent fail - pruning is best-effort
+    debugPrint('Cache pruning skipped: $e');
+  }
 }

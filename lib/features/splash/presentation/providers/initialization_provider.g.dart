@@ -7,7 +7,7 @@ part of 'initialization_provider.dart';
 // **************************************************************************
 
 String _$initializationNotifierHash() =>
-    r'60ddb5943909b31e5e540323bbfad9729e277b97';
+    r'a08ccb624762beeac94ce41ec31d75020caa9e92';
 
 /// Provider that tracks app initialization state
 ///

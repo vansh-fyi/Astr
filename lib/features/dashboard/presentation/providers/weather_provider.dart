@@ -1,15 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/src/either.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:riverpod/src/async_notifier.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../../features/context/domain/entities/geo_location.dart';
 import '../../../../features/context/presentation/providers/astr_context_provider.dart';
+import '../../../../features/data_layer/services/h3_service.dart';
 import '../../../context/domain/entities/astr_context.dart';
 import '../../../planner/domain/entities/daily_forecast.dart';
 import '../../../planner/presentation/providers/planner_provider.dart';
 import '../../data/datasources/open_meteo_weather_service.dart';
+import '../../data/models/weather_cache_entry.dart';
+import '../../data/repositories/cached_weather_repository.dart';
 import '../../data/repositories/weather_repository_impl.dart';
 import '../../domain/entities/hourly_forecast.dart';
 import '../../domain/entities/weather.dart';
@@ -23,9 +27,23 @@ final Provider<OpenMeteoWeatherService> weatherServiceProvider = Provider<OpenMe
   return OpenMeteoWeatherService(dio);
 });
 
+/// Weather repository provider with caching layer.
+///
+/// Uses decorator pattern: CachedWeatherRepository wraps WeatherRepositoryImpl.
+/// Per Architecture: "Transient Cache using Hive CE for weather forecasts"
 final Provider<IWeatherRepository> weatherRepositoryProvider = Provider<IWeatherRepository>((ProviderRef<IWeatherRepository> ref) {
   final OpenMeteoWeatherService service = ref.watch(weatherServiceProvider);
-  return WeatherRepositoryImpl(service);
+  final IWeatherRepository innerRepo = WeatherRepositoryImpl(service);
+
+  // Get the weatherCache box (already opened in initHive)
+  final Box<WeatherCacheEntry> cacheBox = Hive.box<WeatherCacheEntry>('weatherCache');
+  final H3Service h3Service = ref.watch(h3ServiceProvider);
+
+  return CachedWeatherRepository(
+    innerRepository: innerRepo,
+    cacheBox: cacheBox,
+    h3Service: h3Service,
+  );
 });
 
 // Weather State

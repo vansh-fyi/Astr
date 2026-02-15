@@ -1,22 +1,28 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 
 import '../../../core/engine/models/condition_result.dart';
+import '../../../core/services/toast_service.dart';
 import '../../../core/widgets/cosmic_loader.dart';
 import '../../astronomy/domain/entities/astronomy_state.dart';
 import '../../astronomy/presentation/providers/astronomy_provider.dart';
 import '../../context/domain/entities/astr_context.dart';
+import '../../context/domain/entities/geo_location.dart';
 import '../../context/presentation/providers/astr_context_provider.dart';
+import '../../splash/domain/entities/launch_result.dart';
+import '../../splash/presentation/providers/smart_launch_provider.dart';
 import '../domain/entities/weather.dart';
 import '../domain/services/quality_calculator.dart';
 import 'providers/condition_quality_provider.dart';
 import 'providers/visibility_provider.dart';
 import 'providers/weather_provider.dart';
 import 'widgets/dashboard_grid.dart';
+import 'widgets/dashboard_header.dart';
 import 'widgets/highlights_feed.dart';
 import 'widgets/nebula_background.dart';
 import 'widgets/sky_portal.dart';
@@ -37,6 +43,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
+
+    // Story 4.2: Set status bar style for OLED black background (NFR-09)
+    // Set once in initState to avoid repeated calls on every rebuild
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, // Transparent status bar
+        statusBarIconBrightness: Brightness.light, // White icons (Android)
+        statusBarBrightness: Brightness.dark, // Dark content = light icons (iOS)
+        systemNavigationBarColor: Color(0xFF000000), // Pure black nav bar
+        systemNavigationBarIconBrightness: Brightness.light, // White nav icons
+      ),
+    );
+
     _bannerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -89,9 +108,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     final AsyncValue<AstronomyState> astronomyAsync = ref.watch(astronomyProvider);
     final VisibilityState visibilityState = ref.watch(visibilityProvider);
     final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
-    
+
     final DateTime selectedDate = astrContextAsync.value?.selectedDate ?? DateTime.now();
     final bool isToday = DateUtils.isSameDay(selectedDate, DateTime.now());
+
+    // Story 4.1: Handle smart launch result (Zero-Click UX)
+    // Use watch instead of listen to safely handle initial state (fixes race condition)
+    final AsyncValue<LaunchResult> launchAsync = ref.watch(launchResultProvider);
+    
+    // Perform state updates based on launch result (only once if needed)
+    // We use a post-frame callback to avoid build-phase state modification error
+    if (launchAsync.hasValue) {
+      final LaunchResult result = launchAsync.value!;
+     
+      switch (result) {
+        case LaunchSuccess(:final location):
+          // Pre-loaded location from launch controller
+          // Check if we need to update context (prevent infinite loop)
+          final GeoLocation? currentLocation = astrContextAsync.value?.location;
+          if (currentLocation == null || currentLocation != location) {
+             WidgetsBinding.instance.addPostFrameCallback((_) {
+               ref.read(astrContextProvider.notifier).updateLocation(location);
+             });
+          }
+          break;
+
+        case LaunchTimeout():
+          // NFR-10: GPS timeout → Show toast and continue with default/cached location
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              ToastService.showGPSTimeout(context);
+            }
+          });
+          break;
+
+        case LaunchPermissionDenied():
+          // Permission denied → Show toast explaining manual entry is needed
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              ToastService.showError(
+                context,
+                'Location permission denied. Tap location icon to set manually.',
+              );
+            }
+          });
+          break;
+
+        case LaunchServiceDisabled():
+          // Location service disabled → Show toast
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              ToastService.showInfo(
+                context,
+                'Location services disabled. Tap location icon to set manually.',
+              );
+            }
+          });
+          break;
+      }
+    }
 
     // Listen for changes to trigger animation
     ref.listen(astrContextProvider, (AsyncValue<AstrContext>? previous, AsyncValue<AstrContext> next) {
@@ -103,7 +178,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
     return Scaffold(
       extendBody: true,
-      backgroundColor: const Color(0xFF020204),
+      extendBodyBehindAppBar: true, // Extend content behind status bar
+      // Story 4.2: Pure OLED black (#000000) for battery savings (NFR-09)
+      // Note: Using hardcoded value is intentional - OLED requires exact #000000
+      backgroundColor: const Color(0xFF000000),
       body: Stack(
         children: <Widget>[
           // Background Elements
@@ -114,8 +192,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
             bottom: false,
             child: Column(
               children: <Widget>[
-                // Header / Navigation removed (moved to global nav bar)
-                // Future Date Banner
+              // Story 4.2: Dashboard Header with Last Updated indicator (FR-13)
+              const DashboardHeader(),
+
+              // Future Date Banner
                 SlideTransition(
                   position: _bannerSlideAnimation,
                   child: Container(
@@ -166,7 +246,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                         ]);
                       },
                       color: Colors.blueAccent,
-                      backgroundColor: const Color(0xFF141419),
+                      backgroundColor: const Color(0xFF000000), // Pure black for OLED (NFR-09)
                       child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         child: Padding(
@@ -229,7 +309,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                                  ),
                               ],
 
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
 
                               // Highlights Feed
                               const HighlightsFeed(),

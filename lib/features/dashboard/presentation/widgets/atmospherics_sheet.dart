@@ -20,6 +20,7 @@ import '../providers/weather_provider.dart';
 import '../theme/graph_theme.dart';
 import 'conditions_graph.dart';
 import 'graph_legend_item.dart';
+import 'hourly_forecast_list.dart';
 import 'time_card.dart';
 
 class AtmosphericsSheet extends ConsumerWidget {
@@ -48,7 +49,8 @@ class AtmosphericsSheet extends ConsumerWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
                 child: Container(
-                  color: const Color(0xFF0A0A0B).withValues(alpha: 0.8),
+                  // Story 4.4: Pure OLED black for NFR-09
+                  color: const Color(0xFF000000),
                 ),
               ),
             ),
@@ -192,15 +194,19 @@ class AtmosphericsSheet extends ConsumerWidget {
                     // Grid
                     weatherAsync.when(
                       data: (Weather weather) {
-                        // Seeing Color Logic
+                        // Seeing Color Logic (Red Mode compatible - Epic 5)
+                        // Using theme-neutral colors that can be filtered by Red Mode
                         Color seeingColor = Colors.white;
                         if (weather.seeingScore != null) {
                           if (weather.seeingScore! >= 8) {
-                            seeingColor = Colors.greenAccent;
+                            // Excellent - use light green tone
+                            seeingColor = const Color(0xFF90EE90);
                           } else if (weather.seeingScore! >= 5) {
-                            seeingColor = Colors.yellowAccent;
+                            // Good - use amber tone
+                            seeingColor = const Color(0xFFFFA500);
                           } else {
-                            seeingColor = Colors.redAccent;
+                            // Poor - use muted tone
+                            seeingColor = Colors.white.withValues(alpha: 0.6);
                           }
                         }
 
@@ -267,6 +273,20 @@ class AtmosphericsSheet extends ConsumerWidget {
                       loading: () => const Center(child: CircularProgressIndicator()),
                       error: (Object err, StackTrace stack) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.red))),
                     ),
+
+                    // Story 4.4: Hourly Forecast List (AC4)
+                    const SizedBox(height: 16),
+                    Consumer(
+                      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                        final AsyncValue<List<HourlyForecast>> hourlyForecastAsync = ref.watch(hourlyForecastProvider);
+                        
+                        return hourlyForecastAsync.when(
+                          data: (List<HourlyForecast> forecasts) => HourlyForecastList(forecasts: forecasts),
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (Object _, StackTrace __) => const SizedBox.shrink(),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -284,7 +304,8 @@ class AtmosphericsSheet extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0A0A0B).withValues(alpha: 0.7),
+                      // Story 4.4: Pure OLED black for header (NFR-09)
+                    color: const Color(0xFF000000),
                       border: Border(
                         bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
                       ),
@@ -330,7 +351,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                           'Current viewing conditions',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                           ),
                         ),
                       ],

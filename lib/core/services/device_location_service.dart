@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../features/context/domain/entities/geo_location.dart';
@@ -5,6 +7,12 @@ import '../error/failure.dart';
 import 'i_location_service.dart';
 
 class DeviceLocationService implements ILocationService {
+  DeviceLocationService({
+    this.timeoutDuration = const Duration(seconds: 10), // NFR-10: Default 10s timeout
+  });
+
+  final Duration timeoutDuration;
+
   @override
   Future<Either<Failure, GeoLocation>> getCurrentLocation() async {
     bool serviceEnabled;
@@ -30,11 +38,24 @@ class DeviceLocationService implements ILocationService {
     }
 
     try {
-      final Position position = await Geolocator.getCurrentPosition();
+      // NFR-10: GPS timeout after configured duration (default 10s)
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: timeoutDuration, // Pass timeout to Geolocator
+        ),
+      ).timeout(
+        timeoutDuration,
+        onTimeout: () => throw TimeoutException('GPS timeout'),
+      );
+
       return Right(GeoLocation(
         latitude: position.latitude,
         longitude: position.longitude,
       ));
+    } on TimeoutException {
+      // NFR-10: Specific timeout failure with user-friendly message
+      return const Left(TimeoutFailure('GPS Unavailable. Restart or hit Refresh.'));
     } catch (e) {
       return Left(LocationFailure(e.toString()));
     }

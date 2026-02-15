@@ -17,24 +17,24 @@ class MockGeolocatorPlatform extends Mock
   Future<bool> isLocationServiceEnabled() {
     return super.noSuchMethod(
       Invocation.method(#isLocationServiceEnabled, <Object?>[]),
-      returnValue: Future.value(false),
-    );
+      returnValue: Future<bool>.value(false),
+    ) as Future<bool>;
   }
 
   @override
   Future<LocationPermission> checkPermission() {
     return super.noSuchMethod(
       Invocation.method(#checkPermission, <Object?>[]),
-      returnValue: Future.value(LocationPermission.denied),
-    );
+      returnValue: Future<LocationPermission>.value(LocationPermission.denied),
+    ) as Future<LocationPermission>;
   }
 
   @override
   Future<LocationPermission> requestPermission() {
     return super.noSuchMethod(
       Invocation.method(#requestPermission, <Object?>[]),
-      returnValue: Future.value(LocationPermission.denied),
-    );
+      returnValue: Future<LocationPermission>.value(LocationPermission.denied),
+    ) as Future<LocationPermission>;
   }
 
   @override
@@ -42,7 +42,7 @@ class MockGeolocatorPlatform extends Mock
     return super.noSuchMethod(
       Invocation.method(#getCurrentPosition, <Object?>[],
           <Symbol, Object?>{#locationSettings: locationSettings}),
-      returnValue: Future.value(Position(
+      returnValue: Future<Position>.value(Position(
           longitude: 0,
           latitude: 0,
           timestamp: DateTime.now(),
@@ -53,7 +53,7 @@ class MockGeolocatorPlatform extends Mock
           headingAccuracy: 0,
           speed: 0,
           speedAccuracy: 0)),
-    );
+    ) as Future<Position>;
   }
 }
 

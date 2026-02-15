@@ -4,6 +4,7 @@ import 'package:astr/core/services/location_service_provider.dart';
 import 'package:astr/features/context/domain/entities/astr_context.dart';
 import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:astr/features/context/presentation/providers/astr_context_provider.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
@@ -14,12 +15,19 @@ import 'astr_context_test.mocks.dart';
 
 @GenerateMocks(<Type>[ILocationService])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late MockILocationService mockLocationService;
   late ProviderContainer container;
 
   setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
+    
     provideDummy<Either<Failure, GeoLocation>>(
-      const Right(GeoLocation(latitude: 0, longitude: 0)),
+      const Right(GeoLocation(latitude: 0, longitude: 0, name: 'Dummy')),
     );
     mockLocationService = MockILocationService();
     container = ProviderContainer(overrides: <Override>[

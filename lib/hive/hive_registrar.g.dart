@@ -3,6 +3,8 @@
 // Check in to version control
 
 import 'package:hive_ce/hive.dart';
+import 'package:astr/features/dashboard/data/models/weather_cache_entry.dart';
+import 'package:astr/features/data_layer/models/zone_cache_entry.dart';
 import 'package:astr/features/profile/domain/entities/saved_location.dart';
 import 'package:astr/hive/hive_adapters.dart';
 
@@ -10,6 +12,8 @@ extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(SavedLocationAdapter());
     registerAdapter(ThemeUiModelAdapter());
+    registerAdapter(WeatherCacheEntryAdapter());
+    registerAdapter(ZoneCacheEntryAdapter());
   }
 }
 
@@ -17,5 +21,7 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(SavedLocationAdapter());
     registerAdapter(ThemeUiModelAdapter());
+    registerAdapter(WeatherCacheEntryAdapter());
+    registerAdapter(ZoneCacheEntryAdapter());
   }
 }

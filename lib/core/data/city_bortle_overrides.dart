@@ -12,6 +12,8 @@
 /// Last updated: December 2025
 library;
 
+import 'dart:math' as math;
+
 class CityBortleOverride { // Radius of influence in kilometers
 
   const CityBortleOverride({

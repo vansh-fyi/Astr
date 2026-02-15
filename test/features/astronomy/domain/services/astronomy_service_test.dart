@@ -71,18 +71,18 @@ class MockAstronomyService extends AstronomyService {
   }
 
   @override
-  void checkInitialized() {
+  Future<void> checkInitialized() async {
     // No-op
   }
 
   @override
-  Map<String, DateTime?> calculateRiseSetTransit({
+  Future<Map<String, DateTime?>> calculateRiseSetTransit({
     required HeavenlyBody body,
     String? starName,
     required DateTime date,
     required double lat,
     required double long,
-  }) {
+  }) async {
     // Return fixed times for testing logic
     // Rise: 6 AM, Set: 6 PM
     return <String, DateTime?>{

@@ -32,10 +32,10 @@ void main() {
       const int count = 168;
       final Map<String, List<Object>> mockHourlyData = <String, List<Object>>{
         'time': List.generate(count, (int i) => DateTime.now().add(Duration(hours: i)).toIso8601String()),
-        'temperature': List.filled(count, 20),
-        'humidity': List.filled(count, 50),
-        'cloudCover': List.filled(count, 10),
-        'windSpeed': List.filled(count, 5),
+        'temperature': List.filled(count, 20.0),
+        'humidity': List.filled(count, 50.0),
+        'cloudCover': List.filled(count, 10.0),
+        'windSpeed': List.filled(count, 5.0),
         'weatherCode': List.filled(count, 0),
       };
 
@@ -51,7 +51,7 @@ void main() {
         (Failure l) => fail('Should not return failure'),
         (List<DailyWeatherData> r) {
           expect(r.length, 7);
-          expect(r[0].temperatureC, 20.0);
+          expect(r[0].weather.temperatureC, 20.0);
           expect(r[0].weatherCode, 0);
         },
       );
@@ -77,10 +77,10 @@ void main() {
       final DateTime now = DateTime.now();
       final Map<String, List<Object>> mockHourlyData = <String, List<Object>>{
         'time': List.generate(count, (int i) => now.add(Duration(hours: i)).toIso8601String()),
-        'temperature': List.filled(count, 15),
-        'humidity': List.filled(count, 60),
-        'cloudCover': List.filled(count, 25),
-        'windSpeed': List.filled(count, 10),
+        'temperature': List.filled(count, 15.0),
+        'humidity': List.filled(count, 60.0),
+        'cloudCover': List.filled(count, 25.0),
+        'windSpeed': List.filled(count, 10.0),
         'weatherCode': List.filled(count, 1),
       };
 

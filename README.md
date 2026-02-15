@@ -1,174 +1,237 @@
-[![Stand With Palestine](https://raw.githubusercontent.com/TheBSD/StandWithPalestine/main/banner-no-action.svg)](https://thebsd.github.io/StandWithPalestine)
-# Flutter Riverpod Template - 2025 Edition
+# Astr
 
-## Modern Flutter Architecture Template with Riverpod
+**Your Personal Stargazing Planner**
 
-A production-ready Flutter template built with the latest packages and best practices, supporting Flutter 3.32 and above. This template implements clean architecture principles and provides a robust foundation for building scalable applications.
+*Real-time light pollution zones | Celestial object catalog | Weather forecasts | Astronomical calculations*
 
----
+[![Flutter](https://img.shields.io/badge/Flutter-3.32+-02569B?logo=flutter)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.0+-0175C2?logo=dart)](https://dart.dev)
+[![License](https://img.shields.io/badge/License-Proprietary-red)](#license)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-brightgreen)](#supported-platforms)
 
-### Key Features
+[Download on Google Play](https://play.google.com/store/apps/details?id=com.astr.app) |
+[Download on App Store](https://apps.apple.com/app/astr) |
+[Open Web App](https://astr.app)
 
-- 🏗️ Clean Architecture with Domain-Driven Design
-- 🎯 Riverpod 2.6+ with code generation
-- 🔒 Built-in authentication pack with secure storage (Hive CE + AES-256)
-- 🌐 Type-safe API integration with Dio 5.8+
-- 📱 Responsive UI with adaptive widgets
-- 🌍 Internationalization ready with Easy Localization
-- 💾 Secure local storage with Hive CE
-- 🧪 Pre-configured unit testing for authentication and controller logic
-- ⚡ Modern navigation with GoRouter 14.8+
-- 🛠️ Custom linting and devtools configuration
+</div>
 
 ---
 
-## Tech Stack
+## What is Astr?
 
-**Core Libraries:**
-- State Management: Riverpod 2.6.1, Freezed 3.0.6 (immutable state)
-- Network Layer: Dio 5.8.0, FPDart 1.1.0 for functional error handling
-- Local Storage: Hive CE 2.11.1 with AES-256 encryption
-- UI & Navigation: GoRouter 14.8.0, Google Fonts 6.2.1, Material 3
-
-**Developer Tools:**
-- Flutter Lints 5.0.0
-- Build Runner, code generation
-- Custom linting rules (`lint_rules.yaml`)
-- Dart & Flutter DevTools support
+Astr helps you plan the perfect stargazing session. It combines real-time light pollution data from VIIRS satellite imagery, accurate astronomical calculations via the Swiss Ephemeris, and weather forecasts to tell you **when and where** to look up.
 
 ---
 
-## Project Structure
+## Features
+
+### Dashboard
+- **Tonight's Sky** -- at-a-glance stargazing conditions for your location
+- **Light Pollution Zone** -- real-time zone rating (1-9 scale) using VIIRS satellite data with atmospheric skyglow propagation modeling
+- **Weather Integration** -- hourly cloud cover, transparency, and seeing conditions via Open-Meteo
+- **Prime Viewing Windows** -- algorithm that calculates optimal stargazing time slots factoring in moon phase, cloud cover, and darkness
+
+### Celestial Catalog
+- Browse stars, planets, constellations, galaxies, nebulae, and star clusters
+- Visibility calculations based on your location and time
+- Detailed object information with rise/set times
+
+### 7-Day Forecast
+- Multi-day stargazing forecast with star ratings
+- Cloud cover predictions and astronomical twilight tracking
+
+### Profile & Settings
+- Multiple saved locations with GPS or manual entry
+- Red mode (night vision) overlay to preserve dark adaptation
+- Offline global zone data download (native apps only)
+- Background weather sync
+
+---
+
+## Supported Platforms
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| **Android** | Supported | Min SDK 23 (Android 6.0), Target SDK 35 (Android 15) |
+| **iOS** | Supported | iOS 16.0+ |
+| **Web (PWA)** | Supported | Touchscreen mobile browsers. Installs as a PWA. |
+| **Desktop browsers** | N/A | Shows a redirect to download the mobile app |
+
+Astr is designed for **touchscreen devices**. Desktop browsers display a landing page with links to the app stores.
+
+---
+
+## Architecture
 
 ```
 lib/
-├── common/            # Shared widgets and components
-├── config/            # App configuration (theme etc.)
-├── constants/         # App-wide constants (endpoints, assets)
-├── core/              # Core functionality, network layer
-├── features/          # Feature modules (authentication, home, ...)
-│   └── authentication/
-│       ├── data/
-│       ├── domain/
-│       └── presentation/
-├── hive/              # Local storage setup and adapters
-├── router/            # Navigation & routing
-├── utils/             # Utility functions
-├── main.dart          # App entry point
-└── my_app.dart        # App configuration
+├── app/                   # Router, theme, navigation shell
+├── core/
+│   ├── engine/            # Astronomy engine (Swiss Ephemeris via sweph)
+│   │   ├── algorithms/    # Celestial calculations, coordinate transforms
+│   │   ├── database/      # Star & DSO catalogs (SQLite)
+│   │   └── models/        # Astronomical data models
+│   ├── platform/          # Background sync (WorkManager / BGTaskScheduler)
+│   ├── services/          # Weather, location, qualitative conditions
+│   └── widgets/           # Red mode overlay, glass panel, shared UI
+├── features/
+│   ├── astronomy/         # Core astronomical calculations & providers
+│   ├── catalog/           # Celestial object browser
+│   ├── context/           # Location context & zone display
+│   ├── dashboard/         # Home screen, weather, prime viewing windows
+│   ├── data_layer/        # H3 geospatial indexing, zone repository
+│   ├── planner/           # 7-day forecast screen
+│   ├── profile/           # Settings, locations, offline data
+│   └── splash/            # Initialization, TOS, smart launch
+└── hive/                  # Encrypted local storage (AES-256)
 ```
+
+### Key Technologies
+
+| Technology | Purpose |
+|------------|---------|
+| **Riverpod 2.6** | State management with code generation |
+| **GoRouter** | Navigation with `StatefulShellRoute` bottom nav |
+| **Hive CE** | AES-256 encrypted local storage |
+| **Swiss Ephemeris (sweph)** | Precise planetary position calculations |
+| **H3 (h3_flutter)** | Hexagonal geospatial indexing for zone lookups |
+| **SQLite (sqflite)** | Star catalog and DSO database |
+| **Cloudflare Workers + D1** | Zone data API backend |
+| **Open-Meteo** | Weather forecast data |
+
+---
+
+## How Light Pollution Zones Work
+
+Astr uses a custom 9-zone scale derived from VIIRS satellite nighttime lights data:
+
+```
+LPI  = Radiance / 0.171
+Zone = clamp(ceil(1 + log(LPI / 0.05) / log(2.5)), 1, 9)
+```
+
+Raw satellite data only captures upward light. Astr applies a **Garstang-inspired skyglow propagation model** via FFT convolution to account for atmospheric scatter from cities up to 80 km away. This means a "dark" site 30 km from a city correctly shows as Zone 2-3 instead of Zone 1.
+
+See [`docs/astr_zone_scale.md`](docs/astr_zone_scale.md) and [`docs/skyglow_propagation.md`](docs/skyglow_propagation.md) for the full specification.
 
 ---
 
 ## Getting Started
 
+### Prerequisites
+
+- Flutter 3.32+
+- Dart 3.0+
+- Xcode 16+ (for iOS, deployment target 16.0)
+- Android Studio / Android SDK 35 (for Android)
 
 ### Setup
 
-1. **Clone the template:**
-    ```bash
-    git clone https://github.com/Erengun/Flutter-Riverpod-2.0-Template.git my_app
-    cd my_app
-    ```
+```bash
+# Clone
+git clone https://github.com/vansh-fyi/Astr.git
+cd Astr
 
-2. **Install dependencies:**
-    ```bash
-    flutter pub get
-    ```
+# Install dependencies
+flutter pub get
 
-3. **Generate code:**
-    ```bash
-    dart run build_runner build --delete-conflicting-outputs
-    ```
+# Generate code (Riverpod, Freezed, JSON serialization, Hive adapters)
+dart run build_runner build --delete-conflicting-outputs
 
-4. **Setup environment:**
-    ```bash
-    cp .env.example .env
-    ```
-
-5. **Run the app:**
-    ```bash
-    flutter run
-    ```
-
----
-
-## Authentication Module
-
-The template includes a complete authentication system with secure credential storage and error handling.
-
-### How it works
-
-- **Login & Registration:** Uses Dio to POST to `/api/login` and `/api/register` endpoints.
-- **Credential Caching:** Credentials are securely cached in Hive CE using AES-256 encryption, with key derived per-device.
-- **State Management:** All authentication UI and logic is managed via Riverpod notifiers and state classes.
-- **Error Handling:** All network and validation errors are surfaced in the UI.
-- **Loading State:** UI reflects loading and error states for a smooth UX.
-
-### Test Credentials
-
-You can test the authentication functionality using these credentials from [reqres.in](https://reqres.in/):
-
-**Login:**
-```json
-{
-    "email": "eve.holt@reqres.in",
-    "password": "cityslicka"
-}
+# Run on device
+flutter run
 ```
 
-**Register:**
-```json
-{
-    "email": "eve.holt@reqres.in",
-    "password": "pistol"
-}
+### Building for Release
+
+```bash
+# Android (AAB for Play Store)
+flutter build appbundle --release
+
+# iOS (Archive via Xcode)
+flutter build ios --release
+# Then: Xcode -> Product -> Archive -> Distribute -> App Store Connect
+
+# Web (PWA)
+flutter build web --release
 ```
 
-**Example:**
-```dart
-@riverpod
-class LoginController extends _$LoginController {
-  // ... state and logic here
-  Future<LoginResponse> login({required String email, required String password}) async {
-    // Handles login, error handling, caching, loading state etc.
-  }
-}
-```
 ---
 
 ## Testing
 
-- Integrated tests for auth controller logic (`test/features/login_controller_test.dart`)
-- Run tests with:
-    ```bash
-    flutter test
-    ```
+```bash
+# Run all tests
+flutter test
+
+# Run with coverage
+flutter test --coverage
+
+# Run static analysis
+flutter analyze
+```
+
+The test suite includes unit tests for astronomical calculations, widget tests for UI components, and integration tests for data repositories.
+
+---
+
+## Backend
+
+The zone data API runs on Cloudflare Workers with D1 (SQLite):
+
+```
+Flutter App -> Cached Zone Repository -> Cloudflare Worker -> D1 Database
+```
+
+See [`cloudflare/README.md`](cloudflare/README.md) for deployment setup and [`docs/cloudflare_d1_setup.md`](docs/cloudflare_d1_setup.md) for the data import guide.
 
 ---
 
 ## Documentation
 
-- Up-to-date documentation in this README
-- Code comments and examples throughout
+| Document | Description |
+|----------|-------------|
+| [`docs/app_overview.md`](docs/app_overview.md) | Full app feature documentation |
+| [`docs/architecture_diagram.md`](docs/architecture_diagram.md) | System architecture and data flow |
+| [`docs/astr_zone_scale.md`](docs/astr_zone_scale.md) | Light pollution zone formula |
+| [`docs/skyglow_propagation.md`](docs/skyglow_propagation.md) | Atmospheric scatter model |
+| [`docs/cloudflare_d1_setup.md`](docs/cloudflare_d1_setup.md) | Backend setup guide |
 
 ---
 
-## Contributing
+## Privacy
 
-See our [Contributing Guide](CONTRIBUTING.md) for details on how to:
-- Set up your development environment
-- Run tests
-- Submit pull requests
+- **Location data** is used only for astronomical calculations and weather lookups. It is not shared with third parties.
+- **No user accounts** are required. All preferences are stored locally on-device with AES-256 encryption.
+- **Analytics**: Microsoft Clarity is used for anonymous usage analytics. No personal data is collected.
+- **Network requests** go only to Open-Meteo (weather), Open-Meteo Geocoding (location search), and Cloudflare (zone data).
+
+[Privacy Policy](https://astr.app/privacy) | [Terms of Service](https://astr.app/terms)
+
+---
+
+## Support
+
+If you enjoy using Astr, consider supporting development:
+
+[Support on Ko-fi](https://ko-fi.com/vanshgrover)
 
 ---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Copyright (c) 2025-2026 Vansh Grover. All Rights Reserved.
+
+The code, design, and content of this repository are the intellectual property of Vansh Grover. Unauthorized copying, modification, distribution, or use is strictly prohibited.
+
+See [LICENSE](LICENSE) for details.
 
 ---
 
-## Contact
+## Links
 
-- [https://www.erengun.dev](https://www.erengun.dev)
+- [Contributing](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Cloudflare API](cloudflare/)
+- [Data Pipeline Scripts](scripts/)

@@ -1,0 +1,14 @@
+name = "astr-zones"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# R2 bucket binding — zones.db stored here for download endpoint
+[[r2_buckets]]
+binding = "ZONE_BUCKET"
+bucket_name = "astr-zones"
+
+# D1 database binding — zone lookups via SQL
+[[d1_databases]]
+binding = "DB"
+database_name = "astr-zones-db"
+database_id = "d00b90d6-9117-4501-9ec8-5213d5ef334d"

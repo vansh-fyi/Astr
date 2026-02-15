@@ -129,9 +129,13 @@ class FakeObjectDetailNotifier extends StateNotifier<ObjectDetailState>
 
 class FakeVisibilityGraphNotifier extends StateNotifier<VisibilityGraphState> 
     implements VisibilityGraphNotifier {
-  FakeVisibilityGraphNotifier() 
-      : super(const VisibilityGraphState(
-          graphData: VisibilityGraphData(objectCurve: <GraphPoint>[], moonCurve: <GraphPoint>[], optimalWindows: <TimeRange>[])
+  FakeVisibilityGraphNotifier()
+      : super(VisibilityGraphState(
+          graphData: VisibilityGraphData(
+            objectCurve: List<GraphPoint>.generate(10, (int index) => GraphPoint(time: DateTime(2025, 1, 1, index), value: 45.0)),
+            moonCurve: const <GraphPoint>[],
+            optimalWindows: const <TimeRange>[]
+          )
         ));
         
   @override

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:astr/features/context/domain/entities/geo_location.dart';
+
 import '../../../../core/config/api_config.dart';
 import '../../../../core/error/failure.dart';
 import '../../domain/entities/daily_forecast.dart';
@@ -13,11 +15,13 @@ class PlannerRepositoryImpl implements IPlannerRepository {
   final http.Client client;
 
   @override
-  Future<Either<Failure, List<DailyForecast>>> get7DayForecast({
-    required double latitude,
-    required double longitude,
-  }) async {
+  Future<Either<Failure, List<DailyForecast>>> get7DayForecast(
+    GeoLocation location,
+    int bortleClass,
+  ) async {
     try {
+      final double latitude = location.latitude;
+      final double longitude = location.longitude;
       final Uri uri = Uri.parse(
         '${ApiConfig.weatherBaseUrl}/forecast?latitude=$latitude&longitude=$longitude&daily=weathercode,cloudcover_mean,precipitation_probability_max&timezone=auto&forecast_days=7',
       );
@@ -41,7 +45,9 @@ class PlannerRepositoryImpl implements IPlannerRepository {
       for (int i = 0; i < dates.length; i++) {
         final DateTime date = DateTime.parse(dates[i]);
         final double cloudCover = cloudCovers[i].toDouble();
-        final String code = weatherCodes[i].toString();
+        
+        // weatherCode in DailyForecast entity is int
+        final int code = weatherCodes[i];
 
         // Placeholder star rating logic - will be refined in PlannerLogic or here if we move logic to repo.
         // For now, let's just map the raw data. The actual "Star Rating" calculation involving Moon Phase

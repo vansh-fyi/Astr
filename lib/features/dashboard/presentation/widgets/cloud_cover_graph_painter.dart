@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../domain/entities/hourly_forecast.dart';
 
@@ -61,7 +60,7 @@ class CloudCoverGraphPainter extends CustomPainter {
 
       final int minutesFromStart = point.time.difference(startTime).inMinutes;
       final double x = (minutesFromStart / totalDuration) * width;
-      final double y = height - (point.weather.cloudCover / 100 * height);
+      final double y = height - (point.cloudCover / 100 * height);
 
       if (isFirst) {
         path.lineTo(x, y);
@@ -95,7 +94,7 @@ class CloudCoverGraphPainter extends CustomPainter {
 
       final int minutesFromStart = point.time.difference(startTime).inMinutes;
       final double x = (minutesFromStart / totalDuration) * width;
-      final double y = height - (point.weather.cloudCover / 100 * height);
+      final double y = height - (point.cloudCover / 100 * height);
 
       if (isFirst) {
         strokePath.moveTo(x, y);

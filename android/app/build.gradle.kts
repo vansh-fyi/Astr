@@ -6,8 +6,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.temp"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.astr.app"
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -20,21 +20,33 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.temp"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "com.astr.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        // Release signing: create key.properties in android/ with:
+        //   storePassword=<password>
+        //   keyPassword=<password>
+        //   keyAlias=upload
+        //   storeFile=<path-to-keystore>
+        // Then uncomment the release signingConfig below.
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // For production release, configure signing in signingConfigs above
+            // and replace this with: signingConfig = signingConfigs.getByName("release")
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

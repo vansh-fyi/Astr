@@ -5,18 +5,11 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
-import 'package:astr/core/error/failure.dart' as _i5;
-import 'package:astr/features/astronomy/domain/entities/celestial_body.dart'
-    as _i7;
-import 'package:astr/features/astronomy/domain/entities/celestial_position.dart'
-    as _i6;
-import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart'
-    as _i9;
-import 'package:astr/features/astronomy/domain/repositories/i_astro_engine.dart'
+import 'package:astr/features/astronomy/domain/services/astronomy_service.dart'
     as _i2;
-import 'package:fpdart/fpdart.dart' as _i4;
+import 'package:astr/features/catalog/domain/entities/graph_point.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
+import 'package:sweph/sweph.dart' as _i4;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -32,109 +25,153 @@ import 'package:mockito/src/dummies.dart' as _i8;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-/// A class which mocks [IAstroEngine].
+/// A class which mocks [AstronomyService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockIAstroEngine extends _i1.Mock implements _i2.IAstroEngine {
-  MockIAstroEngine() {
+class MockAstronomyService extends _i1.Mock implements _i2.AstronomyService {
+  MockAstronomyService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, _i6.CelestialPosition>> getPosition({
-    required _i7.CelestialBody? body,
-    required DateTime? time,
-    required double? latitude,
-    required double? longitude,
+  _i3.Future<void> init() => (super.noSuchMethod(
+        Invocation.method(
+          #init,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<Map<String, DateTime?>> calculateRiseSetTransit({
+    required _i4.HeavenlyBody? body,
+    String? starName,
+    required DateTime? date,
+    required double? lat,
+    required double? long,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
-          #getPosition,
+          #calculateRiseSetTransit,
           [],
           {
             #body: body,
-            #time: time,
-            #latitude: latitude,
-            #longitude: longitude,
+            #starName: starName,
+            #date: date,
+            #lat: lat,
+            #long: long,
           },
         ),
         returnValue:
-            _i3.Future<_i4.Either<_i5.Failure, _i6.CelestialPosition>>.value(
-                _i8.dummyValue<_i4.Either<_i5.Failure, _i6.CelestialPosition>>(
-          this,
-          Invocation.method(
-            #getPosition,
-            [],
-            {
-              #body: body,
-              #time: time,
-              #latitude: latitude,
-              #longitude: longitude,
-            },
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, _i6.CelestialPosition>>);
+            _i3.Future<Map<String, DateTime?>>.value(<String, DateTime?>{}),
+      ) as _i3.Future<Map<String, DateTime?>>);
 
   @override
-  _i3.Future<
-      _i4.Either<_i5.Failure, _i6.CelestialPosition>> getDeepSkyPosition({
-    required double? ra,
-    required double? dec,
-    required String? name,
-    required DateTime? time,
-    required double? latitude,
-    required double? longitude,
+  _i3.Future<List<_i5.GraphPoint>> calculateAltitudeTrajectory({
+    required _i4.HeavenlyBody? body,
+    required DateTime? startTime,
+    required double? lat,
+    required double? long,
+    Duration? duration = const Duration(hours: 12),
   }) =>
       (super.noSuchMethod(
         Invocation.method(
-          #getDeepSkyPosition,
+          #calculateAltitudeTrajectory,
+          [],
+          {
+            #body: body,
+            #startTime: startTime,
+            #lat: lat,
+            #long: long,
+            #duration: duration,
+          },
+        ),
+        returnValue: _i3.Future<List<_i5.GraphPoint>>.value(<_i5.GraphPoint>[]),
+      ) as _i3.Future<List<_i5.GraphPoint>>);
+
+  @override
+  _i3.Future<List<_i5.GraphPoint>> calculateFixedObjectTrajectory({
+    required double? ra,
+    required double? dec,
+    required DateTime? startTime,
+    required double? lat,
+    required double? long,
+    Duration? duration = const Duration(hours: 12),
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #calculateFixedObjectTrajectory,
           [],
           {
             #ra: ra,
             #dec: dec,
-            #name: name,
-            #time: time,
-            #latitude: latitude,
-            #longitude: longitude,
+            #startTime: startTime,
+            #lat: lat,
+            #long: long,
+            #duration: duration,
+          },
+        ),
+        returnValue: _i3.Future<List<_i5.GraphPoint>>.value(<_i5.GraphPoint>[]),
+      ) as _i3.Future<List<_i5.GraphPoint>>);
+
+  @override
+  _i3.Future<List<_i5.GraphPoint>> calculateMoonTrajectory({
+    required DateTime? startTime,
+    required double? lat,
+    required double? long,
+    Duration? duration = const Duration(hours: 12),
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #calculateMoonTrajectory,
+          [],
+          {
+            #startTime: startTime,
+            #lat: lat,
+            #long: long,
+            #duration: duration,
+          },
+        ),
+        returnValue: _i3.Future<List<_i5.GraphPoint>>.value(<_i5.GraphPoint>[]),
+      ) as _i3.Future<List<_i5.GraphPoint>>);
+
+  @override
+  _i3.Future<double> getMoonPhase(DateTime? time) => (super.noSuchMethod(
+        Invocation.method(
+          #getMoonPhase,
+          [time],
+        ),
+        returnValue: _i3.Future<double>.value(0.0),
+      ) as _i3.Future<double>);
+
+  @override
+  _i3.Future<Map<String, DateTime>> getNightWindow({
+    required DateTime? date,
+    required double? lat,
+    required double? long,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getNightWindow,
+          [],
+          {
+            #date: date,
+            #lat: lat,
+            #long: long,
           },
         ),
         returnValue:
-            _i3.Future<_i4.Either<_i5.Failure, _i6.CelestialPosition>>.value(
-                _i8.dummyValue<_i4.Either<_i5.Failure, _i6.CelestialPosition>>(
-          this,
-          Invocation.method(
-            #getDeepSkyPosition,
-            [],
-            {
-              #ra: ra,
-              #dec: dec,
-              #name: name,
-              #time: time,
-              #latitude: latitude,
-              #longitude: longitude,
-            },
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, _i6.CelestialPosition>>);
+            _i3.Future<Map<String, DateTime>>.value(<String, DateTime>{}),
+      ) as _i3.Future<Map<String, DateTime>>);
 
   @override
-  _i3.Future<_i4.Either<_i5.Failure, _i9.MoonPhaseInfo>> getMoonPhaseInfo(
-          {required DateTime? time}) =>
-      (super.noSuchMethod(
+  _i3.Future<void> checkInitialized() => (super.noSuchMethod(
         Invocation.method(
-          #getMoonPhaseInfo,
+          #checkInitialized,
           [],
-          {#time: time},
         ),
-        returnValue:
-            _i3.Future<_i4.Either<_i5.Failure, _i9.MoonPhaseInfo>>.value(
-                _i8.dummyValue<_i4.Either<_i5.Failure, _i9.MoonPhaseInfo>>(
-          this,
-          Invocation.method(
-            #getMoonPhaseInfo,
-            [],
-            {#time: time},
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, _i9.MoonPhaseInfo>>);
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
 }

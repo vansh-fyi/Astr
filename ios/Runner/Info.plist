@@ -49,5 +49,17 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>BGTaskSchedulerPermittedIdentifiers</key>
+		<array>
+			<string>com.astr.weatherSync</string>
+		</array>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>fetch</string>
+		</array>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Astr uses your location in the background to keep your stargazing conditions up to date with periodic weather sync.</string>
 	</dict>
 </plist>

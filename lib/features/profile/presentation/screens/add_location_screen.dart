@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/src/either.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../../core/widgets/glass_panel.dart';
@@ -14,8 +13,8 @@ import '../../../context/domain/entities/geo_location.dart';
 import '../../../context/domain/repositories/i_geocoding_repository.dart';
 import '../../../context/presentation/providers/geocoding_provider.dart';
 import '../../../dashboard/presentation/widgets/nebula_background.dart';
-import '../../domain/entities/saved_location.dart';
-import '../providers/saved_locations_provider.dart';
+import '../../domain/entities/user_location.dart';
+import '../providers/user_locations_provider.dart';
 
 class AddLocationScreen extends ConsumerStatefulWidget {
 
@@ -23,7 +22,8 @@ class AddLocationScreen extends ConsumerStatefulWidget {
     super.key,
     this.locationToEdit,
   });
-  final SavedLocation? locationToEdit;
+  /// Location to edit, or null if adding a new location.
+  final UserLocation? locationToEdit;
 
   @override
   ConsumerState<AddLocationScreen> createState() => _AddLocationScreenState();
@@ -47,13 +47,12 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
   void initState() {
     super.initState();
     if (widget.locationToEdit != null) {
-      final SavedLocation loc = widget.locationToEdit!;
+      final UserLocation loc = widget.locationToEdit!;
       _nameController.text = loc.name;
       _latController.text = loc.latitude.abs().toString();
       _lngController.text = loc.longitude.abs().toString();
       _isNorth = loc.latitude >= 0;
       _isEast = loc.longitude >= 0;
-      _placeName = loc.placeName;
       _showManualEntry = true;
     }
   }
@@ -137,31 +136,31 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
     }
   }
 
-  void _selectLocation(dynamic location) {
-    final double lat = double.parse(location['lat']);
-    final double lng = double.parse(location['lon']);
+  void _selectLocation(Map<String, dynamic> location) {
+    final double lat = double.parse(location['lat'] as String);
+    final double lng = double.parse(location['lon'] as String);
 
     _isNorth = lat >= 0;
     _isEast = lng >= 0;
 
     _latController.text = lat.abs().toString();
     _lngController.text = lng.abs().toString();
-    
+
     // Try to get a good name
-    final String name = location['display_name'];
+    final String name = location['display_name'] as String;
     // Open-Meteo returns a clean name already, so we can use it directly or split if needed.
     // The previous logic was specific to OSM Nominatim's structure.
-    
+
     _nameController.text = name;
 
     setState(() {
       _showManualEntry = true;
       _searchResults = <dynamic>[]; // Clear results
-      _placeName = location['display_name'];
+      _placeName = location['display_name'] as String?;
     });
   }
 
-  void _saveLocation() {
+  Future<void> _saveLocation() async {
     if (_nameController.text.isEmpty || _latController.text.isEmpty || _lngController.text.isEmpty) {
       showGlassToast(context, 'Please fill in all fields');
       return;
@@ -174,35 +173,70 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
       if (!_isNorth) lat = -lat;
       if (!_isEast) lng = -lng;
 
+      // Validate coordinate ranges
+      if (lat < -90 || lat > 90) {
+        showGlassToast(context, 'Latitude must be between -90 and 90');
+        return;
+      }
+      if (lng < -180 || lng > 180) {
+        showGlassToast(context, 'Longitude must be between -180 and 180');
+        return;
+      }
+
       // Check for duplicates (exclude current location if editing)
-      final List<SavedLocation> currentLocations = ref.read(savedLocationsNotifierProvider).value ?? <SavedLocation>[];
-      final bool isDuplicate = currentLocations.any((SavedLocation loc) {
-        if (widget.locationToEdit != null && loc.id == widget.locationToEdit!.id) return false;
-        return (loc.latitude - lat).abs() < 0.0001 && (loc.longitude - lng).abs() < 0.0001;
-      });
+      final List<UserLocation> currentLocations = ref.read(userLocationsNotifierProvider).value ?? <UserLocation>[];
 
-      if (_nameController.text.isEmpty) {
-        showGlassToast(context, 'Please enter a name');
-        return;
+      // When editing, only check if we're trying to use another location's exact coordinates
+      if (widget.locationToEdit != null) {
+        final bool isDuplicate = currentLocations.any((UserLocation loc) {
+          // Skip the location being edited
+          if (loc.id == widget.locationToEdit!.id) return false;
+          // Check if coordinates exactly match another location
+          return loc.latitude == lat && loc.longitude == lng;
+        });
+
+        if (isDuplicate) {
+          showGlassToast(context, 'Another location already exists at these exact coordinates');
+          return;
+        }
+      } else {
+        // When adding new location, check for exact coordinate match
+        final bool isDuplicate = currentLocations.any((UserLocation loc) {
+          return loc.latitude == lat && loc.longitude == lng;
+        });
+
+        if (isDuplicate) {
+          showGlassToast(context, 'This location is already saved');
+          return;
+        }
       }
 
-      if (isDuplicate) {
-        showGlassToast(context, 'This location is already saved');
-        return;
+      if (widget.locationToEdit != null) {
+        // Update existing location (rename)
+        final updated = widget.locationToEdit!.copyWith(
+          name: _nameController.text,
+          latitude: lat,
+          longitude: lng,
+        );
+        await ref.read(userLocationsNotifierProvider.notifier).updateLocation(updated);
+        if (mounted) {
+          context.pop();
+          showGlassToast(context, 'Location updated');
+        }
+      } else {
+        // Add new location (H3 auto-resolved by provider)
+        await ref.read(userLocationsNotifierProvider.notifier).addLocation(
+          name: _nameController.text,
+          latitude: lat,
+          longitude: lng,
+        );
+        if (mounted) {
+          context.pop();
+          showGlassToast(context, 'Location added successfully');
+        }
       }
-
-      final SavedLocation newLocation = SavedLocation(
-        id: widget.locationToEdit?.id ?? const Uuid().v4(),
-        name: _nameController.text,
-        latitude: lat,
-        longitude: lng,
-        createdAt: widget.locationToEdit?.createdAt ?? DateTime.now(),
-        placeName: _placeName,
-      );
-
-      ref.read(savedLocationsNotifierProvider.notifier).addLocation(newLocation);
-      context.pop();
-      showGlassToast(context, widget.locationToEdit != null ? 'Location updated' : 'Location added successfully');
+    } on Failure catch (e) {
+      showGlassToast(context, 'Error: ${e.message}');
     } catch (e) {
       showGlassToast(context, 'Invalid coordinates');
     }
@@ -267,14 +301,15 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                         border: Border.all(color: Colors.white.withOpacity(0.1)),
                       ),
                       child: Column(
-                        children: _searchResults.map((result) {
+                        children: _searchResults.cast<Map<String, dynamic>>().map((Map<String, dynamic> result) {
+                          final String displayName = result['display_name'] as String? ?? '';
                           return ListTile(
                             title: Text(
-                              result['display_name'].split(',')[0],
+                              displayName.split(',')[0],
                               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
-                              result['display_name'],
+                              displayName,
                               style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

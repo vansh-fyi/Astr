@@ -1,23 +1,36 @@
 #!/bin/bash
 set -e
 
-echo "Installing Flutter..."
+FLUTTER_VERSION="3.35.1"
 
-# Install Flutter
+echo "=== Astr Web Build ==="
+echo "Flutter target: $FLUTTER_VERSION"
+
+# Install Flutter (cached between builds on Vercel)
 if [ ! -d "$HOME/flutter" ]; then
-  git clone https://github.com/flutter/flutter.git -b stable --depth 1 $HOME/flutter
+  echo "Installing Flutter $FLUTTER_VERSION..."
+  git clone https://github.com/flutter/flutter.git -b "$FLUTTER_VERSION" "$HOME/flutter"
+else
+  echo "Flutter found, checking version..."
+  cd "$HOME/flutter"
+  CURRENT=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
+  if [ "$CURRENT" != "$FLUTTER_VERSION" ]; then
+    echo "Updating Flutter from $CURRENT to $FLUTTER_VERSION..."
+    git fetch --tags
+    git checkout "$FLUTTER_VERSION"
+  fi
+  cd -
 fi
 
-# Add Flutter to PATH
 export PATH="$HOME/flutter/bin:$PATH"
 
-# Enable web support
-flutter config --enable-web
+# Precache web artifacts
+flutter precache --web
 
 # Get dependencies
 flutter pub get
 
-# Build web app
-flutter build web --release
+# Build web release
+flutter build web --release --base-href="/"
 
-echo "Build completed successfully!"
+echo "=== Build complete ==="

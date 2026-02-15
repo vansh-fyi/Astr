@@ -75,13 +75,15 @@ pubspec.lock
 yarn.lock
 
 # BMAD related directories
+_bmad/
+_bmad-output/
 .agent/
 .bmad/
 .gemini/
 .claude/
 .cursor/
 .github/
-docs/
+# docs/
 
 # Documentation files to exclude (keep these if you want to exclude them)
 # CODE_OF_CONDUCT.md
@@ -93,12 +95,22 @@ test_output*.txt
 # Large NASA data files (keep these ignored - they're too large)
 NASA_Light_Pollution/
 Light_Pollution_ATLAS/
+NASA_VIIRS/
+
+# ETL intermediate database (Story 1.6 refactor - development only)
+assets/db/temp_zones.sqlite
+assets/db/temp_zones.sqlite-wal
+assets/db/temp_zones.sqlite-shm
 
 # Environment variables
 .env
 .env.local
 .env.*.local
 *.env
+.venv/
+
+# Private guides and internal docs
+DEPLOYMENT_GUIDE.md
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
@@ -106,3 +118,7 @@ Light_Pollution_ATLAS/
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages.env
+archive/
+
+# Large NASA data files (keep these ignored - they're too large)
+VNL NPP 2024 Global Masked Data.tif.gz

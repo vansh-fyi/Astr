@@ -1,0 +1,10 @@
+# H3 Data Pipeline Dependencies
+# Version-pinned for reproducibility
+# Last updated: 2026-01-30 (ETL v2 fix)
+
+h3>=4.0.0,<5.0.0
+numpy>=1.24.0,<3.0.0
+requests>=2.28.0,<3.0.0
+python-dotenv>=1.0.0,<2.0.0
+h5py>=3.8.0,<4.0.0
+pyproj>=3.5.0,<4.0.0  # For MODIS sinusoidal to WGS84 coordinate transformation

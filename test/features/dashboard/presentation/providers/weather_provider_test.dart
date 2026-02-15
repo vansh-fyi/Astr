@@ -46,7 +46,20 @@ void main() {
       ],
     );
 
-    when(mockWeatherRepository.getWeather(any)).thenAnswer((_) async => const Right(Weather(cloudCover: 10)));
+    // WeatherNotifier.build() calls _fetchWeather() for today,
+    // which calls repository.getHourlyForecast() and picks the current hour
+    final DateTime now = DateTime.now();
+    when(mockWeatherRepository.getHourlyForecast(any)).thenAnswer((_) async => Right(<HourlyForecast>[
+      HourlyForecast(
+        time: now,
+        cloudCover: 10,
+        temperatureC: 20,
+        humidity: 50,
+        windSpeedKph: 5,
+        seeingScore: 3,
+        seeingLabel: 'Average',
+      ),
+    ]));
 
     // Act
     // Wait for the dependencies to initialize
@@ -54,11 +67,11 @@ void main() {
     // Wait for the provider to initialize
     final Weather weather = await container.read(weatherProvider.future);
     final AsyncValue<Weather> weatherState = container.read(weatherProvider);
-    
+
     // Assert
     expect(weatherState, isA<AsyncData<Weather>>());
     expect(weather.cloudCover, 10);
-    verify(mockWeatherRepository.getWeather(location)).called(1);
+    verify(mockWeatherRepository.getHourlyForecast(location)).called(1);
   });
 
   test('WeatherNotifier uses planner data when selected date is in future', () async {

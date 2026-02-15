@@ -9,15 +9,15 @@ import '../../../context/domain/entities/astr_context.dart';
 import '../../../context/domain/entities/geo_location.dart';
 import '../../../context/presentation/providers/astr_context_provider.dart';
 import '../../../dashboard/presentation/widgets/nebula_background.dart';
-import '../../domain/entities/saved_location.dart';
-import '../providers/saved_locations_provider.dart';
+import '../../domain/entities/user_location.dart';
+import '../providers/user_locations_provider.dart';
 
 class LocationsScreen extends ConsumerWidget {
   const LocationsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<List<SavedLocation>> savedLocationsAsync = ref.watch(savedLocationsNotifierProvider);
+    final AsyncValue<List<UserLocation>> savedLocationsAsync = ref.watch(userLocationsNotifierProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF020204),
@@ -54,7 +54,7 @@ class LocationsScreen extends ConsumerWidget {
                 // Content
                 Expanded(
                   child: savedLocationsAsync.when(
-                    data: (List<SavedLocation> locations) {
+                    data: (List<UserLocation> locations) {
                       if (locations.isEmpty) {
                         return Center(
                           child: Column(
@@ -97,7 +97,7 @@ class LocationsScreen extends ConsumerWidget {
                           itemCount: locations.length,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
                           itemBuilder: (BuildContext context, int index) {
-                            final SavedLocation location = locations[index];
+                            final UserLocation location = locations[index];
                             return Dismissible(
                               key: Key(location.id),
                               direction: DismissDirection.endToStart,
@@ -110,6 +110,38 @@ class LocationsScreen extends ConsumerWidget {
                                 ),
                                 child: const Icon(Ionicons.trash, color: Colors.white),
                               ),
+                              confirmDismiss: (DismissDirection direction) async {
+                                return await showDialog<bool>(
+                                  context: context,
+                                  builder: (BuildContext dialogContext) => AlertDialog(
+                                    backgroundColor: const Color(0xFF141419),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    title: const Text(
+                                      'Delete Location?',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    content: Text(
+                                      'Are you sure you want to delete "${location.name}"? This action cannot be undone.',
+                                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(dialogContext, false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(dialogContext, true),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.redAccent,
+                                        ),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                ) ?? false;
+                              },
                               onDismissed: (DismissDirection direction) {
                                 _deleteLocation(context, ref, location);
                               },
@@ -153,10 +185,12 @@ class LocationsScreen extends ConsumerWidget {
 class _LocationItem extends ConsumerWidget {
 
   const _LocationItem({required this.location});
-  final SavedLocation location;
+  final UserLocation location;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bool isStale = UserLocationsNotifier.isStale(location);
+    
     return GlassPanel(
       onTap: () {
         final GeoLocation geoLocation = GeoLocation(
@@ -171,74 +205,128 @@ class _LocationItem extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: <Widget>[
-          // Icon
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Center(
-              child: Icon(
-                Ionicons.location,
-                size: 24,
-                color: Colors.white,
+          // Icon with pin indicator
+          Stack(
+            children: <Widget>[
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Icon(
+                    Ionicons.location,
+                    size: 24,
+                    color: isStale ? Colors.white.withOpacity(0.5) : Colors.white,
+                  ),
+                ),
               ),
-            ),
+              // Pin badge (top-right corner of icon)
+              if (location.isPinned)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.amber,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Ionicons.pin,
+                      size: 10,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(width: 16),
 
-          // Name and Coords
+          // Name, Coords, and Status
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  location.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        location.name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isStale ? Colors.white.withOpacity(0.6) : Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    // Stale badge
+                    if (isStale)
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.orange.withOpacity(0.6), width: 1),
+                        ),
+                        child: const Text(
+                          'Stale',
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  location.placeName ?? '${location.latitude.toStringAsFixed(2)}, ${location.longitude.toStringAsFixed(2)}',
+                  '${location.latitude.toStringAsFixed(2)}, ${location.longitude.toStringAsFixed(2)} • ${_formatLastViewed(location.lastViewedTimestamp)}',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.5),
-                    fontFamily: location.placeName != null ? null : 'monospace',
+                    color: Colors.white.withOpacity(isStale ? 0.3 : 0.5),
+                    fontFamily: 'monospace',
                   ),
                 ),
               ],
             ),
           ),
-
-          // Zone Badge (Bortle)
-          if (location.bortleClass != null)
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'Zone ${location.bortleClass}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.8),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
           
-          const SizedBox(width: 8),
+          // Pin toggle button
+          IconButton(
+            icon: Icon(
+              location.isPinned ? Ionicons.pin : Ionicons.pin_outline,
+              color: location.isPinned ? Colors.amber : Colors.white.withOpacity(0.4),
+              size: 20,
+            ),
+            onPressed: () async {
+              try {
+                final notifier = ref.read(userLocationsNotifierProvider.notifier);
+                final newState = await notifier.togglePinned(location.id);
+                if (context.mounted) {
+                  showGlassToast(
+                    context,
+                    newState ? 'Location pinned' : 'Location unpinned',
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  showGlassToast(context, 'Failed to update pin status');
+                }
+              }
+            },
+            tooltip: location.isPinned ? 'Unpin location' : 'Pin location',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          ),
+          
+          const SizedBox(width: 4),
           // Arrow
           Icon(
             Icons.arrow_forward_ios,
@@ -249,8 +337,20 @@ class _LocationItem extends ConsumerWidget {
       ),
     );
   }
+  
+  /// Formats lastViewedTimestamp in human-readable relative format.
+  String _formatLastViewed(DateTime timestamp) {
+    final now = DateTime.now();
+    final diff = now.difference(timestamp);
 
-  void _showLocationOptions(BuildContext context, WidgetRef ref, SavedLocation location) {
+    if (diff.inDays == 0) return 'Today';
+    if (diff.inDays == 1) return 'Yesterday';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inDays < 30) return '${(diff.inDays / 7).floor()}w ago';
+    return '${(diff.inDays / 30).floor()}mo ago';
+  }
+
+  void _showLocationOptions(BuildContext context, WidgetRef ref, UserLocation location) {
     showModalBottomSheet(
       context: context,
       useRootNavigator: true, // Ensure it shows above bottom nav
@@ -293,7 +393,7 @@ class _LocationItem extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              location.placeName ?? '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
+              '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.5),
                 fontSize: 14,
@@ -335,9 +435,41 @@ class _LocationItem extends ConsumerWidget {
             
             // Delete Option
             GlassPanel(
-              onTap: () {
+              onTap: () async {
                 context.pop(); // Close sheet
-                _deleteLocation(context, ref, location);
+                final bool? confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext dialogContext) => AlertDialog(
+                    backgroundColor: const Color(0xFF141419),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: const Text(
+                      'Delete Location?',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    content: Text(
+                      'Are you sure you want to delete "${location.name}"? This action cannot be undone.',
+                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, true),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.redAccent,
+                        ),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true && context.mounted) {
+                  _deleteLocation(context, ref, location);
+                }
               },
               padding: const EdgeInsets.all(16),
               border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
@@ -371,12 +503,12 @@ class _LocationItem extends ConsumerWidget {
 
 }
 
-void _deleteLocation(BuildContext context, WidgetRef ref, SavedLocation location) {
+void _deleteLocation(BuildContext context, WidgetRef ref, UserLocation location) {
   final AstrContext? currentContext = ref.read(astrContextProvider).value;
   final bool isCurrent = currentContext?.location.latitude == location.latitude &&
       currentContext?.location.longitude == location.longitude;
 
-  ref.read(savedLocationsNotifierProvider.notifier).deleteLocation(location.id);
+  ref.read(userLocationsNotifierProvider.notifier).deleteLocation(location.id);
 
   if (isCurrent) {
     ref.read(astrContextProvider.notifier).refreshLocation();

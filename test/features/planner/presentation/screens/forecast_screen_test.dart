@@ -2,6 +2,7 @@ import 'package:astr/features/planner/domain/entities/daily_forecast.dart';
 import 'package:astr/features/planner/presentation/providers/planner_provider.dart';
 import 'package:astr/features/planner/presentation/screens/forecast_screen.dart';
 import 'package:astr/features/planner/presentation/widgets/forecast_list_item.dart';
+import 'package:astr/core/widgets/cosmic_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,7 +23,7 @@ void main() {
     // To simulate loading, we can use a Completer or just check if it shows loading initially.
     // Actually, FutureProvider emits loading first.
     
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(CosmicLoader), findsOneWidget);
   });
 
   testWidgets('ForecastScreen renders list of forecasts', (WidgetTester tester) async {

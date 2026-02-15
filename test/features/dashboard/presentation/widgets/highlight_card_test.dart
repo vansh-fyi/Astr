@@ -23,7 +23,8 @@ void main() {
 
     expect(find.text('Jupiter'), findsOneWidget);
     expect(find.text('Visible Now'), findsOneWidget);
-    expect(find.byIcon(Icons.public), findsOneWidget);
+    // HighlightCard now uses Image.asset instead of Icon(Icons.public)
+    expect(find.byType(Image), findsOneWidget);
   });
 
   testWidgets('HighlightCard shows "Below Horizon" when not visible', (WidgetTester tester) async {

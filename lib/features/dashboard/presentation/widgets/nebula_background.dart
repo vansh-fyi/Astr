@@ -9,7 +9,7 @@ class NebulaBackground extends StatelessWidget {
       children: <Widget>[
         // Base Color
         Container(
-          color: const Color(0xFF020204),
+          color: const Color(0xFF000000), // Pure black for OLED (NFR-09)
         ),
         // Nebula Gradient 1 (Indigo)
         Positioned(

@@ -7,13 +7,15 @@ import '../../features/catalog/presentation/screens/catalog_screen.dart';
 import '../../features/catalog/presentation/screens/object_detail_screen.dart';
 import '../../features/dashboard/presentation/home_screen.dart';
 import '../../features/planner/presentation/pages/forecast_screen.dart';
-import '../../features/profile/domain/entities/saved_location.dart';
+import '../../features/profile/domain/entities/user_location.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/providers/tos_provider.dart';
 import '../../features/profile/presentation/screens/add_location_screen.dart';
 import '../../features/profile/presentation/screens/locations_screen.dart';
 import '../../features/profile/presentation/screens/tos_screen.dart';
 import '../../features/splash/presentation/providers/initialization_provider.dart';
+import '../../features/splash/domain/entities/launch_result.dart';
+import '../../features/splash/presentation/providers/smart_launch_provider.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import 'scaffold_with_nav_bar.dart';
 
@@ -50,7 +52,28 @@ GoRouter goRouter(Ref ref) {
         return isTosRoute ? null : '/tos';
       }
 
+      // Handle LaunchResult redirect (Story 4.1)
+      final AsyncValue<LaunchResult> launchAsync = ref.watch(launchResultProvider);
+      
+      // If launch finished successfully or with recoverable error, ensure we're on dashboard
+      // Note: We don't force redirect if user is already navigating elsewhere (e.g. settings)
+      // unless it's the initial launch from splash/tos
+      if (launchAsync.hasValue) {
+        final LaunchResult result = launchAsync.value!;
+        
+        // If coming from splash/tos, route based on launch result
+        if (isSplashRoute || isTosRoute) {
+          return switch (result) {
+            LaunchSuccess() => '/', // Dashboard
+            LaunchTimeout() => '/', // Dashboard (with toast shown in UI)
+            LaunchPermissionDenied() => '/settings/locations/add', // Force setup
+            LaunchServiceDisabled() => '/settings/locations/add', // Force setup
+          };
+        }
+      }
+
       if (isTosRoute || isSplashRoute) {
+        // Fallback default
         return '/';
       }
 
@@ -140,7 +163,7 @@ GoRouter goRouter(Ref ref) {
                       GoRoute(
                         path: 'add',
                         pageBuilder: (BuildContext context, GoRouterState state) {
-                          final SavedLocation? locationToEdit = state.extra as SavedLocation?;
+                          final UserLocation? locationToEdit = state.extra as UserLocation?;
                           return MaterialPage(
                             child: AddLocationScreen(locationToEdit: locationToEdit),
                           );

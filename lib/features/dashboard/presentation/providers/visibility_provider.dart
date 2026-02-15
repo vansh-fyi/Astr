@@ -1,24 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/src/either.dart';
+import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../../features/context/domain/entities/geo_location.dart';
 import '../../../../features/context/presentation/providers/astr_context_provider.dart';
 import '../../../context/domain/entities/astr_context.dart';
-import '../../data/datasources/png_map_service.dart';
+import '../../../data_layer/providers/cached_zone_repository_provider.dart';
+import '../../../data_layer/repositories/cached_zone_repository.dart';
+import '../../../data_layer/services/h3_service.dart';
 import '../../data/repositories/light_pollution_repository.dart';
 import '../../domain/entities/light_pollution.dart';
 import '../../domain/repositories/i_light_pollution_service.dart';
 
-// Services
-final Provider<PngMapService> pngMapServiceProvider = Provider((ProviderRef<PngMapService> ref) => PngMapService());
-
-// Repository - Uses PNG Light Pollution Atlas only (removed VIIRS API)
-final Provider<ILightPollutionService> lightPollutionRepositoryProvider = Provider<ILightPollutionService>((ProviderRef<ILightPollutionService> ref) {
+// Repository - Uses CachedZoneRepository (remote API + Hive cache)
+// Dark sky locations (not in database) return Bortle 1 default
+final Provider<ILightPollutionService> lightPollutionRepositoryProvider = Provider<ILightPollutionService>((Ref ref) {
+  final CachedZoneRepository zoneRepository = ref.watch(cachedZoneRepositoryProvider);
+  final H3Service h3Service = ref.watch(h3ServiceProvider);
+  
   return LightPollutionRepository(
-    ref.watch(pngMapServiceProvider),
+    zoneRepository: zoneRepository,
+    h3Service: h3Service,
   );
 });
+
 
 // State
 class VisibilityState {
@@ -58,7 +63,7 @@ class VisibilityNotifier extends StateNotifier<VisibilityState> {
     if (state.isLoading) return;
     
     state = state.copyWith(isLoading: true);
-
+    
     final Either<Failure, LightPollution> result = await _repository.getLightPollution(location);
 
     result.fold(
@@ -68,7 +73,7 @@ class VisibilityNotifier extends StateNotifier<VisibilityState> {
   }
 }
 
-final StateNotifierProvider<VisibilityNotifier, VisibilityState> visibilityProvider = StateNotifierProvider<VisibilityNotifier, VisibilityState>((StateNotifierProviderRef<VisibilityNotifier, VisibilityState> ref) {
+final StateNotifierProvider<VisibilityNotifier, VisibilityState> visibilityProvider = StateNotifierProvider<VisibilityNotifier, VisibilityState>((Ref ref) {
   final ILightPollutionService repository = ref.watch(lightPollutionRepositoryProvider);
   final VisibilityNotifier notifier = VisibilityNotifier(repository);
 
@@ -77,21 +82,7 @@ final StateNotifierProvider<VisibilityNotifier, VisibilityState> visibilityProvi
   
   astrContextAsync.whenData((AstrContext context) {
     // When we have a valid location, fetch data
-    // We use a microtask or similar to avoid "setState during build" if strictly needed,
-    // but usually calling a method on the notifier is safe here if it doesn't trigger immediate side-effects during build.
-    // However, to be safe and avoid loops, we can check if data is already loaded for this location?
-    // For simplicity in this MVP, we just trigger fetch.
-    // Ideally, we should compare with previous location or state.
-    
-    // NOTE: In a real app, we'd want to avoid re-fetching if location hasn't changed significantly.
-    // For now, we rely on the provider rebuilding the notifier if dependencies change? 
-    // Actually, StateNotifierProvider keeps the notifier alive. 
-    // We should use `ref.listen` or just trigger it here.
-    
-    // Better pattern: Use a separate provider for the "Future" and let the notifier just hold state?
-    // Or just call it.
-    
-    Future.microtask(() => notifier.fetchData(context.location));
+    Future<void>.microtask(() => notifier.fetchData(context.location));
   });
 
   return notifier;

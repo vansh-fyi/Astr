@@ -11,12 +11,24 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'astr_context_provider_test.mocks.dart';
+import 'package:flutter/services.dart';
 
 @GenerateMocks(<Type>[ILocationService])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late MockILocationService mockLocationService;
 
   setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
+    
+    // Mock get_storage channel if needed, typically 'get_storage'
+    // But mostly it's path_provider causing issues for GetStorage init
+    
     provideDummy<Either<Failure, GeoLocation>>(
       const Right(GeoLocation(latitude: 0, longitude: 0, name: 'Dummy')),
     );

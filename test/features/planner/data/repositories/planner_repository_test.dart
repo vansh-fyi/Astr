@@ -68,9 +68,9 @@ void main() {
         'time': times,
         'cloudCover': cloudCovers,
         'weatherCode': weatherCodes,
-        'temperature': List.filled(168, 20),
-        'humidity': List.filled(168, 50),
-        'windSpeed': List.filled(168, 5),
+        'temperature': List.filled(168, 20.0),
+        'humidity': List.filled(168, 50.0),
+        'windSpeed': List.filled(168, 5.0),
       };
 
       stubAstroEngine.moonIllumination = 0.5;
@@ -86,8 +86,7 @@ void main() {
           expect(r.length, 7);
           expect(r[0].cloudCoverAvg, 10.0);
           expect(r[0].moonIllumination, 0.5);
-          // Score = 100 - 10 - (0.5 * 30) - 0 = 75 -> 4 stars
-          expect(r[0].starRating, 4);
+          expect(r[0].starRating, 5); // Excellent conditions (Bortle 1 = dark sky)
         },
       );
     });

@@ -1,13 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../constants/external_urls.dart';
 import '../../../core/widgets/glass_panel.dart';
 import '../../dashboard/presentation/widgets/nebula_background.dart';
 import 'providers/settings_provider.dart';
+import 'widgets/offline_data_card.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -196,6 +199,57 @@ class ProfileScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
+                        ),
+                        // Offline Data Card — hidden on web/PWA
+                        if (!kIsWeb) ...<Widget>[
+                          const SizedBox(height: 16),
+                          const OfflineDataCard(),
+                        ],
+
+                        const SizedBox(height: 16),
+
+                        // Privacy Policy & Terms
+                        GlassPanel(
+                          enableBlur: false,
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Column(
+                            children: <Widget>[
+                              ListTile(
+                                leading: Icon(Ionicons.shield_checkmark_outline, color: Colors.white.withOpacity(0.7)),
+                                title: const Text('Privacy Policy', style: TextStyle(color: Colors.white, fontSize: 14)),
+                                trailing: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white.withOpacity(0.3)),
+                                onTap: () => launchUrl(Uri.parse(ExternalUrls.privacyPolicy)),
+                              ),
+                              Divider(height: 1, color: Colors.white.withOpacity(0.1)),
+                              ListTile(
+                                leading: Icon(Ionicons.document_text_outline, color: Colors.white.withOpacity(0.7)),
+                                title: const Text('Terms of Service', style: TextStyle(color: Colors.white, fontSize: 14)),
+                                trailing: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white.withOpacity(0.3)),
+                                onTap: () => launchUrl(Uri.parse(ExternalUrls.termsOfService)),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // App Version
+                        FutureBuilder<PackageInfo>(
+                          future: PackageInfo.fromPlatform(),
+                          builder: (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
+                            final String version = snapshot.hasData
+                                ? 'v${snapshot.data!.version} (${snapshot.data!.buildNumber})'
+                                : '';
+                            return Center(
+                              child: Text(
+                                'Astr $version',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white.withOpacity(0.3),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

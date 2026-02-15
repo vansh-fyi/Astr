@@ -1,0 +1,16 @@
+{
+    "name": "astr-zones-worker",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Cloudflare Worker serving ASTR zone data from R2",
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy",
+        "tail": "wrangler tail",
+        "test": "vitest run"
+    },
+    "devDependencies": {
+        "vitest": "^4.0.18",
+        "wrangler": "^4.0.0"
+    }
+}

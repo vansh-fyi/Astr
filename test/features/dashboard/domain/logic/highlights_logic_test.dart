@@ -11,6 +11,7 @@ void main() {
     CelestialPosition createPos(CelestialBody body, double alt, double mag) {
       return CelestialPosition(
         body: body,
+        name: body.name,
         time: now,
         altitude: alt,
         azimuth: 0,
@@ -33,7 +34,7 @@ void main() {
 
     test('should exclude the Sun', () {
       final List<CelestialPosition> positions = <CelestialPosition>[
-        createPos(CelestialBody.sun, 45, -26), // Sun is bright but should be excluded
+        createPos(CelestialBody.sun, -10, -26), // Sun below horizon (nighttime) but should still be excluded
         createPos(CelestialBody.venus, 20, -4),
       ];
 
