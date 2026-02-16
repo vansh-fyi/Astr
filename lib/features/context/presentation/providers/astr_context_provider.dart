@@ -63,7 +63,7 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
     return result.fold(
       (Failure failure) => AstrContext(
         selectedDate: now,
-        location: const GeoLocation(latitude: 0, longitude: 0, name: 'Default'),
+        location: _getLastKnownOrDefault(),
         isCurrentLocation: false,
       ),
       (GeoLocation location) async {
@@ -89,7 +89,18 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
   Future<void> refreshLocation() async {
     // AC#5: Clear persisted location when explicitly refreshing
     await _storage.write(_kUsePersistedLocation, false);
-    state = const AsyncValue.loading();
+    // Preserve previous data during loading to prevent downstream providers
+    // (weather, visibility) from seeing a null/loading state and producing
+    // mixed results — especially on Android where GPS can be slow.
+    final AstrContext? previous = state.value;
+    if (previous != null) {
+      state = AsyncValue<AstrContext>.data(previous).copyWithPrevious(
+        AsyncValue.data(previous),
+        isRefresh: true,
+      );
+    } else {
+      state = const AsyncValue<AstrContext>.loading();
+    }
     state = await AsyncValue.guard(_loadInitialContext);
   }
 
@@ -172,6 +183,17 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
         debugPrint('Stack trace: $stackTrace');
       }
     }
+  }
+  /// Returns the last persisted location, or a (0,0) default if none exists.
+  /// Prevents downstream providers from fetching data for null island on GPS failure.
+  GeoLocation _getLastKnownOrDefault() {
+    final double? lat = _storage.read<double>(_kLastLatitude);
+    final double? lng = _storage.read<double>(_kLastLongitude);
+    final String? name = _storage.read<String>(_kLastLocationName);
+    if (lat != null && lng != null) {
+      return GeoLocation(latitude: lat, longitude: lng, name: name ?? 'Last Known');
+    }
+    return const GeoLocation(latitude: 0, longitude: 0, name: 'Default');
   }
 }
 

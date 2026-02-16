@@ -39,14 +39,14 @@ class DeviceLocationService implements ILocationService {
 
     try {
       // NFR-10: GPS timeout after configured duration (default 10s)
+      // Note: Only use LocationSettings.timeLimit — do NOT add an outer .timeout()
+      // as it races with the platform-level timeout on Android, causing premature
+      // termination where GPS loads for ~1s then dies.
       final Position position = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(
           accuracy: LocationAccuracy.high,
-          timeLimit: timeoutDuration, // Pass timeout to Geolocator
+          timeLimit: timeoutDuration,
         ),
-      ).timeout(
-        timeoutDuration,
-        onTimeout: () => throw TimeoutException('GPS timeout'),
       );
 
       return Right(GeoLocation(
@@ -57,7 +57,13 @@ class DeviceLocationService implements ILocationService {
       // NFR-10: Specific timeout failure with user-friendly message
       return const Left(TimeoutFailure('GPS Unavailable. Restart or hit Refresh.'));
     } catch (e) {
-      return Left(LocationFailure(e.toString()));
+      // On Android, geolocator_android throws platform exceptions for timeouts
+      // that surface as generic Exception with 'TimeLimit' in the message.
+      final String msg = e.toString();
+      if (msg.contains('TimeLimit') || msg.contains('timeout')) {
+        return const Left(TimeoutFailure('GPS Unavailable. Restart or hit Refresh.'));
+      }
+      return Left(LocationFailure(msg));
     }
   }
 }

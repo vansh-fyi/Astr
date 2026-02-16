@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -19,31 +20,34 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <meta name="description" content="Astr - Plan perfect stargazing sessions with real-time light pollution zones, celestial object catalog, weather forecasts, and astronomical event tracking.">
+  <meta name="description"
+    content="Astr - Plan perfect stargazing sessions with real-time light pollution zones, celestial object catalog, weather forecasts, and astronomical event tracking.">
   <meta name="theme-color" content="#0A0A0B">
   <meta name="color-scheme" content="dark">
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Astr - Stargazing Planner">
-  <meta property="og:description" content="Plan perfect stargazing sessions with real-time light pollution data, celestial catalog, and weather forecasts.">
+  <meta property="og:description"
+    content="Plan perfect stargazing sessions with real-time light pollution data, celestial catalog, and weather forecasts.">
   <meta property="og:image" content="icons/Icon-512.png">
   <meta property="og:url" content="https://astr.app">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Astr - Stargazing Planner">
-  <meta name="twitter:description" content="Plan perfect stargazing sessions with real-time light pollution data, celestial catalog, and weather forecasts.">
+  <meta name="twitter:description"
+    content="Plan perfect stargazing sessions with real-time light pollution data, celestial catalog, and weather forecasts.">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Astr">
-  <link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png"/>
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png" />
 
   <title>Astr - Stargazing Planner</title>
   <link rel="manifest" href="manifest.json">
@@ -64,6 +68,7 @@
       text-align: center;
       padding: 2rem;
     }
+
     #desktop-gate h1 {
       font-size: 2.5rem;
       margin-bottom: 0.5rem;
@@ -72,16 +77,19 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
+
     #desktop-gate p {
       font-size: 1.1rem;
       color: #9CA3AF;
       max-width: 480px;
       line-height: 1.6;
     }
+
     #desktop-gate .emoji {
       font-size: 4rem;
       margin-bottom: 1rem;
     }
+
     #desktop-gate .store-links {
       display: flex;
       gap: 1rem;
@@ -89,6 +97,7 @@
       flex-wrap: wrap;
       justify-content: center;
     }
+
     #desktop-gate .store-links a {
       display: inline-flex;
       align-items: center;
@@ -101,6 +110,7 @@
       font-weight: 500;
       transition: background 0.2s;
     }
+
     #desktop-gate .store-links a:hover {
       background: #374151;
     }
@@ -109,25 +119,27 @@
     // Detect non-touch desktop browsers (not tablets or phones)
     function isDesktopBrowser() {
       var hasTouch = ('ontouchstart' in window) ||
-                     (navigator.maxTouchPoints > 0) ||
-                     (navigator.msMaxTouchPoints > 0);
+        (navigator.maxTouchPoints > 0) ||
+        (navigator.msMaxTouchPoints > 0);
       var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       // iPads with desktop UA still have touch
       return !hasTouch && !isMobile;
     }
     var _astrIsDesktop = isDesktopBrowser();
     if (_astrIsDesktop) {
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('desktop-gate').style.display = 'flex';
       });
     }
   </script>
 </head>
+
 <body>
   <div id="desktop-gate">
     <div class="emoji">🔭</div>
     <h1>Astr</h1>
-    <p>Astr is designed for touchscreen devices. For the best stargazing planning experience, please use your phone or tablet.</p>
+    <p>Astr is designed for touchscreen devices. For the best stargazing planning experience, please use your phone or
+      tablet.</p>
     <div class="store-links">
       <a href="https://play.google.com/store/apps/details?id=com.astr.app" target="_blank" rel="noopener">
         📱 Google Play
@@ -148,11 +160,11 @@
 
     // PWA auto-update: detect new service worker and activate immediately
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(function(registration) {
-        registration.addEventListener('updatefound', function() {
+      navigator.serviceWorker.ready.then(function (registration) {
+        registration.addEventListener('updatefound', function () {
           var newWorker = registration.installing;
           if (!newWorker) return;
-          newWorker.addEventListener('statechange', function() {
+          newWorker.addEventListener('statechange', function () {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               // New version available - activate it immediately
               newWorker.postMessage({ type: 'SKIP_WAITING' });
@@ -162,7 +174,7 @@
       });
       // Reload once the new service worker takes over
       var refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', function() {
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
         if (!refreshing) {
           refreshing = true;
           window.location.reload();
@@ -171,4 +183,5 @@
     }
   </script>
 </body>
+
 </html>
