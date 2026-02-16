@@ -59,12 +59,13 @@ class VisibilityNotifier extends StateNotifier<VisibilityState> {
   final ILightPollutionService _repository;
 
   Future<void> fetchData(GeoLocation location) async {
-    // Avoid unnecessary fetches if loading
-    if (state.isLoading) return;
-    
+    if (!mounted || state.isLoading) return;
+
     state = state.copyWith(isLoading: true);
-    
+
     final Either<Failure, LightPollution> result = await _repository.getLightPollution(location);
+
+    if (!mounted) return;
 
     result.fold(
       (Failure failure) => state = state.copyWith(isLoading: false, error: failure.message),
@@ -77,13 +78,22 @@ final StateNotifierProvider<VisibilityNotifier, VisibilityState> visibilityProvi
   final ILightPollutionService repository = ref.watch(lightPollutionRepositoryProvider);
   final VisibilityNotifier notifier = VisibilityNotifier(repository);
 
-  // Listen to location changes
-  final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
-  
-  astrContextAsync.whenData((AstrContext context) {
-    // When we have a valid location, fetch data
-    Future<void>.microtask(() => notifier.fetchData(context.location));
+  // Listen (not watch) so the notifier isn't recreated on every context change.
+  // ref.watch would dispose+recreate the notifier each time, causing the
+  // "used after dispose" crash when async fetchData completes on a stale instance.
+  ref.listen<AsyncValue<AstrContext>>(astrContextProvider, (AsyncValue<AstrContext>? previous, AsyncValue<AstrContext> next) {
+    final GeoLocation? newLocation = next.value?.location;
+    final GeoLocation? oldLocation = previous?.value?.location;
+    if (newLocation != null && newLocation != oldLocation) {
+      notifier.fetchData(newLocation);
+    }
   });
+
+  // Initial fetch if context is already available
+  final AstrContext? currentContext = ref.read(astrContextProvider).value;
+  if (currentContext != null) {
+    Future<void>.microtask(() => notifier.fetchData(currentContext.location));
+  }
 
   return notifier;
 });

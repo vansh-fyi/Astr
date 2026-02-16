@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
+import 'package:timezone/data/latest.dart' as tz;
 
 import 'constants/strings.dart';
 import 'core/platform/background_sync_handler.dart';
@@ -22,6 +23,7 @@ import 'my_app.dart';
 void main() async {
   /// Initialize packages
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   await EasyLocalization.ensureInitialized();
   await initHive();
 

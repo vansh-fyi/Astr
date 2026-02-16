@@ -47,6 +47,20 @@ class TimezoneHelper {
         .toList();
   }
 
+  /// Formats a [Duration] as a compact UTC offset label.
+  ///
+  /// Examples: "+5:30" (IST), "-8" (PST), "+0" (UTC/GMT).
+  static String formatOffset(Duration offset) {
+    final int hours = offset.inHours;
+    final int minutes = offset.inMinutes.remainder(60).abs();
+    final String sign = offset.isNegative ? '-' : '+';
+    if (minutes == 0) return '$sign$hours';
+    return '$sign$hours:${minutes.toString().padLeft(2, '0')}';
+  }
+
+  /// Returns the device's UTC offset as a compact label.
+  static String get deviceOffsetLabel => formatOffset(DateTime.now().timeZoneOffset);
+
   /// Formats date as YYYY-MM-DD.
   static String _formatDate(DateTime date) {
     final String year = date.year.toString().padLeft(4, '0');

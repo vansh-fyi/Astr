@@ -3,8 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:astr/features/data_layer/models/coordinate_validation_exception.dart';
 import 'package:astr/features/data_layer/services/coordinate_validation_service.dart';
 import 'package:astr/features/data_layer/services/h3_service.dart';
-import 'package:astr/features/data_layer/services/zone_data_service.dart';
-import 'package:astr/features/data_layer/services/binary_reader_service.dart';
 
 void main() {
   late CoordinateValidationService service;
@@ -354,14 +352,9 @@ void main() {
       expect(h3Index, isA<BigInt>());
       expect(h3Index > BigInt.zero, isTrue);
 
-      // Step 3: Retrieve zone data (full integration flow)
-      final binaryReader = await BinaryReaderService.initialize();
-      final zoneService = ZoneDataService(binaryReader: binaryReader);
-      final zoneData = await zoneService.getZoneData(h3Index);
-
-      expect(zoneData.bortleClass, greaterThanOrEqualTo(1));
-      expect(zoneData.bortleClass, lessThanOrEqualTo(9));
-    }, skip: 'Requires zones.db asset and h3_flutter FFI (platform-dependent)');
+      // Step 3: Zone data retrieval would use CachedZoneRepository (remote API)
+      // which requires network access, so skipped in unit tests
+    }, skip: 'Requires h3_flutter FFI and network access (platform-dependent)');
 
     test('invalid coordinates prevent H3 lookup attempt', () {
       // AC-3 negative case: Invalid coordinates should NOT reach H3Service

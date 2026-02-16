@@ -36,7 +36,8 @@ class CelestialDetailSheet extends ConsumerWidget {
     // 2. Fetch Rise/Set/Transit Times
     String transitTime = '--:--';
     String setTime = '--:--';
-    
+    final String offsetLabel = ref.watch(locationOffsetLabelProvider);
+
     if (object != null) {
       final AsyncValue<Map<String, DateTime?>> riseSetAsync = ref.watch(riseSetProvider(object));
       final Map<String, DateTime?>? times = riseSetAsync.valueOrNull;
@@ -159,6 +160,7 @@ class CelestialDetailSheet extends ConsumerWidget {
                         // _buildStat('Altitude', altitude, Colors.white), // Removed for now as we don't have real current altitude easily
                         _buildStat('Transit', transitTime, themeColor),
                         _buildStat('Set', setTime, Colors.white),
+                        _buildStat('Timezone', offsetLabel, Colors.white),
                       ],
                     ),
                     const SizedBox(height: 16),

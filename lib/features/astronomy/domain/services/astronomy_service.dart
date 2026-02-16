@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart' as tzmap;
 import 'package:sweph/sweph.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../../catalog/domain/entities/graph_point.dart';
 // Conditional imports for platform-specific functionality
@@ -45,9 +47,13 @@ class AstronomyService {
   }) async {
     await checkInitialized();
 
-    // Calculate JD for the start of the day (Local Midnight -> UTC)
-    // This ensures we find events for the selected date, not tomorrow.
-    final DateTime localMidnight = DateTime(date.year, date.month, date.day);
+    // Look up the IANA timezone for this location (DST-aware).
+    final String tzName = tzmap.latLngToTimezoneString(lat, long);
+    final tz.Location location = tz.getLocation(tzName);
+
+    // Location midnight in UTC — accounts for DST automatically.
+    // e.g. London winter: 00:00 GMT = 00:00 UTC; London summer: 00:00 BST = 23:00 UTC prev day.
+    final tz.TZDateTime localMidnight = tz.TZDateTime(location, date.year, date.month, date.day);
     final DateTime utcStart = localMidnight.toUtc();
 
     // Convert UTC DateTime to Julian Day
@@ -73,9 +79,9 @@ class AstronomyService {
     final double? transit = _calcEvent(body, jd, flags, RiseSetTransitFlag.SE_CALC_MTRANSIT, geopos);
 
     return <String, DateTime?>{
-      'rise': _jdToDateTime(rise),
-      'set': _jdToDateTime(set),
-      'transit': _jdToDateTime(transit),
+      'rise': _jdToLocationTime(rise, location),
+      'set': _jdToLocationTime(set, location),
+      'transit': _jdToLocationTime(transit, location),
     };
   }
 
@@ -272,10 +278,16 @@ class AstronomyService {
     }
   }
 
-  /// Convert Julian Day to DateTime (Local Time)
-  DateTime? _jdToDateTime(double? jd) {
+  /// Convert Julian Day to location-local time (DST-aware).
+  ///
+  /// Returns a `TZDateTime` whose wall-clock values and `timeZoneOffset`
+  /// reflect the location's true local time (including DST). Since
+  /// `TZDateTime` extends `DateTime`, callers can format it directly and
+  /// read `.timeZoneOffset` for the location's UTC offset.
+  DateTime? _jdToLocationTime(double? jd, tz.Location location) {
     if (jd == null) return null;
-    return Sweph.swe_revjul(jd, CalendarType.SE_GREG_CAL).toLocal();
+    final DateTime utcTime = Sweph.swe_revjul(jd, CalendarType.SE_GREG_CAL);
+    return tz.TZDateTime.from(utcTime, location);
   }
 
   /// Calculate Moon Phase (Illumination 0.0-1.0) for a specific time

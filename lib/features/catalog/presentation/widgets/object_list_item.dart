@@ -67,37 +67,44 @@ class ObjectListItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    object.type.displayName.substring(
-                      0,
-                      object.type.displayName.length - 1,
-                    ), // Remove plural 's'
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.7),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Rise/Set Time (placeholder for Story 3.2)
-                  const SizedBox(height: 4),
                   // Rise/Set Time
                   Consumer(
                     builder: (BuildContext context, WidgetRef ref, Widget? child) {
                       final AsyncValue<Map<String, DateTime?>> asyncTimes = ref.watch(riseSetProvider(object));
-                      
+
                       return asyncTimes.when(
                         data: (Map<String, DateTime?> times) {
                           final String rise = times['rise'] != null ? DateFormat('HH:mm').format(times['rise']!) : '-- : --';
                           final String set = times['set'] != null ? DateFormat('HH:mm').format(times['set']!) : '-- : --';
-                          return Text(
-                            '↑ $rise | ↓ $set',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.9),
-                              fontFamily: 'monospace',
-                            ),
+                          final String offsetLabel = ref.watch(locationOffsetLabelProvider);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  offsetLabel,
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    color: Colors.white.withOpacity(0.45),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '↑ $rise | ↓ $set',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ],
                           );
                         },
                         loading: () => Text(
@@ -161,7 +168,8 @@ class ObjectListItem extends StatelessWidget {
   String _getDefaultAssetForType() {
     switch (object.type) {
       case CelestialType.planet:
-        return 'assets/icons/stars/star.webp'; // Fallback for planets
+      case CelestialType.satellite:
+        return 'assets/icons/stars/star.webp'; // Fallback for planets/satellites
       case CelestialType.star:
         return 'assets/icons/stars/star.webp';
       case CelestialType.constellation:

@@ -195,6 +195,7 @@ class ObjectDetailScreen extends ConsumerWidget {
 
     final String rise = riseTime != null ? DateFormat('HH:mm').format(riseTime) : '-- : --';
     final String set = setTime != null ? DateFormat('HH:mm').format(setTime) : '-- : --';
+    final String offset = ref.watch(locationOffsetLabelProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,14 +277,37 @@ class ObjectDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                '↑ $rise | ↓ $set',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'monospace',
-                  color: Colors.white.withOpacity(0.9),
-                ),
+              Row(
+                children: <Widget>[
+                  Text(
+                    '↑ $rise | ↓ $set',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'monospace',
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      offset,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.white.withOpacity(0.5),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -295,7 +319,8 @@ class ObjectDetailScreen extends ConsumerWidget {
   String _getDefaultIconForType(CelestialType type) {
     switch (type) {
       case CelestialType.planet:
-        return 'assets/icons/stars/star.webp'; // Fallback for planets
+      case CelestialType.satellite:
+        return 'assets/icons/stars/star.webp'; // Fallback for planets/satellites
       case CelestialType.star:
         return 'assets/icons/stars/star.webp';
       case CelestialType.constellation:

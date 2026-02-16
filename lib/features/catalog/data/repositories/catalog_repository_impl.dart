@@ -21,7 +21,7 @@ class CatalogRepositoryImpl implements ICatalogRepository {
     const CelestialObject(
       id: 'moon',
       name: 'Moon',
-      type: CelestialType.planet,
+      type: CelestialType.satellite,
       iconPath: 'assets/img/moon_full.webp', // Moon uses phase images
       magnitude: -12.74,
       ephemerisId: 1, // SE_MOON

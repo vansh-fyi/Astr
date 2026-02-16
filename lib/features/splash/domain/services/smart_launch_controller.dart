@@ -1,7 +1,7 @@
 import 'package:astr/core/error/failure.dart';
 import 'package:astr/core/services/i_location_service.dart';
+import 'package:astr/features/data_layer/repositories/cached_zone_repository.dart';
 import 'package:astr/features/data_layer/services/h3_service.dart';
-import 'package:astr/features/data_layer/services/zone_data_service.dart';
 import 'package:flutter/foundation.dart';
 
 import '../entities/launch_result.dart';
@@ -11,7 +11,7 @@ import '../entities/launch_result.dart';
 /// This controller implements the smart launch sequence from Epic 4 Story 4.1:
 /// 1. Get current GPS location (with 10s timeout - NFR-10)
 /// 2. Resolve H3 index at resolution 8
-/// 3. Pre-fetch zone data (Bortle, SQM, Ratio)
+/// 3. Pre-fetch zone data via remote API (Bortle, SQM, Ratio)
 /// 4. Return appropriate launch result for navigation
 ///
 /// **Failure Modes:**
@@ -23,14 +23,14 @@ class SmartLaunchController {
   SmartLaunchController({
     required ILocationService locationService,
     required H3Service h3Service,
-    required ZoneDataService zoneDataService,
+    required CachedZoneRepository zoneRepository,
   })  : _locationService = locationService,
         _h3Service = h3Service,
-        _zoneDataService = zoneDataService;
+        _zoneRepository = zoneRepository;
 
   final ILocationService _locationService;
   final H3Service _h3Service;
-  final ZoneDataService _zoneDataService;
+  final CachedZoneRepository _zoneRepository;
 
   /// Execute smart launch: Auto-detect → Resolve H3 → Pre-fetch data
   ///
@@ -83,9 +83,9 @@ class SmartLaunchController {
           );
           debugPrint('[SmartLaunchController] H3 index resolved: $h3Index');
 
-          // Step 3: Pre-fetch zone data (Bortle, SQM, Ratio)
+          // Step 3: Pre-fetch zone data via remote API (Bortle, SQM, Ratio)
           try {
-            final zoneData = await _zoneDataService.getZoneData(h3Index);
+            final zoneData = await _zoneRepository.getZoneData(h3Index);
 
             // SUCCESS: All data resolved
             debugPrint('[SmartLaunchController] Launch success - Bortle ${zoneData.bortleClass}');

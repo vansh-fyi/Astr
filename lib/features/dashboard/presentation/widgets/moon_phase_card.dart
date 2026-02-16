@@ -103,6 +103,21 @@ class MoonPhaseCard extends ConsumerWidget {
                               ),
                             ),
                           ],
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              ref.watch(locationOffsetLabelProvider),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                                fontSize: 9,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ],

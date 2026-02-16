@@ -9,9 +9,9 @@ import 'package:astr/core/error/failure.dart' as _i7;
 import 'package:astr/core/services/i_location_service.dart' as _i4;
 import 'package:astr/features/context/domain/entities/geo_location.dart' as _i8;
 import 'package:astr/features/data_layer/models/zone_data.dart' as _i3;
-import 'package:astr/features/data_layer/services/h3_service.dart' as _i10;
-import 'package:astr/features/data_layer/services/zone_data_service.dart'
+import 'package:astr/features/data_layer/repositories/cached_zone_repository.dart'
     as _i11;
+import 'package:astr/features/data_layer/services/h3_service.dart' as _i10;
 import 'package:fpdart/fpdart.dart' as _i6;
 import 'package:h3_flutter/h3_flutter.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
@@ -123,11 +123,12 @@ class MockH3Service extends _i1.Mock implements _i10.H3Service {
       ) as BigInt);
 }
 
-/// A class which mocks [ZoneDataService].
+/// A class which mocks [CachedZoneRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockZoneDataService extends _i1.Mock implements _i11.ZoneDataService {
-  MockZoneDataService() {
+class MockCachedZoneRepository extends _i1.Mock
+    implements _i11.CachedZoneRepository {
+  MockCachedZoneRepository() {
     _i1.throwOnMissingStub(this);
   }
 
@@ -160,4 +161,34 @@ class MockZoneDataService extends _i1.Mock implements _i11.ZoneDataService {
           ),
         ),
       ) as _i3.ZoneData);
+
+  @override
+  _i5.Future<void> prefetchZones(List<BigInt>? h3Indices) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #prefetchZones,
+          [h3Indices],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  Map<String, dynamic> getCacheStats() => (super.noSuchMethod(
+        Invocation.method(
+          #getCacheStats,
+          [],
+        ),
+        returnValue: <String, dynamic>{},
+      ) as Map<String, dynamic>);
+
+  @override
+  _i5.Future<void> clearCache() => (super.noSuchMethod(
+        Invocation.method(
+          #clearCache,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/error/failure.dart';
 import '../../../context/domain/entities/geo_location.dart';
 import '../../../context/presentation/providers/astr_context_provider.dart';
+import '../../../dashboard/presentation/providers/location_prefetch_provider.dart';
 import '../../data/repositories/location_repository_impl.dart';
 import '../../domain/entities/user_location.dart';
 
@@ -72,14 +73,17 @@ class UserLocationsNotifier extends _$UserLocationsNotifier {
       (_) async {
         ref.invalidateSelf();
 
+        final GeoLocation geoLocation = GeoLocation(
+          latitude: location.latitude,
+          longitude: location.longitude,
+          name: location.name,
+        );
+
         // Auto-select newly added location in AstrContext
-        ref.read(astrContextProvider.notifier).updateLocation(
-              GeoLocation(
-                latitude: location.latitude,
-                longitude: location.longitude,
-                name: location.name,
-              ),
-            );
+        ref.read(astrContextProvider.notifier).updateLocation(geoLocation);
+
+        // Fire-and-forget: prefetch all data for offline availability
+        ref.read(locationPrefetchServiceProvider).prefetchForLocation(geoLocation);
       },
     );
   }

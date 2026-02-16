@@ -1,3 +1,6 @@
+import 'dart:io' show Platform;
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -9,7 +12,10 @@ import '../../features/dashboard/data/models/weather_cache_entry.dart';
 import '../../features/dashboard/data/repositories/cached_weather_repository.dart';
 import '../../features/dashboard/data/repositories/weather_repository_impl.dart';
 import '../../features/dashboard/data/services/weather_background_sync_service.dart';
+import '../../features/data_layer/models/zone_cache_entry.dart';
+import '../../features/data_layer/repositories/cached_zone_repository.dart';
 import '../../features/data_layer/services/h3_service.dart';
+import '../../features/data_layer/services/remote_zone_service.dart';
 import '../../features/profile/data/datasources/location_database_service.dart';
 import '../../features/profile/data/repositories/location_repository_impl.dart';
 import '../../hive/hive_registrar.g.dart';
@@ -38,6 +44,7 @@ void callbackDispatcher() {
 
       // Open required boxes
       await Hive.openBox<WeatherCacheEntry>('weatherCache');
+      await Hive.openBox<ZoneCacheEntry>('zoneCache');
 
       // Initialize database
       final String dbPath = await getDatabasesPath();
@@ -70,10 +77,19 @@ void callbackDispatcher() {
         h3Service: h3Service,
       );
 
+      // Create zone repository
+      final RemoteZoneService remoteZoneService = RemoteZoneService();
+      final CachedZoneRepository zoneRepo = CachedZoneRepository(
+        remoteService: remoteZoneService,
+        cacheBox: Hive.box<ZoneCacheEntry>('zoneCache'),
+      );
+
       // Create sync service
       final WeatherBackgroundSyncService syncService = WeatherBackgroundSyncService(
         weatherRepository: weatherRepo,
         locationRepository: locationRepo,
+        zoneRepository: zoneRepo,
+        h3Service: h3Service,
       );
 
       // Perform sync
@@ -95,6 +111,17 @@ void callbackDispatcher() {
 /// Call this from main.dart during app initialization.
 /// Safe to call multiple times - won't create duplicate tasks.
 Future<void> initializeBackgroundSync() async {
+  // BGTaskScheduler throws a native NSException on the iOS Simulator
+  // that cannot be caught by Dart try-catch, causing a crash (SIGABRT).
+  // Skip registration entirely on the simulator.
+  if (Platform.isIOS) {
+    final IosDeviceInfo deviceInfo = await DeviceInfoPlugin().iosInfo;
+    if (!deviceInfo.isPhysicalDevice) {
+      debugPrint('Background sync: Skipping on iOS Simulator');
+      return;
+    }
+  }
+
   try {
     await Workmanager().initialize(
       callbackDispatcher,

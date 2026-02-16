@@ -3,6 +3,8 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../context/domain/entities/geo_location.dart';
+import '../../../data_layer/repositories/cached_zone_repository.dart';
+import '../../../data_layer/services/h3_service.dart';
 import '../../../profile/domain/entities/user_location.dart';
 import '../../../profile/domain/repositories/i_location_repository.dart';
 import '../../../profile/presentation/providers/user_locations_provider.dart';
@@ -24,11 +26,17 @@ class WeatherBackgroundSyncService {
   WeatherBackgroundSyncService({
     required IWeatherRepository weatherRepository,
     required ILocationRepository locationRepository,
+    required CachedZoneRepository zoneRepository,
+    required H3Service h3Service,
   })  : _weather = weatherRepository,
-        _locations = locationRepository;
+        _locations = locationRepository,
+        _zone = zoneRepository,
+        _h3 = h3Service;
 
   final IWeatherRepository _weather;
   final ILocationRepository _locations;
+  final CachedZoneRepository _zone;
+  final H3Service _h3;
 
   /// Syncs weather for all active (non-stale) locations.
   ///
@@ -105,9 +113,10 @@ class WeatherBackgroundSyncService {
     return UserLocationsNotifier.isStale(location);
   }
 
-  /// Syncs weather for a single location.
+  /// Syncs all data for a single location.
   ///
-  /// Returns true if successful, false otherwise.
+  /// Fetches current weather, hourly forecast, daily forecast, and zone data.
+  /// Returns true if at least one data type was synced successfully.
   /// Never throws - catches all exceptions.
   Future<bool> _syncLocation(UserLocation location) async {
     try {
@@ -117,26 +126,57 @@ class WeatherBackgroundSyncService {
         name: location.name,
       );
 
-      // Use existing CachedWeatherRepository (Stories 3.1/3.2)
-      // This handles caching, network fallback, etc.
-      final Either<Failure, dynamic> result =
-          await _weather.getDailyForecast(geoLocation);
+      bool anySuccess = false;
 
-      return result.fold(
-        (Failure failure) {
-          debugPrint(
-              'Background sync: Failed to fetch weather for ${location.name}: $failure');
-          return false; // Network failure - silent fail
-        },
-        (_) {
-          debugPrint(
-              'Background sync: Successfully synced ${location.name}');
-          return true; // Success - weather cached by repository
-        },
-      );
+      // Sync all data types concurrently
+      final List<bool> results = await Future.wait<bool>([
+        // Current weather
+        _weather.getWeather(geoLocation).then(
+          (Either<Failure, dynamic> r) => r.isRight(),
+          onError: (_) => false,
+        ),
+        // Hourly forecast
+        _weather.getHourlyForecast(geoLocation).then(
+          (Either<Failure, dynamic> r) => r.isRight(),
+          onError: (_) => false,
+        ),
+        // Daily forecast
+        _weather.getDailyForecast(geoLocation).then(
+          (Either<Failure, dynamic> r) => r.isRight(),
+          onError: (_) => false,
+        ),
+        // Zone data
+        _syncZoneData(location),
+      ]);
+
+      anySuccess = results.any((bool success) => success);
+
+      if (anySuccess) {
+        debugPrint('Background sync: Synced ${location.name}');
+      } else {
+        debugPrint('Background sync: All fetches failed for ${location.name}');
+      }
+
+      return anySuccess;
     } catch (e) {
-      // NFR-04: zones.db lock or Hive write failure - silent fail
+      // NFR-04: Silent fail
       debugPrint('Background sync: Error syncing ${location.name}: $e');
+      return false;
+    }
+  }
+
+  /// Syncs zone data for a single location.
+  Future<bool> _syncZoneData(UserLocation location) async {
+    try {
+      final BigInt h3Index = _h3.latLonToH3(
+        location.latitude,
+        location.longitude,
+        8,
+      );
+      await _zone.getZoneData(h3Index);
+      return true;
+    } catch (e) {
+      debugPrint('Background sync: Zone data error for ${location.name}: $e');
       return false;
     }
   }

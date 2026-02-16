@@ -3,7 +3,7 @@ import 'package:astr/core/services/i_location_service.dart';
 import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:astr/features/data_layer/models/zone_data.dart';
 import 'package:astr/features/data_layer/services/h3_service.dart';
-import 'package:astr/features/data_layer/services/zone_data_service.dart';
+import 'package:astr/features/data_layer/repositories/cached_zone_repository.dart';
 import 'package:astr/features/splash/domain/entities/launch_result.dart';
 import 'package:astr/features/splash/domain/services/smart_launch_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +13,7 @@ import 'package:mockito/mockito.dart';
 
 import 'smart_launch_controller_test.mocks.dart';
 
-@GenerateMocks([ILocationService, H3Service, ZoneDataService])
+@GenerateMocks([ILocationService, H3Service, CachedZoneRepository])
 void main() {
   // Provide dummy values for types Mockito can't auto-generate
   provideDummy<Either<Failure, GeoLocation>>(
@@ -24,17 +24,17 @@ void main() {
     late SmartLaunchController controller;
     late MockILocationService mockLocationService;
     late MockH3Service mockH3Service;
-    late MockZoneDataService mockZoneDataService;
+    late MockCachedZoneRepository mockZoneRepository;
 
     setUp(() {
       mockLocationService = MockILocationService();
       mockH3Service = MockH3Service();
-      mockZoneDataService = MockZoneDataService();
+      mockZoneRepository = MockCachedZoneRepository();
 
       controller = SmartLaunchController(
         locationService: mockLocationService,
         h3Service: mockH3Service,
-        zoneDataService: mockZoneDataService,
+        zoneRepository: mockZoneRepository,
       );
     });
 
@@ -56,7 +56,7 @@ void main() {
           sqm: 20.5,
           ratio: 0.12,
         );
-        when(mockZoneDataService.getZoneData(mockH3Index))
+        when(mockZoneRepository.getZoneData(mockH3Index))
             .thenAnswer((_) async => mockZoneData);
 
         // Act
@@ -72,7 +72,7 @@ void main() {
         // Verify service calls in order
         verify(mockLocationService.getCurrentLocation()).called(1);
         verify(mockH3Service.latLonToH3(37.7749, -122.4194, 8)).called(1);
-        verify(mockZoneDataService.getZoneData(mockH3Index)).called(1);
+        verify(mockZoneRepository.getZoneData(mockH3Index)).called(1);
       });
 
       test('should use resolution 8 for H3 index (PRD requirement)', () async {
@@ -89,7 +89,7 @@ void main() {
           sqm: 22.0,
           ratio: 0.0,
         );
-        when(mockZoneDataService.getZoneData(mockH3Index))
+        when(mockZoneRepository.getZoneData(mockH3Index))
             .thenAnswer((_) async => mockZoneData);
 
         // Act
@@ -118,7 +118,7 @@ void main() {
 
         // Verify H3 and zone data services NOT called
         verifyNever(mockH3Service.latLonToH3(any, any, any));
-        verifyNever(mockZoneDataService.getZoneData(any));
+        verifyNever(mockZoneRepository.getZoneData(any));
       });
 
       test('should detect TimeoutFailure specifically (not generic Failure)', () async {
@@ -153,7 +153,7 @@ void main() {
 
         // Verify H3 and zone data services NOT called
         verifyNever(mockH3Service.latLonToH3(any, any, any));
-        verifyNever(mockZoneDataService.getZoneData(any));
+        verifyNever(mockZoneRepository.getZoneData(any));
       });
 
       test('should handle permanently denied permission', () async {
@@ -188,7 +188,7 @@ void main() {
 
         // Verify H3 and zone data services NOT called
         verifyNever(mockH3Service.latLonToH3(any, any, any));
-        verifyNever(mockZoneDataService.getZoneData(any));
+        verifyNever(mockZoneRepository.getZoneData(any));
       });
     });
 
@@ -204,7 +204,7 @@ void main() {
             .thenReturn(mockH3Index);
 
         // Mock zone data failure (e.g., database read error)
-        when(mockZoneDataService.getZoneData(mockH3Index)).thenThrow(
+        when(mockZoneRepository.getZoneData(mockH3Index)).thenThrow(
           RangeError('H3 index not found in zones.db'),
         );
 
@@ -217,7 +217,7 @@ void main() {
         // Verify all services were attempted
         verify(mockLocationService.getCurrentLocation()).called(1);
         verify(mockH3Service.latLonToH3(37.7749, -122.4194, 8)).called(1);
-        verify(mockZoneDataService.getZoneData(mockH3Index)).called(1);
+        verify(mockZoneRepository.getZoneData(mockH3Index)).called(1);
       });
 
       test('should handle zone data cache miss gracefully', () async {
@@ -229,7 +229,7 @@ void main() {
         final mockH3Index = BigInt.from(617700169958293503);
         when(mockH3Service.latLonToH3(0.0, 0.0, 8)).thenReturn(mockH3Index);
 
-        when(mockZoneDataService.getZoneData(mockH3Index)).thenThrow(
+        when(mockZoneRepository.getZoneData(mockH3Index)).thenThrow(
           FormatException('Zone data not found'),
         );
 
@@ -261,7 +261,7 @@ void main() {
         verify(mockH3Service.latLonToH3(90.0, 0.0, 8)).called(1);
 
         // Zone data NOT called (H3 failed first)
-        verifyNever(mockZoneDataService.getZoneData(any));
+        verifyNever(mockZoneRepository.getZoneData(any));
       });
 
       test('should handle dateline coordinate gracefully', () async {
@@ -278,7 +278,7 @@ void main() {
           sqm: 22.0,
           ratio: 0.0,
         );
-        when(mockZoneDataService.getZoneData(mockH3Index))
+        when(mockZoneRepository.getZoneData(mockH3Index))
             .thenAnswer((_) async => mockZoneData);
 
         // Act
@@ -311,7 +311,7 @@ void main() {
           sqm: 22.0,
           ratio: 0.0,
         );
-        when(mockZoneDataService.getZoneData(mockH3Index)).thenAnswer((_) async {
+        when(mockZoneRepository.getZoneData(mockH3Index)).thenAnswer((_) async {
           callOrder.add('zoneData');
           return mockZoneData;
         });
@@ -335,7 +335,7 @@ void main() {
         // Assert: Only location service called
         verify(mockLocationService.getCurrentLocation()).called(1);
         verifyZeroInteractions(mockH3Service);
-        verifyZeroInteractions(mockZoneDataService);
+        verifyZeroInteractions(mockZoneRepository);
       });
     });
   });

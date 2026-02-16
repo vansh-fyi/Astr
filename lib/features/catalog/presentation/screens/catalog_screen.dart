@@ -64,6 +64,7 @@ class CatalogScreen extends ConsumerWidget {
                       return Padding(
                         padding: const EdgeInsets.only(right: 12),
                         child: ChoiceChip(
+                          showCheckmark: false,
                           label: Text(type.displayName),
                           selected: isSelected,
                           onSelected: (_) {

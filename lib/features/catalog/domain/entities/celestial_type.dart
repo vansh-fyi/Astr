@@ -1,6 +1,7 @@
 /// Enum defining types of celestial objects in the catalog
 enum CelestialType {
   planet,
+  satellite,
   star,
   constellation,
   galaxy,
@@ -11,6 +12,8 @@ enum CelestialType {
     switch (this)  {
       case CelestialType.planet:
         return 'Planets';
+      case CelestialType.satellite:
+        return 'Satellites';
       case CelestialType.star:
         return 'Stars';
       case CelestialType.constellation:

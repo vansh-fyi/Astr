@@ -1,11 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart' as tzmap;
 import 'package:sweph/sweph.dart';
+import 'package:timezone/timezone.dart' as tz;
 
+import '../../../../core/utils/timezone_helper.dart';
 import '../../../astronomy/domain/services/astronomy_service.dart';
 import '../../../context/domain/entities/astr_context.dart';
 import '../../../context/presentation/providers/astr_context_provider.dart';
 import '../../domain/entities/celestial_object.dart';
 import '../../domain/entities/graph_point.dart';
+
+/// Provides the selected location's UTC offset label (e.g., "UTC+0", "UTC+5:30").
+///
+/// Always reflects the location's timezone (including DST), regardless of
+/// whether rise/set times were successfully computed.
+final Provider<String> locationOffsetLabelProvider = Provider<String>((ProviderRef<String> ref) {
+  final AsyncValue<AstrContext> contextState = ref.watch(astrContextProvider);
+  if (!contextState.hasValue) return 'UTC${TimezoneHelper.deviceOffsetLabel}';
+
+  final AstrContext ctx = contextState.value!;
+  final String tzName = tzmap.latLngToTimezoneString(
+    ctx.location.latitude,
+    ctx.location.longitude,
+  );
+  final tz.Location location = tz.getLocation(tzName);
+  final tz.TZDateTime now = tz.TZDateTime.now(location);
+  return 'UTC${TimezoneHelper.formatOffset(now.timeZoneOffset)}';
+});
 
 final FutureProviderFamily<Map<String, DateTime?>, CelestialObject> riseSetProvider = FutureProvider.family<Map<String, DateTime?>, CelestialObject>((FutureProviderRef<Map<String, DateTime?>> ref, CelestialObject object) async {
   final AstronomyService astronomyService = ref.watch(astronomyServiceProvider);

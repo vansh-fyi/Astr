@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import '../../../context/domain/entities/astr_context.dart';
-import '../../../context/presentation/providers/astr_context_provider.dart';
 import '../../domain/entities/weather.dart';
 import '../providers/weather_provider.dart';
 
@@ -20,37 +18,15 @@ class DashboardHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<Weather> weatherAsync = ref.watch(weatherProvider);
-    final AsyncValue<AstrContext> contextAsync = ref.watch(astrContextProvider);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          // Location name (from AstrContext)
-          Flexible(
-            child: contextAsync.when(
-              data: (AstrContext astrContext) => Text(
-                astrContext.location?.name ?? 'Current Location',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              loading: () => const SizedBox.shrink(),
-              error: (Object _, StackTrace __) => const SizedBox.shrink(),
-            ),
-          ),
-
-          const SizedBox(width: 8),
-
-          // Last Updated indicator (FR-13)
-          weatherAsync.when(
-            data: (Weather weather) => _buildLastUpdated(context, weather),
-            loading: () => const SizedBox.shrink(),
-            error: (Object _, StackTrace __) => const SizedBox.shrink(),
-          ),
-        ],
+      alignment: Alignment.centerRight,
+      // Last Updated indicator (FR-13)
+      child: weatherAsync.when(
+        data: (Weather weather) => _buildLastUpdated(context, weather),
+        loading: () => const SizedBox.shrink(),
+        error: (Object _, StackTrace __) => const SizedBox.shrink(),
       ),
     );
   }

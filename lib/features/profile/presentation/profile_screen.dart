@@ -10,7 +10,6 @@ import '../../../constants/external_urls.dart';
 import '../../../core/widgets/glass_panel.dart';
 import '../../dashboard/presentation/widgets/nebula_background.dart';
 import 'providers/settings_provider.dart';
-import 'widgets/offline_data_card.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -200,12 +199,6 @@ class ProfileScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        // Offline Data Card — hidden on web/PWA
-                        if (!kIsWeb) ...<Widget>[
-                          const SizedBox(height: 16),
-                          const OfflineDataCard(),
-                        ],
-
                         const SizedBox(height: 16),
 
                         // Privacy Policy & Terms

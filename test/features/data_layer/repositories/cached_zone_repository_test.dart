@@ -1,11 +1,7 @@
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as p;
 
 import 'package:astr/features/data_layer/models/zone_cache_entry.dart';
 import 'package:astr/features/data_layer/models/zone_data.dart';
@@ -18,42 +14,6 @@ import 'cached_zone_repository_test.mocks.dart';
 void main() {
   late MockRemoteZoneService mockRemote;
   late MockBox<ZoneCacheEntry> mockCache;
-  late Directory tempDir;
-  late String testDbPath;
-
-  setUpAll(() async {
-    tempDir = await Directory.systemTemp.createTemp('cached_zone_repo_test_');
-    testDbPath = p.join(tempDir.path, 'test_zones.db');
-
-    // Create a valid zones.db file for local fallback tests
-    // Format: [Header: 16 bytes][Records: 2 × 20 bytes]
-    final int totalSize = 16 + (2 * 20);
-    final Uint8List data = Uint8List(totalSize);
-    final ByteData buffer = data.buffer.asByteData();
-
-    // Header
-    data.setAll(0, 'ASTR'.codeUnits); // Magic
-    buffer.setUint32(4, 1, Endian.little); // Version
-    buffer.setUint64(8, 2, Endian.little); // Record count
-
-    // Record 0: h3=100, Bortle=5, Ratio=0.5, SQM=20.0
-    buffer.setUint64(16, 100, Endian.little);
-    data[24] = 5;
-    buffer.setFloat32(25, 0.5, Endian.little);
-    buffer.setFloat32(29, 20.0, Endian.little);
-
-    // Record 1: h3=500, Bortle=3, Ratio=0.2, SQM=21.5
-    buffer.setUint64(36, 500, Endian.little);
-    data[44] = 3;
-    buffer.setFloat32(45, 0.2, Endian.little);
-    buffer.setFloat32(49, 21.5, Endian.little);
-
-    await File(testDbPath).writeAsBytes(data);
-  });
-
-  tearDownAll(() async {
-    await tempDir.delete(recursive: true);
-  });
 
   setUp(() {
     mockRemote = MockRemoteZoneService();
@@ -115,69 +75,7 @@ void main() {
   });
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Local-first fallback (new feature)
-  // ──────────────────────────────────────────────────────────────────────────
-
-  group('local-first fallback', () {
-    test('uses local zones.db when available and cache misses', () async {
-      when(mockCache.get(any)).thenReturn(null);
-      when(mockCache.put(any, any)).thenAnswer((_) async => <dynamic, dynamic>{});
-
-      final CachedZoneRepository repo = CachedZoneRepository(
-        remoteService: mockRemote,
-        cacheBox: mockCache,
-        localDbPath: testDbPath,
-      );
-
-      final ZoneData result = await repo.getZoneData(BigInt.from(100));
-
-      expect(result.bortleClass, 5);
-      expect(result.ratio, closeTo(0.5, 0.001));
-      expect(result.sqm, closeTo(20.0, 0.001));
-      // Should NOT call remote since local succeeded
-      verifyNever(mockRemote.getZoneData(any));
-    });
-
-    test('returns pristine dark sky when h3 not in local db', () async {
-      when(mockCache.get(any)).thenReturn(null);
-
-      final CachedZoneRepository repo = CachedZoneRepository(
-        remoteService: mockRemote,
-        cacheBox: mockCache,
-        localDbPath: testDbPath,
-      );
-
-      // h3=999 is NOT in our test db (only 100 and 500)
-      final ZoneData result = await repo.getZoneData(BigInt.from(999));
-
-      expect(result.bortleClass, 1); // pristine dark sky
-      expect(result.ratio, 0.0);
-      expect(result.sqm, 22.0);
-      verifyNever(mockRemote.getZoneData(any));
-    });
-
-    test('falls back to remote when local db file does not exist', () async {
-      when(mockCache.get(any)).thenReturn(null);
-      when(mockRemote.getZoneData(any)).thenAnswer(
-        (_) async => ZoneData(bortleClass: 4, ratio: 0.3, sqm: 20.5),
-      );
-      when(mockCache.put(any, any)).thenAnswer((_) async => <dynamic, dynamic>{});
-
-      final CachedZoneRepository repo = CachedZoneRepository(
-        remoteService: mockRemote,
-        cacheBox: mockCache,
-        localDbPath: '/nonexistent/path/zones.db',
-      );
-
-      final ZoneData result = await repo.getZoneData(BigInt.from(100));
-
-      expect(result.bortleClass, 4);
-      verify(mockRemote.getZoneData(any)).called(1);
-    });
-  });
-
-  // ──────────────────────────────────────────────────────────────────────────
-  // Remote fallback (no local db path set)
+  // Remote fallback (cache miss → remote API)
   // ──────────────────────────────────────────────────────────────────────────
 
   group('remote fallback', () {

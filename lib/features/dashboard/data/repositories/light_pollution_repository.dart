@@ -53,19 +53,10 @@ class LightPollutionRepository implements ILightPollutionService {
         source: zoneData.bortleClass == 1 
             ? LightPollutionSource.estimated  // Dark sky default
             : LightPollutionSource.precise,    // From database
-        zone: _formatZone(h3Index),
+        zone: zoneData.bortleClass.toString(),
       ));
     } catch (e) {
       debugPrint('LightPollutionRepository: Lookup failed: $e');
       return Left<Failure, LightPollution>(ServerFailure('Light pollution lookup failed: $e'));
     }
-  }
-
-  /// Formats H3 index as a short zone identifier.
-  /// 
-  /// Returns the last 4 hex digits for a compact zone label.
-  String _formatZone(BigInt h3Index) {
-    final String hex = h3Index.toRadixString(16);
-    return hex.length >= 4 ? hex.substring(hex.length - 4) : hex;
-  }
-}
+  }}

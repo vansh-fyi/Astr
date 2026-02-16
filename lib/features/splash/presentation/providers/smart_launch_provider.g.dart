@@ -7,11 +7,12 @@ part of 'smart_launch_provider.dart';
 // **************************************************************************
 
 String _$smartLaunchControllerHash() =>
-    r'd4aba0c10591ef31b48e9f9aa4ce74726494a20b';
+    r'dd94a67d6654fafd05e92ec3ef7fcfd8ba8f5e65';
 
 /// Provider for [SmartLaunchController].
 ///
 /// Creates the controller with dependencies injected from other providers.
+/// All dependencies are synchronous — no async waiting required.
 ///
 /// Copied from [smartLaunchController].
 @ProviderFor(smartLaunchController)

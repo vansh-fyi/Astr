@@ -73,6 +73,8 @@ dependencies:
   flutter_native_splash: ^2.3.1
   clarity_flutter: ^1.6.0
   package_info_plus: ^9.0.0
+  timezone: ^0.10.1
+  lat_lng_to_timezone: ^0.2.0
 
 dev_dependencies:
   flutter_test:

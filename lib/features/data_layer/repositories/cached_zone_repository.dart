@@ -4,14 +4,12 @@ import 'package:hive_ce/hive.dart';
 import '../models/zone_cache_entry.dart';
 import '../models/zone_data.dart';
 import '../services/remote_zone_service.dart';
-import '../services/zone_data_service.dart';
-import '../services/binary_reader_service.dart';
 
 /// Cached repository for zone data with cache-first pattern.
 ///
-/// Implements the same pattern as [CachedWeatherRepository]:
+/// Lookup strategy:
 /// 1. Check Hive cache for existing data
-/// 2. If cache miss, fetch from remote API
+/// 2. If cache miss, fetch from remote Cloudflare D1 API
 /// 3. Cache successful responses
 /// 4. Return pristine dark sky (Bortle 1) if not in database
 ///
@@ -27,15 +25,11 @@ class CachedZoneRepository {
   CachedZoneRepository({
     required RemoteZoneService remoteService,
     required Box<ZoneCacheEntry> cacheBox,
-    String? localDbPath,
   })  : _remote = remoteService,
-        _cache = cacheBox,
-        _localDbPath = localDbPath;
+        _cache = cacheBox;
 
   final RemoteZoneService _remote;
   final Box<ZoneCacheEntry> _cache;
-  final String? _localDbPath;
-  ZoneDataService? _localService;
 
   /// Cache key prefix for zone entries
   static const String _keyPrefix = 'zone_';
@@ -68,23 +62,7 @@ class CachedZoneRepository {
       );
     }
 
-    // 2. Try local zones.db if downloaded (offline mode)
-    if (_localDbPath != null) {
-      try {
-        final ZoneDataService localService = _getLocalService();
-        final ZoneData localData = await localService.getZoneData(h3Index);
-        _cacheZoneData(cacheKey, h3Hex, localData);
-        return localData;
-      } on RangeError {
-        // Not found in local DB = pristine dark sky
-        debugPrint('$h3Hex not in local DB, returning pristine dark sky');
-        return pristineDarkSky;
-      } catch (e) {
-        debugPrint('Local lookup failed, falling back to remote: $e');
-      }
-    }
-
-    // 3. Cache miss, no local DB — fetch from remote
+    // 2. Cache miss — fetch from remote D1 API
     debugPrint('Zone cache miss for $h3Hex, fetching from remote...');
     final ZoneData? remoteData = await _remote.getZoneData(h3Index);
 
@@ -93,7 +71,7 @@ class CachedZoneRepository {
       return remoteData;
     }
 
-    // 4. Remote failed - check if we have stale cache
+    // 3. Remote failed - check if we have stale cache
     if (cached != null) {
       debugPrint('Remote failed, using expired cache for $h3Hex');
       return ZoneData(
@@ -103,7 +81,7 @@ class CachedZoneRepository {
       );
     }
 
-    // 5. Not in database = pristine dark sky location
+    // 4. Not in database = pristine dark sky location
     debugPrint('$h3Hex not in lit-areas DB, returning pristine dark sky');
     return pristineDarkSky;
   }
@@ -126,7 +104,7 @@ class CachedZoneRepository {
   }
 
   /// Pre-cache nearby zones (e.g., H3 ring around current location).
-  /// 
+  ///
   /// Useful for smooth UX when panning the map.
   Future<void> prefetchZones(List<BigInt> h3Indices) async {
     // Filter out already cached
@@ -178,13 +156,5 @@ class CachedZoneRepository {
   /// Clear all cached zone data
   Future<void> clearCache() async {
     await _cache.clear();
-  }
-
-  /// Lazily initialize the local ZoneDataService.
-  ZoneDataService _getLocalService() {
-    _localService ??= ZoneDataService(
-      binaryReader: BinaryReaderService(dbPath: _localDbPath!),
-    );
-    return _localService!;
   }
 }
