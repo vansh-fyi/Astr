@@ -38,6 +38,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final bool isLoading = ref.watch(globalLoadingProvider);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           // Page Content (Pushed down to be visible below header)
