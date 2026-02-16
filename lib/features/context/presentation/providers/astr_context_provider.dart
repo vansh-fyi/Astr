@@ -145,11 +145,15 @@ class AstrContextNotifier extends AsyncNotifier<AstrContext> {
           (Failure l) => null, // Ignore error
           (String name) {
              final GeoLocation updatedLocation = location.copyWith(placeName: name);
-             // Update state again with place name
-             state = AsyncValue.data(currentValue.copyWith(
-               location: updatedLocation,
-               isCurrentLocation: false,
-             ));
+             // Update state with place name — use latest state, not the stale
+             // `currentValue` captured before the optimistic update.
+             final AstrContext? latest = state.value;
+             if (latest != null) {
+               state = AsyncValue.data(latest.copyWith(
+                 location: updatedLocation,
+                 isCurrentLocation: false,
+               ));
+             }
              // AC#5: Update persisted name
              _storage.write(_kLastLocationName, name);
           },

@@ -36,9 +36,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProviderStateMixin {
   late AnimationController _bannerController;
-  late Animation<Offset> _bannerSlideAnimation;
   Timer? _bannerTimer;
   DateTime? _lastSelectedDate;
+  bool _isFutureDate = false;
+  bool _hasHandledLaunchToast = false;
+  bool _hasHandledLaunchLocation = false;
 
   @override
   void initState() {
@@ -58,20 +60,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
     _bannerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
     );
-    _bannerSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, -1), // Start slightly above (or 0 if using SizeTransition)
-      end: const Offset(0, 0),
-    ).animate(CurvedAnimation(parent: _bannerController, curve: Curves.easeOutBack));
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final AsyncValue<AstrContext> contextAsync = ref.read(astrContextProvider);
-      final DateTime? selectedDate = contextAsync.value?.selectedDate;
-      if (selectedDate != null && !DateUtils.isSameDay(selectedDate, DateTime.now())) {
-        _handleDateChange(selectedDate);
-      }
-    });
   }
 
   @override
@@ -82,22 +72,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   }
 
   void _handleDateChange(DateTime newDate) {
-    if (DateUtils.isSameDay(newDate, DateTime.now())) {
-      // If today, hide immediately
+    final DateTime today = DateUtils.dateOnly(DateTime.now());
+    final DateTime selected = DateUtils.dateOnly(newDate);
+
+    if (selected == today) {
+      // Today — hide banner
       _bannerTimer?.cancel();
       _bannerController.reverse();
-    } else {
-      // If future date changed
-      if (_lastSelectedDate == null || !DateUtils.isSameDay(newDate, _lastSelectedDate)) {
-        _bannerTimer?.cancel();
-        _bannerController.forward();
-        
-        _bannerTimer = Timer(const Duration(seconds: 3), () {
-          if (mounted) {
-            _bannerController.reverse();
-          }
-        });
-      }
+    } else if (!DateUtils.isSameDay(newDate, _lastSelectedDate)) {
+      // Different non-today date — show banner then auto-hide
+      setState(() {
+        _isFutureDate = selected.isAfter(today);
+      });
+      _bannerTimer?.cancel();
+      _bannerController.forward();
+
+      _bannerTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) {
+          _bannerController.reverse();
+        }
+      });
     }
     _lastSelectedDate = newDate;
   }
@@ -110,7 +104,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
 
     final DateTime selectedDate = astrContextAsync.value?.selectedDate ?? DateTime.now();
-    final bool isToday = DateUtils.isSameDay(selectedDate, DateTime.now());
 
     // Story 4.1: Handle smart launch result (Zero-Click UX)
     // Use watch instead of listen to safely handle initial state (fixes race condition)
@@ -123,55 +116,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
      
       switch (result) {
         case LaunchSuccess(:final location):
-          // Pre-loaded location from launch controller
-          // Check if we need to update context (prevent infinite loop)
-          final GeoLocation? currentLocation = astrContextAsync.value?.location;
-          if (currentLocation == null || currentLocation != location) {
-             WidgetsBinding.instance.addPostFrameCallback((_) {
-               ref.read(astrContextProvider.notifier).updateLocation(location);
-             });
+          // Pre-loaded location from launch controller — run ONCE only.
+          // Without the guard, every rebuild re-checks the launch location
+          // against the current context. When the user picks a saved location,
+          // the mismatch triggers updateLocation(gpsLocation), reverting
+          // the selection back to GPS.
+          if (!_hasHandledLaunchLocation) {
+            _hasHandledLaunchLocation = true;
+            final GeoLocation? currentLocation = astrContextAsync.value?.location;
+            if (currentLocation == null ||
+                currentLocation.latitude != location.latitude ||
+                currentLocation.longitude != location.longitude) {
+               WidgetsBinding.instance.addPostFrameCallback((_) {
+                 ref.read(astrContextProvider.notifier).updateLocation(location);
+               });
+            }
           }
           break;
 
         case LaunchTimeout():
           // NFR-10: GPS timeout → Show toast and continue with default/cached location
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              ToastService.showGPSTimeout(context);
-            }
-          });
+          if (!_hasHandledLaunchToast) {
+            _hasHandledLaunchToast = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                ToastService.showGPSTimeout(context);
+              }
+            });
+          }
           break;
 
         case LaunchPermissionDenied():
           // Permission denied → Show toast explaining manual entry is needed
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              ToastService.showError(
-                context,
-                'Location permission denied. Tap location icon to set manually.',
-              );
-            }
-          });
+          if (!_hasHandledLaunchToast) {
+            _hasHandledLaunchToast = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                ToastService.showError(
+                  context,
+                  'Location permission denied. Tap location icon to set manually.',
+                );
+              }
+            });
+          }
           break;
 
         case LaunchServiceDisabled():
           // Location service disabled → Show toast
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              ToastService.showInfo(
-                context,
-                'Location services disabled. Tap location icon to set manually.',
-              );
-            }
-          });
+          if (!_hasHandledLaunchToast) {
+            _hasHandledLaunchToast = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                ToastService.showInfo(
+                  context,
+                  'Location services disabled. Tap location icon to set manually.',
+                );
+              }
+            });
+          }
           break;
       }
     }
 
-    // Listen for changes to trigger animation
+    // Listen for date changes only to trigger banner animation
     ref.listen(astrContextProvider, (AsyncValue<AstrContext>? previous, AsyncValue<AstrContext> next) {
       final DateTime? newDate = next.value?.selectedDate;
-      if (newDate != null) {
+      final DateTime? oldDate = previous?.value?.selectedDate;
+      if (newDate != null && !DateUtils.isSameDay(newDate, oldDate)) {
         _handleDateChange(newDate);
       }
     });
@@ -195,30 +206,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               // Story 4.2: Dashboard Header with Last Updated indicator (FR-13)
               const DashboardHeader(),
 
-              // Future Date Banner
-                SlideTransition(
-                  position: _bannerSlideAnimation,
+              // Past/Future Date Banner — collapses to zero height when hidden
+                SizeTransition(
+                  sizeFactor: CurvedAnimation(parent: _bannerController, curve: Curves.easeOut),
+                  axisAlignment: -1.0,
                   child: Container(
                     width: double.infinity,
                     color: Colors.indigo,
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    child: SafeArea(
-                      bottom: false,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          const Icon(Ionicons.time_outline, color: Colors.white, size: 16),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Viewing Future Data: ${DateFormat('MMM d').format(selectedDate)}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Icon(Ionicons.time_outline, color: Colors.white, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Viewing ${_isFutureDate ? "Future" : "Past"} Data: ${DateFormat('MMM d').format(selectedDate)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
