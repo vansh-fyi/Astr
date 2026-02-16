@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:astr/core/utils/timezone_helper.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:hive_ce/hive.dart';
@@ -346,12 +348,13 @@ void main() {
 
   group('CachedWeatherRepository - getDailyForecast', () {
     test('CACHE HIT: returns cached daily without network call when all 7 days fresh', () async {
-      // Arrange: Cache all 7 days individually (new format)
-      final today = DateTime.now().toUtc();
-      final normalizedToday = DateTime.utc(today.year, today.month, today.day);
+      // Arrange: Use TimezoneHelper to match production date range
+      // Production code uses TimezoneHelper.get7DayRange(location.longitude)
+      // which may yield different dates than DateTime.now().toUtc()
+      final List<DateTime> dateRange = TimezoneHelper.get7DayRange(testLocation.longitude);
       
-      for (int i = 0; i < 7; i++) {
-        final date = normalizedToday.add(Duration(days: i));
+      for (int i = 0; i < dateRange.length; i++) {
+        final date = dateRange[i];
         final dateStr = '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
         final cacheKey = 'weather_${testH3Index}_daily_$dateStr';
         
@@ -390,12 +393,11 @@ void main() {
     });
 
     test('PARTIAL CACHE: returns partial on network failure', () async {
-      // Cache only 3 days
-      final today = DateTime.now().toUtc();
-      final normalizedToday = DateTime.utc(today.year, today.month, today.day);
+      // Cache only 3 days, using TimezoneHelper date range
+      final List<DateTime> dateRange = TimezoneHelper.get7DayRange(testLocation.longitude);
       
       for (int i = 0; i < 3; i++) {
-        final date = normalizedToday.add(Duration(days: i));
+        final date = dateRange[i];
         final dateStr = '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
         final cacheKey = 'weather_${testH3Index}_daily_$dateStr';
         
@@ -522,12 +524,11 @@ void main() {
     });
 
     test('getDailyForecast: Fresh cache returns DailyWeatherData with isStale=false', () async {
-      // Arrange: Cache all 7 days as fresh
-      final today = DateTime.now().toUtc();
-      final normalizedToday = DateTime.utc(today.year, today.month, today.day);
+      // Arrange: Cache all 7 days as fresh using TimezoneHelper date range
+      final List<DateTime> dateRange = TimezoneHelper.get7DayRange(testLocation.longitude);
 
-      for (int i = 0; i < 7; i++) {
-        final date = normalizedToday.add(Duration(days: i));
+      for (int i = 0; i < dateRange.length; i++) {
+        final date = dateRange[i];
         final dateStr = '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
         final cacheKey = 'weather_${testH3Index}_daily_$dateStr';
 
@@ -557,12 +558,11 @@ void main() {
     });
 
     test('getDailyForecast: Stale cache returns DailyWeatherData with isStale=true', () async {
-      // Arrange: Cache all 7 days as stale
-      final today = DateTime.now().toUtc();
-      final normalizedToday = DateTime.utc(today.year, today.month, today.day);
+      // Arrange: Cache all 7 days as stale using TimezoneHelper date range
+      final List<DateTime> dateRange = TimezoneHelper.get7DayRange(testLocation.longitude);
 
-      for (int i = 0; i < 7; i++) {
-        final date = normalizedToday.add(Duration(days: i));
+      for (int i = 0; i < dateRange.length; i++) {
+        final date = dateRange[i];
         final dateStr = '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
         final cacheKey = 'weather_${testH3Index}_daily_$dateStr';
 
