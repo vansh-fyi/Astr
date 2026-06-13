@@ -74,7 +74,7 @@ Podfile.lock
 pubspec.lock
 yarn.lock
 
-# BMAD related directories
+# AI related directories
 _bmad/
 _bmad-output/
 .agent/
@@ -82,13 +82,18 @@ _bmad-output/
 .gemini/
 .claude/
 .cursor/
+.codex/
 .github/
-# docs/
+.opencode/
+.planning/
+docs/
+
 
 # Documentation files to exclude (keep these if you want to exclude them)
 # CODE_OF_CONDUCT.md
 # CONTRIBUTING.md
-
+AGENTS.md
+CHANGELOG.md
 # Test output files
 test_output*.txt
 
@@ -116,6 +121,7 @@ GetStorage.gs
 
 # Private guides and internal docs
 DEPLOYMENT_GUIDE.md
+requirements.txt
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
