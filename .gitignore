@@ -101,6 +101,11 @@ NASA_VIIRS/
 assets/db/temp_zones.sqlite
 assets/db/temp_zones.sqlite-wal
 assets/db/temp_zones.sqlite-shm
+zone_accumulator.db
+zones_accumulator.db
+test_failures*.log
+GetStorage.bak
+GetStorage.gs
 
 # Environment variables
 .env
@@ -119,6 +124,8 @@ DEPLOYMENT_GUIDE.md
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages.env
 archive/
+!archive/INDEX.md
+!archive/**/README.md
 
 # Large NASA data files (keep these ignored - they're too large)
 VNL NPP 2024 Global Masked Data.tif.gz
