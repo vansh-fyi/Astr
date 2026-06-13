@@ -52,7 +52,7 @@ final staleLocationsProvider =
 // ignore: unused_element
 typedef StaleLocationsRef = AutoDisposeFutureProviderRef<List<UserLocation>>;
 String _$userLocationsNotifierHash() =>
-    r'a2fb0cd8aa0e92437aa21ab0d0056c721d1541b3';
+    r'dd7052f378ec56e4ec14fe9a4948b5d7d620911e';
 
 /// Riverpod AsyncNotifier for managing user locations.
 ///
