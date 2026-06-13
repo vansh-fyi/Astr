@@ -118,7 +118,12 @@ DEPLOYMENT_GUIDE.md
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages.env
-archive/
+archive/**
+!archive/
+!archive/*/
+!archive/**/
+!archive/INDEX.md
+!archive/**/README.md
 
 # Large NASA data files (keep these ignored - they're too large)
 VNL NPP 2024 Global Masked Data.tif.gz
