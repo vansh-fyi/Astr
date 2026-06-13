@@ -117,16 +117,22 @@ def downsample_raster(raster_path):
 # ============================================================================
 # Phase 3: Re-scan VNL with scatter enhancement → update accumulator
 # ============================================================================
-def enhanced_scan(raster_path, scattered, accum_path):
-    """Re-scan VNL at full resolution. For each pixel, add interpolated scatter."""
+def enhanced_scan(raster_path, scattered, accum_path, batch_size=0):
+    """Re-scan VNL at full resolution. For each pixel, add interpolated scatter.
+
+    batch_size: process at most this many strips then stop (0 = all remaining).
+    Resume-safe: already-completed strips are skipped via the progress table.
+    """
     conn = sqlite3.connect(str(accum_path))
     conn.execute('PRAGMA journal_mode=WAL')
     conn.execute('PRAGMA synchronous=NORMAL')
     conn.execute('PRAGMA cache_size=-65536')
 
-    # Reset progress so all strips are re-processed
-    conn.execute('DELETE FROM progress')
+    conn.execute('CREATE TABLE IF NOT EXISTS cells (h3 INTEGER PRIMARY KEY, radiance REAL NOT NULL)')
+    conn.execute('CREATE TABLE IF NOT EXISTS progress (strip_idx INTEGER PRIMARY KEY)')
     conn.commit()
+
+    completed = set(row[0] for row in conn.execute('SELECT strip_idx FROM progress').fetchall())
 
     sc_h, sc_w = scattered.shape
 
@@ -135,14 +141,25 @@ def enhanced_scan(raster_path, scattered, accum_path):
         transform = src.transform
 
     num_strips = (height + STRIP_HEIGHT - 1) // STRIP_HEIGHT
+    remaining_before = num_strips - len(completed)
+    print(f"  Strips total: {num_strips} | done: {len(completed)} | remaining: {remaining_before}"
+          + (f" | batch: {batch_size}" if batch_size > 0 else ""))
+
     src_handle = rasterio.open(raster_path)
     strips_since_open = 0
     total_new = 0
     total_enhanced = 0
+    processed_this_run = 0
 
-    pbar = tqdm(total=num_strips, desc="Enhanced scan", unit="strip")
+    pbar = tqdm(total=num_strips, desc="Enhanced scan", unit="strip", initial=len(completed))
 
     for strip_idx in range(num_strips):
+        if strip_idx in completed:
+            continue
+
+        if batch_size > 0 and processed_this_run >= batch_size:
+            break
+
         if strips_since_open >= REOPEN_INTERVAL:
             src_handle.close(); gc.collect()
             src_handle = rasterio.open(raster_path)
@@ -199,6 +216,7 @@ def enhanced_scan(raster_path, scattered, accum_path):
 
         del data, scatter_strip, enhanced
         strips_since_open += 1
+        processed_this_run += 1
         pbar.update(1)
 
         if (strip_idx + 1) % 10 == 0:
@@ -209,10 +227,14 @@ def enhanced_scan(raster_path, scattered, accum_path):
     src_handle.close()
     pbar.close()
 
+    done_now = conn.execute('SELECT COUNT(*) FROM progress').fetchone()[0]
+    strips_remaining = num_strips - done_now
     total = conn.execute('SELECT COUNT(*) FROM cells').fetchone()[0]
-    print(f"\nEnhanced scan complete. Total cells: {total:,}")
+    print(f"\nBatch complete. Processed this run: {processed_this_run} | "
+          f"Total strips done: {done_now}/{num_strips} | Remaining: {strips_remaining}")
+    print(f"Total cells in accumulator: {total:,}")
     conn.close()
-    return total
+    return strips_remaining
 
 
 # ============================================================================
@@ -294,6 +316,10 @@ def main():
     parser.add_argument('--accum', help='Path to accumulator DB (default: next to TIF)')
     parser.add_argument('--fraction', type=float, default=SCATTER_FRACTION)
     parser.add_argument('--scale-km', type=float, default=SCATTER_SCALE_KM)
+    parser.add_argument('--batch', type=int, default=0,
+                        help='Process N strips per run then stop; re-run to continue (0=all)')
+    parser.add_argument('--reset-accum', action='store_true',
+                        help='Clear accumulator cells+progress before scanning (fresh start)')
     args = parser.parse_args()
 
     SCATTER_FRACTION = args.fraction
@@ -309,9 +335,18 @@ def main():
     output_path = Path(__file__).parent.parent / 'assets' / 'db' / 'zones.db'
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if not accum_path.exists():
+    if args.reset_accum:
+        conn = sqlite3.connect(str(accum_path))
+        conn.execute('CREATE TABLE IF NOT EXISTS cells (h3 INTEGER PRIMARY KEY, radiance REAL NOT NULL)')
+        conn.execute('CREATE TABLE IF NOT EXISTS progress (strip_idx INTEGER PRIMARY KEY)')
+        conn.execute('DELETE FROM cells')
+        conn.execute('DELETE FROM progress')
+        conn.commit()
+        conn.close()
+        print(f"Accumulator reset (cells + progress cleared): {accum_path}")
+    elif not accum_path.exists():
         print(f"Error: Accumulator not found: {accum_path}")
-        print("Run generate_zones_vnl.py first.")
+        print("Use --reset-accum to create a fresh one, or run generate_zones_vnl.py first.")
         sys.exit(1)
 
     print(f"Scatter params: fraction={SCATTER_FRACTION}, scale={SCATTER_SCALE_KM}km, "
@@ -334,7 +369,14 @@ def main():
 
     # Phase 3: Enhanced scan
     print("\n=== Phase 3: Re-scan with scatter enhancement ===")
-    enhanced_scan(raster_path, scattered, accum_path)
+    strips_remaining = enhanced_scan(raster_path, scattered, accum_path, batch_size=args.batch)
+
+    if strips_remaining > 0:
+        print(f"\n[BATCH PAUSE] {strips_remaining} strips remaining.")
+        print(f"Re-run without --reset-accum to continue:")
+        print(f"  python scripts/apply_skyglow.py --tif \"{tif_path}\" "
+              f"--accum {accum_path} --fraction {SCATTER_FRACTION} --batch {args.batch}")
+        sys.exit(0)
 
     # Phase 4: Write zones.db
     print("\n=== Phase 4: Write zones.db ===")
