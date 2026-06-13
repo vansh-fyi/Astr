@@ -123,7 +123,10 @@ DEPLOYMENT_GUIDE.md
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages.env
-archive/
+archive/**
+!archive/
+!archive/*/
+!archive/**/
 !archive/INDEX.md
 !archive/**/README.md
 
