@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/catalog/presentation/screens/catalog_screen.dart';
 import '../../features/catalog/presentation/screens/object_detail_screen.dart';
 import '../../features/dashboard/presentation/home_screen.dart';
-import '../../features/planner/presentation/pages/forecast_screen.dart';
+import '../../features/forecast/presentation/forecast_screen.dart';
 import '../../features/profile/domain/entities/user_location.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/providers/tos_provider.dart';
