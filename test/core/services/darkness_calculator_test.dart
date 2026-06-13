@@ -90,4 +90,73 @@ void main() {
       expect(calculator.getDarknessLabel(15).$1, 'Very Poor');
     });
   });
+
+  group('Zone SQM boundary verification (ZONE-04)', () {
+    // SQM boundaries derived from: SQM = 22.0 - 1.7 * log10(1 + 2*radiance)
+    // See apply_skyglow.py ZONE_THRESHOLDS for the radiance→zone mapping.
+    // Note: Zone 2 lower boundary SQM 21.70 exceeds the Excellent threshold (21.5),
+    // so it correctly maps to 'Excellent', not 'Good' as the ZONE_THRESHOLDS comment
+    // in the plan implies. The implementation thresholds are authoritative.
+
+    test('SQM 21.70 (Zone 2 lower boundary, radiance=0.25) returns Excellent label', () {
+      final (String label, _) = calculator.getDarknessLabel(21.70);
+      expect(label, equals('Excellent'));
+    });
+
+    test('SQM 21.49 (Zone 3 lower boundary, radiance=0.50) returns Good label', () {
+      final (String label, _) = calculator.getDarknessLabel(21.49);
+      expect(label, equals('Good'));
+    });
+
+    test('SQM 21.19 (Zone 4 lower boundary, radiance=1.0) returns Good label', () {
+      final (String label, _) = calculator.getDarknessLabel(21.19);
+      expect(label, equals('Good'));
+    });
+
+    test('SQM 20.56 (Zone 5 lower boundary, radiance=3.0) returns Fair label', () {
+      final (String label, _) = calculator.getDarknessLabel(20.56);
+      expect(label, equals('Fair'));
+    });
+
+    test('SQM 19.83 (Zone 6 lower boundary, radiance=9.0) returns Poor label', () {
+      final (String label, _) = calculator.getDarknessLabel(19.83);
+      expect(label, equals('Poor'));
+    });
+
+    test('SQM 19.26 (Zone 7 lower boundary, radiance=20.0) returns Poor label', () {
+      final (String label, _) = calculator.getDarknessLabel(19.26);
+      expect(label, equals('Poor'));
+    });
+
+    test('SQM 18.59 (Zone 8 lower boundary, radiance=50.0) returns Very Poor label', () {
+      final (String label, _) = calculator.getDarknessLabel(18.59);
+      expect(label, equals('Very Poor'));
+    });
+
+    test('SQM 17.92 (Zone 9 lower boundary, radiance=125.0) returns Very Poor label', () {
+      final (String label, _) = calculator.getDarknessLabel(17.92);
+      expect(label, equals('Very Poor'));
+    });
+
+    test('Zone 2 boundary SQM (21.70) survives zero-moon calculateDarkness unchanged', () {
+      final double result = calculator.calculateDarkness(
+        baseMPSAS: 21.70,
+        moonPhase: 0.0,
+        moonAltitude: 0.0,
+      );
+      expect(result, closeTo(21.70, 0.001));
+    });
+
+    test('Full moon at zenith reduces Zone 3 baseMPSAS (21.49) to Very Poor', () {
+      // baseMPSAS 21.49 − 4.0 penalty = 17.49 → Very Poor
+      final double result = calculator.calculateDarkness(
+        baseMPSAS: 21.49,
+        moonPhase: 1.0,
+        moonAltitude: 90.0,
+      );
+      expect(result, closeTo(17.49, 0.01));
+      final (String label, _) = calculator.getDarknessLabel(result);
+      expect(label, equals('Very Poor'));
+    });
+  });
 }
