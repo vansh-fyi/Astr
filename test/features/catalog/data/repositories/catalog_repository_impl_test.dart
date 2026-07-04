@@ -21,7 +21,7 @@ void main() {
       result.fold(
         (Failure failure) => fail('Expected Right but got Left: ${failure.message}'),
         (List<CelestialObject> objects) {
-          expect(objects.length, 8); // Mercury to Neptune + Moon
+          expect(objects.length, 7); // Mercury to Neptune (Moon is CelestialType.satellite)
           expect(objects.every((CelestialObject obj) => obj.type == CelestialType.planet), true);
           expect(objects.any((CelestialObject obj) => obj.name == 'Mars'), true);
           expect(objects.any((CelestialObject obj) => obj.name == 'Jupiter'), true);
