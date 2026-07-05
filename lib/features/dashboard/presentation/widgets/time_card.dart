@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/design/app_colors.dart';
+import '../../../../core/design/app_typography.dart';
+
 class TimeCard extends StatelessWidget {
   const TimeCard({
     super.key,
@@ -16,19 +19,17 @@ class TimeCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: AppColors.textPrimary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppColors.textPrimary.withValues(alpha: 0.1)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 8,
-              fontWeight: FontWeight.w600,
+            style: AppTypography.micro.copyWith(
+              color: AppColors.textMuted,
               letterSpacing: 0.5,
             ),
             maxLines: 1,
@@ -37,9 +38,8 @@ class TimeCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             time != null ? DateFormat.Hm().format(time!) : '--:--',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),

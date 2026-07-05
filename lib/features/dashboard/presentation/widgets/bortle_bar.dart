@@ -39,21 +39,21 @@ class _BortleBarState extends State<BortleBar> {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     letterSpacing: 1,
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.blueAccent.withOpacity(0.5),
+                      color: Colors.blueAccent.withValues(alpha: 0.5),
                     ),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.2),
+                        color: Colors.blueAccent.withValues(alpha: 0.2),
                         blurRadius: 8,
                       ),
                     ],
@@ -96,7 +96,7 @@ class _BortleBarState extends State<BortleBar> {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -111,11 +111,11 @@ class _BortleBarState extends State<BortleBar> {
                         height: 4,
                         margin: const EdgeInsets.symmetric(horizontal: 2),
                         decoration: BoxDecoration(
-                          color: isActive ? Colors.blue : Colors.white.withOpacity(0.1),
+                          color: isActive ? Colors.blue : Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(2),
                           boxShadow: isActive ? <BoxShadow>[
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.6),
+                              color: Colors.blue.withValues(alpha: 0.6),
                               blurRadius: 8,
                             )
                           ] : null,

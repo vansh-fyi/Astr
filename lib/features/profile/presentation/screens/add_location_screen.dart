@@ -69,7 +69,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
+            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.5),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -272,7 +272,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: 'Search city, town, or place...',
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                         border: InputBorder.none,
                         icon: const Icon(Ionicons.search, color: Colors.white70),
                         suffixIcon: _isSearching
@@ -298,7 +298,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFF141419),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                       ),
                       child: Column(
                         children: _searchResults.cast<Map<String, dynamic>>().map((Map<String, dynamic> result) {
@@ -310,7 +310,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                             ),
                             subtitle: Text(
                               displayName,
-                              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -356,7 +356,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           hintText: 'Location Name (e.g. Home, Park)',
-                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                           border: InputBorder.none,
                           labelStyle: const TextStyle(color: Colors.white70),
                         ),
@@ -376,7 +376,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               decoration: InputDecoration(
                                 hintText: 'Latitude',
-                                hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                                 border: InputBorder.none,
                               ),
                             ),
@@ -385,7 +385,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                         const SizedBox(width: 12),
                         DecoratedBox(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -411,7 +411,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               decoration: InputDecoration(
                                 hintText: 'Longitude',
-                                hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                                 border: InputBorder.none,
                               ),
                             ),
@@ -420,7 +420,7 @@ class _AddLocationScreenState extends ConsumerState<AddLocationScreen> {
                         const SizedBox(width: 12),
                         DecoratedBox(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(

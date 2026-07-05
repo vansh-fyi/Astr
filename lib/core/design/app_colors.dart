@@ -4,6 +4,7 @@ class AppColors {
   const AppColors._();
 
   static const Color surface = Color(0xFF0C0F11);
+  static const Color oledBlack = Color(0xFF000000);
   static const Color surfaceOverlay = Color(0x800C0F11);
   static const Color surfaceGlass = Color(0xCC0C0F11);
   static const Color accent = Color(0xFF448AFF);

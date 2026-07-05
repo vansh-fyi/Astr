@@ -34,8 +34,8 @@ class SkyPortal extends StatelessWidget {
                   begin: Alignment.bottomLeft,
                   end: Alignment.topRight,
                   colors: <Color>[
-                    Colors.indigo.withOpacity(0.2),
-                    Colors.purple.withOpacity(0.2),
+                    Colors.indigo.withValues(alpha: 0.2),
+                    Colors.purple.withValues(alpha: 0.2),
                   ],
                 ),
               ),
@@ -50,18 +50,18 @@ class SkyPortal extends StatelessWidget {
               height: 256,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: <Color>[
-                    Colors.white.withOpacity(0.05),
+                    Colors.white.withValues(alpha: 0.05),
                     Colors.transparent,
                   ],
                 ),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: Colors.indigo.withOpacity(0.15),
+                    color: Colors.indigo.withValues(alpha: 0.15),
                     blurRadius: 50,
                     spreadRadius: -10,
                   ),
@@ -75,7 +75,7 @@ class SkyPortal extends StatelessWidget {
                        margin: const EdgeInsets.all(4),
                        decoration: BoxDecoration(
                          shape: BoxShape.circle,
-                         border: Border.all(color: Colors.white.withOpacity(0.05)),
+                         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                        ),
                      ),
                    ),
@@ -88,7 +88,7 @@ class SkyPortal extends StatelessWidget {
                        decoration: BoxDecoration(
                          shape: BoxShape.circle,
                          border: Border.all(
-                           color: Colors.white.withOpacity(0.1),
+                           color: Colors.white.withValues(alpha: 0.1),
                          ),
                        ),
                      ).animate(onPlay: (AnimationController controller) => controller.repeat())
@@ -126,9 +126,9 @@ class SkyPortal extends StatelessWidget {
                            Container(
                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                              decoration: BoxDecoration(
-                               color: conditionResult!.statusColor.withOpacity(0.1),
+                               color: conditionResult!.statusColor.withValues(alpha: 0.1),
                                borderRadius: BorderRadius.circular(20),
-                               border: Border.all(color: conditionResult!.statusColor.withOpacity(0.2)),
+                               border: Border.all(color: conditionResult!.statusColor.withValues(alpha: 0.2)),
                              ),
                              child: Row(
                                mainAxisSize: MainAxisSize.min,
@@ -160,9 +160,9 @@ class SkyPortal extends StatelessWidget {
                            Container(
                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                              decoration: BoxDecoration(
-                               color: Colors.green.withOpacity(0.1),
+                               color: Colors.green.withValues(alpha: 0.1),
                                borderRadius: BorderRadius.circular(20),
-                               border: Border.all(color: Colors.green.withOpacity(0.2)),
+                               border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
                              ),
                              child: Row(
                                mainAxisSize: MainAxisSize.min,

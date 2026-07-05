@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 
+import '../../../../core/design/app_colors.dart';
+import '../../../../core/design/app_spacing.dart';
+import '../../../../core/design/app_typography.dart';
+
 import '../../../catalog/domain/entities/celestial_object.dart';
 import '../../../catalog/domain/entities/visibility_graph_data.dart';
 import '../../../catalog/presentation/providers/object_detail_notifier.dart';
@@ -102,26 +106,24 @@ class CelestialDetailSheet extends ConsumerWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: AppColors.textPrimary.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                        border: Border.all(color: AppColors.textPrimary.withValues(alpha: 0.1)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
                             'OBSERVING CONDITIONS',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.5),
+                            style: AppTypography.labelSm.copyWith(
+                              color: AppColors.textMuted,
                               letterSpacing: 1,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Excellent',
-                            style: TextStyle(
+                            style: AppTypography.title.copyWith(
                               fontSize: 24,
                               fontWeight: FontWeight.w500,
                               color: themeColor,
@@ -159,8 +161,8 @@ class CelestialDetailSheet extends ConsumerWidget {
                       children: <Widget>[
                         // _buildStat('Altitude', altitude, Colors.white), // Removed for now as we don't have real current altitude easily
                         _buildStat('Transit', transitTime, themeColor),
-                        _buildStat('Set', setTime, Colors.white),
-                        _buildStat('Timezone', offsetLabel, Colors.white),
+                        _buildStat('Set', setTime, AppColors.textPrimary),
+                        _buildStat('Timezone', offsetLabel, AppColors.textPrimary),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -181,9 +183,9 @@ class CelestialDetailSheet extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0A0A0B).withValues(alpha: 0.7),
-                      border: Border(
-                        bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+                      color: AppColors.surfaceOverlay.withValues(alpha: 0.7),
+                      border: const Border(
+                        bottom: BorderSide(color: AppColors.borderSurface),
                       ),
                     ),
                     child: Row(
@@ -194,18 +196,15 @@ class CelestialDetailSheet extends ConsumerWidget {
                           children: <Widget>[
                             Text(
                               title,
-                              style: const TextStyle(
+                              style: AppTypography.title.copyWith(
                                 fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                                 letterSpacing: -1,
                               ),
                             ),
                             Text(
                               subtitle,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
+                              style: AppTypography.heading.copyWith(
                                 color: themeColor,
                               ),
                             ),
@@ -213,7 +212,7 @@ class CelestialDetailSheet extends ConsumerWidget {
                         ),
                         IconButton(
                           onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Ionicons.close_circle, color: Colors.white54, size: 28),
+                          icon: const Icon(Ionicons.close_circle, color: AppColors.textMuted, size: 28),
                         ),
                       ],
                     ),
@@ -233,19 +232,16 @@ class CelestialDetailSheet extends ConsumerWidget {
         children: <Widget>[
           Text(
             label.toUpperCase(),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Colors.white.withValues(alpha: 0.5),
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.textMuted,
               letterSpacing: 1,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: TextStyle(
+            style: AppTypography.heading.copyWith(
               fontSize: 18,
-              fontWeight: FontWeight.w500,
               color: valueColor,
             ),
           ),
@@ -258,19 +254,17 @@ class CelestialDetailSheet extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: AppColors.surface.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: AppColors.textPrimary.withValues(alpha: 0.1)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 8,
-              fontWeight: FontWeight.w600,
+            style: AppTypography.micro.copyWith(
+              color: AppColors.textMuted,
               letterSpacing: 0.5,
             ),
             maxLines: 1,
@@ -279,9 +273,8 @@ class CelestialDetailSheet extends ConsumerWidget {
           const SizedBox(height: 2),
           Text(
             time != null ? DateFormat.Hm().format(time) : '--:--',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
+            style: AppTypography.labelSm.copyWith(
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),

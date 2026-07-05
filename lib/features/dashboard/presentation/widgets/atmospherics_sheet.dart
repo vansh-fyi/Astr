@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
 
+import '../../../../core/design/app_colors.dart';
+import '../../../../core/design/app_typography.dart';
 import '../../../../core/engine/prime_view_calculator.dart';
 import '../../../../core/widgets/glass_panel.dart';
 import '../../../catalog/domain/entities/celestial_object.dart';
@@ -112,9 +114,9 @@ class AtmosphericsSheet extends ConsumerWidget {
                               height: 200,
                               margin: const EdgeInsets.only(bottom: 32),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.05),
+                                color: AppColors.textPrimary.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                                border: Border.all(color: AppColors.textPrimary.withValues(alpha: 0.1)),
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(24),
@@ -196,7 +198,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                       data: (Weather weather) {
                         // Seeing Color Logic (Red Mode compatible - Epic 5)
                         // Using theme-neutral colors that can be filtered by Red Mode
-                        Color seeingColor = Colors.white;
+                        Color seeingColor = AppColors.textPrimary;
                         if (weather.seeingScore != null) {
                           if (weather.seeingScore! >= 8) {
                             // Excellent - use light green tone
@@ -206,7 +208,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                             seeingColor = const Color(0xFFFFA500);
                           } else {
                             // Poor - use muted tone
-                            seeingColor = Colors.white.withValues(alpha: 0.6);
+                            seeingColor = AppColors.textPrimary.withValues(alpha: 0.6);
                           }
                         }
 
@@ -303,11 +305,11 @@ class AtmosphericsSheet extends ConsumerWidget {
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       // Story 4.4: Pure OLED black for header (NFR-09)
-                    color: const Color(0xFF000000),
+                      color: AppColors.oledBlack,
                       border: Border(
-                        bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+                        bottom: BorderSide(color: AppColors.borderSurface),
                       ),
                     ),
                     child: Column(
@@ -321,7 +323,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -331,14 +333,14 @@ class AtmosphericsSheet extends ConsumerWidget {
                                   onPressed: () {
                                     ref.read(weatherProvider.notifier).refresh();
                                   },
-                                  icon: const Icon(Ionicons.refresh_circle, color: Colors.white54, size: 28),
+                                  icon: const Icon(Ionicons.refresh_circle, color: AppColors.textMuted, size: 28),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(),
                                 ),
                                 const SizedBox(width: 16),
                                 IconButton(
                                   onPressed: () => Navigator.pop(context),
-                                  icon: const Icon(Ionicons.close_circle, color: Colors.white54, size: 28),
+                                  icon: const Icon(Ionicons.close_circle, color: AppColors.textMuted, size: 28),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(),
                                 ),
@@ -349,9 +351,8 @@ class AtmosphericsSheet extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           'Current viewing conditions',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.5),
+                          style: AppTypography.labelMd.copyWith(
+                            color: AppColors.textSubdued,
                           ),
                         ),
                       ],
@@ -387,14 +388,12 @@ class AtmosphericsSheet extends ConsumerWidget {
             children: <Widget>[
               Text(
                 label.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white.withOpacity(0.5),
+                style: AppTypography.labelSm.copyWith(
+                  color: AppColors.textMuted,
                   letterSpacing: 1,
                 ),
               ),
-              Icon(icon, color: iconColor ?? Colors.white, size: 18),
+              Icon(icon, color: iconColor ?? AppColors.textPrimary, size: 18),
             ],
           ),
           Column(
@@ -402,19 +401,17 @@ class AtmosphericsSheet extends ConsumerWidget {
             children: <Widget>[
               Text(
                 value,
-                style: const TextStyle(
+                style: AppTypography.title.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                 ),
               ),
               if (subValue != null)
                 Text(
                   subValue,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: subValueColor ?? Colors.white.withOpacity(0.5),
+                  style: AppTypography.labelMd.copyWith(
+                    color: subValueColor ?? AppColors.textMuted,
                   ),
                 ),
             ],
@@ -424,7 +421,7 @@ class AtmosphericsSheet extends ConsumerWidget {
               height: 4,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: AppColors.textPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(2),
               ),
               child: FractionallySizedBox(
@@ -432,7 +429,7 @@ class AtmosphericsSheet extends ConsumerWidget {
                 widthFactor: progress,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: progressColor ?? Colors.white,
+                    color: progressColor ?? AppColors.textPrimary,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

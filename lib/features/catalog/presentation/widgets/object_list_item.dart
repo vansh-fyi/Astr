@@ -32,7 +32,7 @@ class ObjectListItem extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
@@ -83,14 +83,14 @@ class ObjectListItem extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.08),
+                                  color: Colors.white.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   offsetLabel,
                                   style: TextStyle(
                                     fontSize: 9,
-                                    color: Colors.white.withOpacity(0.45),
+                                    color: Colors.white.withValues(alpha: 0.45),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -100,7 +100,7 @@ class ObjectListItem extends StatelessWidget {
                                 '↑ $rise | ↓ $set',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontFamily: 'monospace',
                                 ),
                               ),
@@ -111,7 +111,7 @@ class ObjectListItem extends StatelessWidget {
                           'Calculating...',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontFamily: 'monospace',
                           ),
                         ),
@@ -119,7 +119,7 @@ class ObjectListItem extends StatelessWidget {
                           '↑ -- : -- | ↓ -- : --',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontFamily: 'monospace',
                           ),
                         ),
@@ -138,14 +138,14 @@ class ObjectListItem extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   'Mag ${object.magnitude!.toStringAsFixed(1)}',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -157,7 +157,7 @@ class ObjectListItem extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
             ),
           ],
         ),

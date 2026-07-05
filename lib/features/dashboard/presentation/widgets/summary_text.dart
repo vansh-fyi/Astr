@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../../../core/design/app_colors.dart';
+import '../../../../core/design/app_typography.dart';
 import '../../domain/entities/stargazing_quality.dart';
 
 class SummaryText extends StatelessWidget {
@@ -25,10 +27,9 @@ class SummaryText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // "Starlight" white font - assuming white color, bold weight, large size
-    final TextStyle? textStyle = Theme.of(context).textTheme.headlineLarge?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+    // "Starlight" white font - using design system tokens
+    final TextStyle textStyle = AppTypography.display.copyWith(
+          color: AppColors.textPrimary,
           letterSpacing: 1.2,
         );
 
@@ -51,7 +52,7 @@ class SummaryText extends StatelessWidget {
                 decoration: BoxDecoration(
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.5 * value),
+                      color: AppColors.textPrimary.withValues(alpha: 0.5 * value),
                       blurRadius: 20 * value,
                       spreadRadius: 2 * value,
                     ),

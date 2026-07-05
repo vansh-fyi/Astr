@@ -124,7 +124,7 @@ class ObjectDetailScreen extends ConsumerWidget {
             width: 180,
             height: 180,
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Padding(
@@ -160,10 +160,10 @@ class ObjectDetailScreen extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.blue.withOpacity(0.5),
+              color: Colors.blue.withValues(alpha: 0.5),
             ),
           ),
           child: Text(
@@ -285,7 +285,7 @@ class ObjectDetailScreen extends ConsumerWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'monospace',
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -295,14 +295,14 @@ class ObjectDetailScreen extends ConsumerWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08),
+                      color: Colors.white.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       offset,
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         fontWeight: FontWeight.w500,
                       ),
                     ),

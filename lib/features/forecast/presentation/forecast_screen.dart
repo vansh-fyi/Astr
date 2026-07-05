@@ -95,7 +95,7 @@ class _ForecastScreenState extends ConsumerState<ForecastScreen> with SingleTick
                         '7-Day Outlook',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -226,7 +226,7 @@ class _ForecastItem extends StatelessWidget {
                     DateFormat('MMM d').format(forecast.date),
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -259,11 +259,11 @@ class _ForecastItem extends StatelessWidget {
                           height: 4,
                           margin: const EdgeInsets.symmetric(horizontal: 2),
                           decoration: BoxDecoration(
-                            color: isActive ? const Color(0xFF3B82F6) : Colors.white.withOpacity(0.1),
+                            color: isActive ? const Color(0xFF3B82F6) : Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(2),
                             boxShadow: isActive ? <BoxShadow>[
                               BoxShadow(
-                                color: const Color(0xFF3B82F6).withOpacity(0.6),
+                                color: const Color(0xFF3B82F6).withValues(alpha: 0.6),
                                 blurRadius: 8,
                               )
                             ] : null,

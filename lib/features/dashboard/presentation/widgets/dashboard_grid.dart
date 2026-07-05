@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
 
+import '../../../../core/design/app_colors.dart';
+import '../../../../core/design/app_typography.dart';
+
 import '../../../../core/widgets/glass_panel.dart';
 import '../../../astronomy/domain/entities/moon_phase_info.dart';
 import '../../../catalog/domain/entities/celestial_object.dart';
@@ -103,7 +106,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -112,7 +115,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                         'Perfect visibility for observation.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: AppColors.textMuted,
                         ),
                       ),
                     ],
@@ -211,7 +214,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                       objectId: 'moon',
                       title: 'Moon',
                       subtitle: _getMoonPhaseLabel(widget.moonPhaseInfo),
-                      themeColor: Colors.blueAccent,
+                      themeColor: AppColors.accent,
                     ),
                   );
                 },
@@ -228,7 +231,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: AppColors.textMuted,
                               letterSpacing: 1,
                             ),
                           ),
@@ -236,7 +239,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                             '${(widget.moonPhaseInfo.illumination * 100).round()}%',
                             style: TextStyle(
                               fontSize: 10,
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: AppColors.textMuted,
                             ),
                           ),
                         ],
@@ -255,7 +258,7 @@ class _DashboardGridState extends ConsumerState<DashboardGrid> {
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           ),
                         textAlign: TextAlign.center,
                       ),

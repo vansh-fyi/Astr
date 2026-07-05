@@ -34,11 +34,11 @@ class VisibilityGraphPainter extends CustomPainter {
     _peakDotPaint = Paint()..color = color;
 
     _moonFillPaint = Paint()
-      ..color = const Color(0xFF1E1B4B).withOpacity(0.5)
+      ..color = const Color(0xFF1E1B4B).withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
 
     _moonStrokePaint = Paint()
-      ..color = const Color(0xFF6366F1).withOpacity(0.5)
+      ..color = const Color(0xFF6366F1).withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
   }
@@ -250,14 +250,14 @@ class VisibilityGraphPainter extends CustomPainter {
     path.close();
 
     final Paint paint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..style = PaintingStyle.fill;
       
     canvas.drawPath(path, paint);
 
     // Stroke
     final Paint strokePaint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
+      ..color = Colors.white.withValues(alpha: 0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
@@ -463,8 +463,8 @@ class VisibilityGraphPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[
-          const Color(0xFFF97316).withOpacity(0.5), // Orange-500/50
-          const Color(0xFFF97316).withOpacity(0), // Transparent
+          const Color(0xFFF97316).withValues(alpha: 0.5), // Orange-500/50
+          const Color(0xFFF97316).withValues(alpha: 0), // Transparent
         ],
       ).createShader(Rect.fromLTWH(x, topY, 1, height - topY));
 
@@ -515,7 +515,7 @@ class VisibilityGraphPainter extends CustomPainter {
 
     // Vertical Line (Short, up to label)
     final Paint linePaint = Paint()
-      ..color = const Color(0xFF6366F1).withOpacity(0.5) // Indigo-500
+      ..color = const Color(0xFF6366F1).withValues(alpha: 0.5) // Indigo-500
       ..strokeWidth = 1;
     
     canvas.drawLine(
@@ -533,7 +533,7 @@ class VisibilityGraphPainter extends CustomPainter {
     canvas.drawCircle(
       Offset(x, labelY + 5),
       6,
-      Paint()..color = const Color(0xFFA855F7).withOpacity(0.3), // Glow
+      Paint()..color = const Color(0xFFA855F7).withValues(alpha: 0.3), // Glow
     );
 
     // Moon Label (No Icon)
@@ -559,11 +559,11 @@ class VisibilityGraphPainter extends CustomPainter {
     final Rect rect = Rect.fromLTWH(x, y, textPainter.width + padding * 2, textPainter.height + padding);
 
     final Paint bgPaint = Paint()
-      ..color = const Color(0xFF312E81).withOpacity(0.5) // Indigo-900/50
+      ..color = const Color(0xFF312E81).withValues(alpha: 0.5) // Indigo-900/50
       ..style = PaintingStyle.fill;
 
     final Paint borderPaint = Paint()
-      ..color = const Color(0xFF6366F1).withOpacity(0.3) // Indigo-500/30
+      ..color = const Color(0xFF6366F1).withValues(alpha: 0.3) // Indigo-500/30
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -592,11 +592,11 @@ class VisibilityGraphPainter extends CustomPainter {
     final Rect rect = Rect.fromLTWH(x + 6, y, textPainter.width + padding * 2, textPainter.height + padding);
 
     final Paint bgPaint = Paint()
-      ..color = const Color(0xFFF97316).withOpacity(0.1)
+      ..color = const Color(0xFFF97316).withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
 
     final Paint borderPaint = Paint()
-      ..color = const Color(0xFFF97316).withOpacity(0.2)
+      ..color = const Color(0xFFF97316).withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 

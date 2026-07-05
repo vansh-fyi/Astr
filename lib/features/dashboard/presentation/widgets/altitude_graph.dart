@@ -47,7 +47,7 @@ class _AltitudeGraphState extends State<AltitudeGraph> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.8),
+                      color: Colors.black.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.white24),
                     ),
@@ -145,12 +145,12 @@ class _AltitudeGraphPainter extends CustomPainter {
     _nowOuterDotPaint = Paint()..color = Colors.white;
     _nowInnerDotPaint = Paint()..color = themeColor;
     _scrubberLinePaint = Paint()
-      ..color = Colors.white.withOpacity(0.8)
+      ..color = Colors.white.withValues(alpha: 0.8)
       ..strokeWidth = 1;
     _scrubberOuterDotPaint = Paint()..color = Colors.white;
     _scrubberInnerDotPaint = Paint()..color = themeColor;
     _cloudBgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..style = PaintingStyle.fill;
   }
   final Color themeColor;

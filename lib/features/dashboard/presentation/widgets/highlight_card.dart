@@ -42,7 +42,7 @@ class HighlightCard extends StatelessWidget {
             Text(
               item.isVisible ? 'Visible Now' : 'Below Horizon',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 10,
               ),
             ),

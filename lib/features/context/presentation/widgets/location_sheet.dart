@@ -80,7 +80,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.2),
+                      color: Colors.blueAccent.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: _isLoadingGPS 
@@ -112,7 +112,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                               : 'Use device location',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -171,12 +171,12 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: Colors.white.withValues(alpha: 0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
                                     Ionicons.location, 
-                                    color: isStale ? Colors.white.withOpacity(0.5) : Colors.white, 
+                                    color: isStale ? Colors.white.withValues(alpha: 0.5) : Colors.white, 
                                     size: 20,
                                   ),
                                 ),
@@ -213,7 +213,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
-                                            color: isStale ? Colors.white.withOpacity(0.6) : Colors.white,
+                                            color: isStale ? Colors.white.withValues(alpha: 0.6) : Colors.white,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -225,9 +225,9 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                                           margin: const EdgeInsets.only(left: 8),
                                           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: Colors.orange.withOpacity(0.2),
+                                            color: Colors.orange.withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(4),
-                                            border: Border.all(color: Colors.orange.withOpacity(0.6), width: 1),
+                                            border: Border.all(color: Colors.orange.withValues(alpha: 0.6), width: 1),
                                           ),
                                           child: const Text(
                                             'Stale',
@@ -245,7 +245,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                                     '${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.white.withOpacity(isStale ? 0.4 : 0.7),
+                                      color: Colors.white.withValues(alpha: isStale ? 0.4 : 0.7),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -278,7 +278,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Ionicons.add, color: Colors.white, size: 20),
@@ -332,7 +332,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
             Text(
               '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -355,7 +355,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.2),
+                      color: Colors.blueAccent.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Ionicons.create, color: Colors.blueAccent, size: 20),
@@ -381,13 +381,13 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
                 _deleteLocation(context, ref, location);
               },
               padding: const EdgeInsets.all(16),
-              border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+              border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
               child: Row(
                 children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.2),
+                      color: Colors.redAccent.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Ionicons.trash, color: Colors.redAccent, size: 20),
@@ -452,7 +452,7 @@ class _LocationSheetState extends ConsumerState<LocationSheet> {
         width: 40,
         height: 4,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(2),
         ),
       ),

@@ -67,7 +67,7 @@ class ProfileScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
+                                  color: Colors.white.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(Icons.remove_red_eye, color: Colors.white),
@@ -90,7 +90,7 @@ class ProfileScreen extends ConsumerWidget {
                                       'Preserve night vision',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: Colors.white.withOpacity(0.5),
+                                        color: Colors.white.withValues(alpha: 0.5),
                                       ),
                                     ),
                                   ],
@@ -102,7 +102,7 @@ class ProfileScreen extends ConsumerWidget {
                                   ref.read(settingsNotifierProvider.notifier).toggleRedMode();
                                 },
                                 activeThumbColor: Colors.redAccent,
-                                activeTrackColor: Colors.redAccent.withOpacity(0.3),
+                                activeTrackColor: Colors.redAccent.withValues(alpha: 0.3),
                               ),
                             ],
                           ),
@@ -120,7 +120,7 @@ class ProfileScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
+                                  color: Colors.white.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(Ionicons.location, color: Colors.white),
@@ -139,7 +139,7 @@ class ProfileScreen extends ConsumerWidget {
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                               ),
                             ],
                           ),
@@ -162,7 +162,7 @@ class ProfileScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: Colors.pink.withOpacity(0.1), // Ko-fi brand color
+                                  color: Colors.pink.withValues(alpha: 0.1), // Ko-fi brand color
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(Ionicons.heart, color: Colors.pink), // Ko-fi uses heart
@@ -185,7 +185,7 @@ class ProfileScreen extends ConsumerWidget {
                                       "Hi! I'm a solo designer working on this. Your support helps me to push this project further!",
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: Colors.white.withOpacity(0.5),
+                                        color: Colors.white.withValues(alpha: 0.5),
                                       ),
                                     ),
                                   ],
@@ -194,7 +194,7 @@ class ProfileScreen extends ConsumerWidget {
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                               ),
                             ],
                           ),
@@ -208,16 +208,16 @@ class ProfileScreen extends ConsumerWidget {
                           child: Column(
                             children: <Widget>[
                               ListTile(
-                                leading: Icon(Ionicons.shield_checkmark_outline, color: Colors.white.withOpacity(0.7)),
+                                leading: Icon(Ionicons.shield_checkmark_outline, color: Colors.white.withValues(alpha: 0.7)),
                                 title: const Text('Privacy Policy', style: TextStyle(color: Colors.white, fontSize: 14)),
-                                trailing: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white.withOpacity(0.3)),
+                                trailing: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white.withValues(alpha: 0.3)),
                                 onTap: () => launchUrl(Uri.parse(ExternalUrls.privacyPolicy)),
                               ),
-                              Divider(height: 1, color: Colors.white.withOpacity(0.1)),
+                              Divider(height: 1, color: Colors.white.withValues(alpha: 0.1)),
                               ListTile(
-                                leading: Icon(Ionicons.document_text_outline, color: Colors.white.withOpacity(0.7)),
+                                leading: Icon(Ionicons.document_text_outline, color: Colors.white.withValues(alpha: 0.7)),
                                 title: const Text('Terms of Service', style: TextStyle(color: Colors.white, fontSize: 14)),
-                                trailing: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white.withOpacity(0.3)),
+                                trailing: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white.withValues(alpha: 0.3)),
                                 onTap: () => launchUrl(Uri.parse(ExternalUrls.termsOfService)),
                               ),
                             ],
@@ -238,7 +238,7 @@ class ProfileScreen extends ConsumerWidget {
                                 'Astr $version',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                 ),
                               ),
                             );

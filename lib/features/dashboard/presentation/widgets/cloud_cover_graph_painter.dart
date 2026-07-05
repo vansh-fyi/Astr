@@ -16,7 +16,7 @@ class CloudCoverGraphPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     _strokePaint = Paint()
-      ..color = cloudColor.withOpacity(0.5)
+      ..color = cloudColor.withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -123,8 +123,8 @@ class CloudCoverGraphPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[
-          nowIndicatorColor.withOpacity(0.5),
-          nowIndicatorColor.withOpacity(0),
+          nowIndicatorColor.withValues(alpha: 0.5),
+          nowIndicatorColor.withValues(alpha: 0),
         ],
       ).createShader(Rect.fromLTWH(x, topY, 1, height - topY));
 

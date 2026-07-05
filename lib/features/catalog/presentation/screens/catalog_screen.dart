@@ -46,7 +46,7 @@ class CatalogScreen extends ConsumerWidget {
                         'Explore the cosmos',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -70,16 +70,16 @@ class CatalogScreen extends ConsumerWidget {
                           onSelected: (_) {
                             ref.read(catalogNotifierProvider.notifier).switchCategory(type);
                           },
-                          backgroundColor: Colors.white.withOpacity(0.1),
-                          selectedColor: Colors.blue.withOpacity(0.3),
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          selectedColor: Colors.blue.withValues(alpha: 0.3),
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                           ),
                           side: BorderSide(
                             color: isSelected
-                                ? Colors.blue.withOpacity(0.5)
-                                : Colors.white.withOpacity(0.2),
+                                ? Colors.blue.withValues(alpha: 0.5)
+                                : Colors.white.withValues(alpha: 0.2),
                           ),
                         ),
                       );
@@ -115,7 +115,7 @@ class CatalogScreen extends ConsumerWidget {
                                     child: Text(
                                       'No objects found',
                                       style: TextStyle(
-                                        color: Colors.white.withOpacity(0.5),
+                                        color: Colors.white.withValues(alpha: 0.5),
                                       ),
                                     ),
                                   )

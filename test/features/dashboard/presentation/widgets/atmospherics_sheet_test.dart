@@ -1,3 +1,4 @@
+import 'package:astr/core/design/app_colors.dart';
 import 'package:astr/core/widgets/glass_panel.dart';
 import 'package:astr/features/astronomy/domain/entities/astronomy_state.dart';
 import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
@@ -164,8 +165,8 @@ void main() {
       matching: find.text('Poor'),
     );
     final Text textWidget = tester.widget<Text>(labelFinder);
-    // Updated for Red Mode compatibility (Epic 5) - now uses white with alpha 0.6
-    expect(textWidget.style?.color, Colors.white.withValues(alpha: 0.6));
+    // Updated for Red Mode compatibility (Epic 5) - now uses AppColors.textPrimary with alpha 0.6
+    expect(textWidget.style?.color, AppColors.textPrimary.withValues(alpha: 0.6));
 
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);

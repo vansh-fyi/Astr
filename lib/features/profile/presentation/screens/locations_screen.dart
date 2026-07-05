@@ -63,14 +63,14 @@ class LocationsScreen extends ConsumerWidget {
                               Icon(
                                 Ionicons.location_outline,
                                 size: 64,
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'No saved locations',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: Colors.white.withValues(alpha: 0.5),
                                 ),
                               ),
                             ],
@@ -105,7 +105,7 @@ class LocationsScreen extends ConsumerWidget {
                                 alignment: Alignment.centerRight,
                                 padding: const EdgeInsets.only(right: 20),
                                 decoration: BoxDecoration(
-                                  color: Colors.redAccent.withOpacity(0.8),
+                                  color: Colors.redAccent.withValues(alpha: 0.8),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: const Icon(Ionicons.trash, color: Colors.white),
@@ -124,7 +124,7 @@ class LocationsScreen extends ConsumerWidget {
                                     ),
                                     content: Text(
                                       'Are you sure you want to delete "${location.name}"? This action cannot be undone.',
-                                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                                     ),
                                     actions: <Widget>[
                                       TextButton(
@@ -212,14 +212,14 @@ class _LocationItem extends ConsumerWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Icon(
                     Ionicons.location,
                     size: 24,
-                    color: isStale ? Colors.white.withOpacity(0.5) : Colors.white,
+                    color: isStale ? Colors.white.withValues(alpha: 0.5) : Colors.white,
                   ),
                 ),
               ),
@@ -258,7 +258,7 @@ class _LocationItem extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: isStale ? Colors.white.withOpacity(0.6) : Colors.white,
+                          color: isStale ? Colors.white.withValues(alpha: 0.6) : Colors.white,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -270,9 +270,9 @@ class _LocationItem extends ConsumerWidget {
                         margin: const EdgeInsets.only(left: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.2),
+                          color: Colors.orange.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.orange.withOpacity(0.6), width: 1),
+                          border: Border.all(color: Colors.orange.withValues(alpha: 0.6), width: 1),
                         ),
                         child: const Text(
                           'Stale',
@@ -290,7 +290,7 @@ class _LocationItem extends ConsumerWidget {
                   '${location.latitude.toStringAsFixed(2)}, ${location.longitude.toStringAsFixed(2)} • ${_formatLastViewed(location.lastViewedTimestamp)}',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(isStale ? 0.3 : 0.5),
+                    color: Colors.white.withValues(alpha: isStale ? 0.3 : 0.5),
                     fontFamily: 'monospace',
                   ),
                 ),
@@ -302,7 +302,7 @@ class _LocationItem extends ConsumerWidget {
           IconButton(
             icon: Icon(
               location.isPinned ? Ionicons.pin : Ionicons.pin_outline,
-              color: location.isPinned ? Colors.amber : Colors.white.withOpacity(0.4),
+              color: location.isPinned ? Colors.amber : Colors.white.withValues(alpha: 0.4),
               size: 20,
             ),
             onPressed: () async {
@@ -331,7 +331,7 @@ class _LocationItem extends ConsumerWidget {
           Icon(
             Icons.arrow_forward_ios,
             size: 14,
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -376,7 +376,7 @@ class _LocationItem extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -395,7 +395,7 @@ class _LocationItem extends ConsumerWidget {
             Text(
               '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -414,7 +414,7 @@ class _LocationItem extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.2),
+                      color: Colors.blueAccent.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Ionicons.create, color: Colors.blueAccent, size: 20),
@@ -450,7 +450,7 @@ class _LocationItem extends ConsumerWidget {
                     ),
                     content: Text(
                       'Are you sure you want to delete "${location.name}"? This action cannot be undone.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                     ),
                     actions: <Widget>[
                       TextButton(
@@ -472,13 +472,13 @@ class _LocationItem extends ConsumerWidget {
                 }
               },
               padding: const EdgeInsets.all(16),
-              border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+              border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
               child: Row(
                 children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.2),
+                      color: Colors.redAccent.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Ionicons.trash, color: Colors.redAccent, size: 20),
