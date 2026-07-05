@@ -119,9 +119,10 @@ class QualitativeConditionService {
     }
  
     // Fair: Score > 0.25, Some visibility possible
-    // More lenient threshold to accommodate various edge cases
-    // But exclude extremely poor darkness (inner city) or very heavy clouds
-    if (overallScore > 0.25 && cloudCover < 80.0 && mpsas > 17.3) {
+    // More lenient threshold to accommodate various edge cases.
+    // Note: cloudCover <= 70 is guaranteed here (the > 70 branch above already
+    // returns early), so an explicit cloud check against 80 would be dead code.
+    if (overallScore > 0.25 && mpsas > 17.3) {
       return const ConditionResult(
         quality: ConditionQuality.fair,
         shortSummary: 'Fair',
