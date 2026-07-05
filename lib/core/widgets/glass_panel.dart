@@ -58,11 +58,17 @@ class GlassPanel extends StatelessWidget {
     );
 
     if (onTap != null || onLongPress != null) {
-      content = InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: radius,
-        child: content,
+      // Material(transparency) lets the InkWell ripple render above the
+      // Container background. Without it the opaque Container covers the
+      // Material splash layer and no visual press feedback is visible.
+      content = Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          borderRadius: radius,
+          child: content,
+        ),
       );
     }
 
