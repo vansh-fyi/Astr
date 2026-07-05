@@ -12,6 +12,7 @@ import '../../../core/engine/models/condition_result.dart';
 import '../../../core/engine/models/sky_state.dart';
 import '../../../core/services/toast_service.dart';
 import '../../astronomy/domain/entities/astronomy_state.dart';
+import '../../astronomy/domain/entities/moon_phase_info.dart';
 import '../../astronomy/presentation/providers/astronomy_provider.dart';
 import '../../context/domain/entities/astr_context.dart';
 import '../../context/domain/entities/geo_location.dart';
@@ -26,7 +27,9 @@ import 'widgets/conditions_card.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/hero_condition_label.dart';
 import 'widgets/highlights_feed.dart';
+import 'widgets/moon_mini_card.dart';
 import 'widgets/sky_state_background.dart';
+import 'widgets/visibility_mini_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -243,8 +246,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                             const ConditionsCard(),
                             const SizedBox(height: AppSpacing.md),
                             
-                            // Placeholder for mini-cards (Plan 04)
-                            const SizedBox(height: AppSpacing.kMiniCardHeight),
+                            // Mini-cards Row (Plan 04)
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: VisibilityMiniCard(
+                                    lightPollution: visibilityState.lightPollution,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: MoonMiniCard(
+                                    moonPhaseInfo: astronomyAsync.valueOrNull?.moonPhaseInfo ??
+                                        const MoonPhaseInfo(illumination: 0, phaseAngle: 0),
+                                  ),
+                                ),
+                              ],
+                            ),
                             const SizedBox(height: AppSpacing.md),
                             
                             // Highlights Feed
