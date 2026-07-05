@@ -51,7 +51,7 @@ class RemoteZoneService {
             jsonDecode(response.body) as Map<String, dynamic>;
         
         return ZoneData(
-          astrZone: json['bortle'] as int,
+          astrZone: (json['bortle'] as num).toInt(),
           ratio: (json['ratio'] as num).toDouble(),
           sqm: (json['sqm'] as num).toDouble(),
         );
