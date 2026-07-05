@@ -111,9 +111,9 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    // Verify Title/Subtitle (with leading space check)
-    expect(find.text(' Clear Skies'), findsOneWidget);
-    expect(find.text('  Perfect visibility for observation'), findsOneWidget);
+    // Verify Title/Subtitle (no leading whitespace — WR-002 fix)
+    expect(find.text('Clear Skies'), findsOneWidget);
+    expect(find.text('Perfect visibility for observation'), findsOneWidget);
 
     // Verify Cloud Cover display
     expect(find.text('Cloud Cover'), findsOneWidget);

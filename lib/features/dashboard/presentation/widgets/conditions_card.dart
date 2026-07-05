@@ -30,12 +30,10 @@ class ConditionsCard extends ConsumerWidget {
     final bool isWeatherLoading = weatherAsync.isLoading;
     final String? weatherError = weatherAsync.hasError ? weatherAsync.error.toString() : null;
 
-    final String titleText = conditionQualityAsync.valueOrNull != null
-        ? ' ${conditionQualityAsync.valueOrNull!.shortSummary}'
-        : ' Clear Skies'; // fallback or loading default, note the intentional leading space!
-    final String subtitleText = conditionQualityAsync.valueOrNull != null
-        ? '  ${conditionQualityAsync.valueOrNull!.detailedAdvice}'
-        : '  Perfect visibility for observation'; // fallback, note the two intentional leading spaces!
+    final String titleText = conditionQualityAsync.valueOrNull?.shortSummary
+        ?? 'Clear Skies';
+    final String subtitleText = conditionQualityAsync.valueOrNull?.detailedAdvice
+        ?? 'Perfect visibility for observation';
 
     return RepaintBoundary(
       child: ClipRRect(
