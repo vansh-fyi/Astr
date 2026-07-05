@@ -1,4 +1,3 @@
-import 'package:astr/core/widgets/glass_panel.dart';
 import 'package:astr/features/astronomy/domain/entities/astronomy_state.dart';
 import 'package:astr/features/astronomy/domain/entities/moon_phase_info.dart';
 import 'package:astr/features/astronomy/domain/entities/celestial_body.dart';
@@ -166,7 +165,7 @@ void main() {
     await tester.pump();
 
     expect(find.text("TONIGHT'S HIGHLIGHTS"), findsOneWidget);
-    expect(find.byType(GlassPanel), findsNWidgets(3));
+    expect(find.byType(InkWell), findsNWidgets(3));
     expect(find.text('Venus'), findsOneWidget); // Brightest first
     expect(find.text('Jupiter'), findsOneWidget);
     expect(find.text('Mars'), findsOneWidget);
@@ -197,6 +196,6 @@ void main() {
     await tester.pump();
 
     expect(find.text("TONIGHT'S HIGHLIGHTS"), findsNothing);
-    expect(find.byType(GlassPanel), findsNothing);
+    expect(find.byType(InkWell), findsNothing);
   });
 }

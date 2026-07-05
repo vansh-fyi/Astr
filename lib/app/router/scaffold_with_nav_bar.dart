@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 
+import '../../core/design/app_colors.dart';
+import '../../core/design/app_typography.dart';
 import '../../core/providers/global_loading_provider.dart';
 import '../../core/widgets/cosmic_loader.dart';
 import '../../core/widgets/glass_panel.dart';
@@ -13,7 +15,6 @@ import '../../core/widgets/glass_toast.dart';
 import '../../features/context/domain/entities/astr_context.dart';
 import '../../features/context/presentation/providers/astr_context_provider.dart';
 import '../../features/context/presentation/widgets/location_sheet.dart';
-import '../theme/app_theme.dart';
 
 class ScaffoldWithNavBar extends ConsumerWidget {
 
@@ -62,11 +63,11 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                     left: 16,
                     right: 16,
                   ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.deepCosmos.withOpacity(0.7),
+                  decoration: const BoxDecoration(
+                    color: AppColors.surfaceGlass,
                     border: Border(
                       bottom: BorderSide(
-                        color: Colors.white.withOpacity(0.1),
+                        color: AppColors.borderSurface,
                       ),
                     ),
                   ),
@@ -79,8 +80,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                         child: GlassPanel(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           borderRadius: BorderRadius.circular(30),
+                          backgroundColor: AppColors.surfaceGlass,
+                          borderColor: AppColors.borderSurface,
                           onTap: () {
-                            showModalBottomSheet(
+                            showModalBottomSheet<void>(
                               context: context,
                               useRootNavigator: true,
                               builder: (BuildContext context) => const LocationSheet(),
@@ -92,8 +95,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                               Icon(
                                 Ionicons.location_outline, 
                                 color: (astrContextAsync.value?.isCurrentLocation ?? true) 
-                                    ? Colors.white 
-                                    : Colors.blueAccent,
+                                    ? AppColors.textPrimary 
+                                    : AppColors.accent,
                                 size: 14
                               ),
                               const SizedBox(width: 8),
@@ -104,8 +107,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                     color: (astrContextAsync.value?.isCurrentLocation ?? true)
-                                        ? Colors.white.withOpacity(0.9)
-                                        : Colors.blueAccent,
+                                        ? AppColors.textPrimary
+                                        : AppColors.accent,
                                     letterSpacing: 0.5,
                                   ),
                                   maxLines: 1,
@@ -130,6 +133,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                             GlassPanel(
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(30),
+                              backgroundColor: AppColors.surfaceGlass,
+                              borderColor: AppColors.borderSurface,
                               onTap: () {
                                 final DateTime now = DateTime.now();
                                 final DateTime minDate = now.subtract(const Duration(days: 10));
@@ -143,7 +148,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                               child: const SizedBox(
                                 width: 32,
                                 height: 32,
-                                child: Icon(Ionicons.chevron_back, color: Colors.white70, size: 16),
+                                child: Icon(Ionicons.chevron_back, color: AppColors.textMuted, size: 16),
                               ),
                             ),
                             
@@ -155,6 +160,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                               child: GlassPanel(
                                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                                 borderRadius: BorderRadius.circular(30),
+                                backgroundColor: AppColors.surfaceGlass,
+                                borderColor: AppColors.borderSurface,
                                 onTap: () async {
                                   final DateTime now = DateTime.now();
                                   // AC#3: Restrict to +/-10 days for cloud cover data
@@ -171,8 +178,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                       return Theme(
                                         data: Theme.of(context).copyWith(
                                           colorScheme: const ColorScheme.dark(
-                                            primary: Colors.blueAccent,
-                                            onPrimary: Colors.white,
+                                            primary: AppColors.accent,
+                                            onPrimary: AppColors.textPrimary,
                                             surface: Color(0xFF141419),
                                           ), dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF0A0A0B)),
                                         ),
@@ -190,7 +197,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
-                                    color: isToday ? Colors.white.withOpacity(0.9) : Colors.blueAccent,
+                                    color: isToday ? AppColors.textPrimary : AppColors.accent,
                                     letterSpacing: 0.5,
                                   ),
                                   maxLines: 1,
@@ -205,6 +212,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                             GlassPanel(
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(30),
+                              backgroundColor: AppColors.surfaceGlass,
+                              borderColor: AppColors.borderSurface,
                               onTap: () {
                                 final DateTime now = DateTime.now();
                                 final DateTime maxDate = now.add(const Duration(days: 10));
@@ -218,7 +227,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                               child: const SizedBox(
                                 width: 32,
                                 height: 32,
-                                child: Icon(Ionicons.chevron_forward, color: Colors.white70, size: 16),
+                                child: Icon(Ionicons.chevron_forward, color: AppColors.textMuted, size: 16),
                               ),
                             ),
                           ],
@@ -239,7 +248,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         onPressed: () {
           showGlassToast(context, 'Sky Map coming soon!');
         },
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: AppColors.accent,
         shape: const CircleBorder(),
         child: const Icon(Ionicons.map_outline, color: Colors.white),
       ),
@@ -252,12 +261,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             clipper: NavBarClipper(),
             child: BackdropFilter(
               filter: ImageFilter.blur(
-                sigmaX: AppTheme.glassBlur,
-                sigmaY: AppTheme.glassBlur,
+                sigmaX: 16,
+                sigmaY: 16,
               ),
               child: Container(
                 height: 70 + bottomPadding,
-                color: AppTheme.deepCosmos.withOpacity(0.8),
+                color: AppColors.surfaceGlass,
                 padding: EdgeInsets.only(bottom: bottomPadding),
                 child: Material(
                   type: MaterialType.transparency,
@@ -316,7 +325,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
     return Positioned.fill(
       child: ColoredBox(
-        color: Colors.black.withOpacity(0.5),
+        color: Colors.black.withValues(alpha: 0.5),
         child: const Center(
           child: CosmicLoader(),
         ),
@@ -387,9 +396,9 @@ class NotchShinePainter extends CustomPainter {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: <Color>[
-        Colors.blueAccent.withOpacity(0),
-        Colors.blueAccent.withOpacity(0.8),
-        Colors.blueAccent.withOpacity(0),
+        AppColors.accent.withValues(alpha: 0),
+        AppColors.accent.withValues(alpha: 0.8),
+        AppColors.accent.withValues(alpha: 0),
       ],
       stops: const <double>[0, 0.5, 1],
     ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
@@ -441,7 +450,7 @@ class _NavBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = isSelected ? Colors.white : Colors.white.withOpacity(0.5);
+    final Color itemColor = isSelected ? AppColors.textPrimary : AppColors.textSubdued;
     
     return InkWell(
       onTap: onTap,
@@ -453,16 +462,28 @@ class _NavBarItem extends StatelessWidget {
           children: <Widget>[
             Icon(
               isSelected ? activeIcon : icon,
-              color: color,
+              color: itemColor,
               size: 24,
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: TextStyle(
-                color: color,
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              style: AppTypography.nav.copyWith(
+                color: itemColor,
+                shadows: isSelected
+                    ? const <Shadow>[
+                        Shadow(
+                          color: Color(0xFF3A7FFF),
+                          blurRadius: 12.2,
+                          offset: Offset(0, 1),
+                        ),
+                        Shadow(
+                          color: Color(0x40FFFFFF),
+                          blurRadius: 1,
+                          offset: Offset.zero,
+                        ),
+                      ]
+                    : null,
               ),
             ),
           ],

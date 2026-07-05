@@ -18,6 +18,8 @@ class GlassPanel extends StatelessWidget {
     this.borderRadius,
     this.border,
     this.enableBlur = true,
+    this.backgroundColor,
+    this.borderColor,
   });
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -27,6 +29,8 @@ class GlassPanel extends StatelessWidget {
   final BoxBorder? border;
 
   final bool enableBlur;
+  final Color? backgroundColor;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -34,21 +38,21 @@ class GlassPanel extends StatelessWidget {
 
     // Optimized Style for Non-Blur (Performance Mode)
     // Higher opacity to mask background since we don't blur it
-    final Color backgroundColor = enableBlur 
+    final Color resolvedBgColor = backgroundColor ?? (enableBlur 
         ? const Color(0xFF121212).withValues(alpha: 0.8) 
-        : const Color(0xFF121212).withValues(alpha: 0.95);
+        : const Color(0xFF121212).withValues(alpha: 0.95));
 
     // Subtle border for definition
-    final BoxBorder borderColor = border ?? Border.all(
+    final BoxBorder resolvedBorder = border ?? (borderColor != null ? Border.all(color: borderColor!) : Border.all(
       color: Colors.white.withValues(alpha: enableBlur ? 0.08 : 0.12),
-    );
+    ));
 
     Widget content = Container(
       padding: padding ?? const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: resolvedBgColor,
         borderRadius: radius,
-        border: borderColor,
+        border: resolvedBorder,
       ),
       child: child,
     );

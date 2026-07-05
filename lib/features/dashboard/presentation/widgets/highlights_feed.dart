@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 
-import '../../../../core/widgets/glass_panel.dart';
+import '../../../../core/design/app_colors.dart';
+import '../../../../core/design/app_spacing.dart';
+import '../../../../core/design/app_typography.dart';
 import '../../../astronomy/domain/entities/astronomy_state.dart';
 import '../../../astronomy/presentation/providers/astronomy_provider.dart';
 import '../../domain/entities/highlight_item.dart';
@@ -33,11 +35,9 @@ class HighlightsFeed extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
                 "TONIGHT'S HIGHLIGHTS",
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
+                style: AppTypography.micro.copyWith(
                   letterSpacing: 1.5,
+                  color: AppColors.textMuted,
                 ),
               ),
             ),
@@ -68,92 +68,98 @@ class _HighlightItemWidget extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: GlassPanel(
-        enableBlur: false,
-        padding: const EdgeInsets.all(16),
-        onTap: () {
-          showModalBottomSheet(
-            context: context,
-            backgroundColor: Colors.transparent,
-            isScrollControlled: true,
-            builder: (BuildContext context) => CelestialDetailSheet(
-              objectId: item.body.name.toLowerCase(),
-              title: item.body.displayName,
-              subtitle: 'Best view: $timeStr',
-            ),
-          );
-        },
-        child: Row(
-          children: <Widget>[
-            // Icon Box
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withOpacity(0.2)),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceOverlay,
+          border: Border.all(color: AppColors.borderPrimary),
+          borderRadius: BorderRadius.circular(AppSpacing.kCardRadius),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppSpacing.kCardRadius),
+          onTap: () {
+            showModalBottomSheet<void>(
+              context: context,
+              backgroundColor: Colors.transparent,
+              isScrollControlled: true,
+              builder: (BuildContext context) => CelestialDetailSheet(
+                objectId: item.body.name.toLowerCase(),
+                title: item.body.displayName,
+                subtitle: 'Best view: $timeStr',
               ),
-              child: const Center(
-                child: Icon(
-                  Ionicons.planet_outline,
-                  color: Colors.orange,
-                  size: 20,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    item.body.displayName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: <Widget>[
+                // Icon Box
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
                   ),
-                  const SizedBox(height: 2),
-                  Row(
+                  child: const Center(
+                    child: Icon(
+                      Ionicons.planet_outline,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Best view: $timeStr',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 12,
+                        item.body.displayName,
+                        style: AppTypography.labelMd.copyWith(
+                          color: AppColors.textPrimary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '•',
-                        style: TextStyle(color: Colors.white54),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Excellent', // Placeholder for quality logic
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: <Widget>[
+                          Text(
+                            'Best view: $timeStr',
+                            style: AppTypography.labelMd.copyWith(
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '•',
+                            style: TextStyle(color: AppColors.textMuted),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Excellent', // Placeholder for quality logic
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                // Arrow
+                const Icon(
+                  Ionicons.chevron_forward,
+                  color: AppColors.textMuted,
+                  size: 16,
+                ),
+              ],
             ),
-            // Arrow
-            Icon(
-              Ionicons.chevron_forward,
-              color: Colors.white.withOpacity(0.3),
-              size: 16,
-            ),
-          ],
+          ),
         ),
       ),
     );
