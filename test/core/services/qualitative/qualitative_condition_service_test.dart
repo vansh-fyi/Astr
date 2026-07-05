@@ -1,5 +1,6 @@
 import 'package:astr/core/engine/models/condition_quality.dart';
 import 'package:astr/core/engine/models/condition_result.dart';
+import 'package:astr/core/engine/models/sky_state.dart';
 import 'package:astr/core/services/qualitative/qualitative_condition_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -203,6 +204,62 @@ void main() {
 
         expect(poorDarkness.quality, ConditionQuality.poor);
         expect(poorDarkness.detailedAdvice, 'Excessive Light Pollution');
+      });
+    });
+
+    group('SkyState Mapping', () {
+      test('maps to SkyState.cloudy when cloudCover > 70', () {
+        final result = service.evaluate(
+          cloudCover: 80,
+          moonIllumination: 0,
+          mpsas: 21,
+        );
+        expect(result.skyState, SkyState.cloudy);
+      });
+
+      test('maps to SkyState.tooMuchLight when mpsas < 17.5', () {
+        final result = service.evaluate(
+          cloudCover: 10,
+          moonIllumination: 0,
+          mpsas: 17,
+        );
+        expect(result.skyState, SkyState.tooMuchLight);
+      });
+
+      test('maps to SkyState.milkyWayVisible when excellent conditions', () {
+        final result = service.evaluate(
+          cloudCover: 5,
+          moonIllumination: 0,
+          mpsas: 21.8,
+        );
+        expect(result.skyState, SkyState.milkyWayVisible);
+      });
+
+      test('maps to SkyState.starrySkies when good conditions', () {
+        final result = service.evaluate(
+          cloudCover: 30,
+          moonIllumination: 0.5,
+          mpsas: 20,
+        );
+        expect(result.skyState, SkyState.starrySkies);
+      });
+
+      test('maps to SkyState.planetsVisible when fair conditions', () {
+        final result = service.evaluate(
+          cloudCover: 50,
+          moonIllumination: 1.0,
+          mpsas: 18.5,
+        );
+        expect(result.skyState, SkyState.planetsVisible);
+      });
+
+      test('maps to SkyState.fewStars for default poor conditions', () {
+        final result = service.evaluate(
+          cloudCover: 60,
+          moonIllumination: 0.9,
+          mpsas: 17.6,
+        );
+        expect(result.skyState, SkyState.fewStars);
       });
     });
   });

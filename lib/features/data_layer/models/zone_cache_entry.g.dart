@@ -18,7 +18,7 @@ class ZoneCacheEntryAdapter extends TypeAdapter<ZoneCacheEntry> {
     };
     return ZoneCacheEntry(
       h3Index: fields[0] as String,
-      bortleClass: (fields[1] as num).toInt(),
+      astrZone: (fields[1] as num).toInt(),
       ratio: (fields[2] as num).toDouble(),
       sqm: (fields[3] as num).toDouble(),
       fetchedAt: fields[4] as DateTime,
@@ -32,7 +32,7 @@ class ZoneCacheEntryAdapter extends TypeAdapter<ZoneCacheEntry> {
       ..writeByte(0)
       ..write(obj.h3Index)
       ..writeByte(1)
-      ..write(obj.bortleClass)
+      ..write(obj.astrZone)
       ..writeByte(2)
       ..write(obj.ratio)
       ..writeByte(3)

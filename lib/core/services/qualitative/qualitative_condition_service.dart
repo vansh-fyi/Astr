@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../engine/models/condition_quality.dart';
 import '../../engine/models/condition_result.dart';
+import '../../engine/models/sky_state.dart';
 
 /// Service for evaluating qualitative observing conditions
 ///
@@ -22,18 +23,18 @@ class QualitativeConditionService {
     final double cloudScore = _normalizeCloudCover(cloudCover);
     final double moonScore = _normalizeMoonIllumination(moonIllumination);
     final double darknessScore = _normalizeMPSAS(mpsas);
-
+ 
     // Weighted combination
     // Cloud cover is most critical (40%), followed by darkness (35%) and moon (25%)
     const double cloudWeight = 0.40;
     const double darknessWeight = 0.35;
     const double moonWeight = 0.25;
-
+ 
     final double overallScore =
         (cloudScore * cloudWeight) +
         (darknessScore * darknessWeight) +
         (moonScore * moonWeight);
-
+ 
     // Determine quality and generate advice
     return _determineQualityAndAdvice(
       overallScore: overallScore,
@@ -42,19 +43,19 @@ class QualitativeConditionService {
       mpsas: mpsas,
     );
   }
-
+ 
   /// Normalizes cloud cover to 0-1 scale (lower cloud = higher score)
   double _normalizeCloudCover(double cloudCover) {
     // 0% cloud = 1.0, 100% cloud = 0.0
     return 1.0 - (cloudCover / 100.0).clamp(0.0, 1.0);
   }
-
+ 
   /// Normalizes moon illumination to 0-1 scale (lower illumination = higher score)
   double _normalizeMoonIllumination(double moonIllumination) {
     // New moon (0.0) = 1.0, Full moon (1.0) = 0.0
     return 1.0 - moonIllumination.clamp(0.0, 1.0);
   }
-
+ 
   /// Normalizes MPSAS to 0-1 scale (higher MPSAS = higher score)
   double _normalizeMPSAS(double mpsas) {
     // Map 17.0-22.0 MPSAS range to 0.0-1.0
@@ -63,7 +64,7 @@ class QualitativeConditionService {
     const double maxMPSAS = 22;
     return ((mpsas - minMPSAS) / (maxMPSAS - minMPSAS)).clamp(0.0, 1.0);
   }
-
+ 
   /// Determines quality level and generates appropriate advice
   ConditionResult _determineQualityAndAdvice({
     required double overallScore,
@@ -78,9 +79,10 @@ class QualitativeConditionService {
         shortSummary: 'Poor',
         detailedAdvice: 'Sky might be cloudy',
         statusColor: Color(0xFFF44336), // Red
+        skyState: SkyState.cloudy,
       );
     }
-
+ 
     // Check for extreme light pollution (Bortle Zone 8-9)
     if (mpsas < 17.5) {
       return const ConditionResult(
@@ -88,9 +90,10 @@ class QualitativeConditionService {
         shortSummary: 'Poor',
         detailedAdvice: 'Excessive Light Pollution',
         statusColor: Color(0xFFF44336), // Red
+        skyState: SkyState.tooMuchLight,
       );
     }
-
+ 
     // Excellent: Score > 0.60, Low clouds (<30%), Truly dark skies (>=21.3)
     // Only achievable in Bortle 1-3 zones (dark sky sites with Milky Way visible)
     if (overallScore > 0.60 && cloudCover < 30.0 && mpsas >= 21.3) {
@@ -99,9 +102,10 @@ class QualitativeConditionService {
         shortSummary: 'Excellent',
         detailedAdvice: 'Milky Way visible',
         statusColor: Color(0xFF4CAF50), // Green
+        skyState: SkyState.milkyWayVisible,
       );
     }
-
+ 
     // Good: Score > 0.40, Moderate clouds (<50%), Dark to suburban skies (>=19.1)
     // Achievable in Bortle 4-5 zones (rural/suburban with good star visibility)
     if (overallScore > 0.40 && cloudCover < 50.0 && mpsas >= 19.1) {
@@ -110,9 +114,10 @@ class QualitativeConditionService {
         shortSummary: 'Good',
         detailedAdvice: 'Starry sky today',
         statusColor: Color(0xFF8BC34A), // Light Green
+        skyState: SkyState.starrySkies,
       );
     }
-
+ 
     // Fair: Score > 0.25, Some visibility possible
     // More lenient threshold to accommodate various edge cases
     // But exclude extremely poor darkness (inner city) or very heavy clouds
@@ -122,15 +127,17 @@ class QualitativeConditionService {
         shortSummary: 'Fair',
         detailedAdvice: 'Planets visible',
         statusColor: Color(0xFFFFEB3B), // Yellow
+        skyState: SkyState.planetsVisible,
       );
     }
-
+ 
     // Poor: Everything else
     return const ConditionResult(
       quality: ConditionQuality.poor,
       shortSummary: 'Poor',
       detailedAdvice: 'Few stars visible',
       statusColor: Color(0xFFF44336), // Red
+      skyState: SkyState.fewStars,
     );
   }
 }

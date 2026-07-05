@@ -12,7 +12,7 @@ part 'zone_cache_entry.g.dart';
 class ZoneCacheEntry {
   ZoneCacheEntry({
     required this.h3Index,
-    required this.bortleClass,
+    required this.astrZone,
     required this.ratio,
     required this.sqm,
     required this.fetchedAt,
@@ -22,9 +22,9 @@ class ZoneCacheEntry {
   @HiveField(0)
   final String h3Index;
 
-  /// Bortle Dark-Sky Scale value (1-9)
+  /// Astr Zone value (1-9)
   @HiveField(1)
-  final int bortleClass;
+  final int astrZone;
 
   /// Light pollution ratio (relative to natural sky, 0-10 scale)
   @HiveField(2)
@@ -50,5 +50,5 @@ class ZoneCacheEntry {
 
   @override
   String toString() =>
-      'ZoneCacheEntry(h3: $h3Index, bortle: $bortleClass, fetchedAt: $fetchedAt)';
+      'ZoneCacheEntry(h3: $h3Index, zone: $astrZone, fetchedAt: $fetchedAt)';
 }

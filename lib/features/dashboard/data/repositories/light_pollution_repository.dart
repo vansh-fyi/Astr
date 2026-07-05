@@ -47,13 +47,13 @@ class LightPollutionRepository implements ILightPollutionService {
 
       // Step 3: Convert ZoneData to LightPollution entity
       return Right<Failure, LightPollution>(LightPollution(
-        visibilityIndex: zoneData.bortleClass,
+        visibilityIndex: zoneData.astrZone,
         brightnessRatio: zoneData.ratio,
         mpsas: zoneData.sqm,
-        source: zoneData.bortleClass == 1 
+        source: zoneData.astrZone == 1 
             ? LightPollutionSource.estimated  // Dark sky default
             : LightPollutionSource.precise,    // From database
-        zone: zoneData.bortleClass.toString(),
+        zone: zoneData.astrZone.toString(),
       ));
     } catch (e) {
       debugPrint('LightPollutionRepository: Lookup failed: $e');

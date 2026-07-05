@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'condition_quality.dart';
+import 'sky_state.dart';
 
 /// Result of qualitative condition evaluation
 class ConditionResult extends Equatable {
@@ -10,6 +11,7 @@ class ConditionResult extends Equatable {
     required this.shortSummary,
     required this.detailedAdvice,
     required this.statusColor,
+    required this.skyState,
   });
   /// The overall quality assessment
   final ConditionQuality quality;
@@ -23,6 +25,9 @@ class ConditionResult extends Equatable {
   /// Color representing the condition quality
   final Color statusColor;
 
+  /// The visual sky state
+  final SkyState skyState;
+
   @override
-  List<Object?> get props => <Object?>[quality, shortSummary, detailedAdvice, statusColor];
+  List<Object?> get props => <Object?>[quality, shortSummary, detailedAdvice, statusColor, skyState];
 }

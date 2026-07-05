@@ -1,17 +1,15 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 
 /// Represents light pollution data for a specific H3 zone.
 ///
 /// Contains scientific-grade data used by the UI to display sky quality:
-/// - [bortleClass]: Bortle Dark-Sky Scale value (1-9)
+/// - [astrZone]: Astr Zone value (1-9)
 /// - [ratio]: Light pollution ratio (relative to natural sky)
 /// - [sqm]: Sky Quality Meter value in mag/arcsec²
 ///
 /// **Binary Format (12 bytes total):**
 /// ```
-/// Byte[0]    : Bortle Class (uint8, values 1-9)
+/// Byte[0]    : Astr Zone (uint8, values 1-9)
 /// Bytes[1-4] : Light Pollution Ratio (float32, little-endian)
 /// Bytes[5-8] : SQM value (float32, little-endian)
 /// Bytes[9-11]: Reserved/padding
@@ -23,10 +21,10 @@ class ZoneData {
   /// Creates a ZoneData instance with the given values.
   ///
   /// **Validation:**
-  /// - [bortleClass] must be between 1 and 9
+  /// - [astrZone] must be between 1 and 9
   /// - [ratio] must be non-negative
   const ZoneData({
-    required this.bortleClass,
+    required this.astrZone,
     required this.ratio,
     required this.sqm,
   });
@@ -34,7 +32,7 @@ class ZoneData {
   /// Parses a 12-byte binary buffer into a [ZoneData] instance.
   ///
   /// **Binary Layout:**
-  /// - Byte 0: Bortle class (uint8)
+  /// - Byte 0: Astr Zone (uint8)
   /// - Bytes 1-4: Ratio (float32, little-endian)
   /// - Bytes 5-8: SQM (float32, little-endian)
   /// - Bytes 9-11: Padding (ignored)
@@ -50,16 +48,16 @@ class ZoneData {
     }
 
     // Use ByteData for endianness-safe parsing
-    final buffer = bytes.buffer.asByteData(bytes.offsetInBytes);
+    final ByteData buffer = bytes.buffer.asByteData(bytes.offsetInBytes);
 
-    final bortleClass = bytes[0];
-    final ratio = buffer.getFloat32(1, Endian.little);
-    final sqm = buffer.getFloat32(5, Endian.little);
+    final int bortleClass = bytes[0];
+    final double ratio = buffer.getFloat32(1, Endian.little);
+    final double sqm = buffer.getFloat32(5, Endian.little);
 
-    // Validate Bortle class
+    // Validate Astr Zone
     if (bortleClass < 1 || bortleClass > 9) {
       throw FormatException(
-        'Bortle class must be between 1 and 9, but got $bortleClass',
+        'Astr Zone must be between 1 and 9, but got $bortleClass',
       );
     }
 
@@ -71,13 +69,13 @@ class ZoneData {
     }
 
     return ZoneData(
-      bortleClass: bortleClass,
+      astrZone: bortleClass,
       ratio: ratio,
       sqm: sqm,
     );
   }
 
-  /// Bortle Dark-Sky Scale value (1-9).
+  /// Astr Zone value (1-9).
   ///
   /// - 1: Excellent dark-sky site
   /// - 2: Typical truly dark site
@@ -88,7 +86,7 @@ class ZoneData {
   /// - 7: Suburban/urban transition
   /// - 8: City sky
   /// - 9: Inner-city sky
-  final int bortleClass;
+  final int astrZone;
 
   /// Light pollution ratio relative to natural sky brightness.
   ///
@@ -104,12 +102,12 @@ class ZoneData {
 
   /// Creates a copy of this ZoneData with optional field overrides.
   ZoneData copyWith({
-    int? bortleClass,
+    int? astrZone,
     double? ratio,
     double? sqm,
   }) {
     return ZoneData(
-      bortleClass: bortleClass ?? this.bortleClass,
+      astrZone: astrZone ?? this.astrZone,
       ratio: ratio ?? this.ratio,
       sqm: sqm ?? this.sqm,
     );
@@ -120,16 +118,16 @@ class ZoneData {
     if (identical(this, other)) return true;
 
     return other is ZoneData &&
-        other.bortleClass == bortleClass &&
+        other.astrZone == astrZone &&
         other.ratio == ratio &&
         other.sqm == sqm;
   }
 
   @override
-  int get hashCode => Object.hash(bortleClass, ratio, sqm);
+  int get hashCode => Object.hash(astrZone, ratio, sqm);
 
   @override
   String toString() {
-    return 'ZoneData(bortleClass: $bortleClass, ratio: $ratio, sqm: $sqm)';
+    return 'ZoneData(astrZone: $astrZone, ratio: $ratio, sqm: $sqm)';
   }
 }

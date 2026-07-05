@@ -36,12 +36,12 @@ class CachedZoneRepository {
 
   /// Default value for locations not in lit-areas database.
   /// These are pristine dark sky sites - the best for stargazing!
-  static final ZoneData pristineDarkSky = ZoneData(
-    bortleClass: 1,  // Bortle 1: Excellent dark-sky site
-    ratio: 0.0,      // No artificial light
-    sqm: 22.0,       // Maximum sky quality
+  static const ZoneData pristineDarkSky = ZoneData(
+    astrZone: 1,  // Bortle 1: Excellent dark-sky site
+    ratio: 0,      // No artificial light
+    sqm: 22,       // Maximum sky quality
   );
-
+ 
   /// Get zone data for an H3 index, using cache-first strategy.
   ///
   /// Returns:
@@ -50,59 +50,59 @@ class CachedZoneRepository {
   Future<ZoneData> getZoneData(BigInt h3Index) async {
     final String h3Hex = h3Index.toRadixString(16);
     final String cacheKey = '$_keyPrefix$h3Hex';
-
+ 
     // 1. Check cache first
     final ZoneCacheEntry? cached = _cache.get(cacheKey);
     if (cached != null && !cached.isExpired) {
       debugPrint('Zone cache hit for $h3Hex');
       return ZoneData(
-        bortleClass: cached.bortleClass,
+        astrZone: cached.astrZone,
         ratio: cached.ratio,
         sqm: cached.sqm,
       );
     }
-
+ 
     // 2. Cache miss — fetch from remote D1 API
     debugPrint('Zone cache miss for $h3Hex, fetching from remote...');
     final ZoneData? remoteData = await _remote.getZoneData(h3Index);
-
+ 
     if (remoteData != null) {
       _cacheZoneData(cacheKey, h3Hex, remoteData);
       return remoteData;
     }
-
+ 
     // 3. Remote failed - check if we have stale cache
     if (cached != null) {
       debugPrint('Remote failed, using expired cache for $h3Hex');
       return ZoneData(
-        bortleClass: cached.bortleClass,
+        astrZone: cached.astrZone,
         ratio: cached.ratio,
         sqm: cached.sqm,
       );
     }
-
+ 
     // 4. Not in database = pristine dark sky location
     debugPrint('$h3Hex not in lit-areas DB, returning pristine dark sky');
     return pristineDarkSky;
   }
-
+ 
   /// Synchronous cache-only lookup (for performance-critical paths).
   /// Returns [pristineDarkSky] if not in cache.
   ZoneData getZoneDataSync(BigInt h3Index) {
     final String h3Hex = h3Index.toRadixString(16);
     final String cacheKey = '$_keyPrefix$h3Hex';
-
+ 
     final ZoneCacheEntry? cached = _cache.get(cacheKey);
     if (cached != null) {
       return ZoneData(
-        bortleClass: cached.bortleClass,
+        astrZone: cached.astrZone,
         ratio: cached.ratio,
         sqm: cached.sqm,
       );
     }
     return pristineDarkSky;
   }
-
+ 
   /// Pre-cache nearby zones (e.g., H3 ring around current location).
   ///
   /// Useful for smooth UX when panning the map.
@@ -113,19 +113,19 @@ class CachedZoneRepository {
       final ZoneCacheEntry? cached = _cache.get(cacheKey);
       return cached == null || cached.isExpired;
     }).toList();
-
+ 
     if (toFetch.isEmpty) return;
-
+ 
     debugPrint('Prefetching ${toFetch.length} zone cells...');
     final Map<BigInt, ZoneData> results = await _remote.getZoneDataBatch(toFetch);
-
+ 
     for (final MapEntry<BigInt, ZoneData> entry in results.entries) {
       final String h3Hex = entry.key.toRadixString(16);
       final String cacheKey = '$_keyPrefix$h3Hex';
       _cacheZoneData(cacheKey, h3Hex, entry.value);
     }
   }
-
+ 
   /// Cache zone data entry
   void _cacheZoneData(String cacheKey, String h3Hex, ZoneData data) {
     try {
@@ -133,7 +133,7 @@ class CachedZoneRepository {
         cacheKey,
         ZoneCacheEntry(
           h3Index: h3Hex,
-          bortleClass: data.bortleClass,
+          astrZone: data.astrZone,
           ratio: data.ratio,
           sqm: data.sqm,
           fetchedAt: DateTime.now().toUtc(),
