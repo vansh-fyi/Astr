@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 
+import '../../../core/design/app_colors.dart';
+import '../../../core/design/app_spacing.dart';
 import '../../../core/engine/models/condition_result.dart';
+import '../../../core/engine/models/sky_state.dart';
 import '../../../core/services/toast_service.dart';
-import '../../../core/widgets/cosmic_loader.dart';
 import '../../astronomy/domain/entities/astronomy_state.dart';
 import '../../astronomy/presentation/providers/astronomy_provider.dart';
 import '../../context/domain/entities/astr_context.dart';
@@ -17,15 +19,13 @@ import '../../context/presentation/providers/astr_context_provider.dart';
 import '../../splash/domain/entities/launch_result.dart';
 import '../../splash/presentation/providers/smart_launch_provider.dart';
 import '../domain/entities/weather.dart';
-import '../domain/services/quality_calculator.dart';
 import 'providers/condition_quality_provider.dart';
 import 'providers/visibility_provider.dart';
 import 'providers/weather_provider.dart';
-import 'widgets/dashboard_grid.dart';
 import 'widgets/dashboard_header.dart';
+import 'widgets/hero_condition_label.dart';
 import 'widgets/highlights_feed.dart';
-import 'widgets/nebula_background.dart';
-import 'widgets/sky_portal.dart';
+import 'widgets/sky_state_background.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -187,151 +187,114 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       }
     });
 
+    final AsyncValue<ConditionResult> conditionAsync = ref.watch(conditionQualityProvider);
+    final SkyState skyState = conditionAsync.when(
+      data: (ConditionResult result) => result.skyState,
+      loading: () => SkyState.starrySkies,
+      error: (_, __) => SkyState.starrySkies,
+    );
+
     return Scaffold(
       extendBody: true,
-      extendBodyBehindAppBar: true, // Extend content behind status bar
-      // Story 4.2: Pure OLED black (#000000) for battery savings (NFR-09)
-      // Note: Using hardcoded value is intentional - OLED requires exact #000000
-      backgroundColor: const Color(0xFF000000),
+      extendBodyBehindAppBar: true,
+      backgroundColor: const Color(0xFF000000), // Pure black for OLED (NFR-09)
       body: Stack(
         children: <Widget>[
-          // Background Elements
-          const NebulaBackground(),
+          // z=0: Background
+          SkyStateBackground(skyState: skyState),
 
-          // Main Content
+          // z=1: Content
           SafeArea(
             bottom: false,
-            child: Column(
+            child: Stack(
               children: <Widget>[
-              // Story 4.2: Dashboard Header with Last Updated indicator (FR-13)
-              const DashboardHeader(),
-
-              // Past/Future Date Banner — collapses to zero height when hidden
-                SizeTransition(
-                  sizeFactor: CurvedAnimation(parent: _bannerController, curve: Curves.easeOut),
-                  axisAlignment: -1.0,
-                  child: Container(
-                    width: double.infinity,
-                    color: Colors.indigo,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Icon(Ionicons.time_outline, color: Colors.white, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Viewing ${_isFutureDate ? "Future" : "Past"} Data: ${DateFormat('MMM d').format(selectedDate)}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-
-                // Scrollable Content
-                Expanded(
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[Colors.transparent, Colors.white],
-                        stops: <double>[0, 0.05], // Soft fade at the top
-                      ).createShader(bounds);
+                // Scrollable content
+                Positioned.fill(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await Future.wait(<Future<void>>[
+                        ref.read(astrContextProvider.notifier).refreshLocation(),
+                        ref.read(weatherProvider.notifier).refresh(),
+                      ]);
                     },
-                    blendMode: BlendMode.dstIn,
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        // Refresh all data
-                        await Future.wait(<Future<void>>[
-                          ref.read(astrContextProvider.notifier).refreshLocation(),
-                          ref.read(weatherProvider.notifier).refresh(),
-                        ]);
-                      },
-                      color: Colors.blueAccent,
-                      backgroundColor: const Color(0xFF000000), // Pure black for OLED (NFR-09)
-                      child: SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Column(
-                            children: <Widget>[
-                              const SizedBox(height: 20),
-                              
-                              const SizedBox(height: 20),
-                              
-                              // Sky Portal (Main Visual)
-                              // Sky Portal (Hero)
-                              if (weatherAsync.hasValue && astronomyAsync.hasValue) ...<Widget>[
-                                Consumer(
-                                  builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                                    final Weather weather = weatherAsync.value!;
-                                    final AstronomyState astronomy = astronomyAsync.value!;
-
-                                    final int score = QualityCalculator.calculateScore(
-                                      bortleScale: visibilityState.lightPollution.visibilityIndex.toDouble(),
-                                      cloudCover: weather.cloudCover,
-                                      moonIllumination: astronomy.moonPhaseInfo.illumination,
-                                    );
-
-                                    // Watch the qualitative condition provider
-                                    final AsyncValue<ConditionResult> conditionAsync = ref.watch(conditionQualityProvider);
-
-                                    return SkyPortal(
-                                      qualityLabel: conditionAsync.valueOrNull?.shortSummary ?? 'Loading...',
-                                      score: score,
-                                      conditionResult: conditionAsync.valueOrNull,
-                                      onTap: () {
-                                        // TODO: Open Details Sheet
-                                      },
-                                    );
-                                  },
-                                ),
-                              ] else ...<Widget>[
-                                 const SizedBox(
-                                   height: 300,
-                                   child: CosmicLoader(),
-                                 ),
-                              ],
-
-                              const SizedBox(height: 40),
-
-                              // Dashboard Grid
-                              if (weatherAsync.hasValue && astronomyAsync.hasValue) ...<Widget>[
-                                 Builder(
-                                  builder: (BuildContext context) {
-                                    final Weather weather = weatherAsync.value!;
-                                    final AstronomyState astronomy = astronomyAsync.value!;
-
-                                    return DashboardGrid(
-                                      cloudCover: weather.cloudCover,
-                                      lightPollution: visibilityState.lightPollution,
-                                      moonPhaseInfo: astronomy.moonPhaseInfo,
-                                    );
-                                  }
-                                 ),
-                              ],
-
-                              const SizedBox(height: 32),
-
-                              // Highlights Feed
-                              const HighlightsFeed(),
-
-                              SizedBox(
-                                height: 70 + MediaQuery.of(context).padding.bottom + 20,
-                              ), // Bottom padding
-                            ],
-                          ),
+                    color: Colors.blueAccent,
+                    backgroundColor: const Color(0xFF000000), // Pure black for OLED (NFR-09)
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                      padding: EdgeInsets.only(
+                        top: AppSpacing.kHeaderContentOffset,
+                        bottom: 70 + MediaQuery.of(context).padding.bottom + AppSpacing.md,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          children: <Widget>[
+                            // Hero Section
+                            HeroConditionLabel(
+                              conditionResult: conditionAsync.valueOrNull,
+                              astrZone: visibilityState.isLoading || visibilityState.lightPollution.visibilityIndex == 0
+                                  ? null
+                                  : visibilityState.lightPollution.visibilityIndex,
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            
+                            // Placeholder for ConditionsCard (Plan 03)
+                            const SizedBox(height: AppSpacing.kConditionsCardHeight),
+                            const SizedBox(height: AppSpacing.md),
+                            
+                            // Placeholder for mini-cards (Plan 04)
+                            const SizedBox(height: AppSpacing.kMiniCardHeight),
+                            const SizedBox(height: AppSpacing.md),
+                            
+                            // Highlights Feed
+                            const HighlightsFeed(),
+                          ],
                         ),
                       ),
                     ),
                   ),
+                ),
+
+                // Fixed Header and Banner on top
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const DashboardHeader(),
+                    SizeTransition(
+                      sizeFactor: CurvedAnimation(
+                        parent: _bannerController,
+                        curve: Curves.easeOut,
+                      ),
+                      axisAlignment: -1.0,
+                      child: Container(
+                        width: double.infinity,
+                        color: AppColors.accent,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 16,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            const Icon(
+                              Ionicons.time_outline,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Viewing ${_isFutureDate ? "Future" : "Past"} Data: ${DateFormat('MMM d').format(selectedDate)}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

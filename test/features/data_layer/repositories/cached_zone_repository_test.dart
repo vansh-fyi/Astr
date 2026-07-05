@@ -28,7 +28,7 @@ void main() {
     test('returns cached data without calling remote', () async {
       final ZoneCacheEntry entry = ZoneCacheEntry(
         h3Index: '64',
-        bortleClass: 5,
+        astrZone: 5,
         ratio: 0.5,
         sqm: 20.0,
         fetchedAt: DateTime.now().toUtc(),
@@ -42,7 +42,7 @@ void main() {
 
       final ZoneData result = await repo.getZoneData(BigInt.from(100));
 
-      expect(result.bortleClass, 5);
+      expect(result.astrZone, 5);
       expect(result.ratio, closeTo(0.5, 0.001));
       expect(result.sqm, closeTo(20.0, 0.001));
       verifyNever(mockRemote.getZoneData(any));
@@ -51,14 +51,14 @@ void main() {
     test('skips expired cache and fetches from remote', () async {
       final ZoneCacheEntry expiredEntry = ZoneCacheEntry(
         h3Index: '64',
-        bortleClass: 5,
+        astrZone: 5,
         ratio: 0.5,
         sqm: 20.0,
         fetchedAt: DateTime(2020, 1, 1), // expired (>1 year ago)
       );
       when(mockCache.get(any)).thenReturn(expiredEntry);
       when(mockRemote.getZoneData(any)).thenAnswer(
-        (_) async => ZoneData(bortleClass: 7, ratio: 1.5, sqm: 18.0),
+        (_) async => ZoneData(astrZone: 7, ratio: 1.5, sqm: 18.0),
       );
       when(mockCache.put(any, any)).thenAnswer((_) async => <dynamic, dynamic>{});
 
@@ -69,7 +69,7 @@ void main() {
 
       final ZoneData result = await repo.getZoneData(BigInt.from(100));
 
-      expect(result.bortleClass, 7);
+      expect(result.astrZone, 7);
       verify(mockRemote.getZoneData(any)).called(1);
     });
   });
@@ -82,7 +82,7 @@ void main() {
     test('fetches from remote when no local db configured', () async {
       when(mockCache.get(any)).thenReturn(null);
       when(mockRemote.getZoneData(any)).thenAnswer(
-        (_) async => ZoneData(bortleClass: 6, ratio: 1.0, sqm: 19.0),
+        (_) async => ZoneData(astrZone: 6, ratio: 1.0, sqm: 19.0),
       );
       when(mockCache.put(any, any)).thenAnswer((_) async => <dynamic, dynamic>{});
 
@@ -93,7 +93,7 @@ void main() {
 
       final ZoneData result = await repo.getZoneData(BigInt.from(100));
 
-      expect(result.bortleClass, 6);
+      expect(result.astrZone, 6);
       verify(mockRemote.getZoneData(any)).called(1);
     });
 
@@ -108,7 +108,7 @@ void main() {
 
       final ZoneData result = await repo.getZoneData(BigInt.from(100));
 
-      expect(result.bortleClass, 1);
+      expect(result.astrZone, 1);
       expect(result.ratio, 0.0);
       expect(result.sqm, 22.0);
     });
@@ -116,7 +116,7 @@ void main() {
     test('returns stale cache when remote fails and stale cache exists', () async {
       final ZoneCacheEntry staleEntry = ZoneCacheEntry(
         h3Index: '64',
-        bortleClass: 4,
+        astrZone: 4,
         ratio: 0.3,
         sqm: 20.5,
         fetchedAt: DateTime(2020, 1, 1), // expired
@@ -132,7 +132,7 @@ void main() {
       final ZoneData result = await repo.getZoneData(BigInt.from(100));
 
       // Should use stale cache since remote failed
-      expect(result.bortleClass, 4);
+      expect(result.astrZone, 4);
       expect(result.ratio, closeTo(0.3, 0.001));
     });
   });
@@ -145,7 +145,7 @@ void main() {
     test('returns cached data when available', () {
       final ZoneCacheEntry entry = ZoneCacheEntry(
         h3Index: '64',
-        bortleClass: 5,
+        astrZone: 5,
         ratio: 0.5,
         sqm: 20.0,
         fetchedAt: DateTime.now().toUtc(),
@@ -159,7 +159,7 @@ void main() {
 
       final ZoneData result = repo.getZoneDataSync(BigInt.from(100));
 
-      expect(result.bortleClass, 5);
+      expect(result.astrZone, 5);
     });
 
     test('returns pristine dark sky when not in cache', () {
@@ -172,7 +172,7 @@ void main() {
 
       final ZoneData result = repo.getZoneDataSync(BigInt.from(100));
 
-      expect(result.bortleClass, 1);
+      expect(result.astrZone, 1);
       expect(result.sqm, 22.0);
     });
   });

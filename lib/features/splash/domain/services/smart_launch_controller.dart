@@ -88,7 +88,7 @@ class SmartLaunchController {
             final zoneData = await _zoneRepository.getZoneData(h3Index);
 
             // SUCCESS: All data resolved
-            debugPrint('[SmartLaunchController] Launch success - Bortle ${zoneData.bortleClass}');
+            debugPrint('[SmartLaunchController] Launch success - Bortle ${zoneData.astrZone}');
             return LaunchSuccess(
               location: location,
               h3Index: h3Index.toString(),

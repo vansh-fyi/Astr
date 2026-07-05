@@ -17,8 +17,8 @@ import 'package:astr/features/dashboard/presentation/providers/bortle_provider.d
 import 'package:astr/features/dashboard/presentation/providers/visibility_provider.dart';
 import 'package:astr/features/dashboard/presentation/providers/weather_provider.dart';
 import 'package:astr/features/dashboard/domain/repositories/i_light_pollution_service.dart';
-import 'package:astr/features/planner/domain/entities/daily_forecast.dart';
-import 'package:astr/features/planner/presentation/providers/planner_provider.dart';
+import 'package:astr/features/forecast/domain/entities/daily_forecast.dart';
+import 'package:astr/features/forecast/presentation/providers/forecast_provider.dart';
 import 'package:astr/features/profile/presentation/providers/settings_provider.dart';
 import 'package:astr/features/profile/presentation/providers/tos_provider.dart';
 import 'package:astr/features/splash/domain/entities/launch_result.dart';
@@ -31,6 +31,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/src/router.dart';
 import 'package:sweph/sweph.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 class MockLocationService implements ILocationService {
   @override
@@ -168,6 +169,10 @@ class MockInitializationNotifier extends InitializationNotifier {
 }
 
 void main() {
+  setUpAll(() {
+    tz.initializeTimeZones();
+  });
+
   setUp(() {
     AstrRiveAnimation.testMode = true;
   });

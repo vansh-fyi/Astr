@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:mocktail/mocktail.dart';
 
 import 'package:astr/core/error/failure.dart';
 import 'package:astr/features/dashboard/data/services/weather_background_sync_service.dart';
@@ -10,18 +11,40 @@ import 'package:astr/features/profile/domain/entities/user_location.dart';
 import 'package:astr/features/profile/domain/repositories/i_location_repository.dart';
 import 'package:astr/features/context/domain/entities/geo_location.dart';
 import 'package:astr/features/dashboard/domain/entities/hourly_forecast.dart';
+import 'package:astr/features/data_layer/repositories/cached_zone_repository.dart';
+import 'package:astr/features/data_layer/services/h3_service.dart';
+
+class MockCachedZoneRepository extends Mock implements CachedZoneRepository {}
+class MockH3Service extends Mock implements H3Service {}
 
 void main() {
   late WeatherBackgroundSyncService sut;
   late FakeLocationRepository fakeLocationRepo;
   late FakeWeatherRepository fakeWeatherRepo;
+  late MockCachedZoneRepository mockZoneRepository;
+  late MockH3Service mockH3Service;
+
+  setUpAll(() {
+    registerFallbackValue(BigInt.from(0));
+  });
 
   setUp(() {
     fakeLocationRepo = FakeLocationRepository();
     fakeWeatherRepo = FakeWeatherRepository();
+    mockZoneRepository = MockCachedZoneRepository();
+    mockH3Service = MockH3Service();
+
+    // Default stubs for zone data fetching in background sync
+    when(() => mockH3Service.latLonToH3(any(), any(), any()))
+        .thenReturn(BigInt.from(0));
+    when(() => mockZoneRepository.getZoneData(any()))
+        .thenAnswer((_) async => CachedZoneRepository.pristineDarkSky);
+
     sut = WeatherBackgroundSyncService(
       weatherRepository: fakeWeatherRepo,
       locationRepository: fakeLocationRepo,
+      zoneRepository: mockZoneRepository,
+      h3Service: mockH3Service,
     );
   });
 
@@ -75,12 +98,25 @@ void main() {
     test('syncActiveLocations handles partial network failure', () async {
       final now = DateTime.now();
       fakeLocationRepo.locations = <UserLocation>[
-        _createLocation('loc1', isPinned: false, lastViewed: now),
-        _createLocation('loc2', isPinned: false, lastViewed: now),
-        _createLocation('loc3', isPinned: false, lastViewed: now),
+        _createLocation('loc1', isPinned: false, lastViewed: now, latitude: 10.0),
+        _createLocation('loc2', isPinned: false, lastViewed: now, latitude: 20.0),
+        _createLocation('loc3', isPinned: false, lastViewed: now, latitude: 30.0),
       ];
       // Fail on second location
       fakeWeatherRepo.failOnCall = 2;
+
+      // Stub H3 service to return different indexes for different coordinates
+      when(() => mockH3Service.latLonToH3(10.0, any(), any())).thenReturn(BigInt.from(1));
+      when(() => mockH3Service.latLonToH3(20.0, any(), any())).thenReturn(BigInt.from(2));
+      when(() => mockH3Service.latLonToH3(30.0, any(), any())).thenReturn(BigInt.from(3));
+
+      // Stub zone data repository to fail (throw) for loc2
+      when(() => mockZoneRepository.getZoneData(BigInt.from(1)))
+          .thenAnswer((_) async => CachedZoneRepository.pristineDarkSky);
+      when(() => mockZoneRepository.getZoneData(BigInt.from(2)))
+          .thenThrow(Exception('Zone fetch failed'));
+      when(() => mockZoneRepository.getZoneData(BigInt.from(3)))
+          .thenAnswer((_) async => CachedZoneRepository.pristineDarkSky);
       
       final int result = await sut.syncActiveLocations();
       
@@ -129,12 +165,14 @@ UserLocation _createLocation(
   String name, {
   required bool isPinned,
   required DateTime lastViewed,
+  double latitude = 37.7749,
+  double longitude = -122.4194,
 }) {
   return UserLocation(
     id: name,
     name: name,
-    latitude: 37.7749,
-    longitude: -122.4194,
+    latitude: latitude,
+    longitude: longitude,
     h3Index: 'test_h3',
     lastViewedTimestamp: lastViewed,
     isPinned: isPinned,
@@ -200,7 +238,7 @@ class FakeWeatherRepository implements IWeatherRepository {
     getDailyForecastCallCount++;
     syncedLocations.add(location.name ?? 'unknown');
     
-    if (failOnCall == getDailyForecastCallCount) {
+    if (failOnCall == getDailyForecastCallCount || location.name == 'loc2') {
       return Left(ServerFailure('Network failure'));
     }
     
@@ -215,11 +253,17 @@ class FakeWeatherRepository implements IWeatherRepository {
 
   @override
   Future<Either<Failure, List<HourlyForecast>>> getHourlyForecast(GeoLocation location) async {
+    if (location.name == 'loc2') {
+      return Left(ServerFailure('Network failure'));
+    }
     return const Right(<HourlyForecast>[]);
   }
 
   @override
   Future<Either<Failure, Weather>> getWeather(GeoLocation location) async {
+    if (location.name == 'loc2') {
+      return Left(ServerFailure('Network failure'));
+    }
     return const Right(Weather(cloudCover: 10.0));
   }
 }

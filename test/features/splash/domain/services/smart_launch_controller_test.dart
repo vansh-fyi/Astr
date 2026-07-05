@@ -52,7 +52,7 @@ void main() {
 
         // Mock zone data fetch
         final mockZoneData = ZoneData(
-          bortleClass: 4,
+          astrZone: 4,
           sqm: 20.5,
           ratio: 0.12,
         );
@@ -85,9 +85,9 @@ void main() {
         when(mockH3Service.latLonToH3(0.0, 0.0, 8)).thenReturn(mockH3Index);
 
         final mockZoneData = ZoneData(
-          bortleClass: 1,
-          sqm: 22.0,
-          ratio: 0.0,
+          astrZone: 1,
+          sqm: 22,
+          ratio: 0,
         );
         when(mockZoneRepository.getZoneData(mockH3Index))
             .thenAnswer((_) async => mockZoneData);
@@ -274,9 +274,9 @@ void main() {
         when(mockH3Service.latLonToH3(0.0, 180.0, 8)).thenReturn(mockH3Index);
 
         final mockZoneData = ZoneData(
-          bortleClass: 1,
-          sqm: 22.0,
-          ratio: 0.0,
+          astrZone: 1,
+          sqm: 22,
+          ratio: 0,
         );
         when(mockZoneRepository.getZoneData(mockH3Index))
             .thenAnswer((_) async => mockZoneData);
@@ -307,9 +307,9 @@ void main() {
         });
 
         final mockZoneData = ZoneData(
-          bortleClass: 1,
-          sqm: 22.0,
-          ratio: 0.0,
+          astrZone: 1,
+          sqm: 22,
+          ratio: 0,
         );
         when(mockZoneRepository.getZoneData(mockH3Index)).thenAnswer((_) async {
           callOrder.add('zoneData');

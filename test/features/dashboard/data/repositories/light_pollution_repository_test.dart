@@ -43,7 +43,7 @@ void main() {
     test('returns LightPollution with zone data from repository', () async {
       // Arrange: Zone data for a lit area (Zone 7)
       final ZoneData zoneData =
-          ZoneData(bortleClass: 7, ratio: 5.5, sqm: 18.2);
+          ZoneData(astrZone: 7, ratio: 5.5, sqm: 18.2);
       when(() => mockZoneRepository.getZoneData(testH3Index))
           .thenAnswer((_) async => zoneData);
 
@@ -76,7 +76,7 @@ void main() {
         () async {
       // Arrange: Not in database → pristineDarkSky default
       final ZoneData pristine =
-          ZoneData(bortleClass: 1, ratio: 0.0, sqm: 22.0);
+          ZoneData(astrZone: 1, ratio: 0, sqm: 22);
       when(() => mockZoneRepository.getZoneData(testH3Index))
           .thenAnswer((_) async => pristine);
 
