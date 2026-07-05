@@ -18,7 +18,9 @@ class VisibilityMiniCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int astrZone = lightPollution.visibilityIndex;
-    final int activeBars = ((astrZone - 1) / 2).floor().clamp(0, 5);
+    // Inverted: Zone 1 (dark sky, best) → 5 bars; Zone 9 (city, worst) → 1 bar.
+    // Before: ((astrZone - 1) / 2).floor() gave 0 bars for Zone 1 (wrong).
+    final int activeBars = (5 - ((astrZone - 1) / 2).floor()).clamp(0, 5);
 
     return RepaintBoundary(
       child: ClipRRect(
