@@ -43,7 +43,7 @@ class ConditionsCard extends ConsumerWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
           child: Container(
-            width: AppSpacing.kConditionsCardWidth,
+            width: double.infinity,
             height: AppSpacing.kConditionsCardHeight,
             decoration: BoxDecoration(
               color: AppColors.surfaceOverlay,
@@ -52,11 +52,11 @@ class ConditionsCard extends ConsumerWidget {
             ),
             child: Stack(
               children: <Widget>[
-                // Header row: left=16, top=16, width=313
+                // Header row: left=16, top=16, right=16
                 Positioned(
                   left: AppSpacing.kCardPadding,
                   top: AppSpacing.kCardPadding,
-                  width: 313,
+                  right: AppSpacing.kCardPadding,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
@@ -109,11 +109,11 @@ class ConditionsCard extends ConsumerWidget {
                   ),
                 ),
                 
-                // Cloud Cover: left=16, top=69, width=313
+                // Cloud Cover: left=16, top=69, right=16
                 Positioned(
                   left: AppSpacing.kCardPadding,
                   top: AppSpacing.kCloudSectionTop,
-                  width: 313,
+                  right: AppSpacing.kCardPadding,
                   child: CloudBar(
                     cloudCoverPercentage: cloudCover,
                     isLoading: isWeatherLoading,
@@ -121,11 +121,11 @@ class ConditionsCard extends ConsumerWidget {
                   ),
                 ),
 
-                // Rise/Set cells: left=16, top=162, width=313, height=64
+                // Rise/Set cells: left=16, top=162, right=16, height=64
                 Positioned(
                   left: AppSpacing.kCardPadding,
                   top: 162,
-                  width: 313,
+                  right: AppSpacing.kCardPadding,
                   height: AppSpacing.kSunMoonCellHeight,
                   child: Consumer(
                     builder: (BuildContext context, WidgetRef ref, Widget? child) {
