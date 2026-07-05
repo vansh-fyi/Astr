@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTypography {
@@ -63,10 +62,13 @@ class AppTypography {
     color: AppColors.textMuted,
   );
 
-  static TextStyle get nav => GoogleFonts.inter(
-        fontSize: 8,
-        fontWeight: FontWeight.w400,
-        height: 1.3,
-        color: AppColors.textPrimary,
-      );
+  // Cached as static final so it is allocated once, not on every access.
+  // Uses Satoshi to match the rest of the design-system typography.
+  static final TextStyle nav = const TextStyle(
+    fontFamily: 'Satoshi',
+    fontSize: 8,
+    fontWeight: FontWeight.w400,
+    height: 1.3,
+    color: AppColors.textPrimary,
+  );
 }
