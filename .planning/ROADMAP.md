@@ -119,17 +119,17 @@ Plans:
 
 **Wave 3** *(parallel — blocked on Wave 2 completion)*
 
-- [ ] 03-02-PLAN.md — SkyStateBackground widget + HeroConditionLabel + home_screen.dart Stack refactor (HOME-01, HOME-02, HOME-03)
-- [ ] 03-05-PLAN.md — HighlightsFeed restyle + ScaffoldWithNavBar token migration + GlassPanel update (HOME-07, HOME-08, DS-02)
+- [x] 03-02-PLAN.md — SkyStateBackground widget + HeroConditionLabel + home_screen.dart Stack refactor (HOME-01, HOME-02, HOME-03)
+- [x] 03-05-PLAN.md — HighlightsFeed restyle + ScaffoldWithNavBar token migration + GlassPanel update (HOME-07, HOME-08, DS-02)
 
 **Wave 4** *(parallel — blocked on Wave 3 completion)*
 
-- [ ] 03-03-PLAN.md — ConditionsCard + CloudBar restyle wired into home_screen.dart (HOME-04, HOME-09)
-- [ ] 03-06-PLAN.md — global DS-02 token sweep: atmospherics_sheet, celestial_detail_sheet, dashboard_grid, AppTheme cleanup (DS-02)
+- [x] 03-03-PLAN.md — ConditionsCard + CloudBar restyle wired into home_screen.dart (HOME-04, HOME-09)
+- [x] 03-06-PLAN.md — global DS-02 token sweep: atmospherics_sheet, celestial_detail_sheet, dashboard_grid, AppTheme cleanup (DS-02)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 03-04-PLAN.md — VisibilityMiniCard + MoonMiniCard wired into home_screen.dart (HOME-05, HOME-06)
+- [x] 03-04-PLAN.md — VisibilityMiniCard + MoonMiniCard wired into home_screen.dart (HOME-05, HOME-06)
 
 **Wave 6** *(blocked on Wave 5 + Wave 4 completion)*
 
