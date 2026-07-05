@@ -188,8 +188,11 @@ class _TimeCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String timeStr = time != null
-        ? '${time!.hour.toString().padLeft(2, '0')}:${time!.minute.toString().padLeft(2, '0')}'
+    // Convert to local time: astronomical calculations return UTC DateTimes;
+    // displaying hour/minute without toLocal() shows wrong times outside UTC.
+    final DateTime? localTime = time?.toLocal();
+    final String timeStr = localTime != null
+        ? '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}'
         : '--:--';
 
     return Container(
