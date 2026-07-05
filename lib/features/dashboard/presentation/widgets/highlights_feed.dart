@@ -124,29 +124,11 @@ class _HighlightItemWidget extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Row(
-                        children: <Widget>[
-                          Text(
-                            'Best view: $timeStr',
-                            style: AppTypography.labelMd.copyWith(
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            '•',
-                            style: TextStyle(color: AppColors.textMuted),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Excellent', // Placeholder for quality logic
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Best view: $timeStr',
+                        style: AppTypography.labelMd.copyWith(
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ],
                   ),
