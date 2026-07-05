@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/glass_panel.dart';
+
+import '../../../../core/design/app_colors.dart';
+import '../../../../core/design/app_spacing.dart';
+import '../../../../core/design/app_typography.dart';
 
 class CloudBar extends StatefulWidget {
 
@@ -22,7 +25,15 @@ class _CloudBarState extends State<CloudBar> {
 
   @override
   Widget build(BuildContext context) {
-    return GlassPanel(
+    return Container(
+      width: double.infinity,
+      height: 84,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceGlass,
+        border: Border.all(color: AppColors.borderSubtle),
+        borderRadius: BorderRadius.circular(AppSpacing.kInnerRadius),
+      ),
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -31,36 +42,36 @@ class _CloudBarState extends State<CloudBar> {
             children: <Widget>[
               Text(
                 'Cloud Cover',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Colors.white),
+                style: AppTypography.labelMd.copyWith(color: AppColors.textPrimary),
               ),
               if (widget.isLoading)
                 const SizedBox(
                   width: 12,
                   height: 12,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textPrimary),
                 )
               else if (widget.errorMessage != null)
                 const Icon(Icons.error_outline, color: Colors.redAccent, size: 16)
               else
                 Text(
                   '${widget.cloudCoverPercentage.toInt()}%',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                  style: AppTypography.labelMd.copyWith(color: AppColors.textPrimary),
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 13),
           if (widget.errorMessage != null)
             Text(
               widget.errorMessage!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.redAccent),
+              style: AppTypography.labelSm.copyWith(color: Colors.redAccent),
             )
           else
             Container(
-              height: 8,
+              height: AppSpacing.kCloudTrackHeight,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(4),
+                color: AppColors.cloudTrack,
+                borderRadius: BorderRadius.circular(AppSpacing.kInnerRadius),
               ),
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
@@ -71,16 +82,9 @@ class _CloudBarState extends State<CloudBar> {
                         curve: Curves.easeOutCubic,
                         width: constraints.maxWidth * (widget.cloudCoverPercentage / 100),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          gradient: const LinearGradient(
-                            colors: <Color>[Colors.blue, Colors.blueAccent],
-                          ),
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                              color: Colors.indigo.withOpacity(0.5),
-                              blurRadius: 10,
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.accentSecondary,
+                          boxShadow: AppColors.glowShadow,
                         ),
                       ),
                     ],

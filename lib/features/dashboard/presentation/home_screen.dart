@@ -22,6 +22,7 @@ import '../domain/entities/weather.dart';
 import 'providers/condition_quality_provider.dart';
 import 'providers/visibility_provider.dart';
 import 'providers/weather_provider.dart';
+import 'widgets/conditions_card.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/hero_condition_label.dart';
 import 'widgets/highlights_feed.dart';
@@ -239,7 +240,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                             const SizedBox(height: AppSpacing.lg),
                             
                             // Placeholder for ConditionsCard (Plan 03)
-                            const SizedBox(height: AppSpacing.kConditionsCardHeight),
+                            const ConditionsCard(),
                             const SizedBox(height: AppSpacing.md),
                             
                             // Placeholder for mini-cards (Plan 04)
