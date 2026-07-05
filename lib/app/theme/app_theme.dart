@@ -1,5 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
+
+import '../../core/design/app_colors.dart';
 
 class AppTheme {
   const AppTheme._();
@@ -20,12 +24,12 @@ class AppTheme {
   static ThemeData get darkTheme {
     return FlexThemeData.dark(
       scheme: FlexScheme.materialBaseline,
-      surface: oledBlack, // Pure black for OLED battery savings (NFR-09)
-      background: oledBlack, // Pure black for OLED battery savings (NFR-09)
-      scaffoldBackground: oledBlack, // Pure black for OLED battery savings (NFR-09)
-      primary: starlight,
-      primaryLightRef: starlight, // Fix FlexColorScheme warning
-      onPrimary: oledBlack, // Update to match new background
+      surface: AppColors.surface, // Pure black for OLED battery savings (NFR-09)
+      background: AppColors.surface, // Pure black for OLED battery savings (NFR-09)
+      scaffoldBackground: AppColors.surface, // Pure black for OLED battery savings (NFR-09)
+      primary: AppColors.accent,
+      primaryLightRef: AppColors.accent, // Fix FlexColorScheme warning
+      onPrimary: AppColors.surface, // Update to match new background
       secondary: accentPurple,
       secondaryLightRef: accentPurple, // Fix FlexColorScheme warning
       onSecondary: starlight,
