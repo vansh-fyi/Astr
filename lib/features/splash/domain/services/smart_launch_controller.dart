@@ -18,7 +18,7 @@ import '../entities/launch_result.dart';
 /// - GPS timeout → LaunchTimeout (show toast, offer manual entry)
 /// - Permission denied → LaunchPermissionDenied (navigate to manual entry)
 /// - Service disabled → LaunchServiceDisabled (navigate to manual entry)
-/// - Zone data failure → LaunchTimeout (silent fail, partial data acceptable)
+/// - Zone data failure → LaunchSuccess with pristine dark-sky defaults (GPS succeeded)
 class SmartLaunchController {
   SmartLaunchController({
     required ILocationService locationService,
@@ -46,7 +46,7 @@ class SmartLaunchController {
   /// - GPS timeout → [LaunchTimeout]
   /// - Permission denied → [LaunchPermissionDenied]
   /// - Service disabled → [LaunchServiceDisabled]
-  /// - Zone data error → [LaunchTimeout] (silent fail)
+  /// - Zone data error → [LaunchSuccess] with pristine dark-sky defaults (GPS still succeeded)
   Future<LaunchResult> executeLaunch() async {
     // Step 1: Get current location (with 10s timeout - NFR-10)
     debugPrint('[SmartLaunchController] Starting launch sequence...');
@@ -95,10 +95,15 @@ class SmartLaunchController {
               zoneData: zoneData,
             );
           } catch (e) {
-            // zones.db error - silent fail, go to dashboard anyway
-            // User can retry or use manual entry
+            // Zone data fetch failed (network outage, timeout, etc.) but GPS succeeded.
+            // Return success with pristine dark-sky defaults so no misleading GPS error
+            // toast is shown — the user's location was resolved correctly.
             debugPrint('[SmartLaunchController] Zone data fetch failed: $e');
-            return const LaunchTimeout(); // Treat as partial failure
+            return LaunchSuccess(
+              location: location,
+              h3Index: h3Index.toString(),
+              zoneData: CachedZoneRepository.pristineDarkSky,
+            );
           }
         } catch (e) {
           // H3 calculation error (edge cases: poles, invalid coords)
