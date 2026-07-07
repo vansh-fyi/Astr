@@ -35,7 +35,6 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         ? 'Current Location' 
         : (astrContextAsync.value?.location.name ?? 'Current Location');
 
-    final double topPadding = MediaQuery.of(context).padding.top;
     final bool isLoading = ref.watch(globalLoadingProvider);
 
     return Scaffold(
@@ -48,193 +47,172 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             child: navigationShell,
           ),
           
-          // Global Glass Header
+          // Global Header — transparent, logo centered
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(
-                  padding: EdgeInsets.only(
-                    top: topPadding + 8,
-                    bottom: 12,
-                    left: 16,
-                    right: 16,
-                  ),
-                  decoration: const BoxDecoration(
-                    color: AppColors.surfaceGlass,
-                    border: Border(
-                      bottom: BorderSide(
-                        color: AppColors.borderSurface,
-                      ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    // Center: Astr logo
+                    Image.asset(
+                      'assets/icons/astr/logo.png',
+                      width: 28,
+                      height: 28,
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      // Location Group
-                      Flexible(
-                        flex: 4, // Increased flex to ensure "Current Location" fits
-                        child: GlassPanel(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          borderRadius: BorderRadius.circular(30),
-                          backgroundColor: AppColors.surfaceGlass,
-                          borderColor: AppColors.borderSurface,
-                          onTap: () {
-                            showModalBottomSheet<void>(
-                              context: context,
-                              useRootNavigator: true,
-                              builder: (BuildContext context) => const LocationSheet(),
-                            );
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Icon(
-                                Ionicons.location_outline, 
-                                color: (astrContextAsync.value?.isCurrentLocation ?? true) 
-                                    ? AppColors.textPrimary 
-                                    : AppColors.accent,
-                                size: 14
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  locationName,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: (astrContextAsync.value?.isCurrentLocation ?? true)
-                                        ? AppColors.textPrimary
-                                        : AppColors.accent,
-                                    letterSpacing: 0.5,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
 
-                      const SizedBox(width: 12),
-
-                      // Date Group
-                      Flexible(
-                        flex: 3,
+                    // Left: Location pill
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GlassPanel(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        borderRadius: BorderRadius.circular(30),
+                        backgroundColor: AppColors.surfaceGlass,
+                        borderColor: AppColors.borderSurface,
+                        onTap: () {
+                          showModalBottomSheet<void>(
+                            context: context,
+                            useRootNavigator: true,
+                            builder: (BuildContext context) => const LocationSheet(),
+                          );
+                        },
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            // Prev Button - AC#3: Restricted to -10 days
-                            GlassPanel(
-                              padding: EdgeInsets.zero,
-                              borderRadius: BorderRadius.circular(30),
-                              backgroundColor: AppColors.surfaceGlass,
-                              borderColor: AppColors.borderSurface,
-                              onTap: () {
-                                final DateTime now = DateTime.now();
-                                final DateTime minDate = now.subtract(const Duration(days: 10));
-                                final DateTime nextDate = selectedDate.subtract(const Duration(days: 1));
-                                if (nextDate.isBefore(minDate)) {
-                                  showGlassToast(context, 'Cloud cover forecast unavailable beyond 10 days in the past');
-                                  return;
-                                }
-                                ref.read(astrContextProvider.notifier).updateDate(nextDate);
-                              },
-                              child: const SizedBox(
-                                width: 32,
-                                height: 32,
-                                child: Icon(Ionicons.chevron_back, color: AppColors.textMuted, size: 16),
-                              ),
+                            Icon(
+                              Ionicons.location_outline,
+                              color: (astrContextAsync.value?.isCurrentLocation ?? true)
+                                  ? AppColors.textPrimary
+                                  : AppColors.accent,
+                              size: 14,
                             ),
-                            
                             const SizedBox(width: 6),
-
-                            // Date Pill
-                            // AC#3: Date Picker restricted to +/-10 days for cloud cover availability
-                            Flexible(
-                              child: GlassPanel(
-                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                borderRadius: BorderRadius.circular(30),
-                                backgroundColor: AppColors.surfaceGlass,
-                                borderColor: AppColors.borderSurface,
-                                onTap: () async {
-                                  final DateTime now = DateTime.now();
-                                  // AC#3: Restrict to +/-10 days for cloud cover data
-                                  final DateTime minDate = now.subtract(const Duration(days: 10));
-                                  final DateTime maxDate = now.add(const Duration(days: 10));
-                                  
-                                  final DateTime? pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: selectedDate,
-                                    firstDate: minDate,
-                                    lastDate: maxDate,
-                                    helpText: 'Cloud cover forecast available for ±10 days',
-                                    builder: (BuildContext context, Widget? child) {
-                                      return Theme(
-                                        data: Theme.of(context).copyWith(
-                                          colorScheme: const ColorScheme.dark(
-                                            primary: AppColors.accent,
-                                            onPrimary: AppColors.textPrimary,
-                                            surface: Color(0xFF141419),
-                                          ), dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF0A0A0B)),
-                                        ),
-                                        child: child!,
-                                      );
-                                    },
-                                  );
-
-                                  if (pickedDate != null) {
-                                    ref.read(astrContextProvider.notifier).updateDate(pickedDate);
-                                  }
-                                },
-                                child: Text(
-                                  DateFormat('MMM d').format(selectedDate),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: isToday ? AppColors.textPrimary : AppColors.accent,
-                                    letterSpacing: 0.5,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 110),
+                              child: Text(
+                                locationName,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: (astrContextAsync.value?.isCurrentLocation ?? true)
+                                      ? AppColors.textPrimary
+                                      : AppColors.accent,
+                                  letterSpacing: 0.5,
                                 ),
-                              ),
-                            ),
-
-                            const SizedBox(width: 6),
-
-                            // Next Button - AC#3: Restricted to +10 days
-                            GlassPanel(
-                              padding: EdgeInsets.zero,
-                              borderRadius: BorderRadius.circular(30),
-                              backgroundColor: AppColors.surfaceGlass,
-                              borderColor: AppColors.borderSurface,
-                              onTap: () {
-                                final DateTime now = DateTime.now();
-                                final DateTime maxDate = now.add(const Duration(days: 10));
-                                final DateTime nextDate = selectedDate.add(const Duration(days: 1));
-                                if (nextDate.isAfter(maxDate)) {
-                                  showGlassToast(context, 'Cloud cover forecast unavailable beyond 10 days in the future');
-                                  return;
-                                }
-                                ref.read(astrContextProvider.notifier).updateDate(nextDate);
-                              },
-                              child: const SizedBox(
-                                width: 32,
-                                height: 32,
-                                child: Icon(Ionicons.chevron_forward, color: AppColors.textMuted, size: 16),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Right: Date navigation
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          // Prev button
+                          GlassPanel(
+                            padding: EdgeInsets.zero,
+                            borderRadius: BorderRadius.circular(30),
+                            backgroundColor: AppColors.surfaceGlass,
+                            borderColor: AppColors.borderSurface,
+                            onTap: () {
+                              final DateTime now = DateTime.now();
+                              final DateTime minDate = now.subtract(const Duration(days: 10));
+                              final DateTime nextDate = selectedDate.subtract(const Duration(days: 1));
+                              if (nextDate.isBefore(minDate)) {
+                                showGlassToast(context, 'Cloud cover forecast unavailable beyond 10 days in the past');
+                                return;
+                              }
+                              ref.read(astrContextProvider.notifier).updateDate(nextDate);
+                            },
+                            child: const SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: Icon(Ionicons.chevron_back, color: AppColors.textMuted, size: 14),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          // Date pill
+                          GlassPanel(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                            borderRadius: BorderRadius.circular(30),
+                            backgroundColor: AppColors.surfaceGlass,
+                            borderColor: AppColors.borderSurface,
+                            onTap: () async {
+                              final DateTime now = DateTime.now();
+                              final DateTime minDate = now.subtract(const Duration(days: 10));
+                              final DateTime maxDate = now.add(const Duration(days: 10));
+                              final DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: selectedDate,
+                                firstDate: minDate,
+                                lastDate: maxDate,
+                                helpText: 'Cloud cover forecast available for ±10 days',
+                                builder: (BuildContext context, Widget? child) {
+                                  return Theme(
+                                    data: Theme.of(context).copyWith(
+                                      colorScheme: const ColorScheme.dark(
+                                        primary: AppColors.accent,
+                                        onPrimary: AppColors.textPrimary,
+                                        surface: Color(0xFF141419),
+                                      ),
+                                      dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF0A0A0B)),
+                                    ),
+                                    child: child!,
+                                  );
+                                },
+                              );
+                              if (pickedDate != null) {
+                                ref.read(astrContextProvider.notifier).updateDate(pickedDate);
+                              }
+                            },
+                            child: Text(
+                              DateFormat('MMM d').format(selectedDate),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: isToday ? AppColors.textPrimary : AppColors.accent,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          // Next button
+                          GlassPanel(
+                            padding: EdgeInsets.zero,
+                            borderRadius: BorderRadius.circular(30),
+                            backgroundColor: AppColors.surfaceGlass,
+                            borderColor: AppColors.borderSurface,
+                            onTap: () {
+                              final DateTime now = DateTime.now();
+                              final DateTime maxDate = now.add(const Duration(days: 10));
+                              final DateTime nextDate = selectedDate.add(const Duration(days: 1));
+                              if (nextDate.isAfter(maxDate)) {
+                                showGlassToast(context, 'Cloud cover forecast unavailable beyond 10 days in the future');
+                                return;
+                              }
+                              ref.read(astrContextProvider.notifier).updateDate(nextDate);
+                            },
+                            child: const SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: Icon(Ionicons.chevron_forward, color: AppColors.textMuted, size: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -271,8 +249,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                 child: Material(
                   type: MaterialType.transparency,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
+                      const SizedBox(width: 32),
                       _NavBarItem(
                         icon: Ionicons.home_outline,
                         activeIcon: Ionicons.home,
@@ -280,6 +258,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                         isSelected: navigationShell.currentIndex == 0,
                         onTap: () => _onTap(context, 0),
                       ),
+                      const SizedBox(width: 20),
                       _NavBarItem(
                         icon: Ionicons.planet_outline,
                         activeIcon: Ionicons.planet,
@@ -287,7 +266,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                         isSelected: navigationShell.currentIndex == 1,
                         onTap: () => _onTap(context, 1),
                       ),
-                      const SizedBox(width: 48), // Spacer for FAB
+                      const Spacer(),
+                      const SizedBox(width: 48), // FAB notch gap
+                      const Spacer(),
                       _NavBarItem(
                         icon: Ionicons.calendar_outline,
                         activeIcon: Ionicons.calendar,
@@ -295,6 +276,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                         isSelected: navigationShell.currentIndex == 2,
                         onTap: () => _onTap(context, 2),
                       ),
+                      const SizedBox(width: 20),
                       _NavBarItem(
                         icon: Ionicons.settings_outline,
                         activeIcon: Ionicons.settings,
@@ -302,6 +284,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                         isSelected: navigationShell.currentIndex == 3,
                         onTap: () => _onTap(context, 3),
                       ),
+                      const SizedBox(width: 32),
                     ],
                   ),
                 ),

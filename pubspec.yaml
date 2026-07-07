@@ -113,6 +113,8 @@ flutter:
   assets:
     - assets/translations/
     - assets/img/
+    - assets/favicon/
+    - assets/icons/astr/
     - assets/rive/
     - assets/maps/
     - assets/db/

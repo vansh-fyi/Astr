@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import '../../../context/domain/entities/astr_context.dart';
-import '../../../context/presentation/providers/astr_context_provider.dart';
 import '../../domain/entities/weather.dart';
 import '../providers/weather_provider.dart';
 
@@ -21,31 +19,17 @@ class DashboardHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<AstrContext> contextAsync = ref.watch(astrContextProvider);
     final AsyncValue<Weather> weatherAsync = ref.watch(weatherProvider);
 
-    final String locationName = contextAsync.when(
-      data: (AstrContext ctx) => ctx.location.name ?? 'Current Location',
-      loading: () => '',
-      error: (Object _, StackTrace __) => 'Current Location',
-    );
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          if (locationName.isNotEmpty)
-            Text(
-              locationName,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          weatherAsync.when(
-            data: (Weather weather) => _buildLastUpdated(context, weather),
-            loading: () => const SizedBox.shrink(),
-            error: (Object _, StackTrace __) => const SizedBox.shrink(),
-          ),
-        ],
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: weatherAsync.when(
+          data: (Weather weather) => _buildLastUpdated(context, weather),
+          loading: () => const SizedBox.shrink(),
+          error: (Object _, StackTrace __) => const SizedBox.shrink(),
+        ),
       ),
     );
   }

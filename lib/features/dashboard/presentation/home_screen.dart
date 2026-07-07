@@ -19,7 +19,6 @@ import '../../context/domain/entities/geo_location.dart';
 import '../../context/presentation/providers/astr_context_provider.dart';
 import '../../splash/domain/entities/launch_result.dart';
 import '../../splash/presentation/providers/smart_launch_provider.dart';
-import '../domain/entities/weather.dart';
 import 'providers/condition_quality_provider.dart';
 import 'providers/visibility_provider.dart';
 import 'providers/weather_provider.dart';
@@ -102,7 +101,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<Weather> weatherAsync = ref.watch(weatherProvider);
     final AsyncValue<AstronomyState> astronomyAsync = ref.watch(astronomyProvider);
     final VisibilityState visibilityState = ref.watch(visibilityProvider);
     final AsyncValue<AstrContext> astrContextAsync = ref.watch(astrContextProvider);
@@ -207,13 +205,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           // z=0: Background
           SkyStateBackground(skyState: skyState),
 
-          // z=1: Content
+          // z=1: Content column (mirrors old working structure)
           SafeArea(
             bottom: false,
-            child: Stack(
+            child: Column(
               children: <Widget>[
-                // Scrollable content
-                Positioned.fill(
+                const DashboardHeader(),
+                SizeTransition(
+                  sizeFactor: CurvedAnimation(
+                    parent: _bannerController,
+                    curve: Curves.easeOut,
+                  ),
+                  axisAlignment: -1.0,
+                  child: Container(
+                    width: double.infinity,
+                    color: AppColors.accent,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Icon(
+                          Ionicons.time_outline,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Viewing ${_isFutureDate ? "Future" : "Past"} Data: ${DateFormat('MMM d').format(selectedDate)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async {
                       await Future.wait(<Future<void>>[
@@ -226,14 +258,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                       padding: EdgeInsets.only(
-                        top: AppSpacing.kHeaderContentOffset,
+                        top: AppSpacing.lg,
                         bottom: 70 + MediaQuery.of(context).padding.bottom + AppSpacing.md,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Column(
                           children: <Widget>[
-                            // Hero Section
                             HeroConditionLabel(
                               conditionResult: conditionAsync.valueOrNull,
                               astrZone: visibilityState.isLoading || visibilityState.lightPollution.visibilityIndex == 0
@@ -241,12 +272,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                                   : visibilityState.lightPollution.visibilityIndex,
                             ),
                             const SizedBox(height: AppSpacing.lg),
-                            
-                            // Placeholder for ConditionsCard (Plan 03)
                             const ConditionsCard(),
                             const SizedBox(height: AppSpacing.md),
-                            
-                            // Mini-cards Row (Plan 04)
                             Row(
                               children: <Widget>[
                                 Expanded(
@@ -264,56 +291,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                               ],
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            
-                            // Highlights Feed
                             const HighlightsFeed(),
                           ],
                         ),
                       ),
                     ),
                   ),
-                ),
-
-                // Fixed Header and Banner on top
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const DashboardHeader(),
-                    SizeTransition(
-                      sizeFactor: CurvedAnimation(
-                        parent: _bannerController,
-                        curve: Curves.easeOut,
-                      ),
-                      axisAlignment: -1.0,
-                      child: Container(
-                        width: double.infinity,
-                        color: AppColors.accent,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 16,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            const Icon(
-                              Ionicons.time_outline,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Viewing ${_isFutureDate ? "Future" : "Past"} Data: ${DateFormat('MMM d').format(selectedDate)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

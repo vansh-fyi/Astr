@@ -6,6 +6,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../astronomy/domain/entities/moon_phase_info.dart';
+import 'celestial_detail_sheet.dart';
 
 class MoonMiniCard extends StatelessWidget {
   const MoonMiniCard({
@@ -21,63 +22,73 @@ class MoonMiniCard extends StatelessWidget {
     final String moonPhaseLabel = _getMoonPhaseLabel(moonPhaseInfo);
     final int illuminationPercent = (moonPhaseInfo.illumination * 100).round();
 
-    return RepaintBoundary(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.kCardRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-          child: Container(
-            width: AppSpacing.kMiniCardWidth,
-            height: AppSpacing.kMiniCardHeight,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceOverlay,
-              border: Border.all(color: AppColors.borderPrimary),
-              borderRadius: BorderRadius.circular(AppSpacing.kCardRadius),
-            ),
-            child: Stack(
-              children: <Widget>[
-                // Label 'MOON'
-                Positioned(
-                  top: 15,
-                  left: 15,
-                  child: Text(
-                    'MOON',
-                    style: AppTypography.labelSm.copyWith(color: AppColors.textMuted),
-                  ),
-                ),
-                // Illumination %
-                Positioned(
-                  top: 15,
-                  right: 15,
-                  child: Text(
-                    '$illuminationPercent%',
-                    style: AppTypography.labelSm.copyWith(color: AppColors.textPrimary),
-                  ),
-                ),
-                // Moon image 98x92px centered
-                Positioned(
-                  top: 36,
-                  left: 33, // (164 - 98) / 2 = 33
-                  width: 98,
-                  height: 92,
-                  child: Image.asset(
-                    moonAsset,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                // Phase name bottom-centered
-                Positioned(
-                  bottom: 15,
-                  left: 0,
-                  right: 0,
-                  child: Center(
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet<void>(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (BuildContext ctx) => CelestialDetailSheet(
+            objectId: 'moon',
+            title: 'Moon',
+            subtitle: moonPhaseLabel,
+          ),
+        );
+      },
+      child: RepaintBoundary(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppSpacing.kCardRadius),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+            child: Container(
+              width: AppSpacing.kMiniCardWidth,
+              height: AppSpacing.kMiniCardHeight,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceOverlay,
+                border: Border.all(color: AppColors.borderPrimary),
+                borderRadius: BorderRadius.circular(AppSpacing.kCardRadius),
+              ),
+              child: Stack(
+                children: <Widget>[
+                  Positioned(
+                    top: 15,
+                    left: 15,
                     child: Text(
-                      moonPhaseLabel,
-                      style: AppTypography.micro.copyWith(color: AppColors.textPrimary),
+                      'MOON',
+                      style: AppTypography.labelSm.copyWith(color: AppColors.textMuted),
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    top: 15,
+                    right: 15,
+                    child: Text(
+                      '$illuminationPercent%',
+                      style: AppTypography.labelSm.copyWith(color: AppColors.textPrimary),
+                    ),
+                  ),
+                  Positioned(
+                    top: 36,
+                    left: 33,
+                    width: 98,
+                    height: 92,
+                    child: Image.asset(
+                      moonAsset,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 15,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Text(
+                        moonPhaseLabel,
+                        style: AppTypography.labelMd.copyWith(color: AppColors.textPrimary),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

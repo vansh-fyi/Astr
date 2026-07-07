@@ -23,7 +23,7 @@ class CelestialDetailSheet extends ConsumerWidget {
     required this.objectId,
     required this.title,
     required this.subtitle,
-    this.themeColor = Colors.orange,
+    this.themeColor = AppColors.accent,
   });
   final String objectId;
   final String title;

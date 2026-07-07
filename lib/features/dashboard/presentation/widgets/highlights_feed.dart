@@ -7,6 +7,7 @@ import '../../../../core/design/app_colors.dart';
 import '../../../../core/design/app_spacing.dart';
 import '../../../../core/design/app_typography.dart';
 import '../../../astronomy/domain/entities/astronomy_state.dart';
+import '../../../astronomy/domain/entities/celestial_body.dart';
 import '../../../astronomy/presentation/providers/astronomy_provider.dart';
 import '../../domain/entities/highlight_item.dart';
 import '../../domain/logic/highlights_logic.dart';
@@ -25,7 +26,32 @@ class HighlightsFeed extends ConsumerWidget {
         final List<HighlightItem> highlights = HighlightsLogic.selectTop3(positions: state.positions);
 
         if (highlights.isEmpty) {
-          return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    "TONIGHT'S HIGHLIGHTS",
+                    style: AppTypography.micro.copyWith(
+                      letterSpacing: 1.5,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Text(
+                    'No bright objects above the horizon right now',
+                    style: AppTypography.labelMd.copyWith(color: AppColors.textMuted),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
         return Column(
@@ -97,14 +123,14 @@ class _HighlightItemWidget extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
+                    color: AppColors.accent.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
+                    border: Border.all(color: AppColors.borderPrimary),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Icon(
-                      Ionicons.planet_outline,
-                      color: Colors.orange,
+                      item.body == CelestialBody.moon ? Ionicons.moon_outline : Ionicons.planet_outline,
+                      color: AppColors.accent,
                       size: 20,
                     ),
                   ),
