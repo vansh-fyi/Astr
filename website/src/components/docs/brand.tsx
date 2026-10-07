@@ -1,14 +1,16 @@
-export function AstrMark({ size = 19 }: { size?: number }) {
+import Image from "next/image";
+
+/** The Astr app icon, rendered from the same source as the iOS/Android launcher icon. */
+export function AstrMark({ size = 28 }: { size?: number }) {
   return (
-    <svg
+    <Image
+      src="/astr-icon.png"
+      alt=""
       width={size}
       height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M12 2c.6 5.4 3.4 8.9 10 10-6.6 1.1-9.4 4.6-10 10-.6-5.4-3.4-8.9-10-10 6.6-1.1 9.4-4.6 10-10Z" />
-    </svg>
+      priority
+      className="docs-logo-image"
+    />
   );
 }
 

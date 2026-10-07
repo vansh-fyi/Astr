@@ -27,6 +27,38 @@ function DocumentationNav({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+function SidebarHead({ onSearch }: { onSearch: () => void }) {
+  return (
+    <>
+      <Link className="docs-logo" href="/">
+        <AstrMark size={28} />
+        <Wordmark />
+      </Link>
+      <button
+        type="button"
+        className="docs-search-trigger"
+        onClick={onSearch}
+        aria-label="Search the colour system"
+      >
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.25"
+          aria-hidden="true"
+        >
+          <circle cx="10.5" cy="10.5" r="6.5" />
+          <path d="m16 16 5 5" />
+        </svg>
+        <span>Search…</span>
+        <kbd>⌘ K</kbd>
+      </button>
+    </>
+  );
+}
+
 export function DocsShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const searchDialog = useRef<HTMLDialogElement>(null);
@@ -61,68 +93,27 @@ export function DocsShell({ children }: { children: ReactNode }) {
       <a className="docs-skip" href="#documentation-content">
         Skip to content
       </a>
-      <header className="docs-header">
-        <div className="docs-header-inner">
-          <button
-            type="button"
-            className="docs-mobile-trigger"
-            aria-label="Open navigation"
-            onClick={() => mobileDialog.current?.showModal()}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.25"
-              aria-hidden="true"
-            >
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <Link className="docs-logo" href="/">
-            <span className="docs-logo-mark">
-              <AstrMark size={19} />
-            </span>
-            <Wordmark />
-          </Link>
-          <nav className="docs-header-nav" aria-label="Main navigation">
-            {DOCS_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={pathname === link.href ? "page" : undefined}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <button
-            type="button"
-            className="docs-search-trigger"
-            onClick={() => searchDialog.current?.showModal()}
-            aria-label="Search the colour system"
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.25"
-              aria-hidden="true"
-            >
-              <circle cx="10.5" cy="10.5" r="6.5" />
-              <path d="m16 16 5 5" />
-            </svg>
-            <span>Search the colour system…</span>
-            <kbd>⌘ K</kbd>
-          </button>
-        </div>
-      </header>
+      <button
+        type="button"
+        className="docs-mobile-trigger"
+        aria-label="Open navigation"
+        onClick={() => mobileDialog.current?.showModal()}
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.25"
+          aria-hidden="true"
+        >
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
       <div className="docs-workspace">
         <aside className="docs-sidebar">
+          <SidebarHead onSearch={() => searchDialog.current?.showModal()} />
           <DocumentationNav />
         </aside>
         <main
@@ -196,6 +187,12 @@ export function DocsShell({ children }: { children: ReactNode }) {
         >
           Close
         </button>
+        <SidebarHead
+          onSearch={() => {
+            mobileDialog.current?.close();
+            searchDialog.current?.showModal();
+          }}
+        />
         <DocumentationNav onNavigate={() => mobileDialog.current?.close()} />
       </dialog>
     </div>

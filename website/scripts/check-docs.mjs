@@ -142,7 +142,9 @@ function checkPage(path, html) {
 
   const sidebar = /<aside class="docs-sidebar">([\s\S]*?)<\/aside>/.exec(html)?.[1] ?? "";
   assert(sidebar, `${where}: no sidebar`);
-  assert(count(sidebar, "<a ") === 4, `${where}: sidebar must have exactly 4 links`);
+  assert(count(sidebar, "<a ") === 5, `${where}: sidebar must have the brand link plus 4 page links`);
+  assert(!html.includes('class="docs-header'), `${where}: top bar (docs-header) must not exist`);
+  assert(html.includes("astr-icon"), `${where}: Astr app icon missing`);
   for (const label of LABELS) assert(sidebar.includes(label), `${where}: sidebar lacks ${label}`);
   for (const old of ["Foundations", "Getting started", "Examples", "Components"])
     assert(!sidebar.includes(old), `${where}: sidebar contains old template label ${old}`);
@@ -201,9 +203,9 @@ async function httpChecks(mode) {
       assert(res.status === 200, `${path}: status ${res.status}`);
       checkPage(path, await res.text());
     }
-    const icon = await fetch(`${base}/icon.svg`);
-    assert(icon.status === 200, `/icon.svg: status ${icon.status}`);
-    ok(`${mode}: four pages return 200 with the expected content, icon.svg is 200`);
+    const icon = await fetch(`${base}/icon.png`);
+    assert(icon.status === 200, `/icon.png: status ${icon.status}`);
+    ok(`${mode}: four pages return 200 with the expected content, icon.png is 200`);
 
     for (const path of PAGES) chromeRan = chromeConsoleCheck(base + path) || chromeRan;
     if (chromeRan) ok(`${mode}: headless Chrome console is clean`);
