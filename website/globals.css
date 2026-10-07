@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  /* Space Grey */
+  --color-space-grey-50: #f3f3f3;
+  --color-space-grey-100: #e5e4e4;
+  --color-space-grey-200: #cccccc;
+  --color-space-grey-300: #b3b3b3;
+  --color-space-grey-400: #9b9b9b;
+  --color-space-grey-500: #848484;
+  --color-space-grey-600: #686868;
+  --color-space-grey-700: #555555;
+  --color-space-grey-800: #3b3b3b;
+  --color-space-grey-900: #282828;
+  --color-space-grey-950: #030303;
+
+  /* Deep Space */
+  --color-deep-space-50: #d2d7fb;
+  --color-deep-space-100: #b9c1fe;
+  --color-deep-space-200: #6c95fc;
+  --color-deep-space-300: #1458d6;
+  --color-deep-space-400: #093b8c;
+  --color-deep-space-500: #021f45;
+  --color-deep-space-600: #021b3d;
+  --color-deep-space-700: #011532;
+  --color-deep-space-800: #010e2a;
+  --color-deep-space-900: #020c1e;
+  --color-deep-space-950: #000b17;
+
+  /* Aurora Pink */
+  --color-aurora-pink-50: #fbedf2;
+  --color-aurora-pink-100: #f8dbe4;
+  --color-aurora-pink-200: #f2bacd;
+  --color-aurora-pink-300: #ed93c3;
+  --color-aurora-pink-400: #e867b0;
+  --color-aurora-pink-500: #d64289;
+  --color-aurora-pink-600: #aa3282;
+  --color-aurora-pink-700: #822566;
+  --color-aurora-pink-800: #5d1847;
+  --color-aurora-pink-900: #370a1f;
+  --color-aurora-pink-950: #250513;
+
+  /* Aurora Green */
+  --color-aurora-green-50: #fefff8;
+  --color-aurora-green-100: #f2fbe8;
+  --color-aurora-green-200: #ddf7c4;
+  --color-aurora-green-300: #bef4a3;
+  --color-aurora-green-400: #a6ee8e;
+  --color-aurora-green-500: #88e491;
+  --color-aurora-green-600: #69b276;
+  --color-aurora-green-700: #4c834e;
+  --color-aurora-green-800: #305640;
+  --color-aurora-green-900: #182f28;
+  --color-aurora-green-950: #0b1a1b;
+
+  /* Sodium Airglow */
+  --color-sodium-airglow-50: #fefbf0;
+  --color-sodium-airglow-100: #fef1e0;
+  --color-sodium-airglow-200: #fde3c3;
+  --color-sodium-airglow-300: #fbd49d;
+  --color-sodium-airglow-400: #fbbd6c;
+  --color-sodium-airglow-500: #f6a833;
+  --color-sodium-airglow-600: #c17e26;
+  --color-sodium-airglow-700: #90591a;
+  --color-sodium-airglow-800: #633b0e;
+  --color-sodium-airglow-900: #361e04;
+  --color-sodium-airglow-950: #231202;
+
+  /* Oxygen Airglow */
+  --color-oxygen-airglow-50: #fee9f0;
+  --color-oxygen-airglow-100: #fed2e5;
+  --color-oxygen-airglow-200: #fda3ae;
+  --color-oxygen-airglow-300: #fc6d6f;
+  --color-oxygen-airglow-400: #f93e41;
+  --color-oxygen-airglow-500: #c10c0c;
+  --color-oxygen-airglow-600: #9a0707;
+  --color-oxygen-airglow-700: #780404;
+  --color-oxygen-airglow-800: #570202;
+  --color-oxygen-airglow-900: #390101;
+  --color-oxygen-airglow-950: #270000;
+}
