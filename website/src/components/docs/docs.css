@@ -2,17 +2,17 @@
 @layer base {
   html {
     color-scheme: dark;
-    background: var(--color-space-grey-950);
+    background: var(--color-deep-space-950);
   }
   body {
     margin: 0;
-    background: var(--color-space-grey-950);
+    background: var(--color-deep-space-950);
   }
 }
 
 @layer components {
   .docs-root {
-    --docs-surface: var(--color-space-grey-950);
+    --docs-surface: var(--color-deep-space-950);
     --docs-raised: var(--color-deep-space-900);
     --docs-line: var(--color-space-grey-800);
     --docs-line-strong: var(--color-space-grey-700);

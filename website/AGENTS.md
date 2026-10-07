@@ -36,8 +36,9 @@ This file contains no code on purpose. Rules are written in plain language. The 
 
 ## Roles inside the documentation site
 
-- Page background is space grey nine hundred fifty.
-- Raised surfaces, panels, search field, active navigation and preview areas use Deep Space dark stops.
+- Page background is deep space nine hundred fifty, across the whole site, including the sidebar and the outline.
+- Code blocks, notes, inline code and readouts are filled with space grey nine hundred fifty, so they sit as black panels on the deep space page.
+- Other raised surfaces, such as the search field, active navigation and preview areas, use Deep Space dark stops.
 - Highlight and interaction colour is deep space three hundred. Use it for focus rings, the active tab underline, selected chips and other fills and borders.
 - Text and text accents use the Space Grey stops, from brightest for headings to muted for secondary information. Do not use the highlight colour for small text, because its contrast on the dark background is too low.
 - Aurora and airglow palettes are kept out of the documentation chrome, code highlighting, status marks, demo defaults and example snippets. They appear only where a page documents the palettes themselves. Do not use them to decorate the site.
