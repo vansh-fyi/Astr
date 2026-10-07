@@ -15,7 +15,7 @@ export function OpacityDemoClient({
   mags: MagStep[];
   backdrop: string;
 }) {
-  const [value, setValue] = useState("aurora-green-400");
+  const [value, setValue] = useState("deep-space-300");
   const [active, setActive] = useState(3);
   const { stop } = findStop(palettes, value);
   const form = `bg-${value}/(--mag-${active})`;

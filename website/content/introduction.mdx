@@ -38,16 +38,16 @@ Every stop may be used at every ladder step, and every gradient accepts any stop
 
 <CodeTabs flutter={
 <CodeBlock lang="dart" filename="usage.dart" code={`// a stop at a ladder step
-final Color glow = AstrColors.auroraGreen[400]!.withValues(alpha: Mag.m3);
+final Color glow = AstrColors.deepSpace[300]!.withValues(alpha: Mag.m3);
 
 // a gradient with any stop
 final LinearGradient sky = AstrGradients.extinction(AstrColors.deepSpace[300]!);
-final RadialGradient halo = AstrGradients.moffat(AstrColors.sodiumAirglow[400]!);`} />
+final RadialGradient halo = AstrGradients.moffat(AstrColors.spaceGrey[200]!);`} />
 }>
 
 ```html
 <!-- a stop at a ladder step -->
-<div class="bg-aurora-green-400/(--mag-3)"></div>
+<div class="bg-deep-space-300/(--mag-3)"></div>
 
 <!-- a gradient with any stop -->
 <div class="gradient-extinction [--grad-color:var(--color-deep-space-300)]"></div>

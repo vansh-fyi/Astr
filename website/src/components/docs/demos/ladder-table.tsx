@@ -4,14 +4,14 @@ import { getMagSteps, getStopHex } from "@/lib/tokens";
 export function LadderTable() {
   const steps = getMagSteps();
   assertLadderMatchesCss(steps);
-  const hex = getStopHex("aurora-green", 400);
+  const hex = getStopHex("deep-space", 300);
   return (
     <div className="docs-table-wrap">
       <table className="docs-table">
         <caption>
           Computed alpha is rounded to two decimals; CSS values are read from
           globals.css and verified against the formula at build time. The swatch
-          shows aurora-green-400 over deep-space-950.
+          shows deep-space-300 over deep-space-950.
         </caption>
         <thead>
           <tr>

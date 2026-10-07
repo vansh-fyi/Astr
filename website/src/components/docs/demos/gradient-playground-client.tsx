@@ -17,7 +17,7 @@ export function GradientPlaygroundClient({
   palettes: Palette[];
   backdrop: string;
 }) {
-  const [value, setValue] = useState("aurora-green-400");
+  const [value, setValue] = useState("deep-space-300");
   const [direction, setDirection] = useState<(typeof DIRECTIONS)[number]>("to bottom");
   const { stop } = findStop(palettes, value);
   const usage = `gradient-${kind} [--grad-color:var(--color-${value})]`;

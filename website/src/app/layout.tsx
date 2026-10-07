@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "katex/dist/katex.min.css";
 import "./styles.css";
 import { DocsShell } from "@/components/docs/docs-shell";
@@ -11,10 +12,13 @@ const inter = Inter({
   display: "swap",
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta-sans",
-  subsets: ["latin"],
+const satoshi = localFont({
+  variable: "--font-satoshi",
   display: "swap",
+  src: [
+    { path: "../fonts/Satoshi-Medium.ttf", weight: "500", style: "normal" },
+    { path: "../fonts/Satoshi-Bold.ttf", weight: "700", style: "normal" },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -28,7 +32,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${plusJakartaSans.variable}`}>
+    <html lang="en" className={`dark ${inter.variable} ${satoshi.variable}`}>
       <body>
         <DocsShell>{children}</DocsShell>
       </body>

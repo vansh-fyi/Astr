@@ -2,17 +2,17 @@
 @layer base {
   html {
     color-scheme: dark;
-    background: var(--color-deep-space-950);
+    background: var(--color-space-grey-950);
   }
   body {
     margin: 0;
-    background: var(--color-deep-space-950);
+    background: var(--color-space-grey-950);
   }
 }
 
 @layer components {
   .docs-root {
-    --docs-surface: var(--color-deep-space-950);
+    --docs-surface: var(--color-space-grey-950);
     --docs-raised: var(--color-deep-space-900);
     --docs-line: var(--color-space-grey-800);
     --docs-line-strong: var(--color-space-grey-700);
@@ -21,14 +21,15 @@
     --docs-text-secondary: var(--color-space-grey-300);
     --docs-muted: var(--color-space-grey-400);
     --docs-subtle: var(--color-space-grey-600);
-    --docs-canvas: var(--color-space-grey-950);
-    --docs-accent: var(--color-aurora-green-400);
-    --docs-string: var(--color-sodium-airglow-300);
-    --docs-tag: var(--color-aurora-pink-300);
-    --docs-on-accent: var(--color-deep-space-950);
+    --docs-canvas: var(--color-deep-space-950);
+    --docs-accent: var(--color-deep-space-300);
+    --docs-string: var(--color-space-grey-300);
+    --docs-tag: var(--color-deep-space-100);
+    --docs-keyword: var(--color-deep-space-200);
+    --docs-on-accent: var(--color-space-grey-50);
     --docs-font: var(--font-inter), -apple-system, BlinkMacSystemFont,
       "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --docs-font-heading: var(--font-plus-jakarta-sans), -apple-system,
+    --docs-font-heading: var(--font-satoshi), -apple-system,
       BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --docs-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --docs-radius: 10px;
@@ -216,7 +217,7 @@
     border-left: 1px solid var(--docs-line);
   }
   .docs-outline a:hover {
-    color: var(--docs-accent);
+    color: var(--docs-text-strong);
   }
   .docs-section {
     margin-top: var(--docs-section-gap);
@@ -288,7 +289,7 @@
   .docs-section p a,
   .docs-section li a,
   .docs-note a {
-    color: var(--docs-accent);
+    color: var(--docs-text-strong);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
@@ -399,7 +400,7 @@
     color: var(--docs-string);
   }
   .docs-code-keyword {
-    color: var(--docs-accent);
+    color: var(--docs-keyword);
   }
   .docs-code-tag {
     color: var(--docs-tag);
@@ -665,10 +666,10 @@
     min-height: 0;
   }
   .docs-ok {
-    color: var(--docs-accent);
+    color: var(--docs-text-strong);
   }
   .docs-bad {
-    color: var(--color-oxygen-airglow-300);
+    color: var(--docs-muted);
   }
   .docs-dialog {
     position: fixed;

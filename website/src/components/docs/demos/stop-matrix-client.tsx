@@ -13,7 +13,7 @@ export function StopMatrixClient({
   mags: MagStep[];
   backdrop: string;
 }) {
-  const [paletteId, setPaletteId] = useState("aurora-green");
+  const [paletteId, setPaletteId] = useState("deep-space");
   const [readout, setReadout] = useState("Select a cell to copy its Tailwind class.");
   const palette = palettes.find((p) => p.id === paletteId) ?? palettes[0];
 
