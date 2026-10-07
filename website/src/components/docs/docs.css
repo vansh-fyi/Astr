@@ -168,9 +168,12 @@
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-width: thin;
+    scrollbar-width: none;
     padding: 44px 4px 80px;
     scroll-padding-top: 24px;
+  }
+  .docs-article::-webkit-scrollbar {
+    display: none;
   }
   .docs-page-header {
     margin-bottom: 32px;
@@ -463,10 +466,20 @@
   .docs-ramp h3 {
     margin: 0 0 6px;
   }
-  .docs-ramp-note {
+  .docs-ramp-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-bottom: 12px;
+  }
+  .docs-ramp-head h3 {
+    margin: 0;
+  }
+  .docs-ramp-head code {
     font-size: 11px;
     color: var(--docs-muted);
-    margin-bottom: 12px;
   }
   .docs-ramp-steps {
     display: grid;

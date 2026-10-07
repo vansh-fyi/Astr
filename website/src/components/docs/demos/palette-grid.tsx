@@ -6,10 +6,10 @@ export function PaletteGrid() {
     <>
       {getPalettes().map((palette) => (
         <div className="docs-ramp" key={palette.id}>
-          <h3>{palette.name}</h3>
-          <p className="docs-ramp-note">
+          <div className="docs-ramp-head">
+            <h3>{palette.name}</h3>
             <code>{`--color-${palette.id}-{step}`}</code>
-          </p>
+          </div>
           <div className="docs-ramp-steps">
             {palette.stops.map((stop) => (
               <ColorChip
