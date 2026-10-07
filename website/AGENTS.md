@@ -65,6 +65,13 @@ This file contains no code on purpose. Rules are written in plain language. The 
 - Satoshi comes from the font files already in the application's asset folder. Do not substitute a web font service for it.
 - The brand mark is the real Astr app icon taken from the application's icon source. Never draw, recolour or replace it with a placeholder.
 
+## Images
+
+- Photographs live in the images folder as optimised webp only, with a long edge of at most sixteen hundred pixels. Never commit original PNG or JPEG files.
+- Pages load them from the jsDelivr CDN, served from this repository, through the single image configuration in the library folder. Never hard-code another host.
+- Each image has meaningful alternative text and is tied to the palette it inspired. Keep that mapping in the configuration, not in pages.
+- The introduction shows them as a bento with each palette's eleven stops on the caption. New images must be pushed before the CDN can serve them.
+
 ## Layout rules
 
 - There is no top bar. The brand and the search field sit at the top of the left sidebar, and a small floating menu button appears on narrow screens.

@@ -16,7 +16,7 @@ import { CssSource } from "@/components/docs/demos/css-source";
 import { GradientPlayground } from "@/components/docs/demos/gradient-playground";
 import { LadderTable } from "@/components/docs/demos/ladder-table";
 import { OpacityDemo } from "@/components/docs/demos/opacity-demo";
-import { PaletteGrid, PaletteStrip } from "@/components/docs/demos/palette-grid";
+import { PaletteBento, PaletteGrid, PaletteStrip } from "@/components/docs/demos/palette-grid";
 import { SampleTable } from "@/components/docs/demos/sample-table";
 import { StopMatrix } from "@/components/docs/demos/stop-matrix";
 
@@ -49,6 +49,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     CodeTabs,
     PaletteGrid,
     PaletteStrip,
+    PaletteBento,
     LadderTable,
     SampleTable,
     CssSource,

@@ -163,7 +163,10 @@ function checkPage(path, html) {
     assert(count(html, "<option") >= 132, `${where}: expected at least 132 options`);
     assert(html.includes("0.50572"), `${where}: Kasten-Young constant missing from TeX`);
   }
-  if (path === "/") assert(html.includes('class="docs-swatch-strip"'), `${where}: no palette strip`);
+  if (path === "/") {
+    assert(count(html, 'class="docs-bento-tile"') === 6, `${where}: bento must have six tiles`);
+    assert(html.includes("cdn.jsdelivr.net") || process.env.NEXT_PUBLIC_ASTR_IMAGE_BASE, `${where}: bento images are not served from jsDelivr`);
+  }
 }
 
 function chromeConsoleCheck(url) {
