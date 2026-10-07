@@ -79,3 +79,67 @@
   --color-oxygen-airglow-900: #390101;
   --color-oxygen-airglow-950: #270000;
 }
+
+/*
+ * Opacity ladder: Pogson magnitude scale.
+ * alpha(n) = 10^(-0.4 * n / 2), so every step is half a magnitude and
+ * 10 steps (5 magnitudes) is exactly 100x dimmer. Any colour stop may use any step.
+ * Usage: bg-aurora-green-400/(--mag-3)
+ */
+@theme static {
+  --mag-0: 100%;
+  --mag-1: 63.1%;
+  --mag-2: 39.81%;
+  --mag-3: 25.12%;
+  --mag-4: 15.85%;
+  --mag-5: 10%;
+  --mag-6: 6.31%;
+  --mag-7: 3.98%;
+  --mag-8: 2.51%;
+  --mag-9: 1.58%;
+  --mag-10: 1%;
+}
+
+/*
+ * Gradients take their colour from --grad-color (any colour stop) and
+ * their direction from --grad-dir. Every alpha is a --mag-* step, and
+ * interpolation is in sRGB so Flutter gradients render identically.
+ * Usage: gradient-extinction [--grad-color:var(--color-aurora-green-400)]
+ */
+
+/*
+ * Atmospheric extinction (zenith to horizon).
+ * alpha = 10^(-0.4 * k * (X - 1)), k = 0.2 mag/airmass,
+ * X = Kasten-Young airmass; stops sit at z = 0, 60, 70, 78, 84, 88, 90 degrees
+ * (position = z / 90) and alpha is snapped to the nearest --mag-* step.
+ */
+@utility gradient-extinction {
+  background-image: linear-gradient(
+    in srgb var(--grad-dir, to bottom),
+    color-mix(in srgb, var(--grad-color) var(--mag-0), transparent) 0%,
+    color-mix(in srgb, var(--grad-color) var(--mag-0), transparent) 66.7%,
+    color-mix(in srgb, var(--grad-color) var(--mag-1), transparent) 77.8%,
+    color-mix(in srgb, var(--grad-color) var(--mag-1), transparent) 86.7%,
+    color-mix(in srgb, var(--grad-color) var(--mag-3), transparent) 93.3%,
+    color-mix(in srgb, var(--grad-color) var(--mag-7), transparent) 97.8%,
+    transparent 100%
+  );
+}
+
+/*
+ * Moffat profile (radial glow): I(r) = (1 + (r/a)^2)^-beta, beta = 3,
+ * radius = 4a, alpha snapped to the nearest --mag-* step.
+ */
+@utility gradient-moffat {
+  background-image: radial-gradient(
+    in srgb circle closest-side,
+    color-mix(in srgb, var(--grad-color) var(--mag-0), transparent) 0%,
+    color-mix(in srgb, var(--grad-color) var(--mag-1), transparent) 10%,
+    color-mix(in srgb, var(--grad-color) var(--mag-3), transparent) 20%,
+    color-mix(in srgb, var(--grad-color) var(--mag-6), transparent) 30%,
+    color-mix(in srgb, var(--grad-color) var(--mag-8), transparent) 40%,
+    color-mix(in srgb, var(--grad-color) var(--mag-10), transparent) 50%,
+    transparent 60%,
+    transparent 100%
+  );
+}
