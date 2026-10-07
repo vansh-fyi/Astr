@@ -78,3 +78,21 @@ export function PaletteBento() {
     </div>
   );
 }
+
+/** Source links for the bento photographs. Images without a confirmed source are skipped. */
+export function PaletteCredits() {
+  const palettes = new Map(getPalettes().map((p) => [p.id, p]));
+  const credited = BENTO_IMAGES.filter((image) => image.credit);
+  return (
+    <ul className="docs-credits" aria-label="Image credits">
+      {credited.map((image) => (
+        <li key={image.palette}>
+          <span>{palettes.get(image.palette)?.name}</span>
+          <a href={image.credit!.url} target="_blank" rel="noopener noreferrer">
+            {image.credit!.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}

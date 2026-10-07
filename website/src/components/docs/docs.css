@@ -22,6 +22,7 @@
     --docs-muted: var(--color-space-grey-400);
     --docs-subtle: var(--color-space-grey-600);
     --docs-canvas: var(--color-deep-space-950);
+    --docs-block: var(--color-space-grey-950);
     --docs-accent: var(--color-deep-space-300);
     --docs-string: var(--color-space-grey-300);
     --docs-tag: var(--color-deep-space-100);
@@ -285,7 +286,7 @@
     font: 12px var(--docs-font-mono);
     padding: 1px 5px;
     border-radius: 4px;
-    background: var(--docs-raised);
+    background: var(--docs-block);
     border: 1px solid var(--docs-line);
     color: var(--docs-text);
   }
@@ -339,7 +340,7 @@
     padding: 10px 16px;
     font-size: 11px;
     color: var(--docs-muted);
-    background: var(--docs-raised);
+    background: var(--docs-block);
     border-top: 1px solid var(--docs-line);
   }
   .docs-copy {
@@ -362,7 +363,7 @@
     border: 1px solid var(--docs-line);
     border-radius: var(--docs-radius);
     overflow: hidden;
-    background: var(--docs-raised);
+    background: var(--docs-block);
     margin: 16px 0;
   }
   .docs-code[data-embedded] {
@@ -454,7 +455,7 @@
   .docs-note {
     padding: 16px 18px;
     border-left: 2px solid var(--docs-line-strong);
-    background: var(--docs-raised);
+    background: var(--docs-block);
     color: var(--docs-text-secondary);
     font-size: 13px;
     line-height: 1.75;
@@ -590,6 +591,36 @@
   .docs-bento-tile[data-palette="sodium-airglow"] {
     grid-column: 5 / span 2;
     grid-row: 3;
+  }
+  .docs-section .docs-credits {
+    display: grid;
+    gap: 4px;
+    margin: 0 0 20px;
+    padding: 0;
+    list-style: none;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--docs-muted);
+  }
+  .docs-section .docs-credits li {
+    display: flex;
+    gap: 12px;
+    margin: 0;
+    font-size: 11px;
+  }
+  .docs-section .docs-credits li > span {
+    flex: 0 0 96px;
+    white-space: nowrap;
+    color: var(--docs-text-secondary);
+  }
+  .docs-section .docs-credits a {
+    color: var(--docs-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    overflow-wrap: anywhere;
+  }
+  .docs-credits a:hover {
+    color: var(--docs-text);
   }
   .docs-swatch-strip {
     display: grid;
@@ -739,7 +770,7 @@
     border-top: 1px solid var(--docs-line);
     font: 12px var(--docs-font-mono);
     color: var(--docs-text-secondary);
-    background: var(--docs-raised);
+    background: var(--docs-block);
   }
   .docs-gradient-stage {
     position: relative;
