@@ -1,0 +1,12 @@
+node_modules/
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.env*
+/coverage
+
+# The repo-root .gitignore ignores any "docs/" directory; the docs components must be tracked.
+!/src/components/docs/
