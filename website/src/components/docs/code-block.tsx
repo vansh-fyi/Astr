@@ -57,7 +57,45 @@ export function CopyButton({
   );
 }
 
-function highlight(line: string): ReactNode {
+const DART_KEYWORDS =
+  "abstract|final|const|static|class|extends|import|as|return|null|true|false|for|in|int|double|void|if|else|new";
+
+function highlightDart(line: string): ReactNode {
+  const commentAt = line.indexOf("//");
+  const code = commentAt === -1 ? line : line.slice(0, commentAt);
+  const comment = commentAt === -1 ? "" : line.slice(commentAt);
+  const parts = code
+    .split(
+      new RegExp(
+        `('[^'\n]*'|\\b(?:${DART_KEYWORDS})\\b|\\b0x[0-9A-Fa-f]+\\b|\\b[A-Z]\\w*)`,
+        "g",
+      ),
+    )
+    .map((part, index) => {
+      const kind = /^'/.test(part)
+        ? "string"
+        : new RegExp(`^(?:${DART_KEYWORDS})$`).test(part)
+          ? "keyword"
+          : /^0x/.test(part)
+            ? "string"
+            : /^[A-Z]/.test(part)
+              ? "tag"
+              : undefined;
+      return (
+        <span key={index} className={kind ? `docs-code-${kind}` : undefined}>
+          {part}
+        </span>
+      );
+    });
+  return (
+    <>
+      {parts}
+      {comment && <span className="docs-code-comment">{comment}</span>}
+    </>
+  );
+}
+
+function highlight(line: string, lang?: string): ReactNode {
   const trimmed = line.trimStart();
   if (
     trimmed.startsWith("/*") ||
@@ -65,6 +103,7 @@ function highlight(line: string): ReactNode {
     trimmed.startsWith("//")
   )
     return <span className="docs-code-comment">{line}</span>;
+  if (lang === "dart") return highlightDart(line);
   return line
     .split(
       /(@(?:theme|utility|import|layer)\b|--[\w-]+|"[^"\n]*"|'[^'\n]*'|#[0-9a-fA-F]{3,8}\b)/g,
@@ -113,7 +152,7 @@ export function CodeBlock({
               <span className="docs-line-number" aria-hidden="true">
                 {index + 1}
               </span>
-              <span>{highlight(line)}</span>
+              <span>{highlight(line, lang)}</span>
             </span>
           ))}
         </code>

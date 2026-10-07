@@ -84,7 +84,8 @@ function staticChecks() {
     assert(ids.length > 0, `${name}.mdx meta has no sections`);
     for (const id of ids)
       assert(src.includes(`<DocSection id="${id}"`), `${name}.mdx: no <DocSection id="${id}">`);
-    assert(count(src, "<CodeTabs>") === 1, `${name}.mdx must have exactly one <CodeTabs>`);
+    assert(count(src, "<CodeTabs") === 1, `${name}.mdx must have exactly one <CodeTabs>`);
+    assert(src.includes("flutter={"), `${name}.mdx <CodeTabs> has no flutter panel`);
   }
   ok("content/*.mdx: meta, section ids and one CodeTabs each");
 
@@ -99,17 +100,21 @@ function staticChecks() {
   ok("formula needles present in MDX and in code");
 
   const files = walk(ROOT).filter((f) => !f.endsWith("package-lock.json") && !f.endsWith("check-docs.mjs"));
-  assert(!files.some((f) => f.endsWith(".dart")), "found a .dart file under website/");
-  for (const f of files) {
-    const body = readFileSync(f, "utf8");
-    assert(!body.includes("package:flutter"), `package:flutter found in ${relative(ROOT, f)}`);
-    assert(!/```dart/i.test(body), `dart code fence in ${relative(ROOT, f)}`);
-  }
+  const dartFiles = files.filter((f) => f.endsWith(".dart"));
+  assert(
+    dartFiles.every((f) => f.includes(`${join(ROOT, "content", "flutter")}/`)),
+    "a .dart file lives outside website/content/flutter",
+  );
+  for (const name of ["astr_colors.dart", "astr_opacity.dart", "astr_gradients.dart"])
+    assert(
+      dartFiles.some((f) => f.endsWith(`/${name}`)),
+      `content/flutter/${name} is missing`,
+    );
   for (const f of files.filter((f) => /\/(src|content)\//.test(f))) {
     const hit = readFileSync(f, "utf8").match(/sepcare|clinical|infant|pulse/i);
     assert(!hit, `forbidden residue "${hit?.[0]}" in ${relative(ROOT, f)}`);
   }
-  ok("no Dart/Flutter code and no sepcare residue");
+  ok("Dart files confined to content/flutter, no sepcare residue");
 }
 
 // ------------------------------------------------------------------ http ----
@@ -130,7 +135,7 @@ async function waitFor(base, child, log) {
 
 function checkPage(path, html) {
   const where = `${path}`;
-  for (const needle of ["Skip to content", "Tokens / CSS", "Coming soon", "<dialog", "On this page"])
+  for (const needle of ["Skip to content", "Tokens / CSS", "Flutter", "<dialog", "On this page"])
     assert(html.includes(needle), `${where}: missing "${needle}"`);
   for (const bad of ["Application error", "NEXT_NOT_FOUND", "Unhandled Runtime Error", "Minified React error"])
     assert(!html.includes(bad), `${where}: contains "${bad}"`);

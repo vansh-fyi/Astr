@@ -11,6 +11,7 @@ import {
 import { CodeBlock } from "@/components/docs/code-block";
 import { CodeTabs } from "@/components/docs/code-tabs";
 import { DocNote, DocSection } from "@/components/docs/documentation";
+import { DartSource } from "@/components/docs/demos/dart-source";
 import { CssSource } from "@/components/docs/demos/css-source";
 import { GradientPlayground } from "@/components/docs/demos/gradient-playground";
 import { LadderTable } from "@/components/docs/demos/ladder-table";
@@ -44,12 +45,14 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ...components,
     DocSection,
     DocNote,
+    CodeBlock,
     CodeTabs,
     PaletteGrid,
     PaletteStrip,
     LadderTable,
     SampleTable,
     CssSource,
+    DartSource,
     OpacityDemo,
     StopMatrix,
     GradientPlayground,

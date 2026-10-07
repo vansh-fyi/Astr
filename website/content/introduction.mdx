@@ -36,7 +36,14 @@ The ladder and the gradients are natural-law layers applied on top of the stops.
 
 Every stop may be used at every ladder step, and every gradient accepts any stop through `--grad-color`. There is no list of approved combinations.
 
-<CodeTabs>
+<CodeTabs flutter={
+<CodeBlock lang="dart" filename="usage.dart" code={`// a stop at a ladder step
+final Color glow = AstrColors.auroraGreen[400]!.withValues(alpha: Mag.m3);
+
+// a gradient with any stop
+final LinearGradient sky = AstrGradients.extinction(AstrColors.deepSpace[300]!);
+final RadialGradient halo = AstrGradients.moffat(AstrColors.sodiumAirglow[400]!);`} />
+}>
 
 ```html
 <!-- a stop at a ladder step -->
@@ -47,6 +54,12 @@ Every stop may be used at every ladder step, and every gradient accepts any stop
 ```
 
 </CodeTabs>
+
+<DocNote>
+
+The Flutter files live in `content/flutter/` and mirror `globals.css` value for value: `astr_colors.dart`, `astr_opacity.dart` and `astr_gradients.dart`. They are plain Dart with no dependency on the Astr app.
+
+</DocNote>
 
 </DocSection>
 

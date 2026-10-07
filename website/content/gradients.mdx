@@ -60,7 +60,7 @@ so a stop at position $p$ sits at $r = 4a\,p$, where the position is measured as
 
 <DocSection id="usage" title="Usage">
 
-<CodeTabs>
+<CodeTabs flutter={<DartSource file="astr_gradients.dart" />}>
 
 ```html
 <div class="gradient-extinction [--grad-color:var(--color-aurora-green-400)]"></div>
@@ -73,5 +73,11 @@ so a stop at position $p$ sits at $r = 4a\,p$, where the position is measured as
 <CssSource utility="gradient-moffat" />
 
 </CodeTabs>
+
+<DocNote>
+
+**Flutter.** `astr_gradients.dart` imports `astr_opacity.dart`, so copy both. The tail fades to the same colour at alpha 0 instead of `Colors.transparent`, because Flutter interpolates gradient stops without premultiplying alpha and transparent black would grey the fade. `withValues(alpha:)` needs Flutter 3.27 or newer.
+
+</DocNote>
 
 </DocSection>
