@@ -66,6 +66,7 @@ export function PaletteBento() {
             />
             <figcaption>
               <span>{palette.name}</span>
+              <span className="docs-bento-note">{image.note}</span>
               <span className="docs-bento-strip" aria-hidden="true">
                 {palette.stops.map((stop) => (
                   <i key={stop.token} style={{ backgroundColor: stop.hex }} />
