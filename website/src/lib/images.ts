@@ -24,7 +24,7 @@ export const BENTO_IMAGES: BentoImage[] = [
   {
     palette: "space-grey",
     file: "milky-way.webp",
-    note: "How the eye sees the Milky Way at night.",
+    note: "How the naked eye sees the Milky Way.",
     width: 1200,
     height: 1600,
     alt: "The Milky Way in black and white, a dense band of stars and dark dust lanes.",
@@ -36,7 +36,7 @@ export const BENTO_IMAGES: BentoImage[] = [
   {
     palette: "deep-space",
     file: "campsite.webp",
-    note: "My first Milky Way, stargazing with my sister.",
+    note: "My first Milky Way sighting.",
     width: 900,
     height: 1600,
     alt: "Two glowing tents under a deep blue night sky full of stars.",
@@ -44,7 +44,7 @@ export const BENTO_IMAGES: BentoImage[] = [
   {
     palette: "aurora-pink",
     file: "aurora-pink.webp",
-    note: "One of two auroras that cover the sky's range.",
+    note: "Pink aurora that covers the sky range.",
     width: 1065,
     height: 1600,
     alt: "A pink and magenta aurora over a country road and silhouetted trees.",
@@ -56,7 +56,7 @@ export const BENTO_IMAGES: BentoImage[] = [
   {
     palette: "aurora-green",
     file: "aurora-green.webp",
-    note: "The other aurora, completing the range.",
+    note: "The classic aurora colours from the night sky.",
     width: 1600,
     height: 1068,
     alt: "Green aurora curtains over snowy mountains and a still fjord in Norway.",
@@ -68,7 +68,7 @@ export const BENTO_IMAGES: BentoImage[] = [
   {
     palette: "sodium-airglow",
     file: "airglow-orange.webp",
-    note: "Sodium glow on Earth's limb, seen from orbit.",
+    note: "Sodium airglow as seen from orbit.",
     width: 1600,
     height: 1065,
     alt: "An orange glow along Earth's horizon seen from the space station, beneath a field of stars.",
@@ -80,7 +80,7 @@ export const BENTO_IMAGES: BentoImage[] = [
   {
     palette: "oxygen-airglow",
     file: "airglow-red.webp",
-    note: "Red airglow, a stellar sight we can't see from Earth.",
+    note: "Oxygen airglow as seen from orbit.",
     width: 1600,
     height: 1012,
     alt: "A red airglow band above Earth's limb and the lit cities of the night side.",
