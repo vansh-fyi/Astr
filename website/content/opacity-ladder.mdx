@@ -1,23 +1,71 @@
 export const meta = {
   title: "Opacity ladder",
-  description: "Opacity ladder stub.",
-  sections: [{ id: "overview", title: "Overview" }],
+  description:
+    "Eleven alpha steps on the Pogson magnitude scale. Any colour stop can use any step.",
+  sections: [
+    { id: "formula", title: "Formula" },
+    { id: "scale", title: "The scale" },
+    { id: "demo", title: "Try a stop" },
+    { id: "matrix", title: "Stop by step" },
+    { id: "usage", title: "Usage" },
+  ],
 };
 
-<DocSection id="overview" title="Overview">
+<DocSection id="formula" title="Formula">
 
-Stub content for Opacity ladder.
+Astronomers measure brightness in magnitudes. The Pogson relation says a difference of five magnitudes is exactly a factor of 100 in flux:
+
+$$ m_2 - m_1 = -2.5\,\log_{10}\frac{F_2}{F_1} $$
+
+so one magnitude is a ratio of $100^{1/5} \approx 2.512$. The ladder steps through alpha in half-magnitude increments:
 
 $$ \alpha(n) = 10^{-0.4\,n/2} $$
 
+Ten steps are five magnitudes, so $\alpha(10) = 10^{-2} = 1\%$ and the last step is exactly 100 times dimmer than the first. To find the nearest step for an arbitrary alpha, invert the relation:
+
+$$ n = -5\,\log_{10}\alpha $$
+
+</DocSection>
+
+<DocSection id="scale" title="The scale">
+
+<LadderTable />
+
+</DocSection>
+
+<DocSection id="demo" title="Try a stop">
+
+Choose any stop to see it at all eleven steps over the deep space background.
+
+<OpacityDemo />
+
+</DocSection>
+
+<DocSection id="matrix" title="Stop by step">
+
+The same ladder applied to every stop of one palette. Select a cell to copy its class.
+
+<StopMatrix />
+
+</DocSection>
+
+<DocSection id="usage" title="Usage">
+
 <CodeTabs>
 
+```html
+<!-- Tailwind -->
+<div class="bg-aurora-green-400/(--mag-3)"></div>
+```
+
 ```css
-/* example */
-@theme {
-  --color-example: #a6ee8e;
+/* the equivalent plain CSS */
+.b {
+  background: color-mix(in srgb, var(--color-aurora-green-400) var(--mag-3), transparent);
 }
 ```
+
+<CssSource theme="--mag-" />
 
 </CodeTabs>
 

@@ -1,24 +1,57 @@
 export const meta = {
   title: "Introduction",
-  description: "Introduction stub.",
-  sections: [{ id: "overview", title: "Overview" }],
+  description:
+    "The Astr colour system in three layers: fixed colour stops, a Pogson opacity ladder, and two natural-law gradients.",
+  sections: [
+    { id: "what-it-is", title: "What it is" },
+    { id: "layers", title: "Three layers" },
+    { id: "any-stop-any-opacity", title: "Any stop, any opacity" },
+    { id: "source-of-truth", title: "Source of truth" },
+  ],
 };
 
-<DocSection id="overview" title="Overview">
+<DocSection id="what-it-is" title="What it is">
 
-Stub content for Introduction.
+Astr is a stargazing app, and its interface is dark only. The colour system is built from **66 fixed colour stops**: six palettes with eleven steps each (50 to 950). The stops are absolute hex values. They are never tinted, blended or recomputed.
 
+<PaletteStrip />
 
+Each row above is one palette, from the lightest step (50) on the left to the darkest (950) on the right. See [Colour stops](/colour-stops) for every value.
+
+</DocSection>
+
+<DocSection id="layers" title="Three layers">
+
+The system is deliberately small.
+
+1. **Colour stops.** The fixed palette. Nothing else in the system defines a colour.
+2. **The opacity ladder.** Eleven alpha steps, `--mag-0` to `--mag-10`, spaced by the Pogson magnitude scale. See [Opacity ladder](/opacity-ladder).
+3. **Gradients.** Two profiles taken from nature, atmospheric extinction and the Moffat point-spread function, built entirely from ladder steps. See [Gradients](/gradients).
+
+The ladder and the gradients are natural-law layers applied on top of the stops. They change how much of a stop shows through, never the stop itself.
+
+</DocSection>
+
+<DocSection id="any-stop-any-opacity" title="Any stop, any opacity">
+
+Every stop may be used at every ladder step, and every gradient accepts any stop through `--grad-color`. There is no list of approved combinations.
 
 <CodeTabs>
 
-```css
-/* example */
-@theme {
-  --color-example: #a6ee8e;
-}
+```html
+<!-- a stop at a ladder step -->
+<div class="bg-aurora-green-400/(--mag-3)"></div>
+
+<!-- a gradient with any stop -->
+<div class="gradient-extinction [--grad-color:var(--color-deep-space-300)]"></div>
 ```
 
 </CodeTabs>
+
+</DocSection>
+
+<DocSection id="source-of-truth" title="Source of truth">
+
+Everything on these pages is read from one file, `src/app/globals.css`, at build time: the `@theme` block holds the stops, `@theme static` holds the ladder, and two `@utility` blocks hold the gradients. Palettes and ladder values are parsed from it. The gradient sample tables are recomputed from their formulas and compared with the CSS, and the build fails if the two disagree.
 
 </DocSection>

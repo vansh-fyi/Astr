@@ -11,6 +11,13 @@ import {
 import { CodeBlock } from "@/components/docs/code-block";
 import { CodeTabs } from "@/components/docs/code-tabs";
 import { DocNote, DocSection } from "@/components/docs/documentation";
+import { CssSource } from "@/components/docs/demos/css-source";
+import { GradientPlayground } from "@/components/docs/demos/gradient-playground";
+import { LadderTable } from "@/components/docs/demos/ladder-table";
+import { OpacityDemo } from "@/components/docs/demos/opacity-demo";
+import { PaletteGrid, PaletteStrip } from "@/components/docs/demos/palette-grid";
+import { SampleTable } from "@/components/docs/demos/sample-table";
+import { StopMatrix } from "@/components/docs/demos/stop-matrix";
 
 function MdxLink({ href = "", children, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement>) {
   if (href.startsWith("/"))
@@ -38,6 +45,14 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     DocSection,
     DocNote,
     CodeTabs,
+    PaletteGrid,
+    PaletteStrip,
+    LadderTable,
+    SampleTable,
+    CssSource,
+    OpacityDemo,
+    StopMatrix,
+    GradientPlayground,
     p: ({ children }) => <p className="docs-description">{children}</p>,
     h3: ({ children }) => <h3>{children}</h3>,
     a: MdxLink,

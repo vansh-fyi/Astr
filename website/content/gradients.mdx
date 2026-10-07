@@ -1,23 +1,76 @@
 export const meta = {
   title: "Gradients",
-  description: "Gradients stub.",
-  sections: [{ id: "overview", title: "Overview" }],
+  description:
+    "Two natural-law gradients, atmospheric extinction and the Moffat profile, built only from opacity ladder steps.",
+  sections: [
+    { id: "shared", title: "Shared rules" },
+    { id: "extinction", title: "Atmospheric extinction" },
+    { id: "moffat", title: "Moffat profile" },
+    { id: "usage", title: "Usage" },
+  ],
 };
 
-<DocSection id="overview" title="Overview">
+<DocSection id="shared" title="Shared rules">
 
-Stub content for Gradients.
+Both gradients take their colour from `--grad-color`, which accepts any colour stop, and their direction from `--grad-dir` where it applies. Every alpha is one of the `--mag-*` steps, and interpolation happens in sRGB so a Flutter gradient renders identically.
 
+A computed alpha is snapped to the nearest step:
 
+$$ n^{*} = \operatorname{clamp}\bigl(\operatorname{round}(-5\log_{10}\alpha),\,0,\,10\bigr) $$
+
+Beyond the last step there is a floor: when $-5\log_{10}\alpha \ge 10.5$ the stop is fully transparent instead of `--mag-10`.
+
+</DocSection>
+
+<DocSection id="extinction" title="Atmospheric extinction">
+
+Light from a star loses brightness as it crosses more atmosphere. The loss in magnitudes is proportional to the relative airmass $X$ minus one, with an extinction coefficient $k$:
+
+$$ \alpha(z) = 10^{-0.4\,k\,(X(z)-1)},\qquad k = 0.2 $$
+
+The airmass for a zenith angle $z$ in degrees comes from the Kasten and Young approximation:
+
+$$ X(z) = \frac{1}{\cos z + 0.50572\,\left(96.07995^{\circ} - z\right)^{-1.6364}} $$
+
+Stops sit at z = 0, 60, 70, 78, 84, 88 and 90 degrees. Each stop's position along the gradient is $p = z / 90^{\circ}$, so the zenith is at 0% and the horizon at 100%.
+
+<GradientPlayground kind="extinction" />
+
+<SampleTable kind="extinction" />
+
+</DocSection>
+
+<DocSection id="moffat" title="Moffat profile">
+
+A point source blurred by the atmosphere spreads into a glow described by the Moffat function of radius $r$ and width $a$:
+
+$$ I(r) = \left(1 + (r/a)^2\right)^{-\beta},\qquad \beta = 3 $$
+
+The gradient reaches full transparency at a radius of four widths:
+
+$$ R = 4a $$
+
+so a stop at position $p$ sits at $r = 4a\,p$, where the position is measured as $p = r / (4a)$.
+
+<GradientPlayground kind="moffat" />
+
+<SampleTable kind="moffat" />
+
+</DocSection>
+
+<DocSection id="usage" title="Usage">
 
 <CodeTabs>
 
-```css
-/* example */
-@theme {
-  --color-example: #a6ee8e;
-}
+```html
+<div class="gradient-extinction [--grad-color:var(--color-aurora-green-400)]"></div>
+
+<div class="gradient-moffat [--grad-color:var(--color-sodium-airglow-400)]"></div>
 ```
+
+<CssSource utility="gradient-extinction" />
+
+<CssSource utility="gradient-moffat" />
 
 </CodeTabs>
 

@@ -1,23 +1,44 @@
 export const meta = {
   title: "Colour stops",
-  description: "Colour stops stub.",
-  sections: [{ id: "overview", title: "Overview" }],
+  description:
+    "Six palettes, eleven steps each: 66 fixed colour stops, parsed from the theme at build time.",
+  sections: [
+    { id: "palettes", title: "Palettes" },
+    { id: "naming", title: "Naming" },
+    { id: "usage", title: "Usage" },
+  ],
 };
 
-<DocSection id="overview" title="Overview">
+<DocSection id="palettes" title="Palettes">
 
-Stub content for Colour stops.
+<PaletteGrid />
 
+<DocNote>Select a swatch to copy its hex value.</DocNote>
 
+</DocSection>
+
+<DocSection id="naming" title="Naming">
+
+Every stop is a theme variable named `--color-{palette}-{step}`. Steps run from 50 (lightest) to 950 (darkest) in eleven increments: 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950.
+
+Tailwind exposes each stop as a utility, for example `bg-space-grey-100` or `text-aurora-green-400`.
+
+<DocNote>The stops are absolute. A stop is never lightened, darkened or tinted. To make a colour fainter, use a step of the opacity ladder.</DocNote>
+
+</DocSection>
+
+<DocSection id="usage" title="Usage">
 
 <CodeTabs>
 
 ```css
-/* example */
-@theme {
-  --color-example: #a6ee8e;
+.surface {
+  background-color: var(--color-deep-space-950);
+  color: var(--color-space-grey-100);
 }
 ```
+
+<CssSource theme="--color-aurora-green-" />
 
 </CodeTabs>
 
