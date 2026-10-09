@@ -1,0 +1,891 @@
+{
+  "spec": "docs/astr_sky_synthesis.md",
+  "version": "1.0",
+  "description": "Test vectors for the Astr sky synthesis model. Numeric tolerances are absolute.",
+  "anchor": {
+    "description": "Published check value from the specsim documentation for the Krisciunas & Schaefer (1991) model: obs zenith 20, moon zenith 70, separation 50, moon_phase 0.25 (phase angle 45), k 0.15 gives 19.855 mag/arcsec^2 (rounded to 3 decimals).",
+    "obs_zenith": 20,
+    "moon_zenith": 70,
+    "separation": 50,
+    "phase_angle": 45,
+    "k_v": 0.15,
+    "v": 19.855,
+    "tolerance": 0.0005
+  },
+  "scattering_airmass": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "zenith": 0,
+        "x": 1.0
+      },
+      {
+        "zenith": 30,
+        "x": 1.1470786693528088
+      },
+      {
+        "zenith": 60,
+        "x": 1.8898223650461357
+      },
+      {
+        "zenith": 89,
+        "x": 4.981824398856556
+      },
+      {
+        "zenith": 90,
+        "x": 4.999999999999998
+      }
+    ]
+  },
+  "phase_angle_from_illumination": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "illumination": 1,
+        "degrees": 0.0
+      },
+      {
+        "illumination": 0.75,
+        "degrees": 59.99999999999999
+      },
+      {
+        "illumination": 0.5,
+        "degrees": 90.0
+      },
+      {
+        "illumination": 0.25,
+        "degrees": 120.00000000000001
+      },
+      {
+        "illumination": 0,
+        "degrees": 180.0
+      }
+    ]
+  },
+  "pressure_ratio": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "elevation_m": 0,
+        "ratio": 1.0
+      },
+      {
+        "elevation_m": 500,
+        "ratio": 0.9421251816300449
+      },
+      {
+        "elevation_m": 2400,
+        "ratio": 0.7463671967658141
+      },
+      {
+        "elevation_m": 4000,
+        "ratio": 0.6083415390482032
+      }
+    ]
+  },
+  "extinction_k_v": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "aod550": 0,
+        "elevation_m": 0,
+        "k": 0.1217
+      },
+      {
+        "aod550": 0.1,
+        "elevation_m": 0,
+        "k": 0.23027000000000003
+      },
+      {
+        "aod550": 0.03,
+        "elevation_m": 2400,
+        "k": 0.12746201269814655
+      },
+      {
+        "aod550": 0.02,
+        "elevation_m": 2400,
+        "k": 0.11660501269814655
+      }
+    ]
+  },
+  "moon_brightness_v": {
+    "tolerance": 1e-09,
+    "below_horizon": {
+      "moon_zenith": 90,
+      "result": null
+    },
+    "cases": [
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 30,
+        "separation": 30,
+        "phase_angle": 0.0,
+        "k_v": 0.15,
+        "v": 18.00803292006097
+      },
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 60,
+        "separation": 60,
+        "phase_angle": 0.0,
+        "k_v": 0.15,
+        "v": 18.834026761285198
+      },
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 30,
+        "separation": 30,
+        "phase_angle": 90.0,
+        "k_v": 0.15,
+        "v": 20.610456071894298
+      },
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 60,
+        "separation": 60,
+        "phase_angle": 143.13010235415598,
+        "k_v": 0.25,
+        "v": 23.916944598457555
+      },
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 85,
+        "separation": 85,
+        "phase_angle": 0.0,
+        "k_v": 0.12,
+        "v": 19.65671815229243
+      }
+    ]
+  },
+  "moon_ratio": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 30,
+        "separation": 30,
+        "phase_angle": 0.0,
+        "k_v": 0.15,
+        "ratio": 39.517260691707925
+      },
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 60,
+        "separation": 60,
+        "phase_angle": 0.0,
+        "k_v": 0.15,
+        "ratio": 18.466700066026984
+      },
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 60,
+        "separation": 60,
+        "phase_angle": 90.0,
+        "k_v": 0.15,
+        "ratio": 1.6804284853242843
+      },
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 60,
+        "separation": 60,
+        "phase_angle": 143.13010235415598,
+        "k_v": 0.25,
+        "ratio": 0.17108902864681907
+      },
+      {
+        "obs_zenith": 0,
+        "moon_zenith": 95,
+        "separation": 95,
+        "phase_angle": 0.0,
+        "k_v": 0.15,
+        "ratio": 0.0
+      }
+    ]
+  },
+  "angular_separation": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "alt1": 90,
+        "az1": 0,
+        "alt2": 0,
+        "az2": 0,
+        "degrees": 90.0
+      },
+      {
+        "alt1": 45,
+        "az1": 10,
+        "alt2": 45,
+        "az2": 10,
+        "degrees": 0.0
+      },
+      {
+        "alt1": 0,
+        "az1": 0,
+        "alt2": 0,
+        "az2": 180,
+        "degrees": 180.0
+      },
+      {
+        "alt1": 30,
+        "az1": 90,
+        "alt2": 60,
+        "az2": 90,
+        "degrees": 30.0
+      }
+    ]
+  },
+  "sqm_effective": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "r_art": 0,
+        "b_moon": 0,
+        "sqm": 22.0
+      },
+      {
+        "r_art": 1,
+        "b_moon": 0,
+        "sqm": 21.247425010840047
+      },
+      {
+        "r_art": 0,
+        "b_moon": 3,
+        "sqm": 20.494850021680094
+      },
+      {
+        "r_art": 0.32,
+        "b_moon": 0.32,
+        "sqm": 21.462890379880754
+      },
+      {
+        "r_art": 41,
+        "b_moon": 0,
+        "sqm": 17.941876774005248
+      }
+    ]
+  },
+  "relative_star_count": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "nelm": 6.6215,
+        "relative": 0.9964569097674081
+      },
+      {
+        "nelm": 5.5,
+        "relative": 0.28849515437481077
+      },
+      {
+        "nelm": 4.5,
+        "relative": 0.09552972401042431
+      },
+      {
+        "nelm": 3.5,
+        "relative": 0.031632864646494216
+      }
+    ]
+  },
+  "sky_state": [
+    {
+      "cloud": 0.1,
+      "r_art": 0.0,
+      "r_eff": 0.0,
+      "state": "milkyWayVisible"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 0.0,
+      "r_eff": 1.27,
+      "state": "milkyWayVisible"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 0.0,
+      "r_eff": 1.28,
+      "state": "starrySkies"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 1.0,
+      "r_eff": 5.11,
+      "state": "starrySkies"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 0.0,
+      "r_eff": 5.12,
+      "state": "planetsVisible"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 0.0,
+      "r_eff": 20.47,
+      "state": "planetsVisible"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 0.0,
+      "r_eff": 20.48,
+      "state": "fewStars"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 30.0,
+      "r_eff": 30.0,
+      "state": "fewStars"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 41.0,
+      "r_eff": 41.0,
+      "state": "tooMuchLight"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 0.0,
+      "r_eff": 100.0,
+      "state": "fewStars"
+    },
+    {
+      "cloud": 0.1,
+      "r_art": 41.0,
+      "r_eff": 100.0,
+      "state": "tooMuchLight"
+    },
+    {
+      "cloud": 0.3,
+      "r_art": 0.0,
+      "r_eff": 0.0,
+      "state": "milkyWayVisible"
+    },
+    {
+      "cloud": 0.31,
+      "r_art": 0.0,
+      "r_eff": 0.0,
+      "state": "starrySkies"
+    },
+    {
+      "cloud": 0.5,
+      "r_art": 0.0,
+      "r_eff": 0.0,
+      "state": "starrySkies"
+    },
+    {
+      "cloud": 0.51,
+      "r_art": 0.0,
+      "r_eff": 0.0,
+      "state": "planetsVisible"
+    },
+    {
+      "cloud": 0.7,
+      "r_art": 0.0,
+      "r_eff": 0.0,
+      "state": "planetsVisible"
+    },
+    {
+      "cloud": 0.71,
+      "r_art": 0.0,
+      "r_eff": 0.0,
+      "state": "cloudy"
+    },
+    {
+      "cloud": 0.9,
+      "r_art": 41.0,
+      "r_eff": 41.0,
+      "state": "cloudy"
+    },
+    {
+      "cloud": 0.6,
+      "r_art": 0.0,
+      "r_eff": 10.0,
+      "state": "planetsVisible"
+    },
+    {
+      "cloud": 0.6,
+      "r_art": 0.0,
+      "r_eff": 40.0,
+      "state": "fewStars"
+    }
+  ],
+  "night_state": {
+    "description": "Each hour is [dark, cloud, r_art, b_moon]. window is [start, end) or null.",
+    "cases": [
+      {
+        "name": "six clear dark hours at a dark site",
+        "hours": [
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ]
+        ],
+        "window": [
+          0,
+          6
+        ],
+        "state": "milkyWayVisible"
+      },
+      {
+        "name": "cloud gap splits the night; the longer clear run wins",
+        "hours": [
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.9,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ]
+        ],
+        "window": [
+          3,
+          6
+        ],
+        "state": "milkyWayVisible"
+      },
+      {
+        "name": "one usable hour is not a window; mean cloud 0.63 caps the state",
+        "hours": [
+          [
+            true,
+            0.9,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.9,
+            0,
+            0
+          ]
+        ],
+        "window": null,
+        "state": "planetsVisible"
+      },
+      {
+        "name": "a thoroughly cloudy night has no window and is cloudy",
+        "hours": [
+          [
+            true,
+            0.9,
+            0,
+            0
+          ],
+          [
+            true,
+            0.9,
+            0,
+            0
+          ],
+          [
+            true,
+            0.9,
+            0,
+            0
+          ],
+          [
+            true,
+            0.9,
+            0,
+            0
+          ]
+        ],
+        "window": null,
+        "state": "cloudy"
+      },
+      {
+        "name": "moon rises during the night at a dark site",
+        "hours": [
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0.3
+          ],
+          [
+            true,
+            0.1,
+            0,
+            3
+          ],
+          [
+            true,
+            0.1,
+            0,
+            15
+          ]
+        ],
+        "window": [
+          0,
+          6
+        ],
+        "state": "starrySkies"
+      },
+      {
+        "name": "no astronomical night",
+        "hours": [
+          [
+            false,
+            0.1,
+            0,
+            0
+          ],
+          [
+            false,
+            0.1,
+            0,
+            0
+          ],
+          [
+            false,
+            0.1,
+            0,
+            0
+          ],
+          [
+            false,
+            0.1,
+            0,
+            0
+          ]
+        ],
+        "window": null,
+        "state": null
+      },
+      {
+        "name": "ties go to the earlier window",
+        "hours": [
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.9,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ]
+        ],
+        "window": [
+          0,
+          2
+        ],
+        "state": "milkyWayVisible"
+      },
+      {
+        "name": "city sky has no usable window but still gets a state",
+        "hours": [
+          [
+            true,
+            0.1,
+            150,
+            0
+          ],
+          [
+            true,
+            0.1,
+            150,
+            0
+          ],
+          [
+            true,
+            0.1,
+            150,
+            0
+          ],
+          [
+            true,
+            0.1,
+            150,
+            0
+          ]
+        ],
+        "window": null,
+        "state": "tooMuchLight"
+      },
+      {
+        "name": "daylight hours are ignored",
+        "hours": [
+          [
+            false,
+            0.1,
+            0,
+            0
+          ],
+          [
+            false,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ],
+          [
+            true,
+            0.1,
+            0,
+            0
+          ]
+        ],
+        "window": [
+          2,
+          5
+        ],
+        "state": "milkyWayVisible"
+      }
+    ]
+  },
+  "instant_state": [
+    {
+      "hour": [
+        true,
+        0.1,
+        0,
+        0
+      ],
+      "state": "milkyWayVisible"
+    },
+    {
+      "hour": [
+        true,
+        0.1,
+        0,
+        15
+      ],
+      "state": "planetsVisible"
+    },
+    {
+      "hour": [
+        false,
+        0.1,
+        0,
+        0
+      ],
+      "state": null
+    },
+    {
+      "hour": [
+        true,
+        0.8,
+        0,
+        0
+      ],
+      "state": "cloudy"
+    }
+  ],
+  "moon_hours": {
+    "cases": [
+      {
+        "dark": [
+          true,
+          true,
+          true,
+          false
+        ],
+        "moon_altitude": [
+          10,
+          -5,
+          0,
+          30
+        ],
+        "up": 1,
+        "down": 2
+      },
+      {
+        "dark": [
+          false,
+          false
+        ],
+        "moon_altitude": [
+          40,
+          40
+        ],
+        "up": 0,
+        "down": 0
+      }
+    ]
+  },
+  "why": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "cloud": 0.1,
+        "r_art": 0.0,
+        "r_eff": 0.0,
+        "primary": "none",
+        "light_loss": 0.0,
+        "moon_loss": 0.0
+      },
+      {
+        "cloud": 0.1,
+        "r_art": 0.0,
+        "r_eff": 20.0,
+        "primary": "moon",
+        "light_loss": 0.0,
+        "moon_loss": 2.090340011199748
+      },
+      {
+        "cloud": 0.1,
+        "r_art": 30.0,
+        "r_eff": 30.0,
+        "primary": "light",
+        "light_loss": 2.4312291949700455,
+        "moon_loss": 0.0
+      },
+      {
+        "cloud": 0.9,
+        "r_art": 0.0,
+        "r_eff": 0.0,
+        "primary": "cloud",
+        "light_loss": 0.0,
+        "moon_loss": 0.0
+      },
+      {
+        "cloud": 0.6,
+        "r_art": 0.0,
+        "r_eff": 0.0,
+        "primary": "cloud",
+        "light_loss": 0.0,
+        "moon_loss": 0.0
+      },
+      {
+        "cloud": 0.1,
+        "r_art": 3.0,
+        "r_eff": 3.5,
+        "primary": "light",
+        "light_loss": 0.8095278226806748,
+        "moon_loss": 0.08047342216383413
+      },
+      {
+        "cloud": 0.1,
+        "r_art": 0.1,
+        "r_eff": 0.1,
+        "primary": "none",
+        "light_loss": 0.04736419149327542,
+        "moon_loss": 0.0
+      },
+      {
+        "cloud": 0.1,
+        "r_art": 60.0,
+        "r_eff": 150.0,
+        "primary": "light",
+        "light_loss": 3.0516198592707937,
+        "moon_loss": 0.8750168659173916
+      }
+    ]
+  }
+}
