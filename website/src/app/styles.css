@@ -1,3 +1,18 @@
 @import "./globals.css";
 @import "./scale.css";
 @import "../components/docs/docs.css";
+
+/*
+ * The app components choose their colour stop at run time (tokens.ts), so Tailwind cannot see the uses and would
+ * drop those stops from the build. Listing every stop they can use keeps them. check-docs.mjs fails if a stop in
+ * tokens.ts is missing here.
+ */
+@layer base {
+  :root {
+    --app-stops-in-use:
+      var(--color-space-grey-50) var(--color-space-grey-300) var(--color-space-grey-500) var(--color-space-grey-950)
+      var(--color-deep-space-50) var(--color-deep-space-200) var(--color-deep-space-300)
+      var(--color-aurora-green-400) var(--color-aurora-pink-400)
+      var(--color-sodium-airglow-400) var(--color-oxygen-airglow-400);
+  }
+}

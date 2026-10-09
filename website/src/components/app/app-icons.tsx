@@ -1,4 +1,5 @@
 import "./app-ui.css";
+import { TONE_STOP, type Tone } from "./tokens";
 
 export type GlyphName = "moon" | "cloud" | "graph" | "search" | "compass" | "layers" | "telescope";
 
@@ -19,14 +20,8 @@ export const Glyph = ({ name }: { name: GlyphName }) => (
   </svg>
 );
 
-export type TileTone = "blue" | "green" | "pink" | "amber" | "red";
-const TONES: Record<TileTone, string> = {
-  blue: "var(--color-deep-space-200)",
-  green: "var(--color-aurora-green-400)",
-  pink: "var(--color-aurora-pink-400)",
-  amber: "var(--color-sodium-airglow-400)",
-  red: "var(--color-oxygen-airglow-400)",
-};
+export type TileTone = Tone;
+const toneVar = (tone: Tone): string => `var(--color-${TONE_STOP[tone]})`;
 
 /** Glass icon tile. Pass `pressed` for a toggle; `label` is the accessible name. */
 export function AppIconTile({
@@ -48,7 +43,7 @@ export function AppIconTile({
     <button
       type="button"
       className={`app-ui app-tile${size ? ` is-${size}` : ""}`}
-      style={{ ["--tone" as string]: TONES[tone] }}
+      style={{ ["--tone" as string]: toneVar(tone) }}
       aria-label={label}
       aria-pressed={pressed}
       disabled={disabled}
@@ -72,13 +67,13 @@ export function AppButton({
   glyph?: GlyphName;
   tone?: TileTone;
   variant?: ButtonVariant;
-  size?: "sm" | "lg";
+  size?: "sm";
   disabled?: boolean;
   children: string;
 }) {
   const cls = ["app-ui app-button", variant !== "filled" && `is-${variant}`, size && `is-${size}`].filter(Boolean).join(" ");
   return (
-    <button type="button" className={cls} style={{ ["--tone" as string]: TONES[tone] }} disabled={disabled}>
+    <button type="button" className={cls} style={{ ["--tone" as string]: toneVar(tone) }} disabled={disabled}>
       {glyph && <Glyph name={glyph} />}
       {children}
     </button>

@@ -4,7 +4,7 @@ import { useId, useState, type ReactNode } from "react";
 import { CodeBlock } from "../docs/code-block";
 import { AppButton, AppIconTile, type GlyphName, type TileTone } from "./app-icons";
 import { AppCloudCoverGraph, AppConditionsGraph } from "./app-graphs";
-import { AppObjectGraph, OBJECT_COLORS } from "./app-object-graph";
+import { AppObjectGraph } from "./app-object-graph";
 import { AppStage, AppCloudBar, AppConditionsCard, AppMoonCard, AppSkyState, AppVisibilityCard, type SkyStateKey, moonPhase } from "./app-widgets";
 
 type Opt = { value: string; label?: string };
@@ -62,19 +62,19 @@ const CONFIGS: Record<string, Config> = {
     controls: [
       { kind: "segment", key: "variant", label: "Variant", options: opts("filled", "glass", "outline") },
       { kind: "segment", key: "tone", label: "Tone", options: TONES },
-      { kind: "segment", key: "size", label: "Size", options: [{ value: "sm", label: "Small" }, { value: "md", label: "Medium" }, { value: "lg", label: "Large" }] },
+      { kind: "segment", key: "size", label: "Size", options: [{ value: "md", label: "Medium" }, { value: "sm", label: "Small" }] },
       { kind: "toggle", key: "icon", label: "Icon" },
       { kind: "toggle", key: "disabled", label: "Disabled" },
     ],
     initial: { variant: "filled", tone: "blue", size: "md", icon: true, disabled: false },
     preview: (v) => (
-      <AppButton glyph={v.icon ? "compass" : undefined} tone={tone(v)} variant={v.variant as "filled"} size={v.size === "md" ? undefined : (v.size as "sm" | "lg")} disabled={Boolean(v.disabled)}>
+      <AppButton glyph={v.icon ? "compass" : undefined} tone={tone(v)} variant={v.variant as "filled"} size={v.size === "sm" ? "sm" : undefined} disabled={Boolean(v.disabled)}>
         Explore
       </AppButton>
     ),
     react: (v) => `<AppButton${attrs([["glyph", v.icon ? "compass" : "", ""], ["tone", v.tone, "blue"], ["variant", v.variant, "filled"], ["size", v.size, "md"], ["disabled", v.disabled]])}>Explore</AppButton>`,
     flutter: (v) =>
-      `AstrGlassButton(\n  label: 'Explore',\n${v.icon ? "  icon: Icons.explore,\n" : ""}${v.tone !== "blue" ? `  tone: AstrTone.${v.tone},\n` : ""}${v.variant !== "filled" ? `  variant: AstrButtonVariant.${v.variant},\n` : ""}  onPressed: ${v.disabled ? "null" : "() {}"},\n)${v.size !== "md" ? `\n// Height ${v.size === "sm" ? 32 : 54}: wrap in SizedBox(height: ${v.size === "sm" ? 32 : 54}).` : ""}`,
+      `AstrGlassButton(\n  label: 'Explore',\n${v.icon ? "  icon: Icons.explore,\n" : ""}${v.tone !== "blue" ? `  tone: AstrTone.${v.tone},\n` : ""}${v.variant !== "filled" ? `  variant: AstrButtonVariant.${v.variant},\n` : ""}${v.size === "sm" ? "  compact: true,\n" : ""}  onPressed: ${v.disabled ? "null" : "() {}"},\n)`,
   },
   "cloud-bar": {
     controls: [
@@ -144,17 +144,17 @@ const CONFIGS: Record<string, Config> = {
     controls: [
       { kind: "segment", key: "variant", label: "Variant", options: [{ value: "visibility", label: "Visibility" }, { value: "altitude", label: "Altitude" }] },
       { kind: "segment", key: "object", label: "Object", options: [{ value: "high", label: "High object" }, { value: "low", label: "Low object" }, { value: "late", label: "Late riser" }] },
-      { kind: "segment", key: "color", label: "Highlight", options: opts("blue", "orange", "emerald", "pink") },
+      { kind: "segment", key: "tone", label: "Highlight", options: TONES },
       { kind: "toggle", key: "horizon", label: "Horizon view" },
     ],
-    initial: { variant: "visibility", object: "high", color: "blue", horizon: false },
+    initial: { variant: "visibility", object: "high", tone: "blue", horizon: false },
     column: true,
-    preview: (v) => <AppObjectGraph variant={v.variant as "visibility"} objectId={String(v.object)} color={OBJECT_COLORS[String(v.color)]} horizon={Boolean(v.horizon)} />,
-    react: (v) => `<AppObjectGraph${attrs([["variant", v.variant, "visibility"], ["objectId", v.object, "high"], ["color", OBJECT_COLORS[String(v.color)], "#3b82f6"], ["horizon", v.horizon]])} />`,
+    preview: (v) => <AppObjectGraph variant={v.variant as "visibility"} objectId={String(v.object)} tone={tone(v)} horizon={Boolean(v.horizon)} />,
+    react: (v) => `<AppObjectGraph${attrs([["variant", v.variant, "visibility"], ["objectId", v.object, "high"], ["tone", v.tone, "blue"], ["horizon", v.horizon]])} />`,
     flutter: (v) =>
       v.variant === "visibility"
-        ? `VisibilityGraphWidget(\n  objectId: '${v.object}',\n${v.color !== "blue" ? `  highlightColor: Color(0xFF${OBJECT_COLORS[String(v.color)].slice(1).toUpperCase()}),\n` : ""})${v.horizon ? "\n// Horizon view: proposed, not in the app yet." : ""}`
-        : `AltitudeGraph(\n  themeColor: Color(0xFF${OBJECT_COLORS[String(v.color)].slice(1).toUpperCase()}),\n)`,
+        ? `VisibilityGraphWidget(\n  objectId: '${v.object}',\n${v.tone !== "blue" ? `  highlightColor: AstrTone.${v.tone}.color,\n` : ""})${v.horizon ? "\n// Horizon view: proposed, not in the app yet." : ""}`
+        : `AltitudeGraph(\n  themeColor: AstrTone.${v.tone}.color,\n)`,
   },
   "cloud-cover-graph": {
     controls: [{ kind: "segment", key: "night", label: "Forecast", options: [{ value: "night", label: "Night" }, { value: "overcast", label: "Overcast" }, { value: "clear", label: "Clear" }] }],

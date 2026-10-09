@@ -48,7 +48,7 @@ export const meta = {
 
 <ReactExcerpt file="src/components/app/app-icons.tsx" symbols={["AppButton"]} />
 
-<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-button", ".app-button svg", ".app-button:hover", ".app-button.is-glass", ".app-button.is-outline", ".app-button.is-sm", ".app-button.is-lg"]} />
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-button", ".app-button svg", ".app-button:hover", ".app-button.is-glass", ".app-button.is-outline", ".app-button.is-sm"]} />
 </CodeTabs>
 
 <DocNote>There is no button in the app yet. The Flutter tab is the proposed implementation, built from <code>AstrColors</code> and <code>Mag</code>.</DocNote>
@@ -90,10 +90,10 @@ export const meta = {
   ],
   [
     "size",
-    "none",
-    "sm, lg",
-    "44 tall",
-    "Height."
+    "compact",
+    "sm / boolean",
+    "55 tall",
+    "55 is the touch target; sm is 34."
   ],
   [
     "disabled",
@@ -107,40 +107,58 @@ export const meta = {
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
-    "Radius",
-    "999 (pill)",
-    "BorderRadius.circular(999)",
-    "pill"
-  ],
-  [
     "Height",
-    "44",
-    "44",
-    "44"
+    "--spacing-f55 (touch target), --spacing-f34 compact",
+    "AstrSize.control, AstrSize.controlCompact",
+    "Explore button 27"
   ],
   [
-    "Fill",
-    "tone, lightened 18% at the top",
-    "Color.lerp(tone, white, 0.18)",
-    "gradient"
+    "Shape",
+    "--radius-full",
+    "BorderRadius.circular(\u2026) pill",
+    "kExploreButtonRadius 8"
+  ],
+  [
+    "Padding",
+    "0 --spacing-f21, compact f13",
+    "AstrSpace.f21, f13",
+    "none"
+  ],
+  [
+    "Type",
+    "--text-s0 w700, compact --text-s-1",
+    "AstrType.s0, sNeg1",
+    "labelMd 12 w500"
+  ],
+  [
+    "Filled fill",
+    "tone, lightened by --color-space-grey-50 at --mag-3",
+    "Color.alphaBlend(text, Mag.m3)",
+    "AppColors.accent #448AFF"
   ],
   [
     "Text on fill",
-    "#0C0F11 bold",
-    "Color(0xFF0C0F11)",
-    "14 px, 700"
+    "--color-space-grey-950",
+    "_ink",
+    "textPrimary on accent"
   ],
   [
-    "Glow",
-    "tone at 40% under the button",
-    "BoxShadow(alpha: Mag.m2)",
-    "Mag 2"
+    "Glyph",
+    "--spacing-f21",
+    "AstrSize.icon",
+    "none"
+  ],
+  [
+    "Disabled",
+    "opacity --mag-2",
+    "Mag.m2",
+    "none"
   ]
 ]}
 />

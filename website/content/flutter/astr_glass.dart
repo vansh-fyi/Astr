@@ -3,7 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'astr_colors.dart';
+import 'astr_layout.dart';
 import 'astr_opacity.dart';
+import 'astr_spacing.dart';
+import 'astr_type.dart';
 
 /// The five accent tones for glass tiles and buttons. Each is a stop from
 /// [AstrColors], so a tone can never drift from the colour system.
@@ -23,17 +26,20 @@ enum AstrTone {
       };
 }
 
-/// Tile edge lengths in logical pixels. The corner radius is 28% of the edge.
+/// Tile edge lengths: the Fibonacci steps 34, 55 and 89. The corner radius is
+/// the golden minor part of the edge (0.382), which lands on the next
+/// Fibonacci radius down: 13, 21 and 34.
 enum AstrTileSize {
-  sm(44),
-  md(72),
-  lg(96);
+  sm(AstrSpace.f34),
+  md(AstrSpace.f55),
+  lg(AstrSpace.f89);
 
   const AstrTileSize(this.edge);
   final double edge;
 }
 
-const Color _kInk = Color(0xFF0C0F11);
+/// Text and glyphs on a filled tone.
+final Color _ink = AstrColors.spaceGrey[950]!;
 
 /// A tinted glass square holding one glyph, with a bloom of its tone along the
 /// bottom edge. When [selected] the tile fills with the tone.
@@ -60,15 +66,14 @@ class AstrGlassTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color c = tone.color;
-    final BorderRadius radius = BorderRadius.circular(size.edge * 0.28);
-    final Color glyph = selected ? _kInk : c;
+    final BorderRadius radius = BorderRadius.circular(size.edge * AstrLayout.minor);
 
     return Semantics(
       button: true,
       selected: selected,
       label: label,
       child: Opacity(
-        opacity: onPressed == null ? 0.4 : 1,
+        opacity: onPressed == null ? Mag.m2 : 1,
         child: Material(
           color: Colors.transparent,
           child: Ink(
@@ -76,7 +81,7 @@ class AstrGlassTile extends StatelessWidget {
             height: size.edge,
             decoration: BoxDecoration(
               borderRadius: radius,
-              border: Border.all(color: c.withValues(alpha: 0.35)),
+              border: Border.all(color: c.withValues(alpha: Mag.m3)),
               color: selected ? c : null,
               gradient: selected
                   ? null
@@ -84,16 +89,16 @@ class AstrGlassTile extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: <Color>[
-                        Color.alphaBlend(c.withValues(alpha: 0.22), _kInk),
-                        Color.alphaBlend(c.withValues(alpha: 0.08), _kInk),
+                        Color.alphaBlend(c.withValues(alpha: Mag.m4), _ink),
+                        Color.alphaBlend(c.withValues(alpha: Mag.m6), _ink),
                       ],
                     ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: c.withValues(alpha: selected ? 1 : Mag.m2),
-                  blurRadius: 30,
-                  spreadRadius: -12,
-                  offset: const Offset(0, 10),
+                  color: c.withValues(alpha: selected ? Mag.m0 : Mag.m1),
+                  blurRadius: AstrSpace.f34,
+                  spreadRadius: -AstrSpace.f13,
+                  offset: const Offset(0, AstrSpace.f13),
                 ),
               ],
             ),
@@ -102,11 +107,11 @@ class AstrGlassTile extends StatelessWidget {
               onTap: onPressed,
               child: Icon(
                 icon,
-                size: size.edge * 0.44,
-                color: glyph,
+                size: size.edge * AstrLayout.minor,
+                color: selected ? _ink : c,
                 shadows: selected
                     ? null
-                    : <Shadow>[Shadow(color: c.withValues(alpha: 0.7), blurRadius: 10)],
+                    : <Shadow>[Shadow(color: c.withValues(alpha: Mag.m1), blurRadius: AstrSpace.f8)],
               ),
             ),
           ),
@@ -119,8 +124,10 @@ class AstrGlassTile extends StatelessWidget {
 /// Visual weight of an [AstrGlassButton]. Filled is the default.
 enum AstrButtonVariant { filled, glass, outline }
 
-/// A pill button. Filled uses the tone as its fill with dark text; glass tints
-/// the surface; outline draws only the edge.
+/// A pill button, [AstrSize.control] tall (55, the touch target), or
+/// [AstrSize.controlCompact] (34).
+/// Filled uses the tone as its fill with dark text; glass tints the surface;
+/// outline draws only the edge.
 class AstrGlassButton extends StatelessWidget {
   const AstrGlassButton({
     super.key,
@@ -128,6 +135,7 @@ class AstrGlassButton extends StatelessWidget {
     this.icon,
     this.tone = AstrTone.blue,
     this.variant = AstrButtonVariant.filled,
+    this.compact = false,
     this.onPressed,
   });
 
@@ -135,31 +143,33 @@ class AstrGlassButton extends StatelessWidget {
   final IconData? icon;
   final AstrTone tone;
   final AstrButtonVariant variant;
+  final bool compact;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     final Color c = tone.color;
+    final Color text = AstrColors.spaceGrey[50]!;
     final bool filled = variant == AstrButtonVariant.filled;
     final Color fg = switch (variant) {
-      AstrButtonVariant.filled => _kInk,
-      AstrButtonVariant.glass => AstrColors.spaceGrey[50]!,
+      AstrButtonVariant.filled => _ink,
+      AstrButtonVariant.glass => text,
       AstrButtonVariant.outline => c,
     };
-    final BorderRadius radius = BorderRadius.circular(999);
+    final BorderRadius radius = BorderRadius.circular(AstrRadius.f34 * 2);
 
     return Opacity(
-      opacity: onPressed == null ? 0.4 : 1,
+      opacity: onPressed == null ? Mag.m2 : 1,
       child: Material(
         color: Colors.transparent,
         child: Ink(
-          height: 44,
+          height: compact ? AstrSize.controlCompact : AstrSize.control,
           decoration: BoxDecoration(
             borderRadius: radius,
             border: Border.all(
               color: switch (variant) {
-                AstrButtonVariant.filled => Color.lerp(c, Colors.white, 0.3)!,
-                AstrButtonVariant.glass => c.withValues(alpha: 0.45),
+                AstrButtonVariant.filled => Color.alphaBlend(text.withValues(alpha: Mag.m3), c),
+                AstrButtonVariant.glass => c.withValues(alpha: Mag.m2),
                 AstrButtonVariant.outline => c,
               },
             ),
@@ -167,39 +177,39 @@ class AstrGlassButton extends StatelessWidget {
               AstrButtonVariant.filled => LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: <Color>[Color.lerp(c, Colors.white, 0.18)!, c],
+                  colors: <Color>[Color.alphaBlend(text.withValues(alpha: Mag.m3), c), c],
                 ),
               AstrButtonVariant.glass => LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: <Color>[
-                    Color.alphaBlend(c.withValues(alpha: 0.3), _kInk),
-                    Color.alphaBlend(c.withValues(alpha: 0.14), _kInk),
+                    Color.alphaBlend(c.withValues(alpha: Mag.m3), _ink),
+                    Color.alphaBlend(c.withValues(alpha: Mag.m5), _ink),
                   ],
                 ),
               AstrButtonVariant.outline => null,
             },
             boxShadow: filled
-                ? <BoxShadow>[BoxShadow(color: c.withValues(alpha: Mag.m2), blurRadius: 24, spreadRadius: -10, offset: const Offset(0, 8))]
+                ? <BoxShadow>[BoxShadow(color: c, blurRadius: AstrSpace.f21, spreadRadius: -AstrSpace.f8, offset: const Offset(0, AstrSpace.f8))]
                 : null,
           ),
           child: InkWell(
             borderRadius: radius,
             onTap: onPressed,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: compact ? AstrSpace.f13 : AstrSpace.f21),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   if (icon != null) ...<Widget>[
-                    Icon(icon, size: 18, color: variant == AstrButtonVariant.glass ? c : fg),
-                    const SizedBox(width: 8),
+                    Icon(icon, size: AstrSize.icon, color: variant == AstrButtonVariant.glass ? c : fg),
+                    const SizedBox(width: AstrSpace.f8),
                   ],
                   Text(
                     label,
                     style: TextStyle(
                       fontFamily: 'Satoshi',
-                      fontSize: 14,
+                      fontSize: compact ? AstrType.sNeg1 : AstrType.s0,
                       fontWeight: filled ? FontWeight.w700 : FontWeight.w500,
                       color: fg,
                     ),
@@ -214,9 +224,9 @@ class AstrGlassButton extends StatelessWidget {
   }
 }
 
-/// The glass surface for cards: a sheen over the overlay colour and a hairline
-/// edge. Cards do not glow; glow belongs to buttons and tiles.
-/// Mini cards are 164 by 154 and the conditions card 345 by 242.
+/// The glass surface for cards: a sheen over the surface and a hairline edge.
+/// Cards do not glow; glow belongs to buttons and tiles. Mini cards are
+/// [AstrSpace.f144] wide and 144 + 21 tall.
 class AstrGlassCard extends StatelessWidget {
   const AstrGlassCard({
     super.key,
@@ -231,25 +241,28 @@ class AstrGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BorderRadius radius = BorderRadius.circular(16);
+    final Color text = AstrColors.spaceGrey[50]!;
+    final BorderRadius radius = BorderRadius.circular(AstrRadius.f21);
 
     return RepaintBoundary(
       child: ClipRRect(
         borderRadius: radius,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: ImageFilter.blur(sigmaX: AstrSpace.f13, sigmaY: AstrSpace.f13),
           child: Container(
             width: width,
             height: height,
+            padding: const EdgeInsets.all(AstrSpace.f13),
             decoration: BoxDecoration(
               borderRadius: radius,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              border: Border.all(color: text.withValues(alpha: Mag.m5)),
+              color: _ink.withValues(alpha: Mag.m1),
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: <Color>[
-                  Colors.white.withValues(alpha: 0.09),
-                  Colors.white.withValues(alpha: 0.02),
+                  text.withValues(alpha: Mag.m5),
+                  text.withValues(alpha: Mag.m8),
                 ],
               ),
             ),

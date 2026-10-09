@@ -4,12 +4,15 @@ import { useState, type PointerEvent } from "react";
 import "./app-ui.css";
 import { useElementWidth } from "../docs/viz/use-width";
 import { CLOUD_HOURLY, LATITUDE, MOON_RISE_MINUTES, NIGHT_END, NIGHT_START, OBJECTS, moonAltitude, objectAltitude } from "@/lib/viz-data";
+import { F, GRAPH, T, TONE_STOP, stop, type Tone } from "./tokens";
+import { legendColor } from "./app-graphs";
 
 const NOW = 20 * 60 + 15;
 const SPAN = NIGHT_END - NIGHT_START;
 const STEP = 15;
 const TIMES = Array.from({ length: SPAN / STEP + 1 }, (_, i) => NIGHT_START + i * STEP);
-const NOW_TOP = 80;
+const NOW_TOP = F.f89 - F.f8;
+const HEIGHT = 233;
 
 type Pt = readonly [number, number];
 
@@ -44,46 +47,46 @@ function azimuth(dec: number, minutes: number, transit: number): number {
 const COMPASS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 const compass = (az: number): string => COMPASS[Math.round(az / 45) % 8];
 
-export const OBJECT_COLORS: Record<string, string> = { blue: "#3b82f6", orange: "#f97316", emerald: "#10b981", pink: "#ec4899" };
-
 /** Where the object is on the horizon: altitude above the line, azimuth along it, east to west. */
 function HorizonView({ objectId, minutes, color }: { objectId: string; minutes: number; color: string }) {
   const [ref, w] = useElementWidth<HTMLDivElement>(560);
   const o = OBJECTS.find((x) => x.id === objectId) ?? OBJECTS[0];
   const alt = objectAltitude(o, minutes);
   const az = azimuth(o.dec, minutes, o.transit);
-  const H = 110;
-  const gy = H - 24;
-  const x = ((Math.min(300, Math.max(60, az)) - 60) / 240) * (w - 32) + 16;
-  const y = gy - (Math.max(0, alt) / 90) * (gy - 14);
+  const H = F.f144;
+  const gy = H - F.f21;
+  const pad = F.f21;
+  const px = (a: number): number => ((Math.min(300, Math.max(60, a)) - 60) / 240) * (w - 2 * pad) + pad;
+  const x = px(az);
+  const y = gy - (Math.max(0, alt) / 90) * (gy - F.f21);
   return (
-    <div ref={ref} className="app-og-horizon">
+    <div ref={ref} className="app-ui app-og-horizon">
       <svg viewBox={`0 0 ${w} ${H}`} height={H} role="img" aria-label={`${o.name} at ${Math.round(alt)} degrees altitude, ${compass(az)}`}>
         <defs>
           <linearGradient id="og-ground" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#fff" stopOpacity="0.08" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+            <stop offset="0" stopColor={stop(GRAPH.ink, 5)} />
+            <stop offset="1" stopColor={stop(GRAPH.ink, 10)} />
           </linearGradient>
-          <filter id="og-glow"><feGaussianBlur stdDeviation="4" /></filter>
+          <filter id="og-glow"><feGaussianBlur stdDeviation={F.f3 + F.f1} /></filter>
         </defs>
         <rect x={0} y={gy} width={w} height={H - gy} fill="url(#og-ground)" />
-        <line x1={0} x2={w} y1={gy} y2={gy} stroke="#fff" strokeOpacity={0.25} />
+        <line x1={0} x2={w} y1={gy} y2={gy} stroke={stop(GRAPH.ink, 3)} />
         {[30, 60].map((a) => (
-          <line key={a} x1={0} x2={w} y1={gy - (a / 90) * (gy - 14)} y2={gy - (a / 90) * (gy - 14)} stroke="#fff" strokeOpacity={0.06} strokeDasharray="3 5" />
+          <line key={a} x1={0} x2={w} y1={gy - (a / 90) * (gy - F.f21)} y2={gy - (a / 90) * (gy - F.f21)} stroke={stop(GRAPH.ink, 6)} strokeDasharray={`${F.f3} ${F.f5}`} />
         ))}
         {[["E", 90], ["S", 180], ["W", 270]].map(([l, a]) => (
-          <text key={l} x={((Number(a) - 60) / 240) * (w - 32) + 16} y={H - 6} fontSize={10} fill="#fff" fillOpacity={0.4} textAnchor="middle">{l}</text>
+          <text key={l} x={px(Number(a))} y={H - F.f5} fontSize={T.s2n} fill={stop(GRAPH.ink, 2)} textAnchor="middle">{l}</text>
         ))}
-        {alt > 0 && <line x1={x} x2={x} y1={y} y2={gy} stroke={color} strokeOpacity={0.4} strokeDasharray="2 3" />}
+        {alt > 0 && <line x1={x} x2={x} y1={y} y2={gy} stroke={color} strokeDasharray={`${F.f2} ${F.f3}`} />}
         {alt > 0 ? (
           <g>
-            <circle cx={x} cy={y} r={11} fill={color} fillOpacity={0.45} filter="url(#og-glow)" />
-            <circle cx={x} cy={y} r={5} fill="#fff" stroke={color} strokeWidth={3} />
+            <circle cx={x} cy={y} r={F.f13} fill={color} filter="url(#og-glow)" />
+            <circle cx={x} cy={y} r={F.f5} fill={stop(GRAPH.ink)} stroke={color} strokeWidth={F.f3} />
           </g>
         ) : (
-          <text x={w / 2} y={gy - 12} fontSize={11} fill="#fff" fillOpacity={0.5} textAnchor="middle">Below the horizon</text>
+          <text x={w / 2} y={gy - F.f13} fontSize={T.s1n} fill={stop(GRAPH.ink, 2)} textAnchor="middle">Below the horizon</text>
         )}
-        <text x={16} y={14} fontSize={10} fill="#fff" fillOpacity={0.5} letterSpacing={0.6}>{clock(minutes)} · {alt > 0 ? `${alt.toFixed(0)}° ${compass(az)}` : "set"}</text>
+        <text x={pad} y={F.f21} fontSize={T.s2n} fill={stop(GRAPH.ink, 2)}>{clock(minutes)} · {alt > 0 ? `${alt.toFixed(0)}° ${compass(az)}` : "set"}</text>
       </svg>
     </div>
   );
@@ -92,30 +95,30 @@ function HorizonView({ objectId, minutes, color }: { objectId: string; minutes: 
 /**
  * The app's two object graphs. "visibility" is VisibilityGraphWidget: cloud area, the moon area, the object curve
  * with glow, the current position dot, NOW, moon rise, the peak dot and a scrubber with a tooltip. "altitude" is
- * the simpler AltitudeGraph: one curve over the night with a faint cloud backdrop, NOW dot and scrubber.
- * `horizon` adds a strip that shows where the object sits above the horizon line at the scrubbed time.
+ * the simpler AltitudeGraph: one curve over the night with a faint cloud backdrop, a NOW dot and a scrubber.
+ * `horizon` adds a strip showing where the object sits above the horizon line at the scrubbed time.
  */
 export function AppObjectGraph({
   variant = "visibility",
   objectId = "high",
-  color = "#3b82f6",
+  tone = "blue",
   horizon = false,
 }: {
   variant?: "visibility" | "altitude";
   objectId?: string;
-  color?: string;
+  tone?: Tone;
   horizon?: boolean;
 }) {
   const [ref, w] = useElementWidth<HTMLDivElement>(560);
   const [scrub, setScrub] = useState<number | null>(null);
   const o = OBJECTS.find((x) => x.id === objectId) ?? OBJECTS[0];
   const full = variant === "visibility";
-  const H = 200;
-  const plotH = full ? H : H - 30;
+  const color = stop(TONE_STOP[tone]);
+  const plotH = full ? HEIGHT : HEIGHT - F.f34;
   const x = (m: number): number => ((m - NIGHT_START) / SPAN) * w;
   const objY = (a: number): number => plotH - (Math.max(0, a) / 90) * plotH * 0.7;
   const alt = (m: number): number => (full ? objectAltitude(o, m) : Math.sin(((m - NIGHT_START) / SPAN) * Math.PI) * 80);
-  const altY = (m: number): number => (full ? objY(alt(m)) : plotH - (Math.sin(((m - NIGHT_START) / SPAN) * Math.PI)) * plotH * 0.8);
+  const altY = (m: number): number => (full ? objY(alt(m)) : plotH - Math.sin(((m - NIGHT_START) / SPAN) * Math.PI) * plotH * 0.8);
 
   const cloudPts: Pt[] = CLOUD_HOURLY.map((c, i) => [x(NIGHT_START + i * 60), plotH - (c / 100) * plotH] as const);
   const cloudArea = `M${cloudPts[0][0]} ${plotH} L${cloudPts[0][0]} ${cloudPts[0][1]}${smooth(cloudPts).replace(/^M\S+ \S+/, "")} L${cloudPts.at(-1)![0]} ${plotH} L${w} ${plotH} Z`;
@@ -125,6 +128,7 @@ export function AppObjectGraph({
   const nowX = x(NOW);
   const riseX = x(MOON_RISE_MINUTES);
   const mm = scrub === null ? NOW : NIGHT_START + scrub * SPAN;
+  const riseY = plotH * 0.75;
 
   function move(e: PointerEvent<SVGSVGElement>): void {
     const box = e.currentTarget.getBoundingClientRect();
@@ -137,77 +141,76 @@ export function AppObjectGraph({
         <div className="app-og-head">
           <strong>Visibility</strong>
           <span className="app-legend" style={{ margin: 0 }}>
-            <span><i style={{ background: color }} />OBJECT</span>
-            <span><i style={{ background: "#4f46e5" }} />MOON</span>
-            <span><i style={{ background: "rgb(255 255 255 / 0.24)" }} />CLOUD</span>
+            <span><i style={{ background: legendColor("object", color) }} />OBJECT</span>
+            <span><i style={{ background: legendColor("moon") }} />MOON</span>
+            <span><i style={{ background: legendColor("cloud") }} />CLOUD</span>
           </span>
         </div>
       )}
-      <div ref={ref} className="app-og-plot" style={{ height: H, background: full ? `linear-gradient(to bottom, ${color}1a, transparent)` : undefined }}>
-        <svg viewBox={`0 0 ${w} ${H}`} height={H} role="img" aria-label={`${o.name} visibility over the night`} onPointerMove={move} onPointerDown={move} onPointerLeave={() => setScrub(null)}>
+      <div ref={ref} className="app-og-plot" style={{ height: HEIGHT, backgroundImage: full ? `linear-gradient(to bottom, color-mix(in srgb, ${color} var(--mag-5), transparent), transparent)` : undefined }}>
+        <svg viewBox={`0 0 ${w} ${HEIGHT}`} height={HEIGHT} role="img" aria-label={`${o.name} visibility over the night`} onPointerMove={move} onPointerDown={move} onPointerLeave={() => setScrub(null)}>
           <defs>
-            <filter id="og-curve-glow" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation="3" /></filter>
-            <filter id="og-now-glow" x="-200%" y="-10%" width="500%" height="120%"><feGaussianBlur stdDeviation="3" /></filter>
+            <filter id="og-curve-glow" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation={F.f3} /></filter>
             <linearGradient id="og-cloud" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stopColor="#fff" stopOpacity="0.25" />
-              <stop offset="1" stopColor="#fff" stopOpacity="0.05" />
+              <stop offset="0" stopColor={stop(GRAPH.cloud, 3)} />
+              <stop offset="1" stopColor={stop(GRAPH.cloud, 6)} />
             </linearGradient>
             <linearGradient id="og-now" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1={NOW_TOP} y2={plotH}>
-              <stop offset="0" stopColor="#f97316" stopOpacity="0.9" />
-              <stop offset="1" stopColor="#f97316" stopOpacity="0" />
+              <stop offset="0" stopColor={stop(GRAPH.now, 1)} />
+              <stop offset="1" stopColor={stop(GRAPH.now, 10)} />
             </linearGradient>
           </defs>
           {full ? (
             <>
               <path d={cloudArea} fill="url(#og-cloud)" />
-              <path d={smooth(cloudPts)} fill="none" stroke="#fff" strokeOpacity={0.3} strokeWidth={1.5} />
-              <path d={`M0 ${plotH} L${moonLine.slice(1)} L${w} ${plotH} Z`} fill="#1e1b4b" fillOpacity={0.5} />
-              <path d={moonLine} fill="none" stroke="#6366f1" strokeOpacity={0.5} strokeWidth={1.5} />
-              <path d={objLine} fill="none" stroke={color} strokeOpacity={0.4} strokeWidth={6} filter="url(#og-curve-glow)" />
-              <path d={objLine} fill="none" stroke={color} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+              <path d={smooth(cloudPts)} fill="none" stroke={stop(GRAPH.cloud, 3)} strokeWidth={F.f2} />
+              <path d={`M0 ${plotH} L${moonLine.slice(1)} L${w} ${plotH} Z`} fill={stop(GRAPH.moon, 4)} />
+              <path d={moonLine} fill="none" stroke={stop(GRAPH.moonLine, 2)} strokeWidth={F.f2} />
+              <path d={objLine} fill="none" stroke={color} strokeWidth={F.f5} filter="url(#og-curve-glow)" />
+              <path d={objLine} fill="none" stroke={color} strokeWidth={F.f3} strokeLinecap="round" strokeLinejoin="round" />
               <g>
-                <circle cx={nowX} cy={objY(alt(NOW))} r={9} fill={color} fillOpacity={0.3} filter="url(#og-curve-glow)" />
-                <circle cx={nowX} cy={objY(alt(NOW))} r={5} fill="#fff" stroke={color} strokeWidth={3} />
+                <circle cx={nowX} cy={objY(alt(NOW))} r={F.f8} fill={color} filter="url(#og-curve-glow)" />
+                <circle cx={nowX} cy={objY(alt(NOW))} r={F.f5} fill={stop(GRAPH.ink)} stroke={color} strokeWidth={F.f3} />
               </g>
-              <line x1={riseX} x2={riseX} y1={plotH} y2={plotH * 0.75 + 10} stroke="#6366f1" strokeOpacity={0.5} />
-              <circle cx={riseX} cy={plotH * 0.75 + 5} r={6} fill="#a855f7" fillOpacity={0.3} />
-              <circle cx={riseX} cy={plotH * 0.75 + 5} r={3} fill="#a855f7" />
-              <rect x={riseX + 8} y={plotH * 0.75} width={74} height={17} rx={4} fill="#312e81" fillOpacity={0.5} stroke="#6366f1" strokeOpacity={0.3} />
-              <text x={riseX + 12} y={plotH * 0.75 + 12} fontSize={9} fontWeight={600} letterSpacing={1.5} fill="#a5b4fc">MOON RISE</text>
-              <rect x={nowX - 2} y={NOW_TOP} width={4} height={plotH - NOW_TOP} fill="url(#og-now)" fillOpacity={0.6} filter="url(#og-curve-glow)" />
-              <rect x={nowX - 0.75} y={NOW_TOP} width={1.5} height={plotH - NOW_TOP} fill="url(#og-now)" />
-              <circle className="app-pulse" cx={nowX} cy={NOW_TOP} r={8} fill="#f97316" fillOpacity={0.4} />
-              <circle cx={nowX} cy={NOW_TOP} r={3} fill="#fb923c" />
-              <rect x={nowX + 8} y={NOW_TOP - 7} width={30} height={15} rx={4} fill="#f97316" fillOpacity={0.1} stroke="#f97316" strokeOpacity={0.2} />
-              <text x={nowX + 12} y={NOW_TOP + 4} fontSize={9} fontWeight={700} fill="#fb923c">NOW</text>
-              {alt(peak) > 0 && <circle cx={x(peak)} cy={altY(peak)} r={5} fill={color} />}
+              <line x1={riseX} x2={riseX} y1={plotH} y2={riseY + F.f8} stroke={stop(GRAPH.moonLine, 2)} />
+              <circle cx={riseX} cy={riseY + F.f5} r={F.f8} fill={stop(GRAPH.rise, 3)} />
+              <circle cx={riseX} cy={riseY + F.f5} r={F.f3} fill={stop(GRAPH.rise)} />
+              <rect x={riseX + F.f8} y={riseY - F.f2} width={F.f89} height={F.f21 - F.f3} rx={F.f5} fill={stop(GRAPH.moon, 4)} stroke={stop(GRAPH.moonLine, 3)} />
+              <text x={riseX + F.f13} y={riseY + F.f8 + F.f2} fontSize={T.s2n} fontWeight={600} letterSpacing={1} fill={stop("deep-space-50")}>MOON RISE</text>
+              <rect x={nowX - F.f2} y={NOW_TOP} width={F.f3 + F.f1} height={plotH - NOW_TOP} fill="url(#og-now)" filter="url(#og-curve-glow)" />
+              <rect x={nowX - F.f1 / 2} y={NOW_TOP} width={F.f1} height={plotH - NOW_TOP} fill="url(#og-now)" />
+              <circle className="app-pulse" cx={nowX} cy={NOW_TOP} r={F.f8} fill={stop(GRAPH.now, 2)} />
+              <circle cx={nowX} cy={NOW_TOP} r={F.f3} fill={stop(GRAPH.now)} />
+              <rect x={nowX + F.f8} y={NOW_TOP - F.f8} width={F.f34} height={F.f21 - F.f5} rx={F.f5} fill={stop(GRAPH.now, 5)} stroke={stop(GRAPH.now, 3)} />
+              <text x={nowX + F.f13} y={NOW_TOP + F.f3} fontSize={T.s2n} fontWeight={700} fill={stop(GRAPH.now)}>NOW</text>
+              {alt(peak) > 0 && <circle cx={x(peak)} cy={altY(peak)} r={F.f5} fill={color} />}
             </>
           ) : (
             <>
-              <path d={`M0 ${plotH} L0 ${plotH * 0.2} C${w * 0.125} ${plotH * 0.2} ${w * 0.125} ${plotH * 0.7} ${w * 0.25} ${plotH * 0.7} C${w * 0.375} ${plotH * 0.7} ${w * 0.375} ${plotH * 0.9} ${w * 0.5} ${plotH * 0.9} C${w * 0.625} ${plotH * 0.9} ${w * 0.625} ${plotH * 0.4} ${w * 0.75} ${plotH * 0.4} C${w * 0.875} ${plotH * 0.4} ${w * 0.875} ${plotH * 0.1} ${w} ${plotH * 0.1} L${w} ${plotH} Z`} fill="#fff" fillOpacity={0.05} />
-              <path d={objLine} fill="none" stroke={color} strokeWidth={3} strokeLinecap="round" />
-              <circle cx={w / 2} cy={plotH - plotH * 0.8} r={5} fill={color} />
-              <circle cx={w * 0.2} cy={plotH - Math.sin(0.2 * Math.PI) * plotH * 0.8} r={4} fill="#fff" />
-              <circle cx={w * 0.2} cy={plotH - Math.sin(0.2 * Math.PI) * plotH * 0.8} r={2} fill={color} />
+              <path d={`M0 ${plotH} L0 ${plotH * 0.2} C${w * 0.125} ${plotH * 0.2} ${w * 0.125} ${plotH * 0.7} ${w * 0.25} ${plotH * 0.7} C${w * 0.375} ${plotH * 0.7} ${w * 0.375} ${plotH * 0.9} ${w * 0.5} ${plotH * 0.9} C${w * 0.625} ${plotH * 0.9} ${w * 0.625} ${plotH * 0.4} ${w * 0.75} ${plotH * 0.4} C${w * 0.875} ${plotH * 0.4} ${w * 0.875} ${plotH * 0.1} ${w} ${plotH * 0.1} L${w} ${plotH} Z`} fill={stop(GRAPH.cloud, 6)} />
+              <path d={objLine} fill="none" stroke={color} strokeWidth={F.f3} strokeLinecap="round" />
+              <circle cx={w / 2} cy={plotH - plotH * 0.8} r={F.f5} fill={color} />
+              <circle cx={w * 0.2} cy={plotH - Math.sin(0.2 * Math.PI) * plotH * 0.8} r={F.f5} fill={stop(GRAPH.ink)} />
+              <circle cx={w * 0.2} cy={plotH - Math.sin(0.2 * Math.PI) * plotH * 0.8} r={F.f2} fill={color} />
               {[0, 1, 2, 3, 4].map((i) => (
-                <text key={i} x={(w * i) / 4} y={H - 10} fontSize={10} fontWeight={i === 2 ? 700 : 400} fill={i === 2 ? "#fff" : "#9e9e9e"} textAnchor={i === 0 ? "start" : i === 4 ? "end" : "middle"}>{clock(NIGHT_START + (SPAN * i) / 4)}</text>
+                <text key={i} x={(w * i) / 4} y={HEIGHT - F.f13} fontSize={T.s2n} fontWeight={i === 2 ? 700 : 400} fill={i === 2 ? stop(GRAPH.ink) : stop("space-grey-300")} textAnchor={i === 0 ? "start" : i === 4 ? "end" : "middle"}>{clock(NIGHT_START + (SPAN * i) / 4)}</text>
               ))}
             </>
           )}
           {scrub !== null && (
             <g>
-              <line x1={scrub * w} x2={scrub * w} y1={0} y2={plotH} stroke={full ? color : "#fff"} strokeOpacity={0.8} />
+              <line x1={scrub * w} x2={scrub * w} y1={0} y2={plotH} stroke={full ? color : stop(GRAPH.ink, 1)} />
               {!full && (
                 <>
-                  <circle cx={scrub * w} cy={altY(mm)} r={6} fill="#fff" />
-                  <circle cx={scrub * w} cy={altY(mm)} r={4} fill={color} />
+                  <circle cx={scrub * w} cy={altY(mm)} r={F.f8} fill={stop(GRAPH.ink)} />
+                  <circle cx={scrub * w} cy={altY(mm)} r={F.f5} fill={color} />
                 </>
               )}
             </g>
           )}
         </svg>
         {scrub !== null && (
-          <div className="app-og-tip" style={{ left: Math.max(0, Math.min(w - 100, scrub * w)) }}>
+          <div className="app-og-tip" style={{ left: Math.max(0, Math.min(w - F.f144, scrub * w)) }}>
             <strong>{clock(mm)}</strong>
             <span style={{ color }}>Alt: {Math.max(0, alt(mm)).toFixed(1)}°</span>
           </div>

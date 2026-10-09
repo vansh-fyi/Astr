@@ -80,46 +80,52 @@ const CloudBar(cloudCoverPercentage: 0, isLoading: true)`} />
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
     "Surface",
-    "rgb(12 15 17 / 0.8)",
-    "AppColors.surfaceGlass",
-    "#CC0C0F11"
+    "--sheen (space-grey-50 at --mag-5 to --mag-8) over space-grey-950 at --mag-1",
+    "AstrColors.spaceGrey with Mag.m5, m8, m1",
+    "AppColors.surfaceGlass #CC0C0F11"
   ],
   [
     "Border",
-    "#0C1E33",
-    "AppColors.borderSubtle",
-    "#0C1E33"
-  ],
-  [
-    "Track",
-    "rgb(60 73 87 / 0.3)",
-    "AppColors.cloudTrack",
-    "#4D3C4957"
-  ],
-  [
-    "Fill",
-    "#3A96FF with glow",
-    "AppColors.accentSecondary + glowShadow",
-    "#3A96FF"
-  ],
-  [
-    "Track height",
-    "8",
-    "AppSpacing.kCloudTrackHeight",
-    "8"
+    "space-grey-50 at --mag-6",
+    "Mag.m6",
+    "borderSubtle #0C1E33"
   ],
   [
     "Radius",
-    "12",
-    "AppSpacing.kInnerRadius",
-    "12"
+    "--radius-f13",
+    "AstrRadius.f13",
+    "kInnerRadius 12"
+  ],
+  [
+    "Padding",
+    "--spacing-f13 --spacing-f21",
+    "AstrSpace.f13, f21",
+    "18 and 20"
+  ],
+  [
+    "Track",
+    "space-grey-500 at --mag-4, height --spacing-f8",
+    "AstrColors.spaceGrey[500], Mag.m4, AstrSpace.f8",
+    "cloudTrack #4D3C4957, 8"
+  ],
+  [
+    "Fill",
+    "--color-deep-space-200 with glow",
+    "AstrColors.deepSpace[200]",
+    "accentSecondary #3A96FF"
+  ],
+  [
+    "Label",
+    "--text-s-1",
+    "AstrType.sNeg1",
+    "labelMd 12"
   ]
 ]}
 />

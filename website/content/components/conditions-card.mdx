@@ -40,7 +40,7 @@ export const meta = {
 
 <ReactExcerpt file="src/components/app/app-widgets.tsx" symbols={["AppTimeCell", "AppConditionsCard"]} />
 
-<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-card", ".app-card.is-conditions", ".app-cells", ".app-cell"]} />
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-card", ".app-card.is-conditions", ".app-card-head", ".app-cells", ".app-cell"]} />
 </CodeTabs>
 
 <DocNote>The cards use the glass surface: the Flutter tab starts with <code>AstrGlassCard</code>, the proposed shell. The app widget below it is the current outlined card, which adopts <code>AstrGlassCard</code> as its container. The Explore action is an <code>AstrGlassButton</code>, small and filled, not a separate style.</DocNote>
@@ -78,40 +78,40 @@ export const meta = {
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
-    "Size",
-    "345 by 242",
-    "kConditionsCardWidth, kConditionsCardHeight",
-    "345, 242"
+    "Width",
+    "min(100%, --container-f377)",
+    "AstrLayout (377)",
+    "345"
   ],
   [
-    "Padding",
-    "16",
-    "kCardPadding",
-    "16"
+    "Padding, gap",
+    "--spacing-f13",
+    "AstrSpace.f13",
+    "16, absolute offsets 69 and 162"
   ],
   [
-    "Cloud section top",
-    "69",
-    "kCloudSectionTop",
-    "69"
+    "Title, advice",
+    "--text-s0, --text-s-2",
+    "AstrType.s0, sNeg2",
+    "heading 16, labelSm 10"
   ],
   [
-    "Cell height",
-    "64",
-    "kSunMoonCellHeight",
-    "64"
+    "Explore",
+    "button, compact",
+    "AstrGlassButton(compact: true)",
+    "accent pill 100 by 27"
   ],
   [
-    "Explore button",
-    "AppButton, small, filled",
-    "AstrGlassButton",
-    "32 tall"
+    "Time cells",
+    "--spacing-f55 high, --radius-f13",
+    "AstrSize.control, AstrRadius.f13",
+    "64 high, 12"
   ]
 ]}
 />

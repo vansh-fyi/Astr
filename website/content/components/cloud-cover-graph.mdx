@@ -74,40 +74,40 @@ export const meta = {
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
     "Fill",
-    "white 25% to 5% gradient",
-    "Colors.white at 0.25 and 0.05",
-    "gradient"
+    "space-grey-50 at --mag-3 to --mag-6",
+    "AstrColors.spaceGrey[50], Mag.m3, m6",
+    "Colors.white 25% to 5%"
   ],
   [
     "Stroke",
-    "white at 30%, 1.5 px",
-    "Colors.white.withValues(alpha: 0.3)",
+    "--mag-3, --spacing-f2",
+    "Mag.m3, AstrSpace.f2",
     "1.5"
   ],
   [
-    "Smoothing",
-    "cubic segments, tension 0.2",
-    "(p2 - p0) * 0.2",
-    "0.2"
-  ],
-  [
     "Grid",
-    "white at 5%",
-    "Colors.white.withValues(alpha: 0.05)",
-    "5%"
+    "space-grey-50 at --mag-6",
+    "Mag.m6",
+    "white 5%"
   ],
   [
     "Now",
-    "#F97316 line, pulsing dot",
-    "GraphTheme.nowIndicatorColor",
-    "orange"
+    "sodium-airglow-400",
+    "AstrColors.sodiumAirglow[400]",
+    "#F97316"
+  ],
+  [
+    "Smoothing",
+    "cubic, tension 0.2",
+    "(p2 - p0) * 0.2",
+    "0.2"
   ]
 ]}
 />

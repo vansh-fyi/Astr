@@ -16,7 +16,7 @@ export const meta = {
 
 <Gallery column>
   <AppConditionsGraph />
-  <AppLegend items={[{ label: "Cloud cover", color: "rgba(255,255,255,0.3)" }, { label: "Moon altitude", color: "#6366f1" }, { label: "Prime view", color: "#10b981" }, { label: "Now", color: "#fb923c" }]} />
+  <AppLegend items={[{ label: "Cloud cover", kind: "cloud" }, { label: "Moon altitude", kind: "moon" }, { label: "Prime view", kind: "prime" }, { label: "Now", kind: "now" }]} />
 </Gallery>
 
 </DocSection>
@@ -78,40 +78,58 @@ export const meta = {
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
     "Cloud",
-    "white 25% to 5% gradient, 30% stroke",
-    "Colors.white",
-    "white"
+    "space-grey-50 at --mag-3 to --mag-6, stroke --mag-3",
+    "AstrColors.spaceGrey[50], Mag.m3",
+    "Colors.white 25% to 5%"
   ],
   [
     "Moon",
-    "#1E1B4B at 50%, #6366F1 stroke",
-    "GraphTheme.moonFillColor, moonStrokeColor",
-    "indigo"
+    "deep-space-300 at --mag-2, line deep-space-200",
+    "AstrColors.deepSpace[300], [200]",
+    "GraphTheme.moonFillColor #1E1B4B"
   ],
   [
-    "Prime view",
-    "#10B981 band, #6EE7B7 label",
-    "GraphTheme.primeViewColor",
-    "emerald"
+    "Moon rise",
+    "aurora-pink-400",
+    "AstrColors.auroraPink[400]",
+    "#A855F7"
   ],
   [
     "Now",
-    "#F97316 line, #FB923C label",
-    "GraphTheme.nowIndicatorColor",
-    "orange"
+    "sodium-airglow-400, pulsing",
+    "AstrColors.sodiumAirglow[400]",
+    "GraphTheme.nowIndicatorColor #F97316"
+  ],
+  [
+    "Prime view",
+    "aurora-green-400 band at --mag-5",
+    "AstrColors.auroraGreen[400]",
+    "GraphTheme.primeViewColor #10B981"
   ],
   [
     "Grid",
-    "white at 5%",
-    "Colors.white.withValues(alpha: 0.05)",
-    "5%"
+    "space-grey-50 at --mag-6",
+    "Mag.m6",
+    "white 5%"
+  ],
+  [
+    "Strokes, dots",
+    "Fibonacci 2, 3, 5, 8",
+    "AstrSpace.f2, f3, f5, f8",
+    "1.5, 3, 6"
+  ],
+  [
+    "Labels",
+    "--text-s-2",
+    "AstrType.sNeg2",
+    "9 and 10"
   ]
 ]}
 />

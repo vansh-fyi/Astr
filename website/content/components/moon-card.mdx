@@ -49,7 +49,7 @@ export const meta = {
 
 <ReactExcerpt file="src/components/app/app-widgets.tsx" symbols={["moonPhase", "AppMoonCard"]} />
 
-<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-card", ".app-card.is-mini", ".app-moon-img"]} />
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-card", ".app-card.is-mini", ".app-card-head", ".app-moon-body", ".app-moon-img"]} />
 </CodeTabs>
 
 <DocNote>The cards use the glass surface: the Flutter tab starts with <code>AstrGlassCard</code>, the proposed shell. The app widget below it is the current outlined card, which adopts <code>AstrGlassCard</code> as its container.</DocNote>
@@ -80,34 +80,40 @@ export const meta = {
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
     "Size",
-    "164 by 154",
-    "kMiniCardWidth, kMiniCardHeight",
-    "164, 154"
+    "--spacing-f144 by 144 + --spacing-f21",
+    "AstrSpace.f144",
+    "164 by 154"
   ],
   [
     "Artwork",
-    "98 by 92 at (33, 36)",
-    "assets/img/moon_*.webp",
-    "8 files"
+    "--spacing-f89 square",
+    "AstrSpace.f89",
+    "98 by 92"
   ],
   [
-    "Label",
-    "12 px, 500",
-    "AppTypography.labelMd",
-    "12"
+    "Name",
+    "--text-s-1",
+    "AstrType.sNeg1",
+    "labelMd 12"
   ],
   [
     "Caption",
-    "10 px, muted",
-    "AppTypography.labelSm",
-    "10"
+    "--text-s-2",
+    "AstrType.sNeg2",
+    "labelSm 10"
+  ],
+  [
+    "Surface",
+    "glass card",
+    "AstrGlassCard",
+    "surfaceOverlay + borderPrimary"
   ]
 ]}
 />

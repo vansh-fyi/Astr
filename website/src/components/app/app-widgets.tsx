@@ -18,13 +18,13 @@ export function AppCloudBar({
   message?: string;
 }) {
   return (
-    <div className="app-ui app-cloudbar" style={{ maxWidth: 313 }}>
+    <div className="app-ui app-cloudbar">
       <div className="app-cloudbar-head">
         <span className="app-label-md">Cloud Cover</span>
         {state === "loading" ? (
           <span className="app-spinner" role="status" aria-label="Loading" />
         ) : state === "error" ? (
-          <span aria-label="Error" style={{ color: "#ff5252", fontSize: 16 }}>!</span>
+          <span className="app-heading" aria-label="Error" style={{ color: "var(--c-error)" }}>!</span>
         ) : (
           <span className="app-label-md">{Math.round(value)}%</span>
         )}
@@ -51,8 +51,8 @@ export const activeBars = (zone: number): number => Math.min(5, Math.max(0, 5 - 
 export function AppVisibilityCard({ zone, mpsas }: { zone: number; mpsas: number }) {
   const bars = activeBars(zone);
   return (
-    <div className="app-ui app-card is-mini app-vis">
-      <div className="app-vis-head">
+    <div className="app-ui app-card is-mini">
+      <div className="app-card-head">
         <span className="app-label-sm">VISIBILITY</span>
         <span className="app-zone-pill">Zone {zone}</span>
       </div>
@@ -88,11 +88,15 @@ export function AppMoonCard({ angle, illumination }: { angle: number; illuminati
   const lit = Math.round((illumination ?? (1 - Math.cos((angle * Math.PI) / 180)) / 2) * 100);
   return (
     <div className="app-ui app-card is-mini">
-      <span className="abs app-label-sm" style={{ top: 15, left: 15 }}>MOON</span>
-      <span className="abs app-label-sm" style={{ top: 15, right: 15, color: "var(--app-text)" }}>{lit}%</span>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="app-moon-img" src={`/app/${asset}.webp`} alt={label} />
-      <span className="abs app-label-md" style={{ bottom: 15, left: 0, right: 0, textAlign: "center" }}>{label}</span>
+      <div className="app-card-head">
+        <span className="app-label-sm">MOON</span>
+        <span className="app-label-sm" style={{ color: "var(--c-text)" }}>{lit}%</span>
+      </div>
+      <div className="app-moon-body">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="app-moon-img" src={`/app/${asset}.webp`} alt={label} />
+      </div>
+      <span className="app-label-md app-moon-name">{label}</span>
     </div>
   );
 }
@@ -101,13 +105,13 @@ export function AppMoonCard({ angle, illumination }: { angle: number; illuminati
 export function AppTimeCell({ label, time }: { label: string; time?: string }) {
   return (
     <div className="app-cell">
-      <span className="micro app-micro">{label}</span>
-      <span className="time app-label-md">{time ?? "--:--"}</span>
+      <span className="app-label-sm">{label}</span>
+      <span className="app-label-md">{time ?? "--:--"}</span>
     </div>
   );
 }
 
-/** ConditionsCard: headline, Explore button, cloud bar and the four time cells. */
+/** ConditionsCard: headline, the Explore button, the cloud bar and the four time cells. */
 export function AppConditionsCard({
   title = "Clear Skies",
   subtitle = "Perfect visibility for observation",
@@ -121,17 +125,15 @@ export function AppConditionsCard({
 }) {
   return (
     <div className="app-ui app-card is-conditions">
-      <div className="abs" style={{ top: 16, left: 16, right: 16, display: "flex", justifyContent: "space-between" }}>
-        <div style={{ width: 180 }}>
+      <div className="app-card-head">
+        <div>
           <div className="app-heading">{title}</div>
-          <div className="app-label-sm" style={{ marginTop: 4 }}>{subtitle}</div>
+          <div className="app-label-sm">{subtitle}</div>
         </div>
         <AppButton size="sm">Explore</AppButton>
       </div>
-      <div className="abs" style={{ top: 69, left: 16, right: 16 }}>
-        <AppCloudBar value={cloud} />
-      </div>
-      <div className="abs app-cells" style={{ top: 162, left: 16, right: 16 }}>
+      <AppCloudBar value={cloud} />
+      <div className="app-cells">
         <AppTimeCell label="SUNRISE" time={times.sunrise} />
         <AppTimeCell label="SUNSET" time={times.sunset} />
         <AppTimeCell label="MOONRISE" time={times.moonrise} />
@@ -161,7 +163,7 @@ export function AppSkyState({ state, note }: { state: SkyStateKey; note?: string
       <img src={`/app/${image}.jpg`} alt="" />
       <div>
         <div className="app-heading">{label}</div>
-        {note && <div className="app-label-sm" style={{ marginTop: 2 }}>{note}</div>}
+        {note && <div className="app-label-sm">{note}</div>}
       </div>
     </div>
   );

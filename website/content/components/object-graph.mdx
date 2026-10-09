@@ -44,7 +44,7 @@ AltitudeGraph(themeColor: Colors.orange)`} />
 
 </>}>
 <CodeBlock lang="javascript" filename="Usage" code={`<AppObjectGraph />
-<AppObjectGraph variant="altitude" color="#f97316" />
+<AppObjectGraph variant="altitude" tone="amber" />
 <AppObjectGraph objectId="late" horizon />`} />
 
 <ReactExcerpt file="src/components/app/app-object-graph.tsx" symbols={["AppObjectGraph", "HorizonView", "azimuth"]} />
@@ -76,11 +76,11 @@ AltitudeGraph(themeColor: Colors.orange)`} />
     "Which object. The site has three sample objects."
   ],
   [
-    "color",
+    "tone",
     "highlightColor, themeColor",
-    "colour",
-    "#3B82F6",
-    "Curve, peak dot, scrubber and tooltip colour."
+    "blue, green, pink, amber, red",
+    "blue",
+    "A system colour stop for the curve, peak dot, scrubber and tooltip."
   ],
   [
     "horizon",
@@ -94,46 +94,46 @@ AltitudeGraph(themeColor: Colors.orange)`} />
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
-    "Plot surface",
-    "white at 5%, 24 radius, white 10% border",
-    "Colors.white.withValues(alpha: 0.05)",
-    "24"
+    "Plot",
+    "space-grey-50 at --mag-6, --radius-f21",
+    "Mag.m6, AstrRadius.f21",
+    "white 5%, 24"
   ],
   [
-    "Curve",
-    "3 px, round, 40% glow at 6 px",
-    "highlightColor",
-    "#3B82F6"
+    "Object curve",
+    "tone stop, --spacing-f3, glow --spacing-f5",
+    "AstrTone.color",
+    "highlightColor #3B82F6"
   ],
   [
     "Moon",
-    "#1E1B4B at 50%, #6366F1 stroke",
-    "GraphTheme.moonFillColor",
-    "indigo"
+    "deep-space-300 at --mag-2, line deep-space-200",
+    "AstrColors.deepSpace[300], [200]",
+    "#1E1B4B, #6366F1"
   ],
   [
     "Now",
-    "#F97316, starts 80 px from the top",
-    "topY = 80",
-    "orange"
+    "sodium-airglow-400, starts --spacing-f89 \u2212 f8 from the top",
+    "AstrColors.sodiumAirglow[400]",
+    "#F97316, topY 80"
   ],
   [
-    "Altitude scale",
-    "degrees over 90, at 70% of the height",
-    "value / 90 * height * 0.7",
-    "0.7"
+    "Tooltip",
+    "--radius-f8, --spacing-f8, --text-s-1",
+    "AstrRadius.f8, AstrSpace.f8",
+    "8, 8, 12"
   ],
   [
     "Hour axis",
-    "12 px, white at 30%",
-    "DateFormat.j()",
-    "12"
+    "--text-s-1, space-grey-300",
+    "AstrType.sNeg1",
+    "12, white 30%"
   ]
 ]}
 />

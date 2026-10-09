@@ -37,7 +37,7 @@ export const meta = {
   icon: Icons.nightlight_round,
   label: 'Moon',
   tone: AstrTone.blue,
-  size: AstrTileSize.md,
+  size: AstrTileSize.md, // 55
   selected: false,
   onPressed: () {},
 )`} />
@@ -81,7 +81,7 @@ export const meta = {
     "size",
     "sm, md, lg / AstrTileSize",
     "md",
-    "44, 72 or 96."
+    "34, 55 or 89."
   ],
   [
     "label",
@@ -109,40 +109,58 @@ export const meta = {
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
-    "Tile radius",
-    "28% of the edge",
-    "edge \u00d7 0.28",
-    "28%"
+    "Sizes",
+    "--spacing-f34, f55, f89",
+    "AstrTileSize.sm, md, lg",
+    "new"
+  ],
+  [
+    "Corner radius",
+    "size \u00d7 --phi-inverse-squared (13, 21, 34)",
+    "size * AstrLayout.minor",
+    "new"
+  ],
+  [
+    "Glyph size",
+    "size \u00d7 --phi-inverse-squared",
+    "size * AstrLayout.minor",
+    "new"
   ],
   [
     "Border",
-    "tone at 35%",
-    "tone.withValues(alpha: 0.35)",
-    "35%"
+    "tone at --mag-3",
+    "tone.withValues(alpha: Mag.m3)",
+    "new"
   ],
   [
     "Fill",
-    "tone 22% to 8% over surface",
-    "Color.alphaBlend(tone, ink)",
-    "#0C0F11 base"
+    "tone at --mag-4 to --mag-6 over --color-space-grey-950",
+    "Color.alphaBlend(tone, Mag.m4 and m6)",
+    "new"
   ],
   [
-    "Glow",
-    "drop shadow of the tone",
-    "Shadow(blurRadius: 10)",
-    "10"
+    "Selected fill",
+    "the tone, glyph --color-space-grey-950",
+    "tone, _ink",
+    "new"
+  ],
+  [
+    "Disabled",
+    "opacity --mag-2",
+    "Mag.m2",
+    "new"
   ],
   [
     "Tones",
-    "--color-deep-space-200 and others",
-    "AstrColors.*[200 or 400]",
-    "stops"
+    "--color-deep-space-200, aurora-green-400, aurora-pink-400, sodium-airglow-400, oxygen-airglow-400",
+    "AstrTone.color",
+    "new"
   ]
 ]}
 />

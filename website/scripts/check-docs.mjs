@@ -141,6 +141,22 @@ function scaleChecks() {
     .filter((l) => !/^\s*@(media|container)/.test(l) && /(?<![\w.-])-?\d*\.?\d+px\b/.test(l));
   assert(rawPx.length === 0, `docs.css has raw pixel sizes (use the scale tokens):\n${rawPx.join("\n")}`);
   ok("docs.css: no raw pixel sizes outside media and container queries");
+  // The app components must be made of tokens only: no hex, rgb(), hsl() or pixel numbers in their stylesheet,
+  // and no hex or rgba() in their code. Colour comes from stops at --mag steps, sizes from the Fibonacci tokens.
+  const appCss = readFileSync(join(ROOT, "src/components/app/app-ui.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const cssHits = appCss.split("\n").filter((l) => /#[0-9a-f]{3,8}\b|\brgba?\(|\bhsla?\(|\d\.?\d*px\b/i.test(l.replace(/@media[^{]*|@container[^{]*/g, "")));
+  assert(cssHits.length === 0, `app-ui.css has raw colour or pixel values (use stops, --mag-* and the scale tokens):\n    ${cssHits.join("\n    ")}`);
+  for (const f of readdirSync(join(ROOT, "src/components/app")).filter((n) => n.endsWith(".tsx"))) {
+    const code = readFileSync(join(ROOT, "src/components/app", f), "utf8").split("\n");
+    const hits = code.filter((l) => !l.trimStart().startsWith("//") && !l.trimStart().startsWith("*") && /["'`]#[0-9a-f]{3,8}["'`]|rgba?\(/i.test(l));
+    assert(hits.length === 0, `${f} has raw colours (use stop() from tokens.ts):\n    ${hits.join("\n    ")}`);
+  }
+  const tokensTs = readFileSync(join(ROOT, "src/components/app/tokens.ts"), "utf8");
+  const stylesCss = readFileSync(join(ROOT, "src/app/styles.css"), "utf8");
+  const usedStops = new Set([...tokensTs.matchAll(/"((?:space-grey|deep-space|aurora-green|aurora-pink|sodium-airglow|oxygen-airglow)-\d+)"/g)].map((m) => m[1]));
+  for (const stopName of usedStops) assert(stylesCss.includes(`var(--color-${stopName})`), `styles.css must keep --color-${stopName} alive (tokens.ts uses it at run time)`);
+  ok("app components: tokens only, no raw hex, rgb() or pixel values");
+
   ok("scale.css: Fibonacci spacing, radii, widths and breakpoints, phi-derived type, no colour; Dart mirrors match");
 }
 

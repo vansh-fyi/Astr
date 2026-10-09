@@ -76,28 +76,40 @@ export const meta = {
 
 </DocSection>
 
-<DocSection id="tokens" title="Design tokens">
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
 
 <DocTable
-  head={["Token", "CSS", "Dart", "Value"]}
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
   rows={[
   [
+    "Min height",
+    "--spacing-f144",
+    "AstrSpace.f144",
+    "full screen background"
+  ],
+  [
+    "Radius",
+    "--radius-f21",
+    "AstrRadius.f21",
+    "none"
+  ],
+  [
     "Image opacity",
-    "0.5",
-    "opacity: 0.5",
-    "50%"
+    "--mag-1",
+    "Mag.m1",
+    "0.5"
   ],
   [
     "Wash",
-    "rgb(68 138 255 / 0.2) to clear, top to bottom",
-    "Color(0x33448AFF)",
-    "20%"
+    "deep-space-200 at --mag-4, top to clear",
+    "Mag.m4",
+    "Color(0x33448AFF)"
   ],
   [
-    "Base",
-    "#0C0F11",
-    "AppColors.surface",
-    "#0C0F11"
+    "Label",
+    "--text-s0",
+    "AstrType.s0",
+    "none"
   ]
 ]}
 />

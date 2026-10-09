@@ -1,149 +1,157 @@
 /*
- * The app's own widgets, redrawn for the web at their real density-independent sizes.
- * Values are copied from lib/core/design/app_colors.dart, app_spacing.dart and app_typography.dart, so one
- * pixel here is one logical pixel in the app. This file is deliberately outside the docs design tokens: it
- * shows the application as it is, and a change belongs in the Dart first.
+ * The app's components for the web. Every value is a design-system token: colour from the stops in
+ * globals.css at --mag-* opacity steps, spacing, sizes and radii from the Fibonacci tokens in scale.css, type
+ * from the phi steps. Nothing here is a hex, an rgb() or a pixel number: check-docs.mjs fails on all three.
+ * Glow belongs to buttons and tiles; cards and graphs are plain glass.
  */
 .app-ui {
-  --app-surface: #0c0f11;
-  --app-overlay: rgb(12 15 17 / 0.5);
-  --app-glass: rgb(12 15 17 / 0.8);
-  --app-accent: #448aff;
-  --app-accent-2: #3a96ff;
-  --app-border-primary: #1b3766;
-  --app-border-subtle: #0c1e33;
-  --app-text: #f4f5f5;
-  --app-muted: #b3b7bc;
-  --app-pill-fill: rgb(58 150 255 / 0.2);
-  --app-pill-text: #b0d5ff;
-  --app-track: rgb(60 73 87 / 0.3);
-  --app-glow: 0 0 1px rgb(255 255 255 / 0.25), 0 1px 12.2px #3a7fff;
+  --c-ink: var(--color-space-grey-950);
+  --c-text: var(--color-space-grey-50);
+  --c-muted: var(--color-space-grey-300);
+  --c-accent: var(--color-deep-space-200);
+  --c-accent-ink: var(--color-deep-space-50);
+  --c-error: var(--color-oxygen-airglow-400);
+  --hair: color-mix(in srgb, var(--c-text) var(--mag-6), transparent);
+  --hair-strong: color-mix(in srgb, var(--c-text) var(--mag-5), transparent);
+  --highlight: inset 0 var(--spacing-f1) 0 color-mix(in srgb, var(--c-text) var(--mag-5), transparent);
+  --sheen: linear-gradient(160deg, color-mix(in srgb, var(--c-text) var(--mag-5), transparent), color-mix(in srgb, var(--c-text) var(--mag-8), transparent));
+  --fill: color-mix(in srgb, var(--c-ink) var(--mag-1), transparent);
+  --track: color-mix(in srgb, var(--color-space-grey-500) var(--mag-4), transparent);
+  --glow: 0 0 var(--spacing-f1) color-mix(in srgb, var(--c-text) var(--mag-3), transparent), 0 var(--spacing-f1) var(--spacing-f13) var(--c-accent);
   font-family: var(--font-satoshi), var(--font-inter), system-ui, sans-serif;
-  color: var(--app-text);
+  color: var(--c-text);
 }
 
 .app-stage {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--spacing-f21);
   align-items: flex-start;
   justify-content: center;
-  padding: 24px;
-  border-radius: 24px;
-  background: var(--app-surface);
-  border: 1px solid var(--app-border-subtle);
+  padding: var(--spacing-f34);
+  border-radius: var(--radius-f21);
+  background: var(--c-ink);
+  border: var(--spacing-f1) solid var(--hair);
 }
 .app-stage.is-column { flex-direction: column; align-items: stretch; }
 
-.app-label-sm { font-size: 10px; font-weight: 500; line-height: 1.4; letter-spacing: 0.6px; color: var(--app-muted); }
-.app-label-md { font-size: 12px; font-weight: 500; line-height: 1.3; color: var(--app-text); }
-.app-micro { font-size: 8px; font-weight: 500; line-height: 1.3; letter-spacing: 0.4px; color: var(--app-muted); }
-.app-heading { font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--app-text); }
-.app-title { font-size: 28px; font-weight: 500; line-height: 1.2; letter-spacing: -0.5px; color: var(--app-text); }
+.app-label-sm { font-size: var(--text-s-2); line-height: var(--text-s-2--line-height); letter-spacing: var(--text-s-2--letter-spacing); font-weight: 500; color: var(--c-muted); }
+.app-label-md { font-size: var(--text-s-1); line-height: var(--text-s-1--line-height); letter-spacing: var(--text-s-1--letter-spacing); font-weight: 500; color: var(--c-text); }
+.app-heading { font-size: var(--text-s0); line-height: var(--text-s0--line-height); font-weight: 500; color: var(--c-text); }
+.app-title { font-size: var(--text-s1); line-height: var(--text-s1--line-height); letter-spacing: var(--text-s1--letter-spacing); font-weight: 500; color: var(--c-text); }
 
-/* Glass card: sheen, hairline edge and an inset highlight. No glow: glow belongs to buttons and tiles. */
+/* Glass card: sheen, hairline edge and an inset highlight. No glow. */
 .app-card {
   position: relative;
   box-sizing: border-box;
-  border-radius: 16px;
-  border: 1px solid rgb(255 255 255 / 0.1);
-  background: linear-gradient(160deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.02)), var(--app-overlay);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
-  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-f13);
+  border-radius: var(--radius-f21);
+  border: var(--spacing-f1) solid var(--hair-strong);
+  background: var(--sheen), var(--fill);
+  box-shadow: var(--highlight);
+  backdrop-filter: blur(var(--spacing-f13));
   overflow: hidden;
 }
-.app-card.is-mini { width: 164px; height: 154px; flex: none; }
-.app-card.is-conditions { width: min(100%, 345px); height: 242px; }
-.app-card > .abs { position: absolute; }
+.app-card.is-mini { width: var(--spacing-f144); height: calc(var(--spacing-f144) + var(--spacing-f21)); flex: none; }
+.app-card.is-conditions { width: min(100%, var(--container-f377)); gap: var(--spacing-f13); }
+.app-card-head { display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-f8); }
 
 .app-zone-pill {
-  padding: 4px 11px;
-  border-radius: 70px;
-  background: var(--app-pill-fill);
-  border: 1px solid var(--app-accent);
-  font-size: 8px;
+  padding: var(--spacing-f3) var(--spacing-f8);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--c-accent) var(--mag-4), transparent);
+  border: var(--spacing-f1) solid var(--c-accent);
+  font-size: var(--text-s-2);
+  line-height: 1.3;
   font-weight: 700;
-  letter-spacing: 0.4px;
-  color: var(--app-pill-text);
+  color: var(--c-accent-ink);
+  white-space: nowrap;
 }
 
-.app-rating { display: flex; justify-content: space-between; }
-.app-rating i {
-  display: block;
-  width: 22.4px;
-  height: 5px;
-  border-radius: 12px;
-  background: var(--app-track);
-}
-.app-rating i.on { background: var(--app-accent-2); box-shadow: var(--app-glow); }
+.app-rating { display: flex; gap: var(--spacing-f5); }
+.app-rating i { display: block; flex: 1; height: var(--spacing-f5); border-radius: var(--radius-full); background: var(--track); }
+.app-rating i.on { background: var(--c-accent); box-shadow: var(--glow); }
 
-/* CloudBar */
+/* Cloud bar */
 .app-cloudbar {
   box-sizing: border-box;
   width: 100%;
-  height: 84px;
-  padding: 20px 18px 0;
-  border-radius: 12px;
-  border: 1px solid rgb(255 255 255 / 0.08);
-  background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.015)), var(--app-glass);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  padding: var(--spacing-f13) var(--spacing-f21) var(--spacing-f21);
+  border-radius: var(--radius-f13);
+  border: var(--spacing-f1) solid var(--hair);
+  background: var(--sheen), var(--fill);
+  box-shadow: var(--highlight);
 }
 .app-cloudbar-head { display: flex; justify-content: space-between; align-items: center; }
-.app-cloudbar-track { margin-top: 13px; height: 8px; border-radius: 12px; background: var(--app-track); }
-.app-cloudbar-fill {
-  height: 100%;
-  border-radius: 12px;
-  background: var(--app-accent-2);
-  box-shadow: var(--app-glow);
-  transition: width 1s cubic-bezier(0.215, 0.61, 0.355, 1);
-}
-.app-cloudbar-error { margin-top: 13px; font-size: 10px; letter-spacing: 0.6px; color: #ff5252; }
-.app-spinner {
-  width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%;
-  border: 2px solid var(--app-text); border-right-color: transparent;
-  animation: app-spin 1s linear infinite;
-}
+.app-cloudbar-track { margin-top: var(--spacing-f8); height: var(--spacing-f8); border-radius: var(--radius-full); background: var(--track); }
+.app-cloudbar-fill { height: 100%; border-radius: var(--radius-full); background: var(--c-accent); box-shadow: var(--glow); transition: width 1s cubic-bezier(0.215, 0.61, 0.355, 1); }
+.app-cloudbar-error { margin-top: var(--spacing-f8); font-size: var(--text-s-2); color: var(--c-error); }
+.app-spinner { width: var(--spacing-f13); height: var(--spacing-f13); box-sizing: border-box; border-radius: var(--radius-full); border: var(--spacing-f2) solid var(--c-text); border-right-color: transparent; animation: app-spin 1s linear infinite; }
 @keyframes app-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .app-spinner { animation: none; } .app-cloudbar-fill { transition: none; } }
 
-.app-cells { display: flex; gap: 8px; }
+.app-cells { display: flex; gap: var(--spacing-f8); }
 .app-cell {
-  position: relative; flex: 1; height: 64px; border-radius: 12px;
-  border: 1px solid rgb(255 255 255 / 0.08);
-  background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.015)), var(--app-glass);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
-  box-sizing: border-box; text-align: center;
+  flex: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  height: var(--spacing-f55);
+  border-radius: var(--radius-f13);
+  border: var(--spacing-f1) solid var(--hair);
+  background: var(--sheen), var(--fill);
+  box-shadow: var(--highlight);
+  box-sizing: border-box;
 }
-.app-cell .micro { position: absolute; top: 12px; left: 0; right: 0; }
-.app-cell .time { position: absolute; top: 31px; left: 0; right: 0; }
 
+/* Visibility card: header row, centred label with the SQM under it, rating bars at the foot. */
+.app-vis-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-f2); }
+.app-vis-label { white-space: nowrap; }
 
-.app-moon-img { position: absolute; top: 32px; left: 33px; width: 98px; height: 92px; object-fit: contain; }
+/* Moon card */
+.app-moon-body { flex: 1; display: grid; place-items: center; }
+.app-moon-img { width: var(--spacing-f89); height: var(--spacing-f89); object-fit: contain; }
+.app-moon-name { text-align: center; }
 
-/* Sky state tile: the backdrop at half opacity under a blue wash. */
+/* Sky state tile: the backdrop at half opacity under a wash of the accent. */
 .app-state {
-  position: relative; overflow: hidden; border-radius: 16px; min-height: 154px; flex: 1 1 164px;
-  background: var(--app-surface); border: 1px solid rgb(255 255 255 / 0.1);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
+  position: relative;
+  overflow: hidden;
+  flex: 1 1 var(--spacing-f144);
+  min-height: var(--spacing-f144);
+  border-radius: var(--radius-f21);
+  background: var(--c-ink);
+  border: var(--spacing-f1) solid var(--hair-strong);
+  box-shadow: var(--highlight);
 }
-.app-state img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
-.app-state::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgb(68 138 255 / 0.2), transparent); pointer-events: none; }
-.app-state > div { position: absolute; left: 15px; bottom: 15px; right: 15px; z-index: 1; }
+.app-state img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: var(--mag-1); }
+.app-state::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, color-mix(in srgb, var(--c-accent) var(--mag-4), transparent), transparent); pointer-events: none; }
+.app-state > div { position: absolute; left: var(--spacing-f13); right: var(--spacing-f13); bottom: var(--spacing-f13); z-index: 1; }
 
 /* Graphs */
 .app-graph { position: relative; width: 100%; }
 .app-graph svg { display: block; width: 100%; overflow: visible; }
 .app-graph text { font-family: inherit; }
-.app-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; }
-.app-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: rgb(255 255 255 / 0.7); }
-.app-legend i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+.app-legend { display: flex; flex-wrap: wrap; gap: var(--spacing-f21); margin-top: var(--spacing-f13); }
+.app-legend span { display: inline-flex; align-items: center; gap: var(--spacing-f8); font-size: var(--text-s-2); color: var(--c-muted); }
+.app-legend i { width: var(--spacing-f8); height: var(--spacing-f8); border-radius: var(--radius-full); display: block; }
 
-/* Variant listing on the docs page. */
-.app-variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; margin-block: 1.5rem; align-items: start; }
-.app-variant .app-stage { min-height: 11rem; align-content: center; }
-.app-variant { margin: 0; display: grid; gap: 0.75rem; }
-.app-variant > figcaption { display: grid; gap: 0.25rem; }
-.app-variant > figcaption span { font-size: 0.875rem; opacity: 0.7; }
+.app-pulse { transform-box: fill-box; transform-origin: center; animation: app-pulse 2s ease-in-out infinite; }
+@keyframes app-pulse { 0%, 100% { transform: scale(0.7); opacity: 0.8; } 55% { transform: scale(1.9); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .app-pulse { animation: none; } }
+
+/* Object graph: a glass plot, an hour axis and an optional horizon strip. */
+.app-og { width: 100%; }
+.app-og-head { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-f8) var(--spacing-f13); font-size: var(--text-s1); font-weight: 700; }
+.app-og-plot { position: relative; border-radius: var(--radius-f21); border: var(--spacing-f1) solid var(--hair-strong); background-color: color-mix(in srgb, var(--c-text) var(--mag-6), transparent); overflow: hidden; touch-action: pan-y; }
+.app-og-plot svg { display: block; width: 100%; }
+.app-og-plot text, .app-og-horizon text { font-family: inherit; }
+.app-og-axis { display: flex; justify-content: space-between; padding: var(--spacing-f8) var(--spacing-f13) 0; font-size: var(--text-s-1); font-weight: 500; color: var(--c-muted); }
+.app-og-tip { position: absolute; top: var(--spacing-f8); padding: var(--spacing-f8); display: grid; gap: var(--spacing-f2); border-radius: var(--radius-f8); background: color-mix(in srgb, var(--c-ink) var(--mag-1), transparent); border: var(--spacing-f1) solid var(--hair-strong); font-size: var(--text-s-1); pointer-events: none; }
+.app-og-horizon { margin-top: var(--spacing-f13); border-radius: var(--radius-f13); border: var(--spacing-f1) solid var(--hair); background: color-mix(in srgb, var(--c-text) var(--mag-7), transparent); overflow: hidden; }
+.app-og-horizon svg { display: block; width: 100%; }
 
 /*
  * Tile and button. A tile holds one glyph on a tinted glass square with a bloom of its colour along the bottom
@@ -152,36 +160,32 @@
  */
 .app-tile {
   --tone: var(--color-deep-space-200);
+  --tile-size: var(--spacing-f55);
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: var(--tile-size, 72px);
+  width: var(--tile-size);
   aspect-ratio: 1;
-  border-radius: 28%;
-  border: 1px solid color-mix(in srgb, var(--tone) 35%, transparent);
+  border-radius: calc(var(--tile-size) * var(--phi-inverse-squared));
+  border: var(--spacing-f1) solid color-mix(in srgb, var(--tone) var(--mag-3), transparent);
   color: var(--tone);
   cursor: pointer;
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(circle at 50% 115%, color-mix(in srgb, var(--tone) 55%, transparent), transparent 65%),
-    linear-gradient(160deg, color-mix(in srgb, var(--tone) 22%, #0c0f11), color-mix(in srgb, var(--tone) 8%, #0c0f11));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 10px 30px -12px color-mix(in srgb, var(--tone) 60%, transparent);
+    radial-gradient(circle at 50% 115%, color-mix(in srgb, var(--tone) var(--mag-1), transparent), transparent 65%),
+    linear-gradient(160deg, color-mix(in srgb, var(--tone) var(--mag-4), var(--c-ink)), color-mix(in srgb, var(--tone) var(--mag-6), var(--c-ink)));
+  box-shadow: var(--highlight), 0 var(--spacing-f13) var(--spacing-f34) calc(var(--spacing-f13) * -1) color-mix(in srgb, var(--tone) var(--mag-1), transparent);
   transition: transform 0.4s cubic-bezier(0.215, 0.61, 0.355, 1), box-shadow 0.4s;
 }
-.app-tile svg {
-  width: 44%;
-  height: 44%;
-  fill: currentColor;
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--tone) 70%, transparent));
-}
-.app-tile:hover { transform: translateY(-3px); }
-.app-tile:focus-visible { outline: 2px solid var(--tone); outline-offset: 3px; }
-.app-tile[aria-pressed="true"] { background: var(--tone); color: #0c0f11; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 10px 30px -8px var(--tone); }
+.app-tile svg { width: calc(var(--tile-size) * var(--phi-inverse-squared)); height: calc(var(--tile-size) * var(--phi-inverse-squared)); fill: currentColor; filter: drop-shadow(0 0 var(--spacing-f8) color-mix(in srgb, var(--tone) var(--mag-1), transparent)); }
+.app-tile:hover { transform: translateY(calc(var(--spacing-f3) * -1)); }
+.app-tile:focus-visible { outline: var(--spacing-f2) solid var(--tone); outline-offset: var(--spacing-f3); }
+.app-tile[aria-pressed="true"] { background: var(--tone); color: var(--c-ink); box-shadow: var(--highlight), 0 var(--spacing-f13) var(--spacing-f34) calc(var(--spacing-f8) * -1) var(--tone); }
 .app-tile[aria-pressed="true"] svg { filter: none; }
-.app-tile[disabled] { opacity: 0.4; cursor: not-allowed; transform: none; }
-.app-tile.is-sm { --tile-size: 44px; }
-.app-tile.is-lg { --tile-size: 96px; }
+.app-tile[disabled] { opacity: var(--mag-2); cursor: not-allowed; transform: none; }
+.app-tile.is-sm { --tile-size: var(--spacing-f34); }
+.app-tile.is-lg { --tile-size: var(--spacing-f89); }
 
 .app-button {
   --tone: var(--color-deep-space-200);
@@ -189,74 +193,46 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 20px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--tone) 70%, white);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--tone) 82%, white), var(--tone));
-  color: #0c0f11;
-  font: 700 14px/1 var(--font-satoshi), var(--font-inter), sans-serif;
+  gap: var(--spacing-f8);
+  height: var(--spacing-f55);
+  padding: 0 var(--spacing-f21);
+  border-radius: var(--radius-full);
+  border: var(--spacing-f1) solid color-mix(in srgb, var(--c-text) var(--mag-3), var(--tone));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c-text) var(--mag-3), var(--tone)), var(--tone));
+  color: var(--c-ink);
+  font-family: inherit;
+  font-size: var(--text-s0);
+  line-height: 1;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 8px 24px -10px var(--tone);
+  box-shadow: var(--highlight), 0 var(--spacing-f8) var(--spacing-f21) calc(var(--spacing-f8) * -1) var(--tone);
   transition: transform 0.4s cubic-bezier(0.215, 0.61, 0.355, 1), box-shadow 0.4s;
 }
-.app-button svg { width: 18px; height: 18px; fill: currentColor; }
-.app-button:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), 0 12px 28px -8px var(--tone); }
-.app-button:focus-visible { outline: 2px solid var(--tone); outline-offset: 3px; }
+.app-button svg { width: var(--spacing-f21); height: var(--spacing-f21); fill: currentColor; }
+.app-button:hover { transform: translateY(calc(var(--spacing-f2) * -1)); box-shadow: var(--highlight), 0 var(--spacing-f13) var(--spacing-f21) calc(var(--spacing-f5) * -1) var(--tone); }
+.app-button:focus-visible { outline: var(--spacing-f2) solid var(--tone); outline-offset: var(--spacing-f3); }
 .app-button.is-glass {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--tone) 30%, #0c0f11), color-mix(in srgb, var(--tone) 14%, #0c0f11));
-  border-color: color-mix(in srgb, var(--tone) 45%, transparent);
-  color: var(--app-text);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tone) var(--mag-3), var(--c-ink)), color-mix(in srgb, var(--tone) var(--mag-5), var(--c-ink)));
+  border-color: color-mix(in srgb, var(--tone) var(--mag-2), transparent);
+  color: var(--c-text);
   font-weight: 500;
 }
 .app-button.is-glass svg { fill: var(--tone); }
-.app-button.is-outline {
-  background: transparent;
-  border-color: var(--tone);
-  color: var(--tone);
-  box-shadow: none;
-  font-weight: 500;
-}
-.app-button.is-sm { height: 32px; padding: 0 14px; font-size: 12px; }
-.app-button.is-lg { height: 54px; padding: 0 28px; font-size: 16px; }
-.app-button[disabled] { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.app-button.is-outline { background: transparent; border-color: var(--tone); color: var(--tone); box-shadow: none; font-weight: 500; }
+.app-button.is-sm { height: var(--spacing-f34); padding: 0 var(--spacing-f13); font-size: var(--text-s-1); }
+.app-button[disabled] { opacity: var(--mag-2); cursor: not-allowed; transform: none; box-shadow: none; }
 @media (prefers-reduced-motion: reduce) { .app-tile, .app-button { transition: none; } .app-tile:hover, .app-button:hover { transform: none; } }
-.app-source { margin-block: 1rem; }
-.app-source > summary { cursor: pointer; font-weight: 500; padding-block: 0.5rem; }
-.app-variants[data-wide] { grid-template-columns: 1fr; }
-.app-variant pre, .app-variant code { white-space: pre-wrap; overflow-wrap: anywhere; }
 
-/* Playground: controls, preview, code. */
-.app-pg { display: grid; gap: 1rem; margin-block: 1.5rem; }
-.app-pg-controls { display: grid; gap: 0.75rem; }
-.app-pg-row { display: grid; grid-template-columns: 8rem 1fr; gap: 0.75rem; align-items: center; }
-.app-pg-row > span, .app-pg-row > label { font-size: 0.875rem; opacity: 0.75; }
-.app-pg-range { display: flex; align-items: center; gap: 0.75rem; }
-.app-pg-range input { flex: 1; max-width: 22rem; }
-.app-pg-range output { min-width: 3rem; font-variant-numeric: tabular-nums; }
-.app-pg .app-stage { min-height: 14rem; align-content: center; }
-@media (max-width: 36rem) { .app-pg-row { grid-template-columns: 1fr; } }
-
-/* NOW marker pulse. */
-.app-pulse { transform-box: fill-box; transform-origin: center; animation: app-pulse 2s ease-in-out infinite; }
-@keyframes app-pulse { 0%, 100% { transform: scale(0.7); opacity: 0.8; } 55% { transform: scale(1.9); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .app-pulse { animation: none; } }
-
-/* Object graph: a glass plot, an hour axis and an optional horizon strip. */
-.app-og { width: 100%; }
-.app-og-head { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; font-size: 18px; font-weight: 700; }
-.app-og-plot { position: relative; border-radius: 24px; border: 1px solid rgb(255 255 255 / 0.1); background-color: rgb(255 255 255 / 0.05); overflow: hidden; touch-action: pan-y; }
-.app-og-plot svg { display: block; width: 100%; }
-.app-og-plot text, .app-og-horizon text { font-family: inherit; }
-.app-og-axis { display: flex; justify-content: space-between; padding: 8px 16px 0; font-size: 12px; font-weight: 500; color: rgb(255 255 255 / 0.3); }
-.app-og-tip { position: absolute; top: 10px; padding: 8px; display: grid; gap: 2px; border-radius: 8px; background: rgb(0 0 0 / 0.8); border: 1px solid rgb(255 255 255 / 0.24); font-size: 12px; pointer-events: none; }
-.app-og-horizon { margin-top: 12px; border-radius: 16px; border: 1px solid rgb(255 255 255 / 0.1); background: rgb(255 255 255 / 0.03); overflow: hidden; }
-.app-og-horizon svg { display: block; width: 100%; }
-
-/* Visibility card layout: header row, wrapping label, MPSAS over the bars. */
-.app-vis { display: flex; flex-direction: column; padding: 15px; }
-.app-vis-head { display: flex; justify-content: space-between; align-items: center; }
-.app-vis-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-top: 8px; }
-.app-vis-label { font-size: 20px; letter-spacing: -0.3px; white-space: nowrap; }
-.app-vis .app-rating { margin-top: 6px; }
+/* Docs page furniture for the variant listing and the playground. */
+.app-variants { display: grid; gap: var(--spacing-f21); margin-block: var(--spacing-f21); align-items: start; }
+.app-source { margin-block: var(--spacing-f13); }
+.app-source > summary { cursor: pointer; font-weight: 500; padding-block: var(--spacing-f8); }
+.app-pg { display: grid; gap: var(--spacing-f13); margin-block: var(--spacing-f21); }
+.app-pg-controls { display: grid; gap: var(--spacing-f8); }
+.app-pg-row { display: grid; grid-template-columns: var(--spacing-f144) 1fr; gap: var(--spacing-f13); align-items: center; }
+.app-pg-row > span, .app-pg-row > label { font-size: var(--text-s-1); opacity: var(--mag-1); }
+.app-pg-range { display: flex; align-items: center; gap: var(--spacing-f13); }
+.app-pg-range input { flex: 1; max-width: var(--container-f377); }
+.app-pg-range output { min-width: var(--spacing-f55); font-variant-numeric: tabular-nums; }
+.app-pg .app-stage { min-height: var(--spacing-f144); align-content: center; }
+@container (max-width: 38rem) { .app-pg-row { grid-template-columns: 1fr; } }
