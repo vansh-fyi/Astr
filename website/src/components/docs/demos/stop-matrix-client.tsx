@@ -62,7 +62,7 @@ export function StopMatrixClient({
           />
         ))}
       </div>
-      <p className="docs-readout" aria-live="polite" style={{ width: "100%", marginTop: 16, borderRadius: 8 }}>
+      <p className="docs-readout" aria-live="polite" style={{ width: "100%", marginTop: "var(--spacing-f13)", borderRadius: "var(--radius-f8)" }}>
         {readout}
       </p>
     </DemoFrame>

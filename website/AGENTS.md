@@ -89,7 +89,7 @@ This file contains no code on purpose. Rules are written in plain language. The 
 - There is no top bar. The brand and the search field sit at the top of the left sidebar, and a small floating menu button appears on narrow screens.
 - Three panes: sidebar, article, and an on-this-page outline. The sidebar holds two groups, the colour system and the proportion system. The article scrolls without a visible scrollbar. Keep it that way.
 - Do not add banners, headers, footers, announcement strips or other chrome that was not requested.
-- Keep sizing, spacing and radii consistent with the existing shell stylesheet. Reuse its roles instead of introducing new ones. The shell's pane widths, section gaps and core text already use the proportion tokens; move remaining literal sizes onto the scale whenever you touch them.
+- Keep sizing, spacing and radii consistent with the existing shell stylesheet. Reuse its roles instead of introducing new ones. The shell stylesheet carries no raw pixel sizes: every length, font size and radius reads a proportion token, and the verification script fails if a literal appears outside a media query.
 
 ## Writing pages
 

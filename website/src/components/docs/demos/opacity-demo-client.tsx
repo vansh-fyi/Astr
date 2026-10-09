@@ -24,7 +24,7 @@ export function OpacityDemoClient({
       controls={<StopSelect palettes={palettes} value={value} onChange={setValue} />}
       caption="Same result as the Tailwind class form shown below the tiles."
     >
-      <div className="docs-tiles" style={{ backgroundColor: backdrop, padding: 16, borderRadius: 8 }}>
+      <div className="docs-tiles" style={{ backgroundColor: backdrop, padding: "var(--spacing-f13)", borderRadius: "var(--radius-f8)" }}>
         {mags.map((m) => (
           <button
             type="button"
@@ -45,7 +45,7 @@ export function OpacityDemoClient({
           </button>
         ))}
       </div>
-      <div className="docs-readout" style={{ width: "100%", marginTop: 16, borderRadius: 8 }}>
+      <div className="docs-readout" style={{ width: "100%", marginTop: "var(--spacing-f13)", borderRadius: "var(--radius-f8)" }}>
         <code>{form}</code>
         <CopyButton text={form} />
       </div>

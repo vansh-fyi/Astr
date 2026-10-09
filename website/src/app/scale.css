@@ -66,6 +66,7 @@
   --radius-f13: 0.8125rem;
   --radius-f21: 1.3125rem;
   --radius-f34: 2.125rem;
+  --radius-full: calc(infinity * 1px);
 
   /* Widths: Fibonacci. Usage: w-f233, max-w-f610 */
   --container-f233: 14.5625rem;

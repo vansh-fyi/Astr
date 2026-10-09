@@ -60,7 +60,7 @@ function scaleChecks() {
     assert(tok.has(name), `scale.css lacks ${name}`);
     return remPx(tok.get(name));
   };
-  const group = (prefix) => [...tok.keys()].filter((k) => k.startsWith(prefix) && !k.includes("--", prefix.length));
+  const group = (prefix) => [...tok.keys()].filter((k) => k.startsWith(prefix) && /^\d+$/.test(k.slice(prefix.length)));
   for (const prefix of ["--spacing-f", "--radius-f", "--container-f", "--breakpoint-f"]) {
     const keys = group(prefix);
     assert(keys.length > 0, `scale.css has no ${prefix}* tokens`);
@@ -117,6 +117,14 @@ function scaleChecks() {
   assert(lay.get("major") === Number(tok.get("--phi-inverse")) && lay.get("minor") === Number(tok.get("--phi-inverse-squared")) && lay.get("goldenAspect") === 1.618, "AstrLayout golden constants drifted");
   const size = consts(dart("astr_layout.dart"), "AstrSize");
   for (const [name, v] of size) assert(isFib(v), `AstrSize.${name} = ${v} is not a Fibonacci number`);
+
+  // The shell stylesheet may not carry raw pixel sizes: everything is on the scale.
+  const shell = readFileSync(join(ROOT, "src/components/docs/docs.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const rawPx = shell
+    .split("\n")
+    .filter((l) => !l.trim().startsWith("@media") && /(?<![\w.-])-?\d*\.?\d+px\b/.test(l));
+  assert(rawPx.length === 0, `docs.css has raw pixel sizes (use the scale tokens):\n${rawPx.join("\n")}`);
+  ok("docs.css: no raw pixel sizes outside media queries");
   ok("scale.css: Fibonacci spacing, radii, widths and breakpoints, phi-derived type, no colour; Dart mirrors match");
 }
 

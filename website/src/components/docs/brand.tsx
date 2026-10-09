@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 /** The Astr app icon, rendered from the same source as the iOS/Android launcher icon. */
-export function AstrMark({ size = 28 }: { size?: number }) {
+export function AstrMark({ size = 34 }: { size?: number }) {
   return (
     <Image
       src="/astr-icon.png"

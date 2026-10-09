@@ -33,7 +33,7 @@ function SidebarHead({ onSearch }: { onSearch: () => void }) {
   return (
     <>
       <Link className="docs-logo" href="/">
-        <AstrMark size={28} />
+        <AstrMark size={34} />
         <Wordmark />
       </Link>
       <button
@@ -43,8 +43,8 @@ function SidebarHead({ onSearch }: { onSearch: () => void }) {
         aria-label="Search the colour system"
       >
         <svg
-          width="15"
-          height="15"
+          width="13"
+          height="13"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -106,8 +106,8 @@ export function DocsShell({ children }: { children: ReactNode }) {
         onClick={() => mobileDialog.current?.showModal()}
       >
         <svg
-          width="20"
-          height="20"
+          width="21"
+          height="21"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

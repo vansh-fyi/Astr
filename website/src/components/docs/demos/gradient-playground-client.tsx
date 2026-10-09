@@ -68,7 +68,7 @@ export function GradientPlaygroundClient({
       >
         <div className={fillClass} style={style} />
       </div>
-      <div className="docs-readout" style={{ width: "100%", marginTop: 16, borderRadius: 8 }}>
+      <div className="docs-readout" style={{ width: "100%", marginTop: "var(--spacing-f13)", borderRadius: "var(--radius-f8)" }}>
         <code>{usage}</code>
         <CopyButton text={usage} />
       </div>

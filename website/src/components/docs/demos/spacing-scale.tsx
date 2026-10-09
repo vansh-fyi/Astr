@@ -46,7 +46,7 @@ export function RadiusScale() {
         </figure>
       ))}
       <figure>
-        <span style={{ borderRadius: "999px" }} />
+        <span style={{ borderRadius: "var(--radius-full)" }} />
         <figcaption>
           <strong>full</strong>
           <small>Pills, chips, segmented controls</small>

@@ -27,8 +27,8 @@ export function CopyButton({
       aria-label={status === "copied" ? "Copied" : `${label} to clipboard`}
     >
       <svg
-        width="14"
-        height="14"
+        width="13"
+        height="13"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
