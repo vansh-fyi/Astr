@@ -6,6 +6,7 @@ import { useElementWidth } from "../docs/viz/use-width";
 import { CLOUD_HOURLY, LATITUDE, MOON_RISE_MINUTES, NIGHT_END, NIGHT_START, OBJECTS, moonAltitude, objectAltitude } from "@/lib/viz-data";
 import { F, GRAPH, T, TONE_STOP, stop, type Tone } from "./tokens";
 import { legendColor } from "./app-graphs";
+import { GraphPill } from "./graph-pill";
 
 const NOW = 20 * 60 + 15;
 const SPAN = NIGHT_END - NIGHT_START;
@@ -175,14 +176,12 @@ export function AppObjectGraph({
               <line x1={riseX} x2={riseX} y1={plotH} y2={riseY + F.f8} stroke={stop(GRAPH.moonLine, 2)} />
               <circle cx={riseX} cy={riseY + F.f5} r={F.f8} fill={stop(GRAPH.rise, 3)} />
               <circle cx={riseX} cy={riseY + F.f5} r={F.f3} fill={stop(GRAPH.rise)} />
-              <rect x={riseX + F.f8} y={riseY - F.f2} width={F.f89} height={F.f21 - F.f3} rx={F.f5} fill={stop(GRAPH.moon, 4)} stroke={stop(GRAPH.moonLine, 3)} />
-              <text x={riseX + F.f13} y={riseY + F.f8 + F.f2} fontSize={T.s2n} fontWeight={600} letterSpacing={1} fill={stop("deep-space-50")}>MOON RISE</text>
+              <GraphPill x={riseX + F.f13} y={riseY + F.f5} text="MOON RISE" tracking={1} color={stop("deep-space-50")} fill={stop(GRAPH.moon, 4)} stroke={stop(GRAPH.moonLine, 3)} />
               <rect x={nowX - F.f2} y={NOW_TOP} width={F.f3 + F.f1} height={plotH - NOW_TOP} fill="url(#og-now)" filter="url(#og-curve-glow)" />
               <rect x={nowX - F.f1 / 2} y={NOW_TOP} width={F.f1} height={plotH - NOW_TOP} fill="url(#og-now)" />
               <circle className="app-pulse" cx={nowX} cy={NOW_TOP} r={F.f8} fill={stop(GRAPH.now, 2)} />
               <circle cx={nowX} cy={NOW_TOP} r={F.f3} fill={stop(GRAPH.now)} />
-              <rect x={nowX + F.f8} y={NOW_TOP - F.f8} width={F.f34} height={F.f21 - F.f5} rx={F.f5} fill={stop(GRAPH.now, 5)} stroke={stop(GRAPH.now, 3)} />
-              <text x={nowX + F.f13} y={NOW_TOP + F.f3} fontSize={T.s2n} fontWeight={700} fill={stop(GRAPH.now)}>NOW</text>
+              <GraphPill x={nowX + F.f13} y={NOW_TOP} text="NOW" weight={700} color={stop(GRAPH.now)} fill={stop(GRAPH.now, 5)} stroke={stop(GRAPH.now, 3)} />
               {alt(peak) > 0 && <circle cx={x(peak)} cy={altY(peak)} r={F.f5} fill={color} />}
             </>
           ) : (

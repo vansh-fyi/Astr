@@ -6,6 +6,7 @@ import { useElementWidth } from "../docs/viz/use-width";
 import { CLOUD_HOURLY, MOON_RISE_MINUTES, NIGHT_END, NIGHT_START, moonAltitude, primeView } from "@/lib/viz-data";
 import { clock } from "@/lib/viz";
 import { F, GRAPH, T, stop } from "./tokens";
+import { GraphPill, pillWidth } from "./graph-pill";
 
 const LABEL_H = F.f34;
 const NOW = 20 * 60 + 15;
@@ -42,8 +43,7 @@ function NowMarker({ x, top, bottom }: { x: number; top: number; bottom: number 
       <rect x={x - F.f1 / 2} y={top} width={F.f1} height={bottom - top} fill={`url(#${id})`} />
       <circle className="app-pulse" cx={x} cy={top} r={F.f8} fill={stop(GRAPH.now, 2)} />
       <circle cx={x} cy={top} r={F.f3} fill={stop(GRAPH.now)} />
-      <rect x={x + F.f8} y={top - F.f8} width={F.f34} height={F.f21 - F.f5} rx={F.f5} fill={stop(GRAPH.now, 5)} stroke={stop(GRAPH.now, 3)} />
-      <text x={x + F.f13} y={top + F.f3} fontSize={T.s2n} fontWeight={700} fill={stop(GRAPH.now)}>NOW</text>
+      <GraphPill x={x + F.f13} y={top} text="NOW" weight={700} tracking={0.5} color={stop(GRAPH.now)} fill={stop(GRAPH.now, 5)} stroke={stop(GRAPH.now, 3)} />
     </g>
   );
 }
@@ -123,15 +123,13 @@ export function AppConditionsGraph({ layers = {}, height = 233, cloudData = CLOU
             <line x1={riseX} x2={riseX} y1={h} y2={labelY + F.f8} stroke={stop(GRAPH.moonLine, 2)} />
             <circle cx={riseX} cy={labelY + F.f5} r={F.f8} fill={stop(GRAPH.rise, 3)} />
             <circle cx={riseX} cy={labelY + F.f5} r={F.f3} fill={stop(GRAPH.rise)} />
-            <rect x={riseX + F.f8} y={labelY - F.f2} width={F.f89} height={F.f21 - F.f3} rx={F.f5} fill={stop(GRAPH.moon, 4)} stroke={stop(GRAPH.moonLine, 3)} />
-            <text x={riseX + F.f13} y={labelY + F.f8 + F.f2} fontSize={T.s2n} fontWeight={600} letterSpacing={1} fill={stop("deep-space-50")}>MOON RISE</text>
+            <GraphPill x={riseX + F.f13} y={labelY + F.f5} text="MOON RISE" tracking={1} color={stop("deep-space-50")} fill={stop(GRAPH.moon, 4)} stroke={stop(GRAPH.moonLine, 3)} />
           </g>
         )}
         {win && (
           <g>
             <rect x={winStart} y={0} width={winEnd - winStart} height={h} fill="url(#g-prime)" />
-            <rect x={winMid - F.f55 / 2 - F.f8} y={F.f8} width={F.f55 + F.f21} height={F.f21} rx={F.f21 / 2} fill={stop(GRAPH.prime, 5)} stroke={stop(GRAPH.prime, 3)} />
-            <text x={winMid} y={F.f8 + F.f13 + F.f1} fontSize={T.s2n} fontWeight={600} letterSpacing={0.5} fill={stop(GRAPH.prime)} textAnchor="middle">PRIME VIEW</text>
+            <GraphPill x={winMid - pillWidth("PRIME VIEW", 0.5) / 2} y={F.f8 + F.f21 / 2} text="PRIME VIEW" radius={F.f21} color={stop(GRAPH.prime)} fill={stop(GRAPH.prime, 5)} stroke={stop(GRAPH.prime, 3)} />
           </g>
         )}
         {now && <NowMarker x={nowX} top={nowTop} bottom={h} />}
