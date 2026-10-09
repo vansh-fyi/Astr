@@ -1,16 +1,11 @@
 /*
  * Astr proportion system: spacing, type, radii, sizes and layout widths.
  *
- * Every size is a multiple of one liquid unit, --u, so the whole interface
- * scales with the box it sits in (container query units, cqw). The multiples
- * are the Fibonacci numbers and golden-ratio type steps divided by 16, so at
- * the base unit (16 px) they are exactly the pixel values on the docs pages.
- *
- *   --u = 16 px          when the container is 377 px wide or narrower
- *   --u = 16 px * (1 + (w - 377) / (1597 - 377) * (sqrt(phi) - 1))   above that
- *
- * That is 16 px at a phone and 16 * sqrt(phi) = 20.35 px at 1597 px, then it
- * keeps growing at the same rate. Written with cqw: 0.9159rem + 0.3567cqw.
+ * Every size is a multiple of one unit, --u, which is the 16 px base on every
+ * screen. The multiples are the Fibonacci numbers and golden-ratio type steps
+ * divided by 16, so each token is exactly the pixel value shown on the docs
+ * pages. Layout is what is liquid: panes share the screen as Fibonacci
+ * fractions and reading text is capped in characters, never in pixels.
  *
  * Spacing, sizes and radii: Fibonacci numbers (1 2 3 5 8 13 21 34 55 89 144).
  * Type steps: size(n) = round(16 * phi^(n/2)), leading(n) = 1 + phi^-(1 + n/2),
@@ -20,8 +15,8 @@
  * check-docs.mjs recomputes every value from the formulas and fails on drift.
  */
 @theme static {
-  /* The liquid unit. Needs a size container (container-type: inline-size) above it. */
-  --u: max(1rem, 0.9159rem + 0.3567cqw);
+  /* The unit: 16 px on every screen. Every size below is a multiple of it. */
+  --u: 1rem;
 
   --phi: 1.618;
   --phi-inverse: 0.618;

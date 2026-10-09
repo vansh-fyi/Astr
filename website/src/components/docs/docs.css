@@ -48,7 +48,7 @@
     --docs-ease: cubic-bezier(0.23, 1, 0.32, 1);
     --docs-radius: var(--radius-f21);
     --docs-section-gap: var(--spacing-f55);
-    /* The size container: every cqw in the scale resolves against this box. */
+    /* The size container the @container breakpoints below measure. */
     container-type: inline-size;
     position: fixed;
     inset: 0;

@@ -2,10 +2,10 @@ export const meta = {
   title: "Layout and size",
   group: "Proportion system",
   description:
-    "A liquid unit that scales with the screen, golden-section panes, and the size of every common element.",
+    "Panes that share the screen by golden proportions, fixed 16 px sizing, and the size of every common element.",
   sections: [
     { id: "golden", title: "The golden section" },
-    { id: "liquid", title: "Liquid sizing" },
+    { id: "liquid", title: "Proportional layout" },
     { id: "panes", title: "Panes and measure" },
     { id: "breakpoints", title: "Breakpoints" },
     { id: "sizes", title: "Element sizes" },
@@ -28,23 +28,15 @@ On a phone, use it for vertical structure: the main content takes the upper 61.8
 
 </DocSection>
 
-<DocSection id="liquid" title="Liquid sizing">
+<DocSection id="liquid" title="Proportional layout">
 
-Nothing in the system is a fixed pixel size. Every spacing, radius, type size and element size is a multiple of one liquid unit, written `--u`, and the unit follows the width of the box it sits in. The whole interface scales together, so a phone and a wide desktop show the same design at different sizes.
+The size of things is fixed, and the arrangement is liquid. Every spacing, radius, type size and element size is a multiple of one unit, written `--u`, which is the 16 px base on every screen. A button is the same size on a phone and on a wide desktop, and text is the same size too.
 
-The unit is pinned at two golden references. At a container 377 px wide or narrower it is the 16 px base. At 1597 px it has grown by the square root of phi, so everything is about 27 percent larger. In between it rises in a straight line, and above 1597 it keeps rising at the same rate:
-
-$$ u(w) = 16\,\text{px}\cdot\left(1 + \frac{w-377}{1597-377}\left(\sqrt{\varphi}-1\right)\right) \quad (w \ge 377) $$
-
-The two references are Fibonacci numbers, and 1597 / 377 is phi cubed, so the width grows by six half-steps while the unit grows by one. A true proportional scale with no floor would shrink 16 px text to about 4 px on a phone, so the unit never goes below 16 px. That floor is also the minimum text size.
-
-<FluidTable />
-
-The width is the width of the size container, not the viewport. The shell declares itself a container, and every `cqw` inside it resolves against that box. Put a component in a narrower container and it adapts to the space it was given. In Flutter the same factor comes from a `LayoutBuilder`; see the Flutter tab.
+What flexes is how much room things share. Panes take fractions of the screen, and a column of text is limited by how many characters it holds rather than by a width. Nothing is scaled up or down, so the layout always fills the screen and the elements stay familiar.
 
 <DocNote>
 
-Two things stay absolute because the platform needs them: breakpoints, since media and container queries cannot read variables, and the 16 px floor. Touch targets need no extra rule. A 55 unit is at least 55 px, so it always meets the 44 pt and 48 dp minimums.
+Two things are absolute: the 16 px unit, which is also the minimum text size, and the breakpoints, since media and container queries cannot read variables. Touch targets need no extra rule, because a 55 unit is always 55 px and so always meets the 44 pt and 48 dp minimums.
 
 </DocNote>
 
@@ -68,7 +60,7 @@ Breakpoints are Fibonacci numbers too, and each step is about phi wider than the
 
 <DocSection id="sizes" title="Element sizes">
 
-Every element dimension is a Fibonacci number from the spacing scale. The px column is the size at the 16 px base unit, and it grows with the container.
+Every element dimension is a Fibonacci number from the spacing scale, in pixels.
 
 <SizeTable />
 
@@ -79,7 +71,7 @@ Every element dimension is a Fibonacci number from the spacing scale. The px col
 1. **Draw compact, hit large.** A control can be drawn at 34 px tall but its tappable area must reach 55 px, by padding the hit area and never by enlarging the drawn control.
 2. **Cap text by characters.** Reading text is at most 76 characters wide, never a pixel width, and a view has one reading column.
 3. **Panes divide by proportion.** If a view has two panes, the larger takes 61.8 percent. Three panes share the width as Fibonacci fractions. Never give a pane a pixel width.
-4. **Never write a pixel size.** Positions and sizes are multiples of the liquid unit from the scale. There is no separate column grid to keep in sync.
+4. **Never write a pixel size that is not on the scale.** Positions and sizes are multiples of the unit from the scale. There is no separate column grid to keep in sync.
 5. **Keep dark and glass surfaces legible.** Size and spacing never replace contrast. Text on a translucent surface must still meet contrast after compositing.
 
 </DocSection>
@@ -89,8 +81,8 @@ Every element dimension is a Fibonacci number from the spacing scale. The px col
 <CodeTabs flutter={<DartSource file="astr_layout.dart" />}>
 
 ```html
-<!-- Tailwind: @container makes this box the size container -->
-<main class="@container grid grid-cols-[233fr_610fr_144fr] gap-f21 p-f21">
+<!-- Tailwind -->
+<main class="grid grid-cols-[233fr_610fr_144fr] gap-f21 p-f21">
   <p class="max-w-[var(--measure)]">…</p>
   <div class="aspect-golden rounded-f21"></div>
 </main>
@@ -99,7 +91,6 @@ Every element dimension is a Fibonacci number from the spacing scale. The px col
 ```css
 /* the equivalent plain CSS */
 .screen {
-  container-type: inline-size; /* the unit follows this box */
   display: grid;
   grid-template-columns: 233fr 610fr 144fr;
 }

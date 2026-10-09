@@ -71,7 +71,6 @@ function expectPx(tokens: Map<string, string>, token: string, px: number): void 
 
 /** Throws when scale.css drifts from the formulas. Returns the type table. */
 export function readTypeScale(): TypeStep[] {
-  assertFluidMatchesCss();
   const tokens = readTokens();
   for (const f of SPACING) expectPx(tokens, `--spacing-f${f}`, f);
   for (const f of RADII) expectPx(tokens, `--radius-f${f}`, f);
@@ -156,33 +155,6 @@ export function readScaleLines(prefixes: string[]): string {
     .filter((line) => prefixes.some((p) => line.trim().startsWith(p)));
   if (lines.length === 0) throw new Error(`scale.css has no lines for ${prefixes.join(", ")}`);
   return `@theme static {\n${lines.join("\n")}\n}`;
-}
-
-// --- Liquid unit -------------------------------------------------------------
-
-/** Container widths where the liquid unit is pinned: base at the first, sqrt(phi) times base at the second. */
-export const FLUID_MIN = 377;
-export const FLUID_MAX = 1597;
-
-/** u(w) / 16: 1 up to FLUID_MIN, then rising linearly so that it is sqrt(phi) at FLUID_MAX. */
-export const fluidFactor = (width: number): number =>
-  Math.max(1, 1 + ((width - FLUID_MIN) / (FLUID_MAX - FLUID_MIN)) * (Math.sqrt(PHI) - 1));
-
-/** The cqw expression written in scale.css: 0.9159rem + 0.3567cqw, in px for a width. */
-export const fluidUnitFromCss = (width: number): number =>
-  Math.max(16, 0.9159 * 16 + 0.003567 * width);
-
-/** Throws when the --u expression in scale.css drifts from the formula. */
-export function assertFluidMatchesCss(): void {
-  const css = readFileSync(SCALE_CSS_PATH, "utf8");
-  const m = /--u:\s*max\(1rem,\s*([\d.]+)rem \+ ([\d.]+)cqw\);/.exec(css);
-  if (!m) throw new Error("scale.css has no --u: max(1rem, Arem + Bcqw)");
-  for (const w of [FLUID_MIN, 987, FLUID_MAX, 2560]) {
-    const css_px = Math.max(16, parseFloat(m[1]) * 16 + (parseFloat(m[2]) / 100) * w);
-    const exact = BASE * fluidFactor(w);
-    if (Math.abs(css_px - exact) > 0.02)
-      throw new Error(`--u is ${css_px.toFixed(3)}px at ${w}px in scale.css but the formula gives ${exact.toFixed(3)}px`);
-  }
 }
 
 /** Longest line of reading text, from scale.css. */
