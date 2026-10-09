@@ -45,7 +45,7 @@ Scaffold(
 
 <ReactExcerpt file="src/components/app/app-nav-bar.tsx" symbols={["barPath", "AppNavBar", "NavItem"]} />
 
-<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-navbar", ".app-navbar.is-bottom > svg", ".app-navbar-items", ".app-navbar-gap", ".app-navbar-item", ".app-navbar-item[aria-current=\"page\"]", ".app-navbar-action", ".app-navbar.is-top", ".app-navbar-date"]} />
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-navbar", ".app-navbar.is-bottom > svg", ".app-navbar-items", ".app-navbar-gap", ".app-tile.is-round", ".app-navbar-tab", ".app-navbar-tab[data-active] .app-micro", ".app-navbar-action", ".app-navbar.is-top", ".app-navbar-date"]} />
 </CodeTabs>
 
 <DocNote>The Flutter tab is the app's own source: <code>NavBarClipper</code> cuts the notch, <code>NotchShinePainter</code> draws its shine and <code>_NavBarItem</code> is one tab. The web bar draws the same shapes from design tokens, so its sizes (89 tall, 34 deep notch) differ from the app's (70, 42) until the app moves to the tokens.</DocNote>
@@ -108,20 +108,20 @@ Scaffold(
   ],
   [
     "Tab",
-    "icon --spacing-f21, label --text-s-2, padding f8 f13",
-    "AstrSize.icon, AstrType.sNeg2",
-    "icon 24, label 8"
+    "an icon tile (--spacing-f34) with its label (--text-s-2) under it",
+    "AstrGlassTile(size: AstrTileSize.sm)",
+    "icon 24, label 8, no tile"
   ],
   [
-    "Active",
-    "space-grey-50, label glow in deep-space-200",
-    "Mag.m3",
+    "Active tab",
+    "tile selected in deep-space-200, label lit with a deep-space-200 glow",
+    "selected: true, AstrTone.deepSpace",
     "textPrimary, #3A7FFF shadow"
   ],
   [
-    "Inactive",
-    "space-grey-300",
-    "AstrColors.spaceGrey[300]",
+    "Inactive tab",
+    "tile in space-grey-300",
+    "tone space-grey-300",
     "textSubdued #7D8792"
   ],
   [
@@ -132,9 +132,9 @@ Scaffold(
   ],
   [
     "Centre action",
-    "tile --spacing-f55",
-    "AstrSize.control",
-    "FAB 52"
+    "a round tile, --spacing-f55",
+    "AstrGlassTile, circular",
+    "FAB 52, circle"
   ],
   [
     "Top bar",

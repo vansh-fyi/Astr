@@ -93,7 +93,7 @@ export function AppNavBar({
         ))}
       </nav>
       {action && (
-        <button type="button" className="app-ui app-tile app-navbar-action" aria-label="Sky map">
+        <button type="button" className="app-ui app-tile is-round app-navbar-action" aria-label="Sky map">
           <Glyph name="map" />
         </button>
       )}
@@ -103,9 +103,11 @@ export function AppNavBar({
 
 function NavItem({ tab, active, onSelect }: { tab: { id: NavTab; label: string; glyph: GlyphName }; active: boolean; onSelect: (t: NavTab) => void }) {
   return (
-    <button type="button" className="app-navbar-item" aria-current={active ? "page" : undefined} onClick={() => onSelect(tab.id)}>
-      <Glyph name={tab.glyph} />
-      <span className="app-micro">{tab.label}</span>
-    </button>
+    <div className="app-navbar-tab" data-active={active || undefined} onClick={() => onSelect(tab.id)}>
+      <button type="button" className="app-ui app-tile is-sm" aria-label={tab.label} aria-current={active ? "page" : undefined} aria-pressed={active}>
+        <Glyph name={tab.glyph} />
+      </button>
+      <span className="app-micro" aria-hidden="true">{tab.label}</span>
+    </div>
   );
 }

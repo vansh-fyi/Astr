@@ -386,29 +386,11 @@
 .app-navbar.is-bottom > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .app-navbar-items { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--spacing-f21); }
 .app-navbar-gap { flex: 0 0 var(--spacing-f89); }
-.app-navbar-item {
-  all: unset;
-  box-sizing: border-box;
-  cursor: pointer;
-  display: grid;
-  justify-items: center;
-  gap: var(--spacing-f3);
-  padding: var(--spacing-f8) var(--spacing-f13);
-  border-radius: var(--radius-f13);
-  color: var(--c-muted);
-  font-family: inherit;
-  transition: color 0.3s;
-}
-.app-navbar-item svg { width: var(--spacing-f21); height: var(--spacing-f21); fill: currentColor; }
-.app-navbar-item[aria-current="page"] { color: var(--c-text); }
-.app-navbar-item[aria-current="page"] .app-micro { text-shadow: 0 var(--spacing-f1) var(--spacing-f13) var(--c-accent), 0 0 var(--spacing-f1) color-mix(in srgb, var(--c-text) var(--mag-3), transparent); }
-.app-navbar-item:focus-visible { outline: var(--spacing-f2) solid var(--c-accent); outline-offset: var(--spacing-f2); }
 .app-navbar-action { position: absolute; left: 50%; top: calc(var(--spacing-f55) / -2); transform: translateX(-50%); }
 .app-navbar-action:hover { transform: translate(-50%, calc(var(--spacing-f3) * -1)); }
 .app-navbar.is-top { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-f8); padding: var(--spacing-f8) var(--spacing-f13); border-radius: var(--radius-f21); border: var(--spacing-f1) solid var(--hair); background: var(--sheen), var(--fill); box-shadow: var(--highlight); box-sizing: border-box; }
 .app-navbar-logo { flex: none; width: var(--spacing-f34); height: var(--spacing-f34); border-radius: var(--radius-f8); }
 .app-navbar-date { display: flex; align-items: center; gap: var(--spacing-f5); }
-@media (prefers-reduced-motion: reduce) { .app-navbar-item { transition: none; } }
 .app-navbar-loc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-navbar.is-top > .app-button { min-width: 0; max-width: var(--spacing-f144); }
 
@@ -438,7 +420,15 @@
 }
 .app-navbar-action:active { transform: translate(-50%, 0) scale(0.97); }
 .app-toggle:active .app-toggle-track { box-shadow: var(--highlight), 0 var(--spacing-f8) var(--spacing-f21) calc(var(--spacing-f8) * -1) var(--tone); }
-.app-navbar-item:active { color: var(--c-text); }
-.app-navbar-item:active .app-micro { text-shadow: 0 var(--spacing-f1) var(--spacing-f13) var(--c-accent), 0 0 var(--spacing-f1) color-mix(in srgb, var(--c-text) var(--mag-3), transparent); }
 .app-hour:active { box-shadow: var(--highlight), 0 var(--spacing-f8) var(--spacing-f21) calc(var(--spacing-f8) * -1) var(--c-accent); }
 @media (prefers-reduced-motion: reduce) { .app-button:active, .app-tile:active, .app-navbar-action:active { transform: none; } .app-navbar-action:active { transform: translateX(-50%); } }
+
+/* Nav bar tabs are icon tiles with their label under them. */
+.app-tile.is-round { border-radius: var(--radius-full); }
+.app-navbar-tab { display: grid; justify-items: center; gap: var(--spacing-f3); cursor: pointer; }
+.app-navbar-tab .app-micro { color: var(--c-muted); transition: color 0.3s; }
+.app-navbar-tab[data-active] .app-micro,
+.app-navbar-tab:has(.app-tile:active) .app-micro { color: var(--c-text); text-shadow: 0 var(--spacing-f1) var(--spacing-f13) var(--c-accent), 0 0 var(--spacing-f1) color-mix(in srgb, var(--c-text) var(--mag-3), transparent); }
+.app-navbar-tab .app-tile { --tone: var(--color-space-grey-300); }
+.app-navbar-tab[data-active] .app-tile { --tone: var(--color-deep-space-200); }
+@media (prefers-reduced-motion: reduce) { .app-navbar-tab .app-micro { transition: none; } }

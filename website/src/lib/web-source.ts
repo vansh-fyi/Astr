@@ -24,8 +24,9 @@ export function readCssRules(path: string, selectors: string[]): string {
   for (const selector of selectors) {
     const start = lines.findIndex((l) => l.startsWith(`${selector} {`) || l.startsWith(`${selector},`));
     if (start === -1) throw new Error(`${selector} not found in ${path}`);
+    // A rule ends at the first line that closes a brace: its own line for a one-line rule, or the closing line.
     let end = start;
-    if (!lines[start].trimEnd().endsWith("}")) while (!lines[end].startsWith("}")) end++;
+    while (end < lines.length - 1 && !lines[end].trimEnd().endsWith("}")) end++;
     out.push(lines.slice(start, end + 1).join("\n"));
   }
   return out.join("\n\n");
