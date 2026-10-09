@@ -35,61 +35,63 @@ class VisibilityMiniCard extends StatelessWidget {
               border: Border.all(color: AppColors.borderPrimary),
               borderRadius: BorderRadius.circular(AppSpacing.kCardRadius),
             ),
-            child: Stack(
-              children: <Widget>[
-                // Label 'VISIBILITY'
-                Positioned(
-                  top: 15,
-                  left: 15,
-                  child: Text(
-                    'VISIBILITY',
-                    style: AppTypography.labelSm.copyWith(color: AppColors.textMuted),
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  // Label and zone pill share one row, centred on each other.
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          'VISIBILITY',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelSm.copyWith(color: AppColors.textMuted),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.zonePillFill,
+                          borderRadius: BorderRadius.circular(AppSpacing.kBadgeRadius),
+                          border: Border.all(color: AppColors.accent),
+                        ),
+                        child: Text(
+                          'Zone $astrZone',
+                          style: AppTypography.micro.copyWith(
+                            color: AppColors.zonePillText,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                // Zone pill
-                Positioned(
-                  top: 15,
-                  right: 15,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.zonePillFill,
-                      borderRadius: BorderRadius.circular(AppSpacing.kBadgeRadius),
-                      border: Border.all(color: AppColors.accent),
-                    ),
+                  const SizedBox(height: 8),
+                  // Sky label (e.g. "Rural Sky"): wraps to a second line instead of overflowing.
+                  Expanded(
                     child: Text(
-                      'Zone $astrZone',
-                      style: AppTypography.micro.copyWith(
-                        color: AppColors.zonePillText,
-                        fontWeight: FontWeight.w700,
+                      _getSkyLabel(astrZone),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.title.copyWith(
+                        fontSize: 28,
+                        height: 1.1,
+                        letterSpacing: -0.5,
                       ),
                     ),
                   ),
-                ),
-                // Sky type label (e.g. "Rural Sky")
-                Positioned(
-                  top: 50,
-                  left: 15,
-                  child: Text(
-                    _getSkyLabel(astrZone),
-                    style: AppTypography.title.copyWith(fontSize: 28, letterSpacing: -0.5),
-                  ),
-                ),
-                // MPSAS value
-                Positioned(
-                  top: 86,
-                  left: 15,
-                  child: Text(
+                  // MPSAS value sits directly above the rating bars.
+                  Text(
                     '${lightPollution.mpsas.toStringAsFixed(2)} MPSAS',
                     style: AppTypography.labelSm.copyWith(color: AppColors.textMuted),
                   ),
-                ),
-                // Rating bars
-                Positioned(
-                  bottom: 15,
-                  left: 15,
-                  right: 15,
-                  child: Row(
+                  const SizedBox(height: 6),
+                  // Rating bars
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List<Widget>.generate(5, (int index) {
                       final bool isActive = index < activeBars;
@@ -104,8 +106,8 @@ class VisibilityMiniCard extends StatelessWidget {
                       );
                     }),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
