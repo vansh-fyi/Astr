@@ -4,6 +4,8 @@ import { useId, useState, type ReactNode } from "react";
 import { CodeBlock } from "../docs/code-block";
 import { AppButton, AppIconTile, type GlyphName, type TileTone } from "./app-icons";
 import { AppToggle } from "./app-toggle";
+import { AppTextField } from "./app-text-field";
+import { AppNavBar, type NavTab } from "./app-nav-bar";
 import { TONE_LABEL, dartTone, type Tone } from "./tokens";
 import { AppCloudCoverGraph, AppConditionsGraph } from "./app-graphs";
 import { AppObjectGraph } from "./app-object-graph";
@@ -44,6 +46,25 @@ const attrs = (pairs: [string, unknown, unknown?][]): string =>
     .map(([name, value]) => (value === true ? ` ${name}` : typeof value === "number" ? ` ${name}={${value}}` : ` ${name}="${value}"`))
     .join("");
 
+const textFieldLabel = (v: Values): string => (v.kind === "search" ? "Search objects" : v.kind === "email" ? "Email" : v.kind === "multiline" ? "Notes" : "Location");
+const textFieldHint = (v: Values): string => (v.kind === "search" ? "Jupiter, M31, Orion" : v.kind === "email" ? "you@example.com" : v.kind === "multiline" ? "What did you see tonight?" : "Where are you observing from?");
+const textFieldProps = (v: Values) => ({
+  label: textFieldLabel(v),
+  placeholder: textFieldHint(v),
+  type: (v.kind === "multiline" ? "text" : v.kind) as "text" | "search" | "email",
+  multiline: v.kind === "multiline",
+  glyph: v.icon && v.kind !== "multiline" ? (v.kind === "search" ? ("search" as GlyphName) : ("pin" as GlyphName)) : undefined,
+  help: v.help && v.state !== "error" ? "Shown under the field" : undefined,
+  error: v.state === "error" ? "This value is not valid" : undefined,
+  size: v.size === "sm" ? ("sm" as const) : undefined,
+  tone: v.tone as Tone,
+  disabled: v.state === "disabled",
+});
+const textFieldAttrs = (v: Values): string => {
+  const p = textFieldProps(v);
+  return `${attrs([["label", p.label, ""], ["type", p.type, "text"], ["placeholder", p.placeholder, ""], ["glyph", p.glyph ?? "", ""], ["help", p.help ?? "", ""], ["error", p.error ?? "", ""], ["size", p.size ?? "", ""], ["tone", p.tone, "deep-space"]])}${p.multiline ? " multiline" : ""}${p.disabled ? " disabled" : ""}`;
+};
+
 const CONFIGS: Record<string, Config> = {
   "icon-tile": {
     controls: [
@@ -77,6 +98,36 @@ const CONFIGS: Record<string, Config> = {
     react: (v) => `<AppButton${attrs([["glyph", v.icon ? "compass" : "", ""], ["tone", v.tone, "deep-space"], ["variant", v.variant, "filled"], ["size", v.size, "md"], ["disabled", v.disabled]])}>Explore</AppButton>`,
     flutter: (v) =>
       `AstrGlassButton(\n  label: 'Explore',\n${v.icon ? "  icon: Icons.explore,\n" : ""}${v.tone !== "deep-space" ? `  tone: AstrTone.${dartTone(v.tone as Tone)},\n` : ""}${v.variant !== "filled" ? `  variant: AstrButtonVariant.${v.variant},\n` : ""}${v.size === "sm" ? "  compact: true,\n" : ""}  onPressed: ${v.disabled ? "null" : "() {}"},\n)`,
+  },
+  "text-field": {
+    controls: [
+      { kind: "segment", key: "kind", label: "Type", options: [{ value: "text", label: "Text" }, { value: "search", label: "Search" }, { value: "email", label: "Email" }, { value: "multiline", label: "Multiline" }] },
+      { kind: "segment", key: "size", label: "Size", options: [{ value: "md", label: "Medium" }, { value: "sm", label: "Small" }] },
+      { kind: "segment", key: "state", label: "State", options: opts("default", "error", "disabled") },
+      { kind: "segment", key: "tone", label: "Focus tone", options: TONES },
+      { kind: "toggle", key: "icon", label: "Icon" },
+      { kind: "toggle", key: "help", label: "Help text" },
+    ],
+    initial: { kind: "text", size: "md", state: "default", tone: "deep-space", icon: true, help: true },
+    preview: (v) => <AppTextField key={`${v.kind}`} {...textFieldProps(v)} />,
+    react: (v) => `<AppTextField${textFieldAttrs(v)} />`,
+    flutter: (v) =>
+      `AstrGlassTextField(\n  label: '${textFieldLabel(v)}',\n  hintText: '${textFieldHint(v)}',\n${v.help && v.state !== "error" ? "  helperText: 'Shown under the field',\n" : ""}${v.state === "error" ? "  errorText: 'This value is not valid',\n" : ""}${v.icon && v.kind !== "multiline" ? `  icon: ${v.kind === "search" ? "Icons.search" : "Icons.place"},\n` : ""}${v.tone !== "deep-space" ? `  tone: AstrTone.${dartTone(v.tone as Tone)},\n` : ""}${v.size === "sm" ? "  compact: true,\n" : ""}${v.kind === "multiline" ? "  maxLines: 3,\n" : ""}${v.state === "disabled" ? "  enabled: false,\n" : ""})`,
+  },
+  "nav-bar": {
+    controls: [
+      { kind: "segment", key: "variant", label: "Variant", options: [{ value: "bottom", label: "Bottom bar" }, { value: "top", label: "Top bar" }] },
+      { kind: "segment", key: "active", label: "Active tab", options: [{ value: "home", label: "Home" }, { value: "objects", label: "Objects" }, { value: "forecast", label: "Forecast" }, { value: "settings", label: "Settings" }] },
+      { kind: "toggle", key: "action", label: "Centre action" },
+    ],
+    initial: { variant: "bottom", active: "home", action: true },
+    column: true,
+    preview: (v) => <AppNavBar key={`${v.variant}-${v.active}-${v.action}`} variant={v.variant as "bottom"} active={v.active as NavTab} action={Boolean(v.action)} />,
+    react: (v) => `<AppNavBar${attrs([["variant", v.variant, "bottom"], ["active", v.active, "home"], ["action", v.action ? "" : "false", ""]]).replace(' action="false"', " action={false}")} />`,
+    flutter: (v) =>
+      v.variant === "bottom"
+        ? `// ScaffoldWithNavBar: the bottom bar and its notch\nbottomNavigationBar: Stack(/* NavBarClipper, _NavBarItem x4 */)\n// active tab: navigationShell.currentIndex == ${["home", "objects", "forecast", "settings"].indexOf(String(v.active))}${v.action ? "\nfloatingActionButton: FloatingActionButton(/* sky map */)" : ""}`
+        : "// ScaffoldWithNavBar: the global header\nPositioned(top: 0, child: SafeArea(/* location pill, logo, date stepper */))",
   },
   toggle: {
     controls: [

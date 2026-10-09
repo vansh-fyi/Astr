@@ -29,6 +29,14 @@ export const DOCS_GROUPS = [
     ],
   },
   {
+    name: "Forms",
+    links: [{ href: "/components/text-field", label: "Text field" }],
+  },
+  {
+    name: "Navigation",
+    links: [{ href: "/components/nav-bar", label: "Nav bar" }],
+  },
+  {
     name: "Indicators",
     links: [{ href: "/components/cloud-bar", label: "Cloud bar" }],
   },

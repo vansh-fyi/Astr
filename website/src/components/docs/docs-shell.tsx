@@ -31,7 +31,7 @@ function DocumentationNav({ onNavigate }: { onNavigate?: () => void }) {
 
 function SidebarHead({ onSearch }: { onSearch: () => void }) {
   return (
-    <>
+    <div className="docs-sidebar-head">
       <Link className="docs-logo" href="/">
         <AstrMark size={34} />
         <Wordmark />
@@ -57,7 +57,7 @@ function SidebarHead({ onSearch }: { onSearch: () => void }) {
         <span>Search…</span>
         <kbd>⌘ K</kbd>
       </button>
-    </>
+    </div>
   );
 }
 
@@ -114,7 +114,9 @@ export function DocsShell({ children }: { children: ReactNode }) {
       <div className="docs-workspace">
         <aside className="docs-sidebar">
           <SidebarHead onSearch={() => searchDialog.current?.showModal()} />
-          <DocumentationNav />
+          <div className="docs-sidebar-scroll">
+            <DocumentationNav />
+          </div>
         </aside>
         <main
           id="documentation-content"

@@ -1,0 +1,208 @@
+export const meta = {
+  title: "Text field",
+  group: "Components",
+  description:
+    "A text field on the glass material: a label above, the control with an optional glyph, and a line of help or error text below. Focus draws its tone on the border.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery column>
+  <AppTextField label="Location" placeholder="Where are you observing from?" glyph="pin" help="Shown under the field" />
+  <AppTextField label="Search objects" type="search" placeholder="Jupiter, M31, Orion" glyph="search" />
+  <AppTextField label="Email" type="email" placeholder="you@example.com" error="This value is not valid" />
+  <AppTextField label="Notes" multiline placeholder="What did you see tonight?" />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="text-field" />
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`AstrGlassTextField(
+  label: 'Location',
+  hintText: 'Where are you observing from?',
+  icon: Icons.place,
+  helperText: 'Shown under the field',
+  onChanged: (String text) {},
+)`} />
+
+<DartExcerpt file="content/flutter/astr_glass.dart" symbols={["AstrGlassTextField"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppTextField label="Location" placeholder="Where are you observing from?" glyph="pin" />
+<AppTextField label="Email" type="email" error="This value is not valid" />
+<AppTextField label="Notes" multiline />`} />
+
+<ReactExcerpt file="src/components/app/app-text-field.tsx" symbols={["AppTextField"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-field", ".app-field-control", ".app-field.is-sm .app-field-control", ".app-field-control:focus-within", ".app-field.is-error .app-field-control", ".app-field svg", ".app-field-help"]} />
+</CodeTabs>
+
+<DocNote>There is no text field in the app yet. The Flutter tab is the proposed implementation, built from <code>AstrColors</code>, <code>Mag</code>, <code>AstrSpace</code> and <code>AstrType</code>.</DocNote>
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "label",
+    "label",
+    "string",
+    "required",
+    "Drawn above the control and read by screen readers."
+  ],
+  [
+    "type",
+    "keyboardType",
+    "text, search, email, number",
+    "text",
+    "The kind of input."
+  ],
+  [
+    "multiline",
+    "maxLines",
+    "boolean / int",
+    "false",
+    "A textarea of three rows (web), or more lines (Flutter)."
+  ],
+  [
+    "placeholder",
+    "hintText",
+    "string",
+    "none",
+    "Shown while empty."
+  ],
+  [
+    "help",
+    "helperText",
+    "string",
+    "none",
+    "One line under the field."
+  ],
+  [
+    "error",
+    "errorText",
+    "string",
+    "none",
+    "Replaces the help text and turns the border red."
+  ],
+  [
+    "glyph",
+    "icon",
+    "GlyphName / IconData",
+    "none",
+    "Leading icon."
+  ],
+  [
+    "size",
+    "compact",
+    "sm / boolean",
+    "55 tall",
+    "Small is 34 tall."
+  ],
+  [
+    "tone",
+    "tone",
+    "AstrTone",
+    "deep-space",
+    "The colour of the focus border."
+  ],
+  [
+    "value, onChange",
+    "controller, onChanged",
+    "string",
+    "none",
+    "Controlled text; the web also takes defaultValue."
+  ],
+  [
+    "disabled",
+    "enabled: false",
+    "boolean",
+    "false",
+    "Not editable."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
+
+<DocTable
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
+  rows={[
+  [
+    "Control height",
+    "--spacing-f55, small --spacing-f34",
+    "AstrSize.control, controlCompact",
+    "new"
+  ],
+  [
+    "Radius",
+    "--radius-f13, small --radius-f8",
+    "AstrRadius.f13, f8",
+    "new"
+  ],
+  [
+    "Padding",
+    "0 --spacing-f13, small f8",
+    "AstrSpace.f13, f8",
+    "new"
+  ],
+  [
+    "Label",
+    "--text-s-1, 500",
+    "AstrType.sNeg1",
+    "new"
+  ],
+  [
+    "Text",
+    "--text-s0 (16, no zoom on phones)",
+    "AstrType.s0",
+    "new"
+  ],
+  [
+    "Help, error",
+    "--text-s-2; error --color-oxygen-airglow-400",
+    "AstrType.sNeg2; AstrColors.oxygenAirglow[400]",
+    "new"
+  ],
+  [
+    "Surface",
+    "--sheen over --fill, border --hair-strong",
+    "Mag.m5, m7",
+    "new"
+  ],
+  [
+    "Focus",
+    "border the tone, ring tone at --mag-3 (--spacing-f3)",
+    "tone.color",
+    "new"
+  ],
+  [
+    "Disabled",
+    "opacity --mag-2",
+    "Mag.m2",
+    "new"
+  ]
+]}
+/>
+
+</DocSection>

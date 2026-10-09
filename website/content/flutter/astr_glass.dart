@@ -360,3 +360,94 @@ class AstrGlassToggle extends StatelessWidget {
     );
   }
 }
+
+/// A text field on the glass material: a label above, the control with an
+/// optional leading icon, and a line of help or error text below. The control
+/// is [AstrSize.control] tall (55), or [AstrSize.controlCompact] (34); focus
+/// draws [tone] on the border.
+class AstrGlassTextField extends StatelessWidget {
+  const AstrGlassTextField({
+    super.key,
+    required this.label,
+    this.controller,
+    this.hintText,
+    this.helperText,
+    this.errorText,
+    this.icon,
+    this.tone = AstrTone.deepSpace,
+    this.compact = false,
+    this.maxLines = 1,
+    this.enabled = true,
+    this.onChanged,
+    this.keyboardType,
+  });
+
+  final String label;
+  final TextEditingController? controller;
+  final String? hintText;
+  final String? helperText;
+  final String? errorText;
+  final IconData? icon;
+  final AstrTone tone;
+  final bool compact;
+
+  /// 1 for a single line, more for a multiline field.
+  final int maxLines;
+  final bool enabled;
+  final ValueChanged<String>? onChanged;
+  final TextInputType? keyboardType;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color text = AstrColors.spaceGrey[50]!;
+    final Color muted = AstrColors.spaceGrey[300]!;
+    final Color error = AstrColors.oxygenAirglow[400]!;
+    final double radius = compact ? AstrRadius.f8 : AstrRadius.f13;
+
+    OutlineInputBorder border(Color color) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radius),
+          borderSide: BorderSide(color: color),
+        );
+
+    return Opacity(
+      opacity: enabled ? 1 : Mag.m2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            label,
+            style: TextStyle(fontFamily: 'Satoshi', fontSize: AstrType.sNeg1, fontWeight: FontWeight.w500, color: text),
+          ),
+          const SizedBox(height: AstrSpace.f5),
+          TextField(
+            controller: controller,
+            enabled: enabled,
+            onChanged: onChanged,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            style: TextStyle(fontSize: compact ? AstrType.sNeg1 : AstrType.s0, color: text),
+            cursorColor: tone.color,
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: TextStyle(color: muted.withValues(alpha: Mag.m1)),
+              helperText: helperText,
+              helperStyle: TextStyle(fontSize: AstrType.sNeg2, color: muted),
+              errorText: errorText,
+              errorStyle: TextStyle(fontSize: AstrType.sNeg2, color: error),
+              prefixIcon: icon == null ? null : Icon(icon, size: compact ? AstrSpace.f13 : AstrSize.icon, color: muted),
+              filled: true,
+              fillColor: text.withValues(alpha: Mag.m7),
+              constraints: BoxConstraints(minHeight: compact ? AstrSize.controlCompact : AstrSize.control),
+              contentPadding: EdgeInsets.symmetric(horizontal: compact ? AstrSpace.f8 : AstrSpace.f13, vertical: AstrSpace.f13),
+              enabledBorder: border(text.withValues(alpha: Mag.m5)),
+              focusedBorder: border(tone.color),
+              errorBorder: border(error),
+              focusedErrorBorder: border(error),
+              disabledBorder: border(text.withValues(alpha: Mag.m5)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,0 +1,148 @@
+export const meta = {
+  title: "Nav bar",
+  group: "Components",
+  description:
+    "The app's two bars: the bottom tab bar with a notch for the centre action, and the top bar with the location pill, the logo and the date stepper.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery column>
+  <AppNavBar variant="top" />
+  <AppNavBar />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="nav-bar" />
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`// ScaffoldWithNavBar owns both bars. Tabs: Home 0, Objects 1, Forecast 2, Settings 3.
+Scaffold(
+  bottomNavigationBar: Stack(/* NavBarClipper and four _NavBarItem */),
+  floatingActionButton: FloatingActionButton(/* sky map */),
+)`} />
+
+<SourceExcerpt file="lib/app/router/scaffold_with_nav_bar.dart" symbols={["NavBarClipper", "NotchShinePainter", "_NavBarItem"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppNavBar />
+<AppNavBar variant="bottom" active="forecast" action={false} />
+<AppNavBar variant="top" />`} />
+
+<ReactExcerpt file="src/components/app/app-nav-bar.tsx" symbols={["barPath", "AppNavBar", "NavItem"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-navbar", ".app-navbar.is-bottom > svg", ".app-navbar-items", ".app-navbar-gap", ".app-navbar-item", ".app-navbar-item[aria-current=\"page\"]", ".app-navbar-action", ".app-navbar.is-top", ".app-navbar-date"]} />
+</CodeTabs>
+
+<DocNote>The Flutter tab is the app's own source: <code>NavBarClipper</code> cuts the notch, <code>NotchShinePainter</code> draws its shine and <code>_NavBarItem</code> is one tab. The web bar draws the same shapes from design tokens, so its sizes (89 tall, 34 deep notch) differ from the app's (70, 42) until the app moves to the tokens.</DocNote>
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "variant",
+    "the two bars of ScaffoldWithNavBar",
+    "bottom, top",
+    "bottom",
+    "The tab bar with a notch, or the header."
+  ],
+  [
+    "active",
+    "navigationShell.currentIndex",
+    "home, objects, forecast, settings",
+    "home",
+    "The selected tab. The web bar keeps its own state when you tap."
+  ],
+  [
+    "action",
+    "floatingActionButton",
+    "boolean",
+    "true",
+    "The centre action in the notch (the sky map)."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
+
+<DocTable
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
+  rows={[
+  [
+    "Bottom bar height",
+    "--spacing-f89",
+    "AstrSpace.f89",
+    "70 + safe area"
+  ],
+  [
+    "Notch",
+    "depth --spacing-f34, half-width --spacing-f55",
+    "AstrSpace.f34, f55",
+    "depth 42, half-width 50"
+  ],
+  [
+    "Surface",
+    "--sheen over space-grey-950 at --mag-1",
+    "AstrColors.spaceGrey[950], Mag.m1",
+    "AppColors.surfaceGlass #CC0C0F11"
+  ],
+  [
+    "Tab",
+    "icon --spacing-f21, label --text-s-2, padding f8 f13",
+    "AstrSize.icon, AstrType.sNeg2",
+    "icon 24, label 8"
+  ],
+  [
+    "Active",
+    "space-grey-50, label glow in deep-space-200",
+    "Mag.m3",
+    "textPrimary, #3A7FFF shadow"
+  ],
+  [
+    "Inactive",
+    "space-grey-300",
+    "AstrColors.spaceGrey[300]",
+    "textSubdued #7D8792"
+  ],
+  [
+    "Notch shine",
+    "deep-space-200, --spacing-f2 stroke",
+    "Mag.m1",
+    "AppColors.accent, 2"
+  ],
+  [
+    "Centre action",
+    "tile --spacing-f55",
+    "AstrSize.control",
+    "FAB 52"
+  ],
+  [
+    "Top bar",
+    "pills --spacing-f34 tall, --radius-full",
+    "AstrSize.controlCompact",
+    "30, radius 30"
+  ]
+]}
+/>
+
+</DocSection>

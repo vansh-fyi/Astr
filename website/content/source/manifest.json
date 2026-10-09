@@ -51,6 +51,7 @@
     "lib/core/design/app_spacing.dart",
     "lib/core/design/app_typography.dart",
     "lib/features/dashboard/presentation/widgets/moon_phase_card.dart",
-    "lib/features/dashboard/presentation/widgets/altitude_graph.dart"
+    "lib/features/dashboard/presentation/widgets/altitude_graph.dart",
+    "lib/app/router/scaffold_with_nav_bar.dart"
   ]
 }

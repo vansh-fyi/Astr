@@ -105,11 +105,23 @@
     position: relative;
   }
   .docs-sidebar {
+    display: flex;
+    flex-direction: column;
     height: 100%;
     min-height: 0;
-    overscroll-behavior: contain;
+    padding: var(--spacing-f34) var(--spacing-f21) 0 0;
+    overflow: hidden;
+  }
+  /* The logo and the search stay put; only the navigation under them scrolls. */
+  .docs-sidebar-head {
+    flex: none;
+  }
+  .docs-sidebar-scroll {
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
-    padding: var(--spacing-f34) var(--spacing-f21) var(--spacing-f34) 0;
+    overscroll-behavior: contain;
+    padding-bottom: var(--spacing-f34);
     scrollbar-width: thin;
   }
   .docs-logo {
@@ -149,7 +161,7 @@
   .docs-nav-group h2 {
     margin: 0 0 var(--spacing-f5);
     padding: 0 var(--spacing-f8);
-    font: 600 var(--text-s-1) / var(--text-s-1--line-height) var(--docs-font);
+    font: 600 var(--text-s0) / var(--text-s0--line-height) var(--docs-font);
     color: var(--docs-text);
     letter-spacing: 0;
   }
