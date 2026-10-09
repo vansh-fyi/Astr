@@ -220,6 +220,17 @@ function staticChecks() {
   const src = verifySource();
   assert(src.missing.length === 0, `content/source is missing ${src.missing.join(", ")}. Run npm run sync.`);
   assert(src.differing.length === 0, `content/source differs from the repository: ${src.differing.join(", ")}. Run npm run sync.`);
+  // Satoshi may not be redistributed (ITF Free Font License), so no font file may be tracked by git.
+  try {
+    const tracked = execFileSync("git", ["ls-files", "-z", ":(top)assets/fonts", ":(top)website/src/fonts"], { cwd: ROOT, encoding: "utf8" })
+      .split("\0")
+      .filter((f) => /satoshi/i.test(f));
+    assert(tracked.length === 0, `Satoshi font files are tracked by git (the licence forbids redistribution): ${tracked.join(", ")}`);
+    ok("no Satoshi font files are tracked by git");
+  } catch (err) {
+    if (err?.status === undefined) throw err;
+    console.log("skip tracked-font check (git not available)");
+  }
   ok(`${src.checked} source copies match the repository (${src.skipped} originals not present)`);
 
   const impact = JSON.parse(readFileSync(join(ROOT, "content/data/zone-impact.json"), "utf8"));

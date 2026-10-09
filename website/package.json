@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/fetch-fonts.mjs --if-missing",
     "dev": "next dev",
+    "prebuild": "node scripts/fetch-fonts.mjs --if-missing",
     "build": "next build --webpack",
+    "prebuild:turbo": "node scripts/fetch-fonts.mjs --if-missing",
     "build:turbo": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
     "check": "node scripts/check-docs.mjs",
-    "sync": "node scripts/sync-source.mjs"
+    "sync": "node scripts/sync-source.mjs",
+    "fonts": "node scripts/fetch-fonts.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",

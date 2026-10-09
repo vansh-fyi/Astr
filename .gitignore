@@ -137,3 +137,7 @@ archive/**
 
 # Large NASA data files (keep these ignored - they're too large)
 VNL NPP 2024 Global Masked Data.tif.gz
+# Satoshi (ITF Free Font License): free to use, but the files may not be redistributed. Fetched by
+# website/scripts/fetch-fonts.mjs (node website/scripts/fetch-fonts.mjs --app for the Flutter app).
+assets/fonts/Satoshi-*.ttf
+website/src/fonts/Satoshi-*.ttf

@@ -42,11 +42,12 @@ Swiss Ephemeris, through the sweph package
 Files in this repository that are not licensed under Apache-2.0
 --------------------------------------------------------------------------------
 
-Satoshi typeface (assets/fonts/Satoshi-*.ttf, website/src/fonts/Satoshi-*.ttf)
+Satoshi typeface (not in the repository)
   Indian Type Foundry, ITF Free Font License. Free for commercial use, but the font files may not be
-  redistributed, which includes uploading them to a public server. Remove the files from the public
-  repository and fetch them at build time from Fontshare, or replace the typeface, before the repository
-  is made public.
+  redistributed, which includes uploading them to a public server. The files are therefore git-ignored and
+  downloaded from Fontshare by website/scripts/fetch-fonts.mjs (run automatically before the website's dev
+  and build; run it with --app for the Flutter app's copy in assets/fonts). An earlier version of the
+  repository committed the font files, and they remain in its git history.
 
 Inter typeface
   SIL Open Font License 1.1.

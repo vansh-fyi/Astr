@@ -218,6 +218,16 @@ If you enjoy using Astr, consider supporting development:
 
 ---
 
+## Fonts
+
+The Satoshi typeface is free to use but its licence forbids redistributing the files, so they are not in the
+repository. The website fetches them from Fontshare automatically before `npm run dev` and `npm run build`.
+For the Flutter app, run this once from the repository root before `flutter run`:
+
+```bash
+node website/scripts/fetch-fonts.mjs --app
+```
+
 ## License
 
 Copyright 2025-2026 Vansh Grover. Licensed under the [Apache License, Version 2.0](LICENSE).

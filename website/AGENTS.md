@@ -89,7 +89,7 @@ This file contains no code on purpose. Rules are written in plain language. The 
 ## Typography and brand
 
 - Satoshi for headings and the wordmark. Inter for body text. No other typefaces.
-- Satoshi comes from the font files already in the application's asset folder. Do not substitute a web font service for it.
+- Satoshi's licence forbids redistributing the font files, so they are never committed. They are git-ignored and fetched from Fontshare by the fonts script, which runs automatically before the dev server and the build. Never commit a Satoshi file, and never substitute another typeface for it.
 - The brand mark is the real Astr app icon taken from the application's icon source. Never draw, recolour or replace it with a placeholder.
 
 ## Images
