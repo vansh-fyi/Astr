@@ -89,7 +89,16 @@ The state is a function of the cloud fraction $c$, the artificial ratio $r$ and 
 
 **Cloud caps.** Milky Way needs $c \le 0.30$, otherwise it becomes Starry sky. Starry sky needs $c \le 0.50$, otherwise it becomes Planets visible. The cuts 0.30, 0.50 and 0.70 are the values the app already uses (proposals to tune).
 
-<CloudBar value={42} cuts />
+<Gallery>
+  <AppSkyState state="milkyWayVisible" />
+  <AppSkyState state="starrySkies" />
+  <AppSkyState state="planetsVisible" />
+  <AppSkyState state="fewStars" />
+  <AppSkyState state="cloudy" />
+  <AppSkyState state="tooMuchLight" />
+</Gallery>
+
+The six states with the app's own backgrounds.
 
 **The moon cannot create "Too much light".** That state describes light pollution, so a moon-driven worst case is Few stars.
 

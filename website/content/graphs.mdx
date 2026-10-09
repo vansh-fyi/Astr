@@ -64,7 +64,12 @@ This is the graph at the top of the atmospherics sheet. It answers one question:
   ]}
 />
 
-<ConditionsGraphDemo />
+<Gallery column>
+  <AppConditionsGraph />
+  <AppLegend items={[{ label: "Cloud cover", color: "rgba(255,255,255,0.3)" }, { label: "Moon altitude", color: "#6366f1" }, { label: "Prime view", color: "#10b981" }, { label: "Now", color: "#fb923c" }]} />
+</Gallery>
+
+The sample night above is drawn by the same code as the app's graph. See [App components](/components#conditions-graph) for the layer variants.
 
 **Reading it.** You want a low cloud area and the moon area either absent or low. A tall moon area under low cloud means a bright, high moon. A prime-view band that sits where the moon area is zero is the best case.
 
@@ -166,9 +171,20 @@ The graph stops at 70% of its height for 90° so that peak and labels have room.
   ]}
 />
 
-<CloudBar value={37} />
+<Gallery>
+  <AppCloudBar value={37} />
+</Gallery>
 
-<MoonPhaseStrip />
+<Gallery>
+  <AppMoonCard angle={0} />
+  <AppMoonCard angle={45} />
+  <AppMoonCard angle={90} />
+  <AppMoonCard angle={135} />
+  <AppMoonCard angle={180} />
+  <AppMoonCard angle={225} />
+  <AppMoonCard angle={270} />
+  <AppMoonCard angle={315} />
+</Gallery>
 
 **Moon phase names** come from the phase angle in degrees: new moon at 355 or above and 5 or below, waxing crescent above 5 and below 85, first quarter from 85 to 95, waxing gibbous above 95 and below 175, full moon from 175 to 185, waning gibbous above 185 and below 265, last quarter from 265 to 275, waning crescent above 275 and below 355. Each band selects one of eight pictures.
 

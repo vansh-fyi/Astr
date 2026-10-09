@@ -1,0 +1,92 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+
+/// Optimized glass-morphism panel with performance enhancements
+///
+/// Performance optimizations:
+/// - RepaintBoundary prevents unnecessary repaints of blur filter
+/// - Static blur sigma values reduce GPU overhead
+/// - Const constructors where possible
+class GlassPanel extends StatelessWidget {
+
+  const GlassPanel({
+    super.key,
+    required this.child,
+    this.padding,
+    this.onTap,
+    this.onLongPress,
+    this.borderRadius,
+    this.border,
+    this.enableBlur = true,
+    this.backgroundColor,
+    this.borderColor,
+  });
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final BorderRadius? borderRadius;
+  final BoxBorder? border;
+
+  final bool enableBlur;
+  final Color? backgroundColor;
+  final Color? borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final BorderRadius radius = borderRadius ?? BorderRadius.circular(24);
+
+    // Optimized Style for Non-Blur (Performance Mode)
+    // Higher opacity to mask background since we don't blur it
+    final Color resolvedBgColor = backgroundColor ?? (enableBlur 
+        ? const Color(0xFF121212).withValues(alpha: 0.8) 
+        : const Color(0xFF121212).withValues(alpha: 0.95));
+
+    // Subtle border for definition
+    final BoxBorder resolvedBorder = border ?? (borderColor != null ? Border.all(color: borderColor!) : Border.all(
+      color: Colors.white.withValues(alpha: enableBlur ? 0.08 : 0.12),
+    ));
+
+    Widget content = Container(
+      padding: padding ?? const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: resolvedBgColor,
+        borderRadius: radius,
+        border: resolvedBorder,
+      ),
+      child: child,
+    );
+
+    if (onTap != null || onLongPress != null) {
+      // Material(transparency) lets the InkWell ripple render above the
+      // Container background. Without it the opaque Container covers the
+      // Material splash layer and no visual press feedback is visible.
+      content = Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          borderRadius: radius,
+          child: content,
+        ),
+      );
+    }
+
+    if (!enableBlur) {
+      // Return container directly without BackdropFilter/ClipRRect/RepaintBoundary
+      // This is the key performance win.
+      return content;
+    }
+
+    // Wrap BackdropFilter in RepaintBoundary to prevent unnecessary repaints
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: radius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: content,
+        ),
+      ),
+    );
+  }
+}

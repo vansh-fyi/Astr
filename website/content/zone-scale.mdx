@@ -51,7 +51,19 @@ $$ \text{zone}(r) = \begin{cases} 1 & r < 0.32 \\ 2 + \lfloor \log_2 (r / 0.32) 
 
 Implementations compare against the list of edges instead of computing a logarithm, so a value on an edge cannot land on the wrong side through rounding.
 
-<ZoneSkies />
+<Gallery>
+  <AppVisibilityCard zone={1} mpsas={22.0} />
+  <AppVisibilityCard zone={2} mpsas={21.85} />
+  <AppVisibilityCard zone={3} mpsas={21.6} />
+  <AppVisibilityCard zone={4} mpsas={21.3} />
+  <AppVisibilityCard zone={5} mpsas={20.9} />
+  <AppVisibilityCard zone={6} mpsas={20.4} />
+  <AppVisibilityCard zone={7} mpsas={19.8} />
+  <AppVisibilityCard zone={8} mpsas={19.0} />
+  <AppVisibilityCard zone={9} mpsas={18.2} />
+</Gallery>
+
+The nine visibility cards, as the app shows them: the zone, a sky label and the sky brightness at the middle of the zone, with five rating bars.
 
 <LadderAxis />
 

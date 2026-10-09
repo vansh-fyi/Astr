@@ -45,7 +45,11 @@ One request returns an hourly series for 10 past days and 16 forecast days (the 
 
 Cloud cover is **not calculated by Astr**. It is a variable from a numerical weather model: the fraction of the sky above a grid cell (about 11 km across) that the model puts cloud in, from 0% to 100%.
 
-<CloudSkyTiles />
+<Gallery column>
+  <AppCloudBar value={12} />
+  <AppCloudBar value={45} />
+  <AppCloudBar value={86} />
+</Gallery>
 
 It means a share of the sky, not a probability that a given star is hidden. A forecast of 30% means about a third of the sky is covered, and the model does not say which third. It also cannot see clouds smaller than a grid cell or the shape of one hill's weather.
 

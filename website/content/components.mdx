@@ -1,0 +1,214 @@
+export const meta = {
+  title: "App components",
+  group: "Components",
+  description:
+    "The widgets the app draws, redrawn for the web at their real sizes from the app's own colours, spacing and artwork, each with its variants and the Dart that builds it.",
+  sections: [
+    { id: "tokens", title: "Tokens" },
+    { id: "cloud-bar", title: "Cloud bar" },
+    { id: "visibility", title: "Visibility card" },
+    { id: "moon", title: "Moon card" },
+    { id: "tiles", title: "Icon tiles and buttons" },
+    { id: "conditions", title: "Conditions card" },
+    { id: "sky-state", title: "Sky state background" },
+    { id: "conditions-graph", title: "Conditions graph" },
+    { id: "cloud-graph", title: "Cloud cover graph" },
+  ],
+};
+
+<DocSection id="tokens" title="Tokens" description="Every widget is built from three Dart files. One pixel on this page is one logical pixel in the app, so the previews are the real sizes.">
+
+<DocTable
+  head={["Token", "Value", "Used for"]}
+  rows={[
+    ["surface", "`#0C0F11`", "the app background"],
+    ["surfaceOverlay", "`#0C0F11` at 50%", "card fill, behind a 2 px blur"],
+    ["surfaceGlass", "`#0C0F11` at 80%", "inner panels: the cloud bar and time cells"],
+    ["borderPrimary", "`#1B3766`", "card outline"],
+    ["borderSubtle", "`#0C1E33`", "inner panel outline"],
+    ["accent", "`#448AFF`", "Explore button, zone pill outline"],
+    ["accentSecondary", "`#3A96FF`", "cloud fill, lit rating bars"],
+    ["cardRadius, innerRadius", "16, 12", "card and inner panel corners"],
+    ["miniCard", "164 by 154", "visibility and moon cards"],
+    ["conditionsCard", "345 by 242", "the headline card"],
+  ]}
+/>
+
+<details className="app-source">
+<summary>Dart source</summary>
+
+<SourceExcerpt file="lib/core/design/app_colors.dart" symbols={["AppColors"]} />
+
+
+</details>
+</DocSection>
+
+<DocSection id="cloud-bar" title="Cloud bar" description="Cloud cover as a label, a percentage and an 8 pixel track whose glowing fill animates to the new value over a second.">
+
+<Variants items={[
+  { label: "Clear", note: "Little cloud, a short fill.", preview: <AppCloudBar value={12} />, dart: "CloudBar(cloudCoverPercentage: 12)" },
+  { label: "Partly cloudy", preview: <AppCloudBar value={45} />, dart: "CloudBar(cloudCoverPercentage: 45)" },
+  { label: "Overcast", preview: <AppCloudBar value={100} />, dart: "CloudBar(cloudCoverPercentage: 100)" },
+  { label: "Loading", note: "A spinner replaces the percentage.", preview: <AppCloudBar value={0} state="loading" />, dart: "CloudBar(cloudCoverPercentage: 0, isLoading: true)" },
+  { label: "Error", preview: <AppCloudBar value={0} state="error" message="Weather unavailable" />, dart: "CloudBar(cloudCoverPercentage: 0, errorMessage: 'Weather unavailable')" },
+]} />
+
+<details className="app-source">
+<summary>Dart source</summary>
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/cloud_bar.dart" symbols={["CloudBar", "_CloudBarState"]} />
+
+
+</details>
+</DocSection>
+
+<DocSection id="visibility" title="Visibility card" description="The Astr zone as a pill, a sky label, the sky brightness in magnitudes per square arcsecond and five rating bars. Zone 1 lights five bars and zone 9 lights one.">
+
+<Gallery>
+    <AppVisibilityCard zone={1} mpsas={22.0} />
+    <AppVisibilityCard zone={2} mpsas={21.85} />
+    <AppVisibilityCard zone={3} mpsas={21.6} />
+    <AppVisibilityCard zone={4} mpsas={21.3} />
+    <AppVisibilityCard zone={5} mpsas={20.9} />
+    <AppVisibilityCard zone={6} mpsas={20.4} />
+    <AppVisibilityCard zone={7} mpsas={19.8} />
+    <AppVisibilityCard zone={8} mpsas={19.0} />
+    <AppVisibilityCard zone={9} mpsas={18.2} />
+</Gallery>
+
+<Variants items={[
+  { label: "Dark sky", note: "Zone 1 to 2: five bars.", preview: <AppVisibilityCard zone={1} mpsas={22.0} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 1, mpsas: 22.0))" },
+  { label: "Suburban", note: "Zone 5 to 6: three bars.", preview: <AppVisibilityCard zone={5} mpsas={20.9} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 5, mpsas: 20.9))" },
+  { label: "City", note: "Zone 9: one bar.", preview: <AppVisibilityCard zone={9} mpsas={18.2} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 9, mpsas: 18.2))" },
+]} />
+
+<details className="app-source">
+<summary>Dart source</summary>
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/visibility_mini_card.dart" symbols={["VisibilityMiniCard"]} />
+
+
+</details>
+</DocSection>
+
+<DocSection id="moon" title="Moon card" description="The painted moon for the phase angle, the lit percentage and the phase name. The eight artworks are selected by the same angle bands the moon science page lists.">
+
+<Gallery>
+    <AppMoonCard angle={0} />
+    <AppMoonCard angle={45} />
+    <AppMoonCard angle={90} />
+    <AppMoonCard angle={135} />
+    <AppMoonCard angle={180} />
+    <AppMoonCard angle={225} />
+    <AppMoonCard angle={270} />
+    <AppMoonCard angle={315} />
+</Gallery>
+
+<Variants items={[
+  { label: "Waxing gibbous", preview: <AppMoonCard angle={135} />, dart: "MoonMiniCard(moonPhaseInfo: MoonPhaseInfo(phaseAngle: 135, illumination: 0.85))" },
+  { label: "Last quarter", preview: <AppMoonCard angle={270} />, dart: "MoonMiniCard(moonPhaseInfo: MoonPhaseInfo(phaseAngle: 270, illumination: 0.5))" },
+]} />
+
+<details className="app-source">
+<summary>Dart source</summary>
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/moon_mini_card.dart" symbols={["MoonMiniCard"]} />
+
+
+</details>
+</DocSection>
+
+<DocSection id="tiles" title="Icon tiles and buttons" description="Dark speckled glass with a glowing glyph and a bloom of one system colour along the bottom edge. Tiles hold an icon alone; buttons carry a word.">
+
+<Gallery>
+  <AppIconTile glyph="moon" tone="blue" label="Moon" />
+  <AppIconTile glyph="cloud" tone="red" label="Clouds" />
+  <AppIconTile glyph="star" tone="amber" label="Stars" />
+  <AppIconTile glyph="graph" tone="green" label="Graphs" />
+  <AppIconTile glyph="compass" tone="pink" label="Explore" />
+  <AppIconTile glyph="search" tone="blue" label="Search" />
+  <AppIconTile glyph="layers" tone="green" label="Layers" />
+  <AppIconTile glyph="telescope" tone="amber" label="Telescope" />
+</Gallery>
+
+<Variants items={[
+  { label: "Tile sizes", note: "Small is 44, default 72, large 96, all keeping the squircle.", preview: <><AppIconTile glyph="moon" size="sm" label="Moon" /><AppIconTile glyph="moon" label="Moon" /><AppIconTile glyph="moon" size="lg" label="Moon" /></>, dart: "AstrGlassTile(icon: AstrGlyph.moon, size: AstrTileSize.md)" },
+  { label: "Pressed and disabled", preview: <><AppIconTile glyph="graph" tone="green" pressed label="Graphs" /><AppIconTile glyph="graph" tone="green" disabled label="Graphs" /></>, dart: "AstrGlassTile(icon: AstrGlyph.graph, tone: AstrTone.green, selected: true)" },
+  { label: "Buttons", preview: <><AppButton glyph="compass" tone="blue">Explore</AppButton><AppButton glyph="star" tone="amber">Save place</AppButton><AppButton disabled>Unavailable</AppButton></>, dart: "AstrGlassButton(label: 'Explore', icon: AstrGlyph.compass)" },
+]} />
+
+<DocNote>The tile and button Dart above is the proposed Flutter API, so there is no source excerpt: the app does not have these widgets yet.</DocNote>
+
+</DocSection>
+
+<DocSection id="conditions" title="Conditions card" description="The headline card: a title and advice from the condition result, the Explore button that opens the atmospherics sheet, the cloud bar and four rise and set cells.">
+
+<Variants items={[
+  { label: "Clear night", preview: <AppConditionsCard />, dart: "const ConditionsCard()" },
+  { label: "Cloudy night", preview: <AppConditionsCard title="Cloudy" subtitle="Cloud cover hides most of the sky" cloud={86} />, dart: "const ConditionsCard() // weather.cloudCover = 86" },
+  { label: "No rise or set", note: "Polar day or no moonrise shows dashes.", preview: <AppConditionsCard times={{ sunrise: "03:40", sunset: "22:18" }} />, dart: "const ConditionsCard() // moon times are null" },
+]} />
+
+<details className="app-source">
+<summary>Dart source</summary>
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/conditions_card.dart" symbols={["ConditionsCard", "_TimeCell"]} />
+
+
+</details>
+</DocSection>
+
+<DocSection id="sky-state" title="Sky state background" description="Each of the six sky states has an illustrated sky, drawn at half opacity under a blue wash. The pictures below are the app's own artwork.">
+
+<Gallery>
+    <AppSkyState state="milkyWayVisible" />
+    <AppSkyState state="starrySkies" />
+    <AppSkyState state="planetsVisible" />
+    <AppSkyState state="fewStars" />
+    <AppSkyState state="cloudy" />
+    <AppSkyState state="tooMuchLight" />
+</Gallery>
+
+<details className="app-source">
+<summary>Dart source</summary>
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/sky_state_background.dart" symbols={["SkyStateBackground", "SkyStateAssets"]} />
+
+
+</details>
+</DocSection>
+
+<DocSection id="conditions-graph" title="Conditions graph" description="Cloud cover, the moon's altitude, the moon rise marker, the prime view window and the current time on one night. Colours are the painter's own: white for cloud, indigo for the moon, emerald for prime view, orange for now.">
+
+<Variants wide items={[
+  { label: "Full", preview: <AppConditionsGraph />, dart: "ConditionsGraph(cloudCoverData: hourly, moonCurve: curve, moonRiseTime: rise, primeViewWindow: window, startTime: start, endTime: end)" },
+  { label: "Cloud only", preview: <AppConditionsGraph layers={{ moon: false, moonRise: false, prime: false }} />, dart: "ConditionsGraph(cloudCoverData: hourly, startTime: start, endTime: end)" },
+  { label: "Moon only", preview: <AppConditionsGraph layers={{ cloud: false, prime: false }} />, dart: "ConditionsGraph(moonCurve: curve, moonRiseTime: rise, startTime: start, endTime: end)" },
+]} />
+
+<AppStage><AppLegend items={[{ label: "Cloud cover", color: "rgba(255,255,255,0.3)" }, { label: "Moon altitude", color: "#6366f1" }, { label: "Prime view", color: "#10b981" }, { label: "Now", color: "#fb923c" }]} /></AppStage>
+
+<details className="app-source">
+<summary>Dart source</summary>
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/conditions_graph.dart" symbols={["ConditionsGraph"]} />
+<SourceExcerpt file="lib/features/dashboard/presentation/theme/graph_theme.dart" symbols={["GraphTheme"]} />
+
+
+</details>
+</DocSection>
+
+<DocSection id="cloud-graph" title="Cloud cover graph" description="The hourly forecast's cloud area: straight edges, a half-opacity stroke and the NOW marker.">
+
+<Variants wide items={[
+  { label: "Night forecast", preview: <AppCloudCoverGraph />, dart: "CustomPaint(painter: CloudCoverGraphPainter(data: hourly, startTime: start, endTime: end, cloudColor: Colors.white24, nowIndicatorColor: GraphTheme.nowIndicatorColor))" },
+]} />
+
+<details className="app-source">
+<summary>Dart source</summary>
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/cloud_cover_graph_painter.dart" symbols={["CloudCoverGraphPainter"]} />
+
+
+</details>
+</DocSection>

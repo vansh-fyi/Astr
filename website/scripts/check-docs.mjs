@@ -15,8 +15,8 @@ const GLOBALS = join(ROOT, "src/app/globals.css");
 const SCALE = join(ROOT, "src/app/scale.css");
 const EXPECTED_SHA =
   "3e3d60003ee84a7bface6a8ff088f03c592c141c875c80eb0b8cd79e2231ae1c";
-const PAGES = ["/", "/colour-stops", "/opacity-ladder", "/gradients", "/spacing", "/typography", "/layout", "/sky-science", "/zone-scale", "/light-pollution", "/sky-brightness", "/sky-states", "/weather-clouds", "/planets-sky", "/graphs", "/offline"];
-const LABELS = ["Introduction", "Colour stops", "Opacity ladder", "Gradients", "Spacing", "Typography", "Layout and size", "Overview", "Zone scale", "Light pollution data", "Moonlight and sky brightness", "Sky states", "Weather and clouds", "Planets and the sky", "Graphs", "Offline and sync"];
+const PAGES = ["/", "/colour-stops", "/opacity-ladder", "/gradients", "/spacing", "/typography", "/layout", "/components", "/sky-science", "/zone-scale", "/light-pollution", "/sky-brightness", "/sky-states", "/weather-clouds", "/planets-sky", "/graphs", "/offline"];
+const LABELS = ["Introduction", "Colour stops", "Opacity ladder", "Gradients", "Spacing", "Typography", "Layout and size", "App components", "Overview", "Zone scale", "Light pollution data", "Moonlight and sky brightness", "Sky states", "Weather and clouds", "Planets and the sky", "Graphs", "Offline and sync"];
 const PHI = (1 + Math.sqrt(5)) / 2;
 
 function fail(message) {
@@ -286,7 +286,7 @@ function checkPage(path, html) {
   assert(!html.includes('class="docs-header'), `${where}: top bar (docs-header) must not exist`);
   assert(html.includes("astr-icon"), `${where}: Astr app icon missing`);
   for (const label of LABELS) assert(sidebar.includes(label), `${where}: sidebar lacks ${label}`);
-  for (const old of ["Foundations", "Getting started", "Examples", "Components"])
+  for (const old of ["Foundations", "Getting started", "Examples"])
     assert(!sidebar.includes(old), `${where}: sidebar contains old template label ${old}`);
 
   if (path === "/colour-stops") {

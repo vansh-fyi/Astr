@@ -17,6 +17,10 @@ export const DOCS_GROUPS = [
     ],
   },
   {
+    name: "Components",
+    links: [{ href: "/components", label: "App components" }],
+  },
+  {
     name: "Sky science",
     links: [
       { href: "/sky-science", label: "Overview" },

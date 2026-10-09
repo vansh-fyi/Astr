@@ -156,6 +156,10 @@ These facts come from the sky science pages, which are the source of truth. Link
 - Each image has meaningful alternative text and is tied to the palette it inspired. Keep that mapping in the configuration, not in pages.
 - The introduction shows them as a bento with each palette's eleven stops on the caption. New images must be pushed before the CDN can serve them.
 
+## App components
+
+`/components` redraws the app's own widgets (cloud bar, visibility and moon cards, conditions card, sky state backgrounds, both graphs) in `src/components/app/`, from the Dart in `app_colors.dart` and `app_spacing.dart`, with the app's real artwork in `public/app/`. The app's design wins: when the docs and the app disagree, change the Dart first. One CSS pixel there is one logical pixel in the app, so `app-ui.css` is exempt from the raw-pixel rule. Every widget gets variants with the Dart that builds it, and a folded source excerpt from a file listed in `content/source/manifest.json`. Use these components on the science pages instead of new chart styles. The glass tile and button style (speckled glass, glowing glyph, bloom in one system colour) is a proposed Flutter API until the app has it.
+
 ## Visual components for the science pages
 
 Text-heavy sections are shown with components in `src/components/docs/viz/`. Add new ones there, register them in `src/mdx-components.tsx`, and style them in `docs.css` under the `viz-` prefix.
