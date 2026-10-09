@@ -27,6 +27,11 @@ const opts = (...values: string[]): Opt[] => values.map((value) => ({ value }));
 const TONES = opts("blue", "green", "pink", "amber", "red");
 const tone = (v: Values) => v.tone as TileTone;
 const ZONE_MPSAS = [22.0, 21.85, 21.6, 21.3, 20.9, 20.4, 19.8, 19.0, 18.2];
+/** Phase angle in degrees (0 new, 180 full) for an illuminated percentage, on the waxing or the waning side. */
+const moonAngle = (v: Values): number => {
+  const a = Math.round((Math.acos(1 - 2 * (Number(v.lit) / 100)) * 180) / Math.PI);
+  return v.side === "waning" ? (360 - a) % 360 : a;
+};
 const pascal = (s: string) => s[0].toUpperCase() + s.slice(1);
 const ICONS: Record<string, string> = { moon: "Icons.nightlight_round", cloud: "Icons.cloud", graph: "Icons.bar_chart", compass: "Icons.explore", search: "Icons.search" };
 
@@ -90,12 +95,13 @@ const CONFIGS: Record<string, Config> = {
   },
   "moon-card": {
     controls: [
-      { kind: "segment", key: "phase", label: "Phase", options: [{ value: "0", label: "New" }, { value: "45", label: "Waxing crescent" }, { value: "90", label: "First quarter" }, { value: "135", label: "Waxing gibbous" }, { value: "180", label: "Full" }, { value: "225", label: "Waning gibbous" }, { value: "270", label: "Last quarter" }, { value: "315", label: "Waning crescent" }] },
+      { kind: "segment", key: "side", label: "Cycle", options: [{ value: "waxing", label: "Waxing" }, { value: "waning", label: "Waning" }] },
+      { kind: "range", key: "lit", label: "Illuminated", min: 0, max: 100, unit: "%" },
     ],
-    initial: { phase: "135" },
-    preview: (v) => <AppMoonCard angle={Number(v.phase)} />,
-    react: (v) => `<AppMoonCard angle={${v.phase}} />`,
-    flutter: (v) => `MoonMiniCard(\n  moonPhaseInfo: MoonPhaseInfo(\n    phaseAngle: ${v.phase},\n    illumination: ${((1 - Math.cos((Number(v.phase) * Math.PI) / 180)) / 2).toFixed(2)},\n  ), // ${moonPhase(Number(v.phase)).label}\n)`,
+    initial: { side: "waxing", lit: 85 },
+    preview: (v) => <AppMoonCard angle={moonAngle(v)} illumination={Number(v.lit) / 100} />,
+    react: (v) => `<AppMoonCard angle={${moonAngle(v)}} illumination={${Number(v.lit) / 100}} />`,
+    flutter: (v) => `MoonMiniCard(\n  moonPhaseInfo: MoonPhaseInfo(\n    phaseAngle: ${moonAngle(v)},\n    illumination: ${Number(v.lit) / 100},\n  ), // ${moonPhase(moonAngle(v)).label}\n)`,
   },
   "conditions-card": {
     controls: [

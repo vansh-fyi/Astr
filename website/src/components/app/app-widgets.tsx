@@ -81,9 +81,9 @@ export function moonPhase(angle: number): { asset: string; label: string } {
 }
 
 /** MoonMiniCard: the painted moon, illumination and phase name. */
-export function AppMoonCard({ angle }: { angle: number }) {
+export function AppMoonCard({ angle, illumination }: { angle: number; illumination?: number }) {
   const { asset, label } = moonPhase(angle);
-  const lit = Math.round(((1 - Math.cos((angle * Math.PI) / 180)) / 2) * 100);
+  const lit = Math.round((illumination ?? (1 - Math.cos((angle * Math.PI) / 180)) / 2) * 100);
   return (
     <div className="app-ui app-card is-mini">
       <span className="abs app-label-sm" style={{ top: 15, left: 15 }}>MOON</span>
