@@ -411,3 +411,34 @@
 @media (prefers-reduced-motion: reduce) { .app-navbar-item { transition: none; } }
 .app-navbar-loc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-navbar.is-top > .app-button { min-width: 0; max-width: var(--spacing-f144); }
+
+/*
+ * Pressed state. Hover lifts and glows; pressing settles back down (a small squeeze) and keeps the glow, so a press
+ * always answers with light. Quiet buttons that do not glow at rest glow while they are pressed.
+ */
+.app-button:active,
+.app-tile:active,
+.app-toggle:active .app-toggle-track { transition-duration: 0.1s; }
+.app-button:active {
+  transform: scale(0.97);
+  box-shadow: var(--highlight), 0 var(--spacing-f13) var(--spacing-f21) calc(var(--spacing-f5) * -1) var(--tone);
+}
+.app-button.is-glass.is-sm:active,
+.app-button.is-outline.is-sm:active {
+  box-shadow: var(--highlight), 0 var(--spacing-f8) var(--spacing-f21) calc(var(--spacing-f8) * -1) var(--tone);
+}
+.app-button.is-outline:active { background: color-mix(in srgb, var(--tone) var(--mag-5), transparent); }
+.app-button.is-glass[aria-pressed="true"]:active,
+.app-button.is-glass[aria-selected="true"]:active {
+  box-shadow: var(--highlight), 0 var(--spacing-f13) var(--spacing-f21) calc(var(--spacing-f5) * -1) var(--tone);
+}
+.app-tile:active {
+  transform: scale(0.97);
+  box-shadow: var(--highlight), 0 var(--spacing-f13) var(--spacing-f34) calc(var(--spacing-f8) * -1) var(--tone);
+}
+.app-navbar-action:active { transform: translate(-50%, 0) scale(0.97); }
+.app-toggle:active .app-toggle-track { box-shadow: var(--highlight), 0 var(--spacing-f8) var(--spacing-f21) calc(var(--spacing-f8) * -1) var(--tone); }
+.app-navbar-item:active { color: var(--c-text); }
+.app-navbar-item:active .app-micro { text-shadow: 0 var(--spacing-f1) var(--spacing-f13) var(--c-accent), 0 0 var(--spacing-f1) color-mix(in srgb, var(--c-text) var(--mag-3), transparent); }
+.app-hour:active { box-shadow: var(--highlight), 0 var(--spacing-f8) var(--spacing-f21) calc(var(--spacing-f8) * -1) var(--c-accent); }
+@media (prefers-reduced-motion: reduce) { .app-button:active, .app-tile:active, .app-navbar-action:active { transform: none; } .app-navbar-action:active { transform: translateX(-50%); } }

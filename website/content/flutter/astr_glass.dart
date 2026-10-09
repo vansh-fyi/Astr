@@ -43,8 +43,9 @@ enum AstrTileSize {
 final Color _ink = AstrColors.spaceGrey[950]!;
 
 /// A tinted glass square holding one glyph, with a bloom of its tone along the
-/// bottom edge. When [selected] the tile fills with the tone.
-class AstrGlassTile extends StatelessWidget {
+/// bottom edge. When [selected] the tile fills with the tone. Pressed, it
+/// squeezes slightly and its glow grows, like the hover state on the web.
+class AstrGlassTile extends StatefulWidget {
   const AstrGlassTile({
     super.key,
     required this.icon,
@@ -65,54 +66,68 @@ class AstrGlassTile extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
+  State<AstrGlassTile> createState() => _AstrGlassTileState();
+}
+
+class _AstrGlassTileState extends State<AstrGlassTile> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final Color c = tone.color;
+    final Color c = widget.tone.color;
+    final AstrTileSize size = widget.size;
+    final bool selected = widget.selected;
     final BorderRadius radius = BorderRadius.circular(size.edge * AstrLayout.minor);
 
     return Semantics(
       button: true,
       selected: selected,
-      label: label,
+      label: widget.label,
       child: Opacity(
-        opacity: onPressed == null ? Mag.m2 : 1,
-        child: Material(
-          color: Colors.transparent,
-          child: Ink(
-            width: size.edge,
-            height: size.edge,
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              border: Border.all(color: c.withValues(alpha: Mag.m3)),
-              color: selected ? c : null,
-              gradient: selected
-                  ? null
-                  : LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: <Color>[
-                        Color.alphaBlend(c.withValues(alpha: Mag.m4), _ink),
-                        Color.alphaBlend(c.withValues(alpha: Mag.m6), _ink),
-                      ],
-                    ),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: c.withValues(alpha: selected ? Mag.m0 : Mag.m1),
-                  blurRadius: AstrSpace.f34,
-                  spreadRadius: -AstrSpace.f13,
-                  offset: const Offset(0, AstrSpace.f13),
-                ),
-              ],
-            ),
-            child: InkWell(
-              borderRadius: radius,
-              onTap: onPressed,
-              child: Icon(
-                icon,
-                size: size.edge * AstrLayout.minor,
-                color: selected ? _ink : c,
-                shadows: selected
+        opacity: widget.onPressed == null ? Mag.m2 : 1,
+        child: AnimatedScale(
+          scale: _pressed ? 0.97 : 1,
+          duration: const Duration(milliseconds: 100),
+          child: Material(
+            color: Colors.transparent,
+            child: Ink(
+              width: size.edge,
+              height: size.edge,
+              decoration: BoxDecoration(
+                borderRadius: radius,
+                border: Border.all(color: c.withValues(alpha: Mag.m3)),
+                color: selected ? c : null,
+                gradient: selected
                     ? null
-                    : <Shadow>[Shadow(color: c.withValues(alpha: Mag.m1), blurRadius: AstrSpace.f8)],
+                    : LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[
+                          Color.alphaBlend(c.withValues(alpha: Mag.m4), _ink),
+                          Color.alphaBlend(c.withValues(alpha: Mag.m6), _ink),
+                        ],
+                      ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: c.withValues(alpha: selected || _pressed ? Mag.m0 : Mag.m1),
+                    blurRadius: AstrSpace.f34,
+                    spreadRadius: _pressed ? -AstrSpace.f8 : -AstrSpace.f13,
+                    offset: const Offset(0, AstrSpace.f13),
+                  ),
+                ],
+              ),
+              child: InkWell(
+                borderRadius: radius,
+                onTap: widget.onPressed,
+                onHighlightChanged: (bool value) => setState(() => _pressed = value),
+                child: Icon(
+                  widget.icon,
+                  size: size.edge * AstrLayout.minor,
+                  color: selected ? _ink : c,
+                  shadows: selected
+                      ? null
+                      : <Shadow>[Shadow(color: c.withValues(alpha: Mag.m1), blurRadius: AstrSpace.f8)],
+                ),
               ),
             ),
           ),
@@ -126,10 +141,10 @@ class AstrGlassTile extends StatelessWidget {
 enum AstrButtonVariant { filled, glass, outline }
 
 /// A pill button, [AstrSize.control] tall (55, the touch target), or
-/// [AstrSize.controlCompact] (34).
-/// Filled uses the tone as its fill with dark text; glass tints the surface;
-/// outline draws only the edge.
-class AstrGlassButton extends StatelessWidget {
+/// [AstrSize.controlCompact] (34). Filled uses the tone as its fill with dark
+/// text; glass tints the surface; outline draws only the edge. Pressed, it
+/// squeezes slightly and glows in its tone, even the quiet variants.
+class AstrGlassButton extends StatefulWidget {
   const AstrGlassButton({
     super.key,
     required this.label,
@@ -148,9 +163,17 @@ class AstrGlassButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
+  State<AstrGlassButton> createState() => _AstrGlassButtonState();
+}
+
+class _AstrGlassButtonState extends State<AstrGlassButton> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final Color c = tone.color;
+    final Color c = widget.tone.color;
     final Color text = AstrColors.spaceGrey[50]!;
+    final AstrButtonVariant variant = widget.variant;
     final bool filled = variant == AstrButtonVariant.filled;
     final Color fg = switch (variant) {
       AstrButtonVariant.filled => _ink,
@@ -160,62 +183,75 @@ class AstrGlassButton extends StatelessWidget {
     final BorderRadius radius = BorderRadius.circular(AstrRadius.f34 * 2);
 
     return Opacity(
-      opacity: onPressed == null ? Mag.m2 : 1,
-      child: Material(
-        color: Colors.transparent,
-        child: Ink(
-          height: compact ? AstrSize.controlCompact : AstrSize.control,
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            border: Border.all(
-              color: switch (variant) {
-                AstrButtonVariant.filled => Color.alphaBlend(text.withValues(alpha: Mag.m3), c),
-                AstrButtonVariant.glass => c.withValues(alpha: Mag.m2),
-                AstrButtonVariant.outline => c,
-              },
-            ),
-            gradient: switch (variant) {
-              AstrButtonVariant.filled => LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[Color.alphaBlend(text.withValues(alpha: Mag.m3), c), c],
-                ),
-              AstrButtonVariant.glass => LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[
-                    Color.alphaBlend(c.withValues(alpha: Mag.m3), _ink),
-                    Color.alphaBlend(c.withValues(alpha: Mag.m5), _ink),
-                  ],
-                ),
-              AstrButtonVariant.outline => null,
-            },
-            boxShadow: filled
-                ? <BoxShadow>[BoxShadow(color: c, blurRadius: AstrSpace.f21, spreadRadius: -AstrSpace.f8, offset: const Offset(0, AstrSpace.f8))]
-                : null,
-          ),
-          child: InkWell(
-            borderRadius: radius,
-            onTap: onPressed,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: compact ? AstrSpace.f13 : AstrSpace.f21),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  if (icon != null) ...<Widget>[
-                    Icon(icon, size: AstrSize.icon, color: variant == AstrButtonVariant.glass ? c : fg),
-                    const SizedBox(width: AstrSpace.f8),
-                  ],
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontFamily: 'Satoshi',
-                      fontSize: compact ? AstrType.sNeg1 : AstrType.s0,
-                      fontWeight: filled ? FontWeight.w700 : FontWeight.w500,
-                      color: fg,
-                    ),
+      opacity: widget.onPressed == null ? Mag.m2 : 1,
+      child: AnimatedScale(
+        scale: _pressed ? 0.97 : 1,
+        duration: const Duration(milliseconds: 100),
+        child: Material(
+          color: Colors.transparent,
+          child: Ink(
+            height: widget.compact ? AstrSize.controlCompact : AstrSize.control,
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(
+                color: switch (variant) {
+                  AstrButtonVariant.filled => Color.alphaBlend(text.withValues(alpha: Mag.m3), c),
+                  AstrButtonVariant.glass => c.withValues(alpha: Mag.m2),
+                  AstrButtonVariant.outline => c,
+                },
+              ),
+              color: variant == AstrButtonVariant.outline && _pressed ? c.withValues(alpha: Mag.m5) : null,
+              gradient: switch (variant) {
+                AstrButtonVariant.filled => LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[Color.alphaBlend(text.withValues(alpha: Mag.m3), c), c],
                   ),
-                ],
+                AstrButtonVariant.glass => LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[
+                      Color.alphaBlend(c.withValues(alpha: Mag.m3), _ink),
+                      Color.alphaBlend(c.withValues(alpha: Mag.m5), _ink),
+                    ],
+                  ),
+                AstrButtonVariant.outline => null,
+              },
+              boxShadow: filled || _pressed
+                  ? <BoxShadow>[
+                      BoxShadow(
+                        color: c,
+                        blurRadius: AstrSpace.f21,
+                        spreadRadius: _pressed ? -AstrSpace.f5 : -AstrSpace.f8,
+                        offset: Offset(0, _pressed ? AstrSpace.f13 : AstrSpace.f8),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: InkWell(
+              borderRadius: radius,
+              onTap: widget.onPressed,
+              onHighlightChanged: (bool value) => setState(() => _pressed = value),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: widget.compact ? AstrSpace.f13 : AstrSpace.f21),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (widget.icon != null) ...<Widget>[
+                      Icon(widget.icon, size: AstrSize.icon, color: variant == AstrButtonVariant.glass ? c : fg),
+                      const SizedBox(width: AstrSpace.f8),
+                    ],
+                    Text(
+                      widget.label,
+                      style: TextStyle(
+                        fontFamily: 'Satoshi',
+                        fontSize: widget.compact ? AstrType.sNeg1 : AstrType.s0,
+                        fontWeight: filled ? FontWeight.w700 : FontWeight.w500,
+                        color: fg,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -278,7 +314,7 @@ class AstrGlassCard extends StatelessWidget {
 /// A switch. The track is a golden rectangle, 55 by 34, with a 21 thumb; when
 /// [compact] it steps down the Fibonacci ladder to 34 by 21 and a 13 thumb.
 /// On, the track fills with the tone and the thumb turns dark.
-class AstrGlassToggle extends StatelessWidget {
+class AstrGlassToggle extends StatefulWidget {
   const AstrGlassToggle({
     super.key,
     required this.value,
@@ -299,22 +335,34 @@ class AstrGlassToggle extends StatelessWidget {
   final bool compact;
 
   @override
+  State<AstrGlassToggle> createState() => _AstrGlassToggleState();
+}
+
+class _AstrGlassToggleState extends State<AstrGlassToggle> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final Color c = tone.color;
+    final AstrGlassToggle w = widget;
+    final bool value = w.value;
+    final Color c = w.tone.color;
     final Color text = AstrColors.spaceGrey[50]!;
-    final double trackW = compact ? AstrSpace.f34 : AstrSpace.f55;
-    final double trackH = compact ? AstrSpace.f21 : AstrSpace.f34;
-    final double thumb = compact ? AstrSpace.f13 : AstrSpace.f21;
+    final double trackW = w.compact ? AstrSpace.f34 : AstrSpace.f55;
+    final double trackH = w.compact ? AstrSpace.f21 : AstrSpace.f34;
+    final double thumb = w.compact ? AstrSpace.f13 : AstrSpace.f21;
     final double inset = (trackH - thumb) / 2;
     const Duration duration = Duration(milliseconds: 300);
 
     return Semantics(
       toggled: value,
-      label: label,
+      label: w.label,
       child: Opacity(
-        opacity: onChanged == null ? Mag.m2 : 1,
+        opacity: w.onChanged == null ? Mag.m2 : 1,
         child: GestureDetector(
-          onTap: onChanged == null ? null : () => onChanged!(!value),
+          onTap: w.onChanged == null ? null : () => w.onChanged!(!value),
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
           child: AnimatedContainer(
             duration: duration,
             curve: Curves.easeOutCubic,
@@ -334,7 +382,7 @@ class AstrGlassToggle extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: <Color>[text.withValues(alpha: Mag.m5), text.withValues(alpha: Mag.m8)],
                     ),
-              boxShadow: value
+              boxShadow: value || _pressed
                   ? <BoxShadow>[BoxShadow(color: c, blurRadius: AstrSpace.f21, spreadRadius: -AstrSpace.f8, offset: const Offset(0, AstrSpace.f8))]
                   : null,
             ),
