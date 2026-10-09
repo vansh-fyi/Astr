@@ -1,0 +1,364 @@
+{
+  "spec": "docs/astr_zone_scale.md",
+  "version": "2.0",
+  "description": "Test vectors for the Astr Zone scale. Boundaries are lower-inclusive. Implementations must match within the stated tolerances.",
+  "constants": {
+    "natural_ucd_per_m2": 174.0,
+    "reference_sqm": 22.0,
+    "first_edge": 0.32,
+    "step": 2.0,
+    "zone_count": 9
+  },
+  "edges": [
+    0.32,
+    0.64,
+    1.28,
+    2.56,
+    5.12,
+    10.24,
+    20.48,
+    40.96
+  ],
+  "ratio_to_zone": [
+    {
+      "r": -1,
+      "zone": 1
+    },
+    {
+      "r": 0,
+      "zone": 1
+    },
+    {
+      "r": 0.1,
+      "zone": 1
+    },
+    {
+      "r": 0.31999999968000004,
+      "zone": 1
+    },
+    {
+      "r": 0.32,
+      "zone": 2
+    },
+    {
+      "r": 0.48,
+      "zone": 2
+    },
+    {
+      "r": 0.6399999993600001,
+      "zone": 2
+    },
+    {
+      "r": 0.64,
+      "zone": 3
+    },
+    {
+      "r": 0.96,
+      "zone": 3
+    },
+    {
+      "r": 1.2799999987200001,
+      "zone": 3
+    },
+    {
+      "r": 1.28,
+      "zone": 4
+    },
+    {
+      "r": 1.92,
+      "zone": 4
+    },
+    {
+      "r": 2.5599999974400003,
+      "zone": 4
+    },
+    {
+      "r": 2.56,
+      "zone": 5
+    },
+    {
+      "r": 3.84,
+      "zone": 5
+    },
+    {
+      "r": 5.119999994880001,
+      "zone": 5
+    },
+    {
+      "r": 5.12,
+      "zone": 6
+    },
+    {
+      "r": 7.68,
+      "zone": 6
+    },
+    {
+      "r": 10.239999989760001,
+      "zone": 6
+    },
+    {
+      "r": 10.24,
+      "zone": 7
+    },
+    {
+      "r": 15.36,
+      "zone": 7
+    },
+    {
+      "r": 20.479999979520002,
+      "zone": 7
+    },
+    {
+      "r": 20.48,
+      "zone": 8
+    },
+    {
+      "r": 30.72,
+      "zone": 8
+    },
+    {
+      "r": 40.959999959040005,
+      "zone": 8
+    },
+    {
+      "r": 40.96,
+      "zone": 9
+    },
+    {
+      "r": 1024.0,
+      "zone": 9
+    },
+    {
+      "r": 1000000.0,
+      "zone": 9
+    }
+  ],
+  "ratio_to_sqm": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "r": 0,
+        "sqm": 22.0
+      },
+      {
+        "r": 0.32,
+        "sqm": 21.698565171985376
+      },
+      {
+        "r": 1.0,
+        "sqm": 21.247425010840047
+      },
+      {
+        "r": 2.56,
+        "sqm": 20.62137500506781
+      },
+      {
+        "r": 10.24,
+        "sqm": 19.373084221917395
+      },
+      {
+        "r": 40.96,
+        "sqm": 17.942911301196197
+      },
+      {
+        "r": 100,
+        "sqm": 16.989196565543395
+      }
+    ]
+  },
+  "sqm_to_ratio": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "sqm": 22.0,
+        "r": 0
+      },
+      {
+        "sqm": 21.698565171985376,
+        "r": 0.32
+      },
+      {
+        "sqm": 21.247425010840047,
+        "r": 1.0
+      },
+      {
+        "sqm": 20.62137500506781,
+        "r": 2.56
+      },
+      {
+        "sqm": 19.373084221917395,
+        "r": 10.24
+      },
+      {
+        "sqm": 17.942911301196197,
+        "r": 40.96
+      },
+      {
+        "sqm": 16.989196565543395,
+        "r": 100
+      }
+    ]
+  },
+  "sqm_to_nelm": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "sqm": 22.0,
+        "nelm": 6.624711410308956
+      },
+      {
+        "sqm": 21.5,
+        "nelm": 6.384481628898438
+      },
+      {
+        "sqm": 21.0,
+        "nelm": 6.115542572320855
+      },
+      {
+        "sqm": 20.0,
+        "nelm": 5.4942081460882894
+      },
+      {
+        "sqm": 19.0,
+        "nelm": 4.772297735930498
+      },
+      {
+        "sqm": 18.0,
+        "nelm": 3.9680555741943446
+      },
+      {
+        "sqm": 17.0,
+        "nelm": 3.101315587051473
+      }
+    ]
+  },
+  "artificial_ucd": {
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "r": 0,
+        "ucd": 0.0
+      },
+      {
+        "r": 0.32,
+        "ucd": 55.68
+      },
+      {
+        "r": 1,
+        "ucd": 174.0
+      },
+      {
+        "r": 40.96,
+        "ucd": 7127.04
+      }
+    ]
+  },
+  "legacy": {
+    "description": "Production radiance thresholds and the ratio implied by the interim SQM fit (r = (1+2R)^0.68 - 1).",
+    "tolerance": 1e-09,
+    "cases": [
+      {
+        "radiance": 0,
+        "legacy_zone": 1,
+        "ratio": 0.0,
+        "ladder_zone": 1
+      },
+      {
+        "radiance": 0.24,
+        "legacy_zone": 1,
+        "ratio": 0.30550327750187733,
+        "ladder_zone": 1
+      },
+      {
+        "radiance": 0.25,
+        "legacy_zone": 2,
+        "ratio": 0.3174740087220036,
+        "ladder_zone": 1
+      },
+      {
+        "radiance": 0.5,
+        "legacy_zone": 3,
+        "ratio": 0.6021397551792442,
+        "ladder_zone": 2
+      },
+      {
+        "radiance": 1.0,
+        "legacy_zone": 4,
+        "ratio": 1.1107774857888884,
+        "ladder_zone": 3
+      },
+      {
+        "radiance": 1.1,
+        "legacy_zone": 4,
+        "ratio": 1.2054742180872844,
+        "ladder_zone": 3
+      },
+      {
+        "radiance": 2.9,
+        "legacy_zone": 4,
+        "ratio": 2.682188867411066,
+        "ladder_zone": 5
+      },
+      {
+        "radiance": 3.0,
+        "legacy_zone": 5,
+        "ratio": 2.755490495644016,
+        "ladder_zone": 5
+      },
+      {
+        "radiance": 6.0,
+        "legacy_zone": 5,
+        "ratio": 4.721125564669949,
+        "ladder_zone": 5
+      },
+      {
+        "radiance": 9.0,
+        "legacy_zone": 6,
+        "ratio": 6.405466960052512,
+        "ladder_zone": 6
+      },
+      {
+        "radiance": 17.0,
+        "legacy_zone": 6,
+        "ratio": 10.219313151902824,
+        "ladder_zone": 6
+      },
+      {
+        "radiance": 20.0,
+        "legacy_zone": 7,
+        "ratio": 11.493756073117853,
+        "ladder_zone": 7
+      },
+      {
+        "radiance": 48.0,
+        "legacy_zone": 7,
+        "ratio": 21.439066172722818,
+        "ladder_zone": 8
+      },
+      {
+        "radiance": 50.0,
+        "legacy_zone": 8,
+        "ratio": 22.06420737203065,
+        "ladder_zone": 8
+      },
+      {
+        "radiance": 120.0,
+        "legacy_zone": 8,
+        "ratio": 40.66501945503779,
+        "ladder_zone": 8
+      },
+      {
+        "radiance": 125.0,
+        "legacy_zone": 9,
+        "ratio": 41.83296423762514,
+        "ladder_zone": 9
+      },
+      {
+        "radiance": 250.0,
+        "legacy_zone": 9,
+        "ratio": 67.5314078358432,
+        "ladder_zone": 9
+      }
+    ]
+  }
+}

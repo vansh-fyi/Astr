@@ -16,6 +16,20 @@ export const DOCS_GROUPS = [
       { href: "/layout", label: "Layout and size" },
     ],
   },
+  {
+    name: "Sky science",
+    links: [
+      { href: "/sky-science", label: "Overview" },
+      { href: "/zone-scale", label: "Zone scale" },
+      { href: "/light-pollution", label: "Light pollution data" },
+      { href: "/sky-brightness", label: "Moonlight and sky brightness" },
+      { href: "/sky-states", label: "Sky states" },
+      { href: "/weather-clouds", label: "Weather and clouds" },
+      { href: "/planets-sky", label: "Planets and the sky" },
+      { href: "/graphs", label: "Graphs" },
+      { href: "/offline", label: "Offline and sync" },
+    ],
+  },
 ] as const;
 
 /** Flat list with each link's group, for search. */

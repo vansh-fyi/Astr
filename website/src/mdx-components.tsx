@@ -10,7 +10,7 @@ import {
 } from "react";
 import { CodeBlock } from "@/components/docs/code-block";
 import { CodeTabs } from "@/components/docs/code-tabs";
-import { DocNote, DocSection } from "@/components/docs/documentation";
+import { DocNote, DocSection, DocTable } from "@/components/docs/documentation";
 import { DartSource } from "@/components/docs/demos/dart-source";
 import { CssSource } from "@/components/docs/demos/css-source";
 import { FibonacciSpiral } from "@/components/docs/demos/fibonacci-spiral";
@@ -23,6 +23,9 @@ import { RatioTable } from "@/components/docs/demos/ratio-table";
 import { SampleTable } from "@/components/docs/demos/sample-table";
 import { RadiusScale, SpacingScale } from "@/components/docs/demos/spacing-scale";
 import { ScaleSource } from "@/components/docs/demos/scale-source";
+import { SourceExcerpt, SourceFile } from "@/components/docs/demos/source-file";
+import { SkyCalculator, ZoneCalculator } from "@/components/docs/demos/sky-calculators";
+import { ExtinctionTable, KernelParameters, KernelTable, LegacyBridgeTable, MoonGrid, ValidationTable, VectorStatus, ZoneImpactTable, ZoneLadderTable } from "@/components/docs/demos/sky-tables";
 import { StopMatrix } from "@/components/docs/demos/stop-matrix";
 import { TypeScale, TypeTable } from "@/components/docs/demos/type-scale";
 
@@ -51,6 +54,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ...components,
     DocSection,
     DocNote,
+    DocTable,
     CodeBlock,
     CodeTabs,
     PaletteGrid,
@@ -60,6 +64,19 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     LadderTable,
     SampleTable,
     CssSource,
+    SourceFile,
+    SourceExcerpt,
+    SkyCalculator,
+    ZoneCalculator,
+    ExtinctionTable,
+    KernelParameters,
+    KernelTable,
+    ValidationTable,
+    LegacyBridgeTable,
+    MoonGrid,
+    VectorStatus,
+    ZoneImpactTable,
+    ZoneLadderTable,
     ScaleSource,
     DartSource,
     OpacityDemo,

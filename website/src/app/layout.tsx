@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s · Astr design system",
   },
   description:
-    "Colour stops, the Pogson opacity ladder and natural-law gradients, plus Fibonacci spacing, golden-ratio type and layout that make up the Astr design system.",
+    "Colour stops, the Pogson opacity ladder and natural-law gradients, plus Fibonacci spacing, golden-ratio type and layout, and the sky science behind the app's verdict, that make up the Astr design system.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

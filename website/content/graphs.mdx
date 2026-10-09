@@ -1,0 +1,99 @@
+export const meta = {
+  title: "Graphs",
+  group: "Sky science",
+  description:
+    "What each graph in the app plots, the units on its axes, how the best window is chosen, and what each graph becomes under the sky model.",
+  sections: [
+    { id: "conditions", title: "Conditions graph" },
+    { id: "prime-view", title: "Prime view" },
+    { id: "visibility", title: "Object visibility graph" },
+    { id: "atmospherics", title: "Atmospherics" },
+    { id: "target", title: "What each becomes" },
+    { id: "implementation", title: "Implementation" },
+  ],
+};
+
+<DocSection id="conditions" title="Conditions graph">
+
+The graph on the atmospherics sheet covers one night, from sunset to the next sunrise, with five time labels across the bottom.
+
+<DocTable
+  head={["Layer", "What it plots", "Scale"]}
+  rows={[
+    ["Cloud cover", "the hourly cloud cover forecast as a filled area", "0% at the bottom to 100% at the top"],
+    ["Moon", "the moon curve as a filled area with an outline", "0 at the bottom to 90 at the top"],
+    ["Moonrise marker", "a vertical line and a dot where the moon rises", "time only"],
+    ["Prime view", "a highlighted band over the best window, with a badge", "time only"],
+    ["Now", "a line labelled NOW", "time only"],
+  ]}
+/>
+
+**The moon curve** is the moon's altitude multiplied by its illuminated fraction when it is above the horizon, sampled every 15 minutes. Its unit is degrees times a fraction, which has no physical meaning beyond "higher and fuller is worse". Because it is plotted against 90, a full moon at the zenith reaches the top and a half moon at 60° reaches a third of the height.
+
+</DocSection>
+
+<DocSection id="prime-view" title="Prime view">
+
+Prime view is the best stretch of the night for observing. For each hourly sample in the night:
+
+$$ \text{score} = 0.7\,\frac{c}{100} + 0.3\,\frac{i\,a}{90} $$
+
+where $c$ is the cloud cover in percent, $i$ the moon's illuminated fraction and $a$ its altitude in degrees when above the horizon (otherwise the second term is 0). Lower is better. The window is the contiguous run of at least 2 hours (3 samples) with the lowest average score, and it is dropped if that average is above 0.8.
+
+The weights 0.7 and 0.3 and the 0.8 cut-off are fixed numbers with no stated basis.
+
+</DocSection>
+
+<DocSection id="visibility" title="Object visibility graph">
+
+For one object, the graph plots its altitude over the night and the moon curve, and shades the **optimal windows**: the hours when the object is above 30° and the moon curve is below 30. Both thresholds are described in the code as arbitrary. The moon curve is the same unit-less value as above and belongs to the moon alone, so the moon's effect does not depend on how close the moon is to the object.
+
+</DocSection>
+
+<DocSection id="atmospherics" title="Atmospherics">
+
+The atmospherics sheet also shows tiles for seeing, darkness, humidity and temperature.
+
+<DocTable
+  head={["Tile", "Value", "Meaning"]}
+  rows={[
+    ["Seeing", "1 to 10 with a label", "a ground-weather proxy (see [Weather and clouds](/weather-clouds))"],
+    ["Darkness", "mag/arcsec², with a label from Excellent to Very Poor", "the zone's sky brightness minus a moon penalty `4 × phase × sin(altitude)`"],
+    ["Humidity", "%", "forecast at the current hour"],
+    ["Temperature", "°C", "forecast at the current hour"],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="target" title="What each becomes">
+
+<DocTable
+  head={["Graph", "Definition under the sky model"]}
+  rows={[
+    ["Cloud cover", "the hourly cloud fraction over the night, with the 0.30, 0.50 and 0.70 cuts that set the sky state"],
+    ["Moon", "the moon's cost in magnitudes of sky brightness, in mag/arcsec², at the zenith"],
+    ["Sky brightness", "the effective sky brightness over the night"],
+    ["Best window", "the window with the greatest utility, shaded on the time axis"],
+    ["Object altitude", "altitude over time with airmass on a second axis"],
+    ["Object windows", "hours when the object is at least 30° up and the moon adds at most 0.5 mag at the object's own position (proposal)"],
+  ]}
+/>
+
+The moon's cost at an object uses the angle between the moon and the object, so an object far from the moon is barely affected. The formulas are on [Moonlight and sky brightness](/sky-brightness).
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation">
+
+Excerpts of the real files, cut out by name, copied into the site and checked against the repository on every build.
+
+<CodeTabs labels={["Today", "Target"]} second={<SourceExcerpt file="lib/core/utils/astr_sky_model.dart" symbols={["sqmEffective", "hourQuality", "bestWindow", "angularSeparationDeg"]} />}>
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/conditions_graph.dart" symbols={["_drawMoonCurve", "_drawCloudCover"]} />
+<SourceExcerpt file="lib/core/engine/prime_view_calculator.dart" symbols={["_calculateCombinedScore", "_findBestContiguousWindow"]} />
+<SourceExcerpt file="lib/features/catalog/data/services/visibility_service_impl.dart" symbols={["calculateVisibility"]} />
+
+</CodeTabs>
+
+</DocSection>

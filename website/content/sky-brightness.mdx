@@ -1,0 +1,126 @@
+export const meta = {
+  title: "Moonlight and sky brightness",
+  group: "Sky science",
+  description:
+    "How artificial light, scattered moonlight and the air add up to the brightness of the sky at a given hour, and what it means for the stars you can see.",
+  sections: [
+    { id: "units", title: "One unit for everything" },
+    { id: "moonlight", title: "Moonlight" },
+    { id: "extinction", title: "Extinction" },
+    { id: "darkness", title: "Darkness" },
+    { id: "examples", title: "Worked examples" },
+    { id: "try", title: "Try it" },
+    { id: "limits", title: "Limits" },
+    { id: "validation", title: "Validation plan" },
+    { id: "implementation", title: "Implementation" },
+  ],
+};
+
+<DocSection id="units" title="One unit for everything">
+
+Light adds as luminance, not as magnitudes. So every contribution is expressed in **natural units**, where 1.0 is the natural zenith sky brightness (22.0 mag/arcsec², 174 µcd/m²), and the sum is converted afterwards.
+
+<DocTable
+  head={["Symbol", "Meaning"]}
+  rows={[
+    ["`r`", "artificial brightness over natural brightness (the zone quantity, see [Zone scale](/zone-scale))"],
+    ["`b_moon`", "scattered moonlight over natural brightness"],
+    ["`total`", "`1 + r + b_moon`"],
+  ]}
+/>
+
+$$ \text{SQM}_{\text{eff}} = 22.0 - 2.5\log_{10}(1 + r + b_{\text{moon}}) \qquad \text{NELM}_{\text{eff}} = 7.93 - 5\log_{10}\!\left(10^{\,4.316 - \text{SQM}_{\text{eff}}/5} + 1\right) $$
+
+SQM is the brightness of the sky in magnitudes per square arcsecond. NELM is the naked-eye limiting magnitude, the faintest star an observer can see, from an empirical fit between sky-meter readings and observers' reports (Unihedron and AAVSO).
+
+<VectorStatus />
+
+</DocSection>
+
+<DocSection id="moonlight" title="Moonlight">
+
+Scattered moonlight follows Krisciunas and Schaefer (1991), "A model of the brightness of moonlight" (PASP 103, 1033). It is an empirical fit to 33 photometric measurements in the V band, and its authors report agreement with data at the 8% to 23% level. The formulas were checked against the published reference implementation in the specsim package.
+
+Let $\alpha$ be the phase angle in degrees (0 at full moon, 180 at new), $\rho$ the angle between the moon and the sky position, $Z$ and $Z_m$ the zenith distances of the sky position and the moon, and $k$ the V-band extinction coefficient in magnitudes per airmass.
+
+$$ m = -12.73 + 0.026\,|\alpha| + 4\times10^{-9}\alpha^{4} \qquad I^{*} = 10^{-0.4\,(m + 16.57)} $$
+
+$$ f(\rho) = 10^{5.36}\,(1.06 + \cos^{2}\rho) + 10^{\,6.15 - \rho/40} \qquad X(Z) = \left(1 - 0.96\sin^{2}Z\right)^{-1/2} $$
+
+$$ B_{\text{moon}} = f(\rho)\,I^{*}\,10^{-0.4\,k\,X(Z_m)}\left(1 - 10^{-0.4\,k\,X(Z)}\right)\ \text{nL} \qquad V = \frac{20.7233 - \ln(B_{\text{moon}}/34.08)}{0.92104} $$
+
+$$ b_{\text{moon}} = 10^{\,0.4\,(22.0 - V)} \quad (0\text{ when } Z_m \ge 90^\circ) \qquad \alpha = \arccos(2i - 1) $$
+
+Here $i$ is the illuminated fraction of the moon from the ephemeris. The last conversion, from nanolamberts to magnitudes, is Garstang (1986), eq. 19.
+
+**An anchor value.** The reference implementation documents one worked value: $Z = 20^\circ$, $Z_m = 70^\circ$, $\rho = 50^\circ$, $\alpha = 45^\circ$ and $k = 0.15$ give **19.855 mag/arcsec²**. The Python, Dart and TypeScript implementations all reproduce it to 0.0005, and this site's build fails if they do not.
+
+**Which part of the sky.** For the verdict on the sky as a whole, use the zenith: $Z = 0$ and $\rho = Z_m$. For one object's visibility, use the object's direction, with $\rho$ the angle between the moon and the object computed from their altitudes and azimuths.
+
+</DocSection>
+
+<DocSection id="extinction" title="Extinction">
+
+The air dims light on its way through. The moonlight model needs the V-band extinction coefficient, built from three parts:
+
+$$ k_V = 0.1057\,\frac{P}{P_0} + 0.016 + 1.0857\,\tau_{550} $$
+
+The first term is Rayleigh scattering scaled by station pressure (from the international standard atmosphere at the station's elevation), the second is ozone, and the third is aerosol, where $\tau_{550}$ is the aerosol optical depth at 550 nm and 1.0857 is $2.5\log_{10}e$, which converts an optical depth to magnitudes. With no aerosol data, use $\tau = 0.05$ (a proposal).
+
+<ExtinctionTable />
+
+The two constants are not individually verified (**unverified**). As a check on the whole formula, a site at 2400 m with an optical depth of 0.03 gives 0.127, against a measured median of 0.130 for the Roque de los Muchachos observatory on clear nights.
+
+</DocSection>
+
+<DocSection id="darkness" title="Darkness">
+
+An hour is **dark** when the Sun is at or below −18°. Between sunset and that point the sky is still lit by the Sun, so there is no verdict and the app shows twilight or day. How bright the sky is during twilight is measured by Patat et al. (2006) at Paranal, and modelling it is future work.
+
+</DocSection>
+
+<DocSection id="examples" title="Worked examples">
+
+A site of each zone under a range of moons, computed with the functions above.
+
+<MoonGrid />
+
+A high full moon takes a pristine site to about the limiting magnitude of a zone 8 city, which matches the experience that a full moon wipes out the Milky Way. In a bright city the moon barely matters.
+
+</DocSection>
+
+<DocSection id="try" title="Try it">
+
+<SkyCalculator />
+
+</DocSection>
+
+<DocSection id="limits" title="Limits">
+
+- Twilight brightness is not modelled; the model is gated at −18°.
+- Moonlight is modelled in the V band, while a sky meter is broader.
+- Moonlight reflected from clouds, airglow variation, the zodiacal light and the observer's altitude are ignored.
+- The artificial ratio $r$ comes from satellite data, so its error carries through.
+- The Rayleigh and ozone constants are not individually verified.
+
+</DocSection>
+
+<DocSection id="validation" title="Validation plan">
+
+1. **Moonlight.** Compare the effective sky brightness with Globe at Night and sky-meter network readings taken with the moon up (the data record date and time, so the moon can be computed), in dark and suburban strata. Report bias and error in mag/arcsec².
+2. **Limiting magnitude.** Compare the model's limiting magnitude with observers' reports for the same nights.
+3. **Cloud.** Compare forecast cover with satellite cloud masks for the sampled nights.
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation">
+
+Excerpts of the real files, cut out by name, copied into the site and checked against the repository on every build.
+
+<CodeTabs labels={["Python", "Dart"]} second={<SourceExcerpt file="lib/core/utils/astr_sky_model.dart" symbols={["pressureRatio", "extinctionKV", "scatteringAirmass", "phaseAngleFromIllumination", "moonBrightnessV", "moonRatio", "angularSeparationDeg", "sqmEffective"]} />}>
+
+<SourceExcerpt file="scripts/astr_sky.py" symbols={["pressure_ratio", "extinction_k_v", "scattering_airmass", "phase_angle_from_illumination", "moon_brightness_v", "moon_ratio", "angular_separation_deg", "sqm_effective"]} />
+
+</CodeTabs>
+
+</DocSection>

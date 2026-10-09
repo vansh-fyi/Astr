@@ -1,0 +1,117 @@
+export const meta = {
+  title: "Planets and the sky",
+  group: "Sky science",
+  description:
+    "How the app finds the Sun, Moon and planets, when they rise and set, and what its catalogue holds today.",
+  sections: [
+    { id: "what", title: "What is computed" },
+    { id: "method", title: "Method today" },
+    { id: "time", title: "Time and place" },
+    { id: "night", title: "The night window" },
+    { id: "moon", title: "Moon phase and the moon curve" },
+    { id: "catalogue", title: "The catalogue today" },
+    { id: "licence", title: "The licence problem" },
+    { id: "target", title: "The plan" },
+    { id: "implementation", title: "Implementation" },
+  ],
+};
+
+<DocSection id="what" title="What is computed">
+
+Everything about where things are, and when, is computed on the device. Nothing needs the network.
+
+<DocTable
+  head={["Quantity", "Computed for", "How often"]}
+  rows={[
+    ["Position (altitude and azimuth)", "Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, and fixed objects by right ascension and declination", "every 15 minutes across a window"],
+    ["Rise, set and transit", "the same bodies", "per date and place"],
+    ["Moon illuminated fraction", "the Moon", "per instant"],
+    ["Night window", "Sun", "per date and place"],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="method" title="Method today">
+
+The app uses the Swiss Ephemeris through the `sweph` package. A position is a call to the ephemeris for a body at a Julian day, then a conversion from equatorial coordinates to altitude and azimuth for the observer.
+
+<DocTable
+  head={["Step", "Swiss Ephemeris call"]}
+  rows={[
+    ["Julian day from a UTC time", "`swe_julday`"],
+    ["Position of a body", "`swe_calc_ut`, equatorial coordinates from the Swiss Ephemeris files"],
+    ["Altitude and azimuth", "`swe_azalt` from equatorial coordinates for the observer; the app uses the true altitude, without refraction"],
+    ["Rise, set and transit", "`swe_rise_trans` with the topocentric flag; the pressure and temperature arguments are left at 0"],
+    ["Moon phase and illuminated fraction", "`swe_pheno_ut`, element 1"],
+  ]}
+/>
+
+Fixed objects such as stars and deep-sky objects skip the ephemeris and go straight to `swe_azalt` with their right ascension and declination. The bundled catalogue stores no proper motion, so positions are used as given.
+
+One accuracy note: rise and set use the topocentric flag, but the 15-minute altitude trajectories take geocentric positions and only then convert for the observer. For the Moon that leaves out parallax, which is up to about one degree, so the moon curve can differ from the true altitude by that much (the size of the effect is from general astronomy, **unverified** here).
+
+</DocSection>
+
+<DocSection id="time" title="Time and place">
+
+A location's time zone comes from its coordinates, and "midnight" for a date is local midnight converted to UTC, so daylight saving shifts are handled by the time-zone database and not by hand. Altitudes are true altitudes. The sky model needs altitude, azimuth and the Moon's illuminated fraction, and these are what the ephemeris returns.
+
+</DocSection>
+
+<DocSection id="night" title="The night window">
+
+The night runs from a sunset to a sunrise. If it is before today's sunrise, the night began yesterday evening. If it is after today's sunset, it ends at tomorrow's sunrise. In the daytime it shows the coming night. The window uses sunset and sunrise, not the astronomical-darkness limit of −18° that the [sky model](/sky-states) applies hour by hour inside it.
+
+</DocSection>
+
+<DocSection id="moon" title="Moon phase and the moon curve">
+
+The moon's illuminated fraction comes from the phase function: 0 at new moon, 1 at full. The graphs also use a **moon curve**: every 15 minutes, the moon's altitude multiplied by its illuminated fraction when it is above the horizon, and 0 below. It is a number between 0 and 90 with no physical unit. It is a stand-in for how much the moon matters, and the [sky model](/sky-brightness) replaces it with the moonlight's cost in magnitudes.
+
+</DocSection>
+
+<DocSection id="catalogue" title="The catalogue today">
+
+The planets and the Sun and Moon come from the ephemeris. Everything else comes from a bundled SQLite database. Counted from the file in the repository on 2026-10-09, it holds:
+
+<DocTable
+  head={["Table", "Rows", "Content"]}
+  rows={[
+    ["`dso`", "3", "M31 (Andromeda Galaxy), M42 (Orion Nebula), M45 (Pleiades)"],
+    ["`stars`", "4", "Sirius, Vega, Betelgeuse, Polaris"],
+  ]}
+/>
+
+That is a seed, not a catalogue. The object corpus is a core goal of the project: see the [overview](/sky-science) for the plan to reach parity with the best planetarium apps.
+
+</DocSection>
+
+<DocSection id="licence" title="The licence problem">
+
+The Swiss Ephemeris is dual-licensed: GNU AGPL, which would put the whole app under the AGPL, or a paid Professional License. The choice must be made before distributing. The `sweph` package carries the same terms. The app is licensed under Apache-2.0, and AGPL-licensed code is a known conflict with store terms, so a store build must not include it. This is recorded in the repository's NOTICE file.
+
+</DocSection>
+
+<DocSection id="target" title="The plan">
+
+The decision is to replace the ephemeris with a free, permanent one built on **JPL's planetary ephemerides** (DE440), read by the app's own code. DE440 is NASA/JPL data for 1550 to 2650 in a file of about 128 MB. A reduced file, DE440s, is about 31 MB and covers 1849 to 2150 with no loss of precision in that range. Positions are stored as Chebyshev polynomials, which are simple to evaluate. The public-domain status of the files should be confirmed before relying on it (**unverified**).
+
+- **Frame transforms** (precession and nutation, sidereal time, aberration, light time, refraction, topocentric correction) will be ported from the IERS Conventions and the BSD-licensed ERFA library. The star map needs them too.
+- **Small bodies**: orbital elements from the JPL Small-Body Database and the Minor Planet Center, advanced as two-body orbits, with hyperbolic orbits for interstellar objects. **Satellites**: CelesTrak data with SGP4.
+- **Fallback**: Astronomy Engine (MIT licence, about one arcminute) if the new reader slips. One arcminute is less than a pixel on a phone showing a 60° field of view.
+- **Tests**: JPL Horizons output as the reference, with `sweph` used only as a comparison in development and never shipped.
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation">
+
+Excerpts of the real files, cut out by name, copied into the site and checked against the repository on every build.
+
+<CodeTabs labels={["Ephemeris service", "Visibility windows"]} second={<SourceExcerpt file="lib/features/catalog/data/services/visibility_service_impl.dart" symbols={["calculateVisibility"]} />}>
+
+<SourceExcerpt file="lib/features/astronomy/domain/services/astronomy_service.dart" symbols={["calculateRiseSetTransit", "calculateAltitudeTrajectory", "calculateMoonTrajectory", "getMoonPhase", "getNightWindow"]} />
+
+</CodeTabs>
+
+</DocSection>

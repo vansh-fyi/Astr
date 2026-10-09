@@ -10,14 +10,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Astr design system: agent rules
 
-This folder is the documentation site for the Astr design system. It is a Next.js app that will grow into the full design documentation and Flutter reference. Its scope is two systems: colour (the colour stops, the opacity ladder and gradients) and proportion (spacing, typography, layout and element sizes). Read this file before changing anything here, and follow it exactly.
+This folder is the documentation site for the Astr design system. It is a Next.js app that will grow into the full design documentation and Flutter reference. Its scope is three systems: colour (the colour stops, the opacity ladder and gradients), proportion (spacing, typography, layout and element sizes) and sky science (how the app measures and decides: the zone scale, light pollution data, sky brightness, sky states, weather, planets, graphs and offline behaviour). Read this file before changing anything here, and follow it exactly.
 
 This file contains no code on purpose. Rules are written in plain language. The authoritative values live in the files named below, never in this document.
 
 ## Scope
 
-- Colour and proportion only. Do not add component documentation or any other new page until the owner asks for it, one at a time. The owner asked for the three proportion pages together, which is why spacing, typography and layout exist.
-- The Flutter application in the repository root is outdated and is used for functionality only. Never read it for design guidance and never edit it from this folder's work. Design rules come from this site, not from the app.
+- Colour, proportion and sky science only. Do not add component documentation or any other new page until the owner asks for it, one at a time. The owner asked for the proportion pages together and for the sky science pages together, which is why they all exist.
+- The Flutter application in the repository root is outdated and is used for functionality only. Never read it for design guidance and never edit it from this folder's work. Design rules come from this site, not from the app. The sky science pages are the exception: they document the application's logic, so they read its code, but only through the source copies described below.
 - The sepcare project, kept next to this repository, is the reference for the documentation shell's design language. Follow its layout, spacing, sizing and tone closely. Do not copy its colours, its content or anything clinical.
 
 ## Single source of truth
@@ -72,6 +72,19 @@ This file contains no code on purpose. Rules are written in plain language. The 
 - Layout: the reading measure is seventy-six characters. Panes use consecutive Fibonacci proportions. Compact controls are drawn at thirty-four and tapped at fifty-five.
 - Media queries cannot read variables, so a breakpoint written in the shell stylesheet is a literal. It must be a Fibonacci breakpoint or a sum of pane widths, and its comment must say which.
 - The same page rules apply to the proportion pages: markdown with embedded components, formulas on the page, one code tabs block, and Dart files in the Flutter folder.
+
+## Sky science pages
+
+- These pages document logic, not design. They read the application's real code and never retype it.
+- Code is copied byte for byte into the content source folder by the sync script, from the list in the manifest. The verification script fails if a copy differs from its original. After changing a file in the manifest, run the sync script. Add a file to the manifest before using it on a page.
+- A page shows either a whole file or excerpts cut out by symbol name. A symbol that no longer exists fails the build, so an excerpt cannot go stale. Never paste code into a page.
+- Tables and calculators are computed by the TypeScript ports in the library folder. The build checks those ports against the shared test vectors that the Python and Dart implementations also pass. If they disagree, fix the code or the vectors, never the check.
+- The second tab on these pages is named for the page (for example Python and Dart), not Flutter. Each page still has exactly one code tabs block with both panels filled.
+- The markdown pipeline has no table syntax. Use the shared table component with arrays.
+- Mark every claim that was not checked against a primary source as unverified, and every design choice that is not a measurement as a proposal, in the visible text. Never present a proposal as settled.
+- State the facts about today's code plainly, including bad ones (for example the size of the bundled catalogue and what the current sky state ignores).
+- Data that comes from a one-off analysis lives in the data folder with its provenance in the file, and the verification script checks it adds up.
+- Do not use Bortle terms except to say they are not used.
 
 ## Typography and brand
 

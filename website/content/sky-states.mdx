@@ -1,0 +1,164 @@
+export const meta = {
+  title: "Sky states",
+  group: "Sky science",
+  description:
+    "How an hour of sky becomes one of six states, how a night picks its best window, and how the app says what is limiting the sky.",
+  sections: [
+    { id: "overview", title: "Overview" },
+    { id: "inputs", title: "Inputs per hour" },
+    { id: "usable", title: "Usable hours and the best window" },
+    { id: "states", title: "The six states" },
+    { id: "why", title: "What is limiting the sky" },
+    { id: "night", title: "The night, the hero and the chip" },
+    { id: "moon-time", title: "Moon time" },
+    { id: "try", title: "Try it" },
+    { id: "today", title: "What this replaces" },
+    { id: "limits", title: "Limits and proposals" },
+    { id: "implementation", title: "Implementation" },
+  ],
+};
+
+<DocSection id="overview" title="Overview">
+
+The verdict comes from four ingredients: the **place** (how much artificial light there is, the zone ratio $r$), the **sky** (cloud cover and air clarity from a forecast), the **moon** (scattered moonlight, see [Moonlight and sky brightness](/sky-brightness)) and the **Sun** (whether it is dark at all). It is one of six states, plus a plain statement of what limits the sky: cloud, moon, light pollution or nothing.
+
+<VectorStatus />
+
+</DocSection>
+
+<DocSection id="inputs" title="Inputs per hour">
+
+<DocTable
+  head={["Input", "Source", "Used for"]}
+  rows={[
+    ["Sun altitude", "ephemeris", "dark: at or below −18°"],
+    ["Moon altitude, azimuth, illuminated fraction", "ephemeris", "moonlight `b_moon`"],
+    ["Total cloud cover", "forecast (Open-Meteo `cloud_cover`)", "cloud fraction `c`, percent over 100"],
+    ["Aerosol optical depth at 550 nm", "forecast (CAMS through Open-Meteo Air Quality), or none", "extinction `k_V`"],
+    ["Elevation", "forecast response or an elevation model", "extinction `k_V`"],
+    ["`r`", "zone data: the ratio from the cell's sky brightness, or `r` directly after calibration", "artificial light"],
+  ]}
+/>
+
+Each sample stands for one hour. Cloud cover is a **model output**, not something Astr calculates: a grid-cell fraction of the sky covered, so it says how much of the sky is covered and not whether a given star is hidden. See [Weather and clouds](/weather-clouds).
+
+</DocSection>
+
+<DocSection id="usable" title="Usable hours and the best window">
+
+For each hour, with $c$ the cloud fraction:
+
+$$ \text{usable} = \text{dark} \;\wedge\; c \le 0.70 \;\wedge\; \text{NELM}_{\text{eff}} \ge 3.5 $$
+
+$$ u = (1 - c)\;10^{\,0.48\,(\text{NELM}_{\text{eff}} - \text{NELM}_{\text{natural}})} \quad \text{when usable, else } 0 $$
+
+The utility $u$ is the expected number of naked-eye stars you can see relative to a natural clear sky: the clear fraction times the star-count ratio. The slope 0.48 is the logarithmic slope of commonly cited all-sky star counts, to be recomputed from the catalogue once the corpus exists (**unverified**). The three thresholds are proposals.
+
+**Best window.** Split the night into runs of consecutive usable hours. The best window is the run with the greatest summed utility, at least **2 hours** long. Ties go to the earlier run. If no run qualifies, there is no window.
+
+</DocSection>
+
+<DocSection id="states" title="The six states">
+
+The state is a function of the cloud fraction $c$, the artificial ratio $r$ and $r_{\text{eff}} = r + b_{\text{moon}}$. The moon pushes the sky into a worse **effective zone**, using the ladder from [Zone scale](/zone-scale).
+
+<DocTable
+  head={["Order", "Condition", "State"]}
+  rows={[
+    ["1", "`c > 0.70`", "Cloudy"],
+    ["2", "effective zone 9 and the artificial zone is also 9", "Too much light"],
+    ["3", "effective zone 8, or zone 9 caused only by the moon", "Few stars"],
+    ["4", "effective zone 6 or 7", "Planets visible"],
+    ["5", "effective zone 4 or 5", "Starry sky"],
+    ["6", "effective zone 1, 2 or 3", "Milky Way visible"],
+  ]}
+/>
+
+**Cloud caps.** Milky Way needs $c \le 0.30$, otherwise it becomes Starry sky. Starry sky needs $c \le 0.50$, otherwise it becomes Planets visible. The cuts 0.30, 0.50 and 0.70 are the values the app already uses (proposals to tune).
+
+**The moon cannot create "Too much light".** That state describes light pollution, so a moon-driven worst case is Few stars.
+
+**Why the bands are where they are.** On a moonless clear night, zones 1 to 3 have a limiting magnitude of 6.2 or better and the Milky Way is intact. Zones 4 and 5 are the Milky Way fading band and beyond (5.5 to 6.2). Zones 6 and 7 leave the brightest stars and planets (4.5 to 5.5), zone 8 leaves few stars (3.9 to 4.5), and zone 9 is the top class. The state boundaries are zone boundaries, so the zone and the verdict never disagree on a moonless night.
+
+</DocSection>
+
+<DocSection id="why" title="What is limiting the sky">
+
+`why` returns the reason, so the app can say why and not only what.
+
+<DocTable
+  head={["Primary cause", "When"]}
+  rows={[
+    ["`cloud`", "the state is Cloudy, or cloud capped the state"],
+    ["`moon`", "otherwise, the moon costs at least 0.25 magnitudes of limiting magnitude and more than light pollution does"],
+    ["`light`", "otherwise, light pollution costs at least 0.25 magnitudes against a natural sky"],
+    ["`none`", "otherwise"],
+  ]}
+/>
+
+It also returns `light_loss` and `moon_loss`, the limiting-magnitude losses in magnitudes. The 0.25 cut is a proposal.
+
+</DocSection>
+
+<DocSection id="night" title="The night, the hero and the chip">
+
+- **Night state.** The state of the best window, computed from the window's mean cloud and mean $r_{\text{eff}}$, so a moon-up hour counts in luminance and not in magnitudes. With no window, the state comes from the dark hours, so a cloudy night or a city sky still gets an honest label. With no dark hour at all (polar summer) there is no verdict.
+- **Hero.** Shows the night state, and the date arrows move the night.
+- **Right now.** The same state function applied to the current hour. It is empty when the Sun is not below −18°. Because both use the same function, the two can never disagree about the method.
+- **The night.** Runs from sunset to the next sunrise, as the app computes today. Dark hours inside it are those with the Sun at or below −18°.
+
+</DocSection>
+
+<DocSection id="moon-time" title="Moon time">
+
+Moon time is two numbers over the dark hours: how many have the moon **up** and how many have it **down**. The moon's cost is $\Delta\text{SQM} = \text{SQM}(r) - \text{SQM}_{\text{eff}}$ in magnitudes, at the zenith or at an object. The night state already includes it through $r_{\text{eff}}$.
+
+</DocSection>
+
+<DocSection id="try" title="Try it">
+
+<SkyCalculator />
+
+</DocSection>
+
+<DocSection id="today" title="What this replaces">
+
+Today's home screen reads a single **current-hour** cloud value for today, and a day average for other dates, then scores cloud (40%), darkness (35%) and moon illumination (25%) with Bortle-style cut-offs. The new model replaces it.
+
+<DocTable
+  head={["Today", "Becomes"]}
+  rows={[
+    ["`QualitativeConditionService.evaluate` (40/35/25 score, Bortle cut-offs)", "`skyState`"],
+    ["`DarknessCalculator.calculateDarkness` (`4 × phase × sin(altitude)`)", "`sqmEffective` with `moonRatio`"],
+    ["`PrimeViewCalculator` (cloud 0.7, moon 0.3, lowest average)", "`bestWindow`"],
+    ["`BortleMpsasConverter`", "removed"],
+    ["`QualityCalculator` and `StargazingLogic` (unused)", "removed"],
+  ]}
+/>
+
+Today's evaluation, for reference:
+
+<SourceExcerpt file="lib/core/services/qualitative/qualitative_condition_service.dart" symbols={["evaluate"]} />
+
+</DocSection>
+
+<DocSection id="limits" title="Limits and proposals">
+
+- Twilight brightness is not modelled; the model is gated at −18°.
+- Clouds are one number per hour from a forecast model. Moonlit clouds and cloud-amplified skyglow near cities are ignored, and a low cover does not guarantee a clear line to a given star.
+- The cloud cuts (0.30, 0.50, 0.70), the 3.5 limiting-magnitude floor, the two-hour minimum and the 0.25 magnitude cause cut are proposals to tune against observer reports.
+- The star-count slope is not verified.
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation">
+
+Excerpts of the real files, cut out by name, copied into the site and checked against the repository on every build.
+
+<CodeTabs labels={["Python", "Dart"]} second={<SourceExcerpt file="lib/core/utils/astr_sky_model.dart" symbols={["hourQuality", "bestWindow", "skyState", "why", "nightState", "instantState", "moonHours"]} />}>
+
+<SourceExcerpt file="scripts/astr_sky.py" symbols={["hour_quality", "best_window", "sky_state", "why", "night_state", "instant_state", "moon_hours"]} />
+
+</CodeTabs>
+
+</DocSection>

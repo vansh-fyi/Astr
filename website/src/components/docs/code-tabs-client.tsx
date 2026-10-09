@@ -2,20 +2,22 @@
 
 import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 
-type Tab = "css" | "flutter";
+type Tab = "first" | "second";
 
 export function CodeTabsClient({
-  css,
-  flutter,
+  first,
+  second,
+  labels,
 }: {
-  css: ReactNode;
-  flutter?: ReactNode;
+  first: ReactNode;
+  second?: ReactNode;
+  labels: [string, string];
 }) {
   const id = useId();
-  const [active, setActive] = useState<Tab>("css");
+  const [active, setActive] = useState<Tab>("first");
   const tabs: { key: Tab; label: string }[] = [
-    { key: "css", label: "Tokens / CSS" },
-    ...(flutter ? [{ key: "flutter" as const, label: "Flutter" }] : []),
+    { key: "first", label: labels[0] },
+    ...(second ? [{ key: "second" as const, label: labels[1] }] : []),
   ];
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -53,22 +55,22 @@ export function CodeTabsClient({
       </div>
       <div
         role="tabpanel"
-        id={`${id}-panel-css`}
-        aria-labelledby={`${id}-tab-css`}
+        id={`${id}-panel-first`}
+        aria-labelledby={`${id}-tab-first`}
         className="docs-tabpanel"
-        hidden={active !== "css"}
+        hidden={active !== "first"}
       >
-        {css}
+        {first}
       </div>
-      {flutter && (
+      {second && (
         <div
           role="tabpanel"
-          id={`${id}-panel-flutter`}
-          aria-labelledby={`${id}-tab-flutter`}
+          id={`${id}-panel-second`}
+          aria-labelledby={`${id}-tab-second`}
           className="docs-tabpanel"
-          hidden={active !== "flutter"}
+          hidden={active !== "second"}
         >
-          {flutter}
+          {second}
         </div>
       )}
     </div>

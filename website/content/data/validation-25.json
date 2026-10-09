@@ -1,0 +1,180 @@
+{
+  "provenance": "Final validation run of Phase 2 plan 04 (2026-06-14) on zones.db SHA-256 09cb4d9920c65fc70eebfa098223809e9b7dd451aecc01965d6aef54f7b83f08. Expected zones were derived from the Lorenz atlas with the legacy thresholds. Radiance is the value stored for the cell; none means the cell is not in the database, which is zone 1. The causes are the run's own assessment, not measured.",
+  "rows": [
+    {
+      "name": "New York, USA",
+      "expected": 9,
+      "got": 9,
+      "radiance": 247.76,
+      "cause": null
+    },
+    {
+      "name": "London, UK",
+      "expected": 9,
+      "got": 9,
+      "radiance": 206.97,
+      "cause": null
+    },
+    {
+      "name": "Tokyo, Japan",
+      "expected": 8,
+      "got": 8,
+      "radiance": 67.43,
+      "cause": null
+    },
+    {
+      "name": "Sydney, Australia",
+      "expected": 9,
+      "got": 9,
+      "radiance": 148.36,
+      "cause": null
+    },
+    {
+      "name": "Paris, France",
+      "expected": 8,
+      "got": 8,
+      "radiance": 97.86,
+      "cause": null
+    },
+    {
+      "name": "Berlin, Germany",
+      "expected": 8,
+      "got": 8,
+      "radiance": 80.53,
+      "cause": null
+    },
+    {
+      "name": "Mumbai, India",
+      "expected": 8,
+      "got": 8,
+      "radiance": 93.52,
+      "cause": null
+    },
+    {
+      "name": "São Paulo, Brazil",
+      "expected": 9,
+      "got": 9,
+      "radiance": 179.61,
+      "cause": null
+    },
+    {
+      "name": "Cairo, Egypt",
+      "expected": 9,
+      "got": 9,
+      "radiance": 166.62,
+      "cause": null
+    },
+    {
+      "name": "Cape Town, South Africa",
+      "expected": 8,
+      "got": 8,
+      "radiance": 83.89,
+      "cause": null
+    },
+    {
+      "name": "Death Valley, USA",
+      "expected": 1,
+      "got": 1,
+      "radiance": null,
+      "cause": null
+    },
+    {
+      "name": "Atacama Desert, Chile",
+      "expected": 1,
+      "got": 1,
+      "radiance": null,
+      "cause": null
+    },
+    {
+      "name": "Teide, Canary Islands",
+      "expected": 3,
+      "got": 3,
+      "radiance": 0.96,
+      "cause": null
+    },
+    {
+      "name": "Mauna Kea, Hawaii",
+      "expected": 1,
+      "got": 1,
+      "radiance": null,
+      "cause": null
+    },
+    {
+      "name": "Namib Desert, Namibia",
+      "expected": 1,
+      "got": 1,
+      "radiance": null,
+      "cause": null
+    },
+    {
+      "name": "Antarctica McMurdo",
+      "expected": 1,
+      "got": 1,
+      "radiance": null,
+      "cause": null
+    },
+    {
+      "name": "Greenland Nuuk",
+      "expected": 6,
+      "got": 6,
+      "radiance": 15.92,
+      "cause": null
+    },
+    {
+      "name": "Sahara Desert",
+      "expected": 1,
+      "got": 1,
+      "radiance": null,
+      "cause": null
+    },
+    {
+      "name": "Gobi Desert, Mongolia",
+      "expected": 1,
+      "got": 1,
+      "radiance": null,
+      "cause": null
+    },
+    {
+      "name": "Outback, Australia",
+      "expected": 1,
+      "got": 1,
+      "radiance": null,
+      "cause": null
+    },
+    {
+      "name": "Reykjavik, Iceland",
+      "expected": 7,
+      "got": 9,
+      "radiance": 125.82,
+      "cause": "A city of about 230 thousand at 125 nW matches New York in density, which is implausible. Likely aurora or polar-night noise at 65°N."
+    },
+    {
+      "name": "Singapore",
+      "expected": 9,
+      "got": 7,
+      "radiance": 36.97,
+      "cause": "One of the densest city centres in Asia reads only 37 nW. Likely an equatorial under-read from persistent cloud and a low viewing angle."
+    },
+    {
+      "name": "Wellington, NZ",
+      "expected": 8,
+      "got": 8,
+      "radiance": 59.47,
+      "cause": null
+    },
+    {
+      "name": "Anchorage, Alaska",
+      "expected": 8,
+      "got": 8,
+      "radiance": 124.66,
+      "cause": null
+    },
+    {
+      "name": "Ushuaia, Argentina",
+      "expected": 7,
+      "got": 8,
+      "radiance": 105.75,
+      "cause": "Reads 105.75 nW for a town of about 80 thousand. Likely high-latitude VIIRS noise."
+    }
+  ]
+}

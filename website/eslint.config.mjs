@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Verbatim copies of repository files, shown on the pages; they are not this site's code.
+    "content/source/**",
   ]),
 ]);
 

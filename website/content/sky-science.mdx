@@ -1,0 +1,108 @@
+export const meta = {
+  title: "Overview",
+  group: "Sky science",
+  description:
+    "The science behind Astr's verdict: darkness, atmosphere, moon and sky, how each part is specified and tested, and where the object corpus is going.",
+  sections: [
+    { id: "principles", title: "Principles" },
+    { id: "layers", title: "Layers" },
+    { id: "status", title: "Status" },
+    { id: "sources", title: "Data and licences" },
+    { id: "corpus", title: "The object corpus" },
+    { id: "reading", title: "Where to start" },
+    { id: "checks", title: "How these pages stay true" },
+  ],
+};
+
+<DocSection id="principles" title="Principles">
+
+- **One physical quantity.** The brightness of the sky at a place and hour decides the verdict, the graphs, the visibility of each object and, later, the star map.
+- **Every number is reproducible.** Tables on these pages are computed from the same functions the app runs, and the code shown is the real code, copied from the repository and checked on every build.
+- **Say what is not known.** Anything not checked against a primary source is marked as unverified. Anything that is a design choice and not a measurement is marked as a proposal.
+- **Free and open.** The app is planned to be free, open source and tip-funded. Code is Apache-2.0 and published data packs are CC BY-SA, subject to each upstream source's terms. No third-party copyleft code ships in the app.
+
+</DocSection>
+
+<DocSection id="layers" title="Layers">
+
+<DocTable
+  head={["Layer", "Answers", "Page"]}
+  rows={[
+    ["Darkness", "How dark is this place, in any weather?", "[Zone scale](/zone-scale), [Light pollution data](/light-pollution)"],
+    ["Atmosphere", "What is the air doing tonight?", "[Weather and clouds](/weather-clouds)"],
+    ["Celestial mechanics", "Where is everything, and when?", "[Planets and the sky](/planets-sky)"],
+    ["Synthesis", "How good is the sky each hour, and what is limiting it?", "[Moonlight and sky brightness](/sky-brightness), [Sky states](/sky-states)"],
+    ["Presentation", "Graphs, the hero state, later the star map", "[Graphs](/graphs)"],
+    ["Delivery", "What works offline, and how it stays fresh", "[Offline and sync](/offline)"],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="status" title="Status">
+
+<DocTable
+  head={["Part", "Status"]}
+  rows={[
+    ["Zone scale", "**Specified, with tests.** Python and Dart implementations pass shared vectors. The data behind it is the legacy chain until calibration."],
+    ["Moonlight, sky brightness and sky states", "**Specified, with tests.** Not wired into the app yet; the app still uses the older scoring."],
+    ["Light pollution pipeline", "**As built.** Documented from the scripts; calibration against ground measurements is not done."],
+    ["Weather and clouds", "**As built.** Layered clouds, transparency and a physical seeing estimate are proposals."],
+    ["Planets and the sky", "**As built on a licence that cannot ship.** The Swiss Ephemeris is to be replaced by JPL data read by the app's own code."],
+    ["Graphs", "**As built.** Definitions under the sky model are proposals."],
+    ["Offline and sync", "**As built.** The full zone download and object packs are not built."],
+    ["Object corpus and star map", "**Planned.** Today's catalogue is 3 deep-sky objects and 4 stars."],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="sources" title="Data and licences">
+
+<DocTable
+  head={["Source", "Used for", "Terms"]}
+  rows={[
+    ["VIIRS Nighttime Lights (Earth Observation Group, Colorado School of Mines)", "light pollution", "many products are CC BY 4.0, cite Elvidge et al. 2021; the exact 2024 product is to be confirmed"],
+    ["Open-Meteo", "weather", "CC BY 4.0; free tier is non-commercial; confirm tips qualify"],
+    ["Open-Meteo Air Quality (CAMS)", "aerosols (planned)", "credit CAMS"],
+    ["Swiss Ephemeris", "positions today", "AGPL or paid licence; to be replaced"],
+    ["JPL planetary ephemerides, Small-Body Database, Minor Planet Center", "positions and orbits (planned)", "US government data and public orbit files; confirm each statement"],
+    ["CelesTrak", "satellites (planned)", "free general-perturbation data"],
+    ["Gaia DR3", "stars (planned)", "CC BY-SA 3.0 IGO"],
+    ["OpenNGC", "deep-sky objects (planned)", "CC BY-SA 4.0"],
+    ["Globe at Night", "calibration (planned)", "CC BY 4.0"],
+    ["Falchi et al. 2016 atlas, Lorenz atlas", "comparison only", "Falchi is CC BY-NC; never used to fit or redistributed"],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="corpus" title="The object corpus">
+
+The corpus is meant to be the app's identity: every celestial object a stargazer might want, with whether it can be seen tonight, here, and with what. The benchmark is Stellarium Mobile Plus, which lists the Gaia catalogue of over 1.4 billion stars, a combined catalogue of over 3 million nebulae and galaxies, all known comets, about 10,000 asteroids, planets with their moons and most visible satellites. Its offline set is about 2 million stars, 2 million deep-sky objects and 10,000 asteroids. These are the figures Stellarium Labs publishes and they vary between pages, so they give an order of magnitude.
+
+Every part of that has a free upstream, so parity is a data-engineering job: catalogues cut into tiles on the sky (the IVOA HiPS scheme), a bundled core and downloadable region packs, and daily orbit and satellite updates. What Astr adds is **visibility intelligence**: for each object, a visibility class and contrast reserve from the sky brightness of that hour, the object's surface brightness and size, its altitude and the moon (after Crumey 2014), plus live comets and interstellar visitors such as 1I/ʻOumuamua, 2I/Borisov and 3I/ATLAS. All of this is planned and none of it is built.
+
+</DocSection>
+
+<DocSection id="reading" title="Where to start">
+
+Read [Zone scale](/zone-scale), then [Moonlight and sky brightness](/sky-brightness), then [Sky states](/sky-states). Those three are the specification. The rest document the code as it is.
+
+</DocSection>
+
+<DocSection id="checks" title="How these pages stay true">
+
+The code on these pages is copied byte for byte from the repository into this site by `npm run sync`, and the check fails if a copy differs from its original. Excerpts are cut out by name, so a renamed function fails the build. The tables are computed by a TypeScript port of the models, which the build holds to the same test vectors the Python and Dart code pass.
+
+<CodeTabs labels={["This site", "The models"]} second={<CodeBlock lang="text" filename="repository root" code={`python3 scripts/test_astr_zone.py
+python3 scripts/test_astr_sky.py
+flutter test test/core/utils`} />}>
+
+<CodeBlock lang="text" filename="website/" code={`npm run sync     # copy the source files listed in content/source/manifest.json
+npm run check    # fails if a copy differs, a page is missing a section, or a number drifts
+npm run build`} />
+
+</CodeTabs>
+
+</DocSection>

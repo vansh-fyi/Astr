@@ -1,0 +1,152 @@
+export const meta = {
+  title: "Zone scale",
+  group: "Sky science",
+  description:
+    "Nine zones of artificial sky brightness, each twice the one before, defined on the ratio of artificial to natural light.",
+  sections: [
+    { id: "definition", title: "Definition" },
+    { id: "ladder", title: "The ladder" },
+    { id: "why", title: "Why this ladder" },
+    { id: "conversions", title: "Conversions" },
+    { id: "try", title: "Try it" },
+    { id: "edge-cases", title: "Edge cases" },
+    { id: "legacy", title: "Current data and the legacy chain" },
+    { id: "impact", title: "What changes" },
+    { id: "naming", title: "Names to fix" },
+    { id: "calibration", title: "Calibration and validation" },
+    { id: "implementation", title: "Implementation" },
+  ],
+};
+
+<DocSection id="definition" title="Definition">
+
+A zone is a band of **artificial sky brightness relative to the natural sky**, at the zenith, on a clear night with a standard atmosphere and no moon. With $L_{\text{art}}$ the zenith luminance added by artificial light and $L_{\text{nat}}$ the natural zenith luminance:
+
+$$ r = \frac{L_{\text{art}}}{L_{\text{nat}}}, \qquad L_{\text{nat}} = 174\ \mu\text{cd/m}^2 \;\equiv\; 22.0\ \text{mag/arcsec}^2 $$
+
+The value 174 µcd/m² for a natural sky is from Falchi et al. (2016). Zero means a natural sky, and one means artificial light equals the natural background.
+
+<VectorStatus />
+
+</DocSection>
+
+<DocSection id="ladder" title="The ladder">
+
+Zones are a doubling ladder that starts at $r = 0.32$. Each edge is twice the one before it, and a value exactly on an edge belongs to the higher zone.
+
+$$ \text{zone}(r) = \begin{cases} 1 & r < 0.32 \\ 2 + \lfloor \log_2 (r / 0.32) \rfloor & 0.32 \le r < 40.96 \\ 9 & r \ge 40.96 \end{cases} $$
+
+Implementations compare against the list of edges instead of computing a logarithm, so a value on an edge cannot land on the wrong side through rounding.
+
+<ZoneLadderTable />
+
+A doubling is 0.753 magnitudes, so adjacent zones differ by about three quarters of a magnitude of sky brightness.
+
+</DocSection>
+
+<DocSection id="why" title="Why this ladder">
+
+1. **It reproduces the production data.** Converting the radiance thresholds that built the current `zones.db` into ratios gives edges within 0.87 to 1.25 times the ladder (table below).
+2. **It matches a published scale.** The Falchi et al. (2016) atlas classes artificial light as a ratio to natural: below 0.01, 0.01 to 0.02, 0.02 to 0.04, 0.04 to 0.08, 0.08 to 0.16, 0.16 to 0.32, with the Milky Way lost at about 1.28 to 2.56 and a top class above about 41 (over 7130 µcd/m²). The doubling between the quoted values is inferred, so confirm it against the paper's legend (**unverified**).
+3. **The zones land on things you can see.** Zone 4 is the band where the Milky Way fades, and zone 9 is the top class. Zone 1 merges the six darkest published classes, because below $r = 0.32$ the sky is within a third of natural and the differences are not usable.
+
+Zones are not Bortle classes, and the scale does not use Bortle terms.
+
+The earlier specification (version 1.0) used a factor of 2.5 per zone from 0.05 and divided radiance by 0.171. That constant is a luminance in mcd/m², not a satellite radiance in nW/cm²/sr, so its edges did not match the production data.
+
+</DocSection>
+
+<DocSection id="conversions" title="Conversions">
+
+$$ \text{SQM} = 22.0 - 2.5\log_{10}(1 + r) \qquad r = 10^{0.4\,(22.0 - \text{SQM})} - 1 \qquad L_{\text{art}} = 174\,r $$
+
+$$ \text{NELM} = 7.93 - 5\log_{10}\!\left(10^{\,4.316 - \text{SQM}/5} + 1\right) $$
+
+NELM is the naked-eye limiting magnitude, an empirical fit between sky-meter readings and observers' limiting magnitudes (Unihedron and AAVSO). It is informative: the zone definition does not depend on it. A real sky meter includes starlight above the 22.0 baseline, so dark-site readings sit a little brighter than 22.0 and must be adjusted before comparison.
+
+</DocSection>
+
+<DocSection id="try" title="Try it">
+
+<ZoneCalculator />
+
+</DocSection>
+
+<DocSection id="edge-cases" title="Edge cases">
+
+<DocTable
+  head={["Input", "Result"]}
+  rows={[
+    ["`r < 0`", "Counts as 0, zone 1"],
+    ["`r` is NaN", "Error (`ValueError` in Python, `ArgumentError` in Dart)"],
+    ["`r` is infinite", "Zone 9"],
+    ["A cell is absent from `zones.db`", "Implicit zone 1, sky brightness 22.0"],
+    ["`SQM` at or above 22.0", "`r = 0`"],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="legacy" title="Current data and the legacy chain">
+
+The current `zones.db` was built from radiance $R$ in nW/cm²/sr (VIIRS light plus modelled skyglow, see [Light pollution data](/light-pollution)) with a fit and thresholds. This is the **legacy chain**:
+
+$$ \text{SQM} = 22.0 - 1.7\log_{10}(1 + 2R) \quad\Rightarrow\quad r = (1 + 2R)^{0.68} - 1 $$
+
+<LegacyBridgeTable />
+
+After calibration the chain becomes $L_{\text{art}} = k\,R_{\text{eff}}$ with $k$ fitted to ground measurements, and the zone is computed from $r = L_{\text{art}} / 174$. Until then, the best available zone is the ladder applied to the legacy ratio.
+
+</DocSection>
+
+<DocSection id="impact" title="What changes">
+
+Adopting the ladder on the current data, measured over every stored cell:
+
+<ZoneImpactTable />
+
+Only the 25-city validation set's Anchorage changes zone (8 to 9, at a radiance of 124.66, right on the edge). This measures how the definition changes today's data. It does not measure accuracy, which is the next section.
+
+</DocSection>
+
+<DocSection id="naming" title="Names to fix">
+
+<DocTable
+  head={["Today", "Holds", "Should be"]}
+  rows={[
+    ["JSON `bortle`", "the Astr zone", "`zone`"],
+    ["JSON `ratio` and `ZoneData.ratio`", "the radiance in nW/cm²/sr", "`radiance` (and `r` becomes the ratio)"],
+    ["`bortleClass` in older code", "the Astr zone", "`astrZone` (already renamed in the app model)"],
+  ]}
+/>
+
+The stored record is the H3 index, zone, radiance and sky brightness in 20 bytes, sorted by H3 index behind a 16-byte header, and only cells in zone 2 or above are stored.
+
+</DocSection>
+
+<DocSection id="calibration" title="Calibration and validation">
+
+The goal is to replace the legacy fit with a physical chain whose error is measured against ground data and published.
+
+- **Data.** Globe at Night (CC BY 4.0) and other openly licensed sky-meter networks. The Falchi atlas (CC BY-NC) and the Lorenz atlas are comparison references only, never used to fit a parameter. Use only readings taken in astronomical darkness, moonless and clear, and subtract a natural baseline so a pristine site does not read as artificially lit.
+- **Parameters to fit.** The scale factor $k$ and the kernel's fraction, scale length, power and reference distance. Test whether the 80 km kernel radius truncates real skyglow, since Falchi integrates to 195 km.
+- **Split by region**, not by station, because nearby stations see the same radiance field and would leak.
+- **Metrics** per stratum and overall: bias, mean error and root-mean-square error in mag/arcsec², the zone confusion matrix, the share within one zone, and the station count.
+- **Adoption rule.** The calibrated chain replaces the legacy chain only if its held-out error beats the legacy baseline by a stated margin. Proposed targets, to be set after the baseline is measured: bias within 0.10 mag/arcsec² and error within 0.30. For reference, Falchi reports a residual of 0.15 for the atlas.
+- **Failure tags.** Every failing station gets a cause: aurora or polar noise, equatorial cloud, snow, altitude, local lighting or no data. Reykjavik, Singapore and Ushuaia in the 25-city check already fail this way.
+
+Model issues to test, found by reading the code: the kernel uses a fixed 5.55 km pixel, so its east-west footprint is distorted away from the equator; scatter inside the coarse pixel is excluded; the radius stops at 80 km; no elevation, mountain screening or aerosol variation is modelled; VIIRS is blind below 500 nm, so white LEDs are under-counted; and clouds can amplify skyglow near cities up to ten times (Falchi 2016).
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation">
+
+These are the real files, copied into the site and checked against the repository on every build.
+
+<CodeTabs labels={["Python", "Dart"]} second={<SourceFile file="lib/core/utils/astr_zone_scale.dart" />}>
+
+<SourceFile file="scripts/astr_zone.py" />
+
+</CodeTabs>
+
+</DocSection>

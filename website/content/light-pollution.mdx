@@ -1,0 +1,160 @@
+export const meta = {
+  title: "Light pollution data",
+  group: "Sky science",
+  description:
+    "How a satellite image of the Earth at night becomes a zone for every 0.7 km² cell, and how the app looks it up.",
+  sections: [
+    { id: "pipeline", title: "The pipeline" },
+    { id: "source", title: "Source data" },
+    { id: "skyglow", title: "Skyglow" },
+    { id: "cells", title: "H3 cells" },
+    { id: "thresholds", title: "Zones from radiance" },
+    { id: "format", title: "The zones.db file" },
+    { id: "serving", title: "Serving and lookup" },
+    { id: "validation", title: "Validation" },
+    { id: "limits", title: "Limits" },
+    { id: "regenerate", title: "Regenerating" },
+    { id: "implementation", title: "Implementation" },
+  ],
+};
+
+<DocSection id="pipeline" title="The pipeline">
+
+A satellite looks down and measures light that escapes upwards. A person on the ground looks up and sees light scattered through the air from cities tens of kilometres away. The pipeline turns the first into an estimate of the second, one cell at a time.
+
+<DocTable
+  head={["Step", "What happens", "Script"]}
+  rows={[
+    ["1. Read", "The annual night-lights image is read in strips of 200 rows. Each pixel above a small floor becomes an H3 cell, keeping the maximum radiance per cell in a disk-backed accumulator.", "`generate_zones_vnl.py`"],
+    ["2. Downsample", "The image is block-averaged by a factor of 12 into a coarse grid of about 5.5 km pixels.", "`apply_skyglow.py`"],
+    ["3. Scatter", "A scatter kernel is convolved with the coarse grid (FFT) to estimate skyglow from every lit pixel within 80 km.", "`apply_skyglow.py`"],
+    ["4. Rescan", "The full-resolution image is read again. Each pixel gets its direct radiance plus the scatter from the coarse grid. Cells at or above 0.25 nW/cm²/sr are kept.", "`apply_skyglow.py`"],
+    ["5. Write", "Cells are sorted by H3 index and written to a binary `zones.db` with a zone, the radiance and a sky brightness per cell.", "`apply_skyglow.py`"],
+    ["6. Publish", "The file is split into SQL parts for the D1 database and uploaded to R2 for download.", "`export_zones_to_sql.py`, `upload_to_r2.py`"],
+  ]}
+/>
+
+Cells below the floor are not stored. A location that is not in the file is a dark site and counts as zone 1.
+
+</DocSection>
+
+<DocSection id="source" title="Source data">
+
+The input is the VIIRS Nighttime Lights annual composite for 2024 from the Earth Observation Group at the Colorado School of Mines, a 15 arc-second global grid of average radiance in nW/cm²/sr. Many of the group's products are published under CC BY 4.0 and must be cited. The licence of the exact 2024 product used here is still to be confirmed (**unverified**).
+
+Elvidge, C.D., Zhizhin, M., Ghosh, T., Hsu, F.-C., Taneja, J. (2021). Annual time series of global VIIRS nighttime lights derived from monthly averages: 2012 to 2019. *Remote Sensing* 13(5), 922.
+
+</DocSection>
+
+<DocSection id="skyglow" title="Skyglow">
+
+Each lit source pixel adds a little light at the observer. The kernel is Garstang-type: an exponential loss with distance, then a power-law falloff.
+
+$$ k(d) = \frac{F\,e^{-d/L}}{1 + (d/d_0)^{\beta}}, \qquad \text{skyglow} = \sum_i R_i\,k(d_i) \quad (d_i \le 80\ \text{km}) $$
+
+<KernelParameters />
+
+Production data was regenerated with $F = 0.06$ instead of the script's default. That run reset the accumulator and passed `--fraction 0.06` on the command line, so the script's own default still reads 0.12 and a plain run does not reproduce the data. The earlier documentation also listed a table of distances that did not follow from the formula. This is the table the formula gives for the production fraction:
+
+<KernelTable fraction={0.06} />
+
+References: Garstang (1986), PASP 98, 364; Cinzano, Falchi and Elvidge (2001), MNRAS 328, 689.
+
+</DocSection>
+
+<DocSection id="cells" title="H3 cells">
+
+Cells use Uber's H3 grid at resolution 8: hexagons of about 0.74 km² with an edge of about 0.46 km. A latitude and longitude maps to one 64-bit cell index, so a lookup is a single key. The app and the pipeline both use resolution 8.
+
+H3 indices use the full unsigned 64-bit range, but SQLite and D1 store signed integers, so the worker converts between them.
+
+</DocSection>
+
+<DocSection id="thresholds" title="Zones from radiance">
+
+The stored zone comes from radiance thresholds, and the stored sky brightness from a fit. These are the **legacy chain**, described with the new definition on [Zone scale](/zone-scale).
+
+<SourceExcerpt file="scripts/generate_zones_vnl.py" symbols={["ZONE_THRESHOLDS", "radiance_to_zone", "radiance_to_sqm"]} />
+
+The comment on the thresholds still says "Bortle", which is a leftover from an earlier name. The zones are Astr zones and are not Bortle classes.
+
+</DocSection>
+
+<DocSection id="format" title="The zones.db file">
+
+<DocTable
+  head={["Part", "Size", "Content"]}
+  rows={[
+    ["Header", "16 bytes", "The ASCII bytes `ASTR`, a version word (`01 00 00 00`), then the record count as an unsigned 64-bit little-endian integer"],
+    ["Record", "20 bytes", "H3 index (unsigned 64-bit), zone (1 byte), radiance (32-bit float), sky brightness (32-bit float), 3 bytes of padding, all little-endian"],
+    ["Order", "", "Sorted by H3 index, so a lookup is a binary search"],
+    ["Stored", "", "Only cells in zone 2 or above; absence means zone 1"],
+  ]}
+/>
+
+The current file holds 37,528,537 records in 750,570,756 bytes (716 MB).
+
+</DocSection>
+
+<DocSection id="serving" title="Serving and lookup">
+
+A Cloudflare Worker answers `GET /zone/{h3 hex}` from a D1 table `zones(h3, zone, radiance, sqm)` and returns JSON. For a cell that is not in the table it answers zone 1 with `implicit: true`, which matches the app's local behaviour. Responses are cached for an hour, because the data is static. `GET /download` streams the whole file from R2.
+
+The app converts the location to a resolution-8 cell, then asks `CachedZoneRepository`: a Hive cache first, then the Worker, then an expired cache entry if the network fails, then the dark-site default. Cache entries expire after a year. See [Offline and sync](/offline).
+
+</DocSection>
+
+<DocSection id="validation" title="Validation">
+
+The final check before deployment compared 25 places across continents, urban cores and dark sites, against expectations derived from the Lorenz light-pollution atlas.
+
+<ValidationTable />
+
+The last column shows the zone each stored radiance would get under the doubling ladder: only Anchorage changes. The three mismatches are traced to the satellite data, not to the scatter model, and no change to the scatter parameters can fix them.
+
+</DocSection>
+
+<DocSection id="limits" title="Limits">
+
+- **Blue light.** VIIRS does not see below 500 nm, so white LED lighting is under-counted (Falchi et al. 2016).
+- **Clouds and snow.** Clouds can amplify skyglow near cities up to ten times, and snow changes ground reflection. The model assumes a clear night.
+- **Polar and equatorial noise.** Aurora and polar-night noise inflate high latitudes, and persistent cloud deflates equatorial cities.
+- **Kernel geometry.** The kernel uses a fixed 5.55 km pixel, so its east-west footprint shrinks relative to the north-south one away from the equator.
+- **Near field.** Scatter inside a coarse pixel is excluded, so light from the immediate neighbourhood of a cell may be under-counted.
+- **Radius.** The 80 km cutoff is shorter than the 195 km Falchi integrates to.
+- **Terrain.** No elevation, mountain screening or varying aerosol is modelled.
+- **Staleness.** The data is one annual composite and is regenerated yearly.
+
+</DocSection>
+
+<DocSection id="regenerate" title="Regenerating">
+
+Changing a scatter parameter downwards needs the accumulator reset, because it keeps the maximum value per cell. The retune to 0.06 took 17 batches of ten strips at about 3.5 minutes each, around 54 minutes in total.
+
+```text
+python scripts/generate_zones_vnl.py --tif <VNL annual composite>
+python scripts/apply_skyglow.py --tif <VNL annual composite> --accum zones_accumulator.db \
+    --fraction 0.06 --reset-accum --batch 10
+python scripts/export_zones_to_sql.py
+python scripts/upload_to_r2.py
+```
+
+The commands are from the pipeline's own guide in `archive/data-pipeline/README.md`; the flag names are in the scripts below.
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation">
+
+These are excerpts of the real files, cut out by name, copied into the site and checked against the repository on every build.
+
+<CodeTabs labels={["Pipeline (Python)", "Service (JavaScript and Dart)"]} second={<>
+<SourceExcerpt file="cloudflare/worker.js" symbols={["handleZoneLookup", "toSigned64"]} />
+<SourceExcerpt file="lib/features/data_layer/services/remote_zone_service.dart" symbols={["getZoneData"]} />
+<SourceExcerpt file="lib/features/data_layer/repositories/cached_zone_repository.dart" symbols={["getZoneData"]} />
+</>}>
+
+<SourceExcerpt file="scripts/apply_skyglow.py" symbols={["create_scatter_kernel", "write_zones_db"]} />
+
+</CodeTabs>
+
+</DocSection>

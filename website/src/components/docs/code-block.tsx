@@ -95,7 +95,59 @@ function highlightDart(line: string): ReactNode {
   );
 }
 
+const KEYWORDS: Record<string, string> = {
+  python:
+    "def|class|return|if|elif|else|for|while|in|import|from|as|None|True|False|and|or|not|with|try|except|raise|lambda|yield|pass|break|continue|is|global",
+  javascript:
+    "function|async|await|const|let|var|return|if|else|for|while|of|in|new|null|true|false|try|catch|throw|export|import|from|switch|case|break|default|typeof",
+  json: "true|false|null",
+};
+
+/** Index of the first comment marker outside a string literal, or -1. */
+function commentStart(line: string, marker: string): number {
+  let quote: string | null = null;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (quote) {
+      if (c === "\\") i++;
+      else if (c === quote) quote = null;
+    } else if (c === "'" || c === '"' || c === "`") quote = c;
+    else if (line.startsWith(marker, i)) return i;
+  }
+  return -1;
+}
+
+function highlightGeneric(line: string, lang: "python" | "javascript" | "json"): ReactNode {
+  const marker = lang === "python" ? "#" : "//";
+  const at = lang === "json" ? -1 : commentStart(line, marker);
+  const code = at === -1 ? line : line.slice(0, at);
+  const comment = at === -1 ? "" : line.slice(at);
+  const words = KEYWORDS[lang];
+  const parts = code
+    .split(new RegExp(`("(?:[^"\\\\\n]|\\\\.)*"|'(?:[^'\\\\\n]|\\\\.)*'|\`[^\`\n]*\`|\\b(?:${words})\\b)`, "g"))
+    .map((part, index) => {
+      const kind = /^["'`]/.test(part)
+        ? "string"
+        : new RegExp(`^(?:${words})$`).test(part)
+          ? "keyword"
+          : undefined;
+      return (
+        <span key={index} className={kind ? `docs-code-${kind}` : undefined}>
+          {part}
+        </span>
+      );
+    });
+  return (
+    <>
+      {parts}
+      {comment && <span className="docs-code-comment">{comment}</span>}
+    </>
+  );
+}
+
 function highlight(line: string, lang?: string): ReactNode {
+  if (lang === "python" || lang === "javascript" || lang === "json")
+    return highlightGeneric(line, lang);
   const trimmed = line.trimStart();
   if (
     trimmed.startsWith("/*") ||
@@ -124,6 +176,18 @@ function highlight(line: string, lang?: string): ReactNode {
     });
 }
 
+/** Python docstrings span lines, so work out which lines sit inside one. */
+function pythonDocstringLines(lines: string[], lang?: string): boolean[] {
+  if (lang !== "python") return lines.map(() => false);
+  let inside = false;
+  return lines.map((line) => {
+    const marks = (line.match(/"""/g) ?? []).length;
+    const starts = inside;
+    if (marks % 2 === 1) inside = !inside;
+    return starts || marks > 0;
+  });
+}
+
 export function CodeBlock({
   code,
   filename,
@@ -137,6 +201,7 @@ export function CodeBlock({
 }) {
   const source = code.replace(/\n$/, "");
   const label = filename ?? lang ?? "code";
+  const docstringFlags = pythonDocstringLines(source.split("\n"), lang);
   return (
     <div className="docs-code" data-embedded={embedded || undefined}>
       {!embedded && (
@@ -152,7 +217,13 @@ export function CodeBlock({
               <span className="docs-line-number" aria-hidden="true">
                 {index + 1}
               </span>
-              <span>{highlight(line, lang)}</span>
+              <span>
+                {docstringFlags[index] ? (
+                  <span className="docs-code-comment">{line}</span>
+                ) : (
+                  highlight(line, lang)
+                )}
+              </span>
             </span>
           ))}
         </code>

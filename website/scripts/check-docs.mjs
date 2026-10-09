@@ -8,14 +8,15 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { verify as verifySource } from "./sync-source.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const GLOBALS = join(ROOT, "src/app/globals.css");
 const SCALE = join(ROOT, "src/app/scale.css");
 const EXPECTED_SHA =
   "3e3d60003ee84a7bface6a8ff088f03c592c141c875c80eb0b8cd79e2231ae1c";
-const PAGES = ["/", "/colour-stops", "/opacity-ladder", "/gradients", "/spacing", "/typography", "/layout"];
-const LABELS = ["Introduction", "Colour stops", "Opacity ladder", "Gradients", "Spacing", "Typography", "Layout and size"];
+const PAGES = ["/", "/colour-stops", "/opacity-ladder", "/gradients", "/spacing", "/typography", "/layout", "/sky-science", "/zone-scale", "/light-pollution", "/sky-brightness", "/sky-states", "/weather-clouds", "/planets-sky", "/graphs", "/offline"];
+const LABELS = ["Introduction", "Colour stops", "Opacity ladder", "Gradients", "Spacing", "Typography", "Layout and size", "Overview", "Zone scale", "Light pollution data", "Moonlight and sky brightness", "Sky states", "Weather and clouds", "Planets and the sky", "Graphs", "Offline and sync"];
 const PHI = (1 + Math.sqrt(5)) / 2;
 
 function fail(message) {
@@ -181,7 +182,7 @@ function staticChecks() {
 
   scaleChecks();
 
-  for (const name of ["introduction", "colour-stops", "opacity-ladder", "gradients", "spacing", "typography", "layout"]) {
+  for (const name of ["introduction", "colour-stops", "opacity-ladder", "gradients", "spacing", "typography", "layout", "sky-science", "zone-scale", "light-pollution", "sky-brightness", "sky-states", "weather-clouds", "planets-sky", "graphs", "offline"]) {
     const src = readFileSync(join(ROOT, `content/${name}.mdx`), "utf8");
     assert(src.includes("export const meta"), `${name}.mdx has no meta export`);
     const metaBlock = src.slice(src.indexOf("export const meta"), src.indexOf("};") + 2);
@@ -190,7 +191,7 @@ function staticChecks() {
     for (const id of ids)
       assert(src.includes(`<DocSection id="${id}"`), `${name}.mdx: no <DocSection id="${id}">`);
     assert(count(src, "<CodeTabs") === 1, `${name}.mdx must have exactly one <CodeTabs>`);
-    assert(src.includes("flutter={"), `${name}.mdx <CodeTabs> has no flutter panel`);
+    assert(src.includes("flutter={") || src.includes("second={"), `${name}.mdx <CodeTabs> has no second panel`);
   }
   ok("content/*.mdx: meta, section ids and one CodeTabs each");
 
@@ -207,15 +208,38 @@ function staticChecks() {
   const files = walk(ROOT).filter((f) => !f.endsWith("package-lock.json") && !f.endsWith("check-docs.mjs"));
   const dartFiles = files.filter((f) => f.endsWith(".dart"));
   assert(
-    dartFiles.every((f) => f.includes(`${join(ROOT, "content", "flutter")}/`)),
-    "a .dart file lives outside website/content/flutter",
+    dartFiles.every((f) => f.includes(`${join(ROOT, "content", "flutter")}/`) || f.includes(`${join(ROOT, "content", "source")}/`)),
+    "a .dart file lives outside website/content/flutter and website/content/source",
   );
   for (const name of ["astr_colors.dart", "astr_opacity.dart", "astr_gradients.dart", "astr_spacing.dart", "astr_type.dart", "astr_layout.dart"])
     assert(
       dartFiles.some((f) => f.endsWith(`/${name}`)),
       `content/flutter/${name} is missing`,
     );
-  for (const f of files.filter((f) => /\/(src|content)\//.test(f))) {
+  // Source copies must match the repository, so the code shown on the pages cannot drift.
+  const src = verifySource();
+  assert(src.missing.length === 0, `content/source is missing ${src.missing.join(", ")}. Run npm run sync.`);
+  assert(src.differing.length === 0, `content/source differs from the repository: ${src.differing.join(", ")}. Run npm run sync.`);
+  ok(`${src.checked} source copies match the repository (${src.skipped} originals not present)`);
+
+  const impact = JSON.parse(readFileSync(join(ROOT, "content/data/zone-impact.json"), "utf8"));
+  const cells = impact.matrix.flat().reduce((a, b) => a + b, 0);
+  assert(cells === impact.records && impact.records === 37528537, "zone-impact.json does not sum to 37,528,537 records");
+  const unchanged = impact.matrix.reduce((n, row, i) => n + row[i], 0);
+  assert(Math.abs((impact.records - unchanged) / impact.records - 0.1363) < 0.0005, "zone-impact.json: the share of cells that change zone drifted from 13.6%");
+  const valid = JSON.parse(readFileSync(join(ROOT, "content/data/validation-25.json"), "utf8"));
+  assert(valid.rows.length === 25 && valid.rows.filter((r) => r.expected === r.got).length === 22, "validation-25.json must be 25 rows with 22 matches");
+  ok("content/data: zone impact sums to its record count, validation set is 25 places with 22 matches");
+
+  const skyVec = JSON.parse(readFileSync(join(ROOT, "content/source/test/fixtures/astr_sky_model.vectors.json"), "utf8"));
+  assert(skyVec.anchor.v === 19.855, "the moonlight anchor value must be 19.855");
+  const zoneVec = JSON.parse(readFileSync(join(ROOT, "content/source/test/fixtures/astr_zone_scale.vectors.json"), "utf8"));
+  assert(JSON.stringify(zoneVec.edges) === JSON.stringify([0.32, 0.64, 1.28, 2.56, 5.12, 10.24, 20.48, 40.96]), "zone vector edges are not the doubling ladder from 0.32");
+  const pyConst = (name) => Number(new RegExp(`^${name}\\s*=\\s*([\\d.]+)`, "m").exec(readFileSync(join(ROOT, "content/source/scripts/apply_skyglow.py"), "utf8"))?.[1]);
+  assert(pyConst("SCATTER_FRACTION") === 0.12 && pyConst("MAX_RADIUS_KM") === 80, "apply_skyglow.py constants changed: re-check the light-pollution page's prose about the 0.12 default and the 80 km radius");
+  ok("vectors: moonlight anchor 19.855, zone ladder edges, skyglow constants the prose depends on");
+
+  for (const f of files.filter((f) => /\/(src|content)\//.test(f) && !f.includes("/content/source/"))) {
     const hit = readFileSync(f, "utf8").match(/sepcare|clinical|infant|pulse/i);
     assert(!hit, `forbidden residue "${hit?.[0]}" in ${relative(ROOT, f)}`);
   }
@@ -240,7 +264,7 @@ async function waitFor(base, child, log) {
 
 function checkPage(path, html) {
   const where = `${path}`;
-  for (const needle of ["Skip to content", "Tokens / CSS", "Flutter", "<dialog", "On this page"])
+  for (const needle of ["Skip to content", 'role="tablist"', "<dialog", "On this page"])
     assert(html.includes(needle), `${where}: missing "${needle}"`);
   for (const bad of ["Application error", "NEXT_NOT_FOUND", "Unhandled Runtime Error", "Minified React error"])
     assert(!html.includes(bad), `${where}: contains "${bad}"`);
@@ -280,6 +304,22 @@ function checkPage(path, html) {
   if (path === "/layout") {
     assert(html.includes('class="katex"'), `${where}: no KaTeX output`);
     assert(html.includes("docs-panes"), `${where}: pane diagram missing`);
+  }
+  if (path === "/zone-scale") {
+    assert(html.includes("docs-vectorstatus"), `${where}: vector status line missing`);
+    assert(html.includes("40.96") && html.includes("docs-readoutgrid"), `${where}: ladder table or calculator missing`);
+    assert(html.includes("astr_zone.py"), `${where}: the Python source is not shown`);
+  }
+  if (path === "/light-pollution") {
+    assert(html.includes("create_scatter_kernel") && html.includes("handleZoneLookup"), `${where}: source excerpts missing`);
+    assert(count(html, "<tr>") >= 40, `${where}: tables look empty`);
+  }
+  if (path === "/sky-brightness") {
+    assert(html.includes("19.855"), `${where}: anchor value missing`);
+    assert(html.includes("moon_brightness_v"), `${where}: Python source excerpt missing`);
+  }
+  if (path === "/sky-states") {
+    assert(html.includes("docs-readoutgrid") && html.includes("best_window"), `${where}: calculator or source excerpt missing`);
   }
   if (path === "/") {
     assert(count(html, 'class="docs-bento-tile"') === 6, `${where}: bento must have six tiles`);

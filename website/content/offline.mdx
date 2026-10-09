@@ -1,0 +1,105 @@
+export const meta = {
+  title: "Offline and sync",
+  group: "Sky science",
+  description:
+    "What works without a network today, how each cache expires, how background sync chooses locations, and what is not built yet.",
+  sections: [
+    { id: "summary", title: "What works offline" },
+    { id: "zones", title: "Zone data" },
+    { id: "weather", title: "Weather" },
+    { id: "prefetch", title: "Saving a location" },
+    { id: "sync", title: "Background sync" },
+    { id: "device", title: "Computed on the device" },
+    { id: "missing", title: "Not built yet" },
+    { id: "implementation", title: "Implementation" },
+  ],
+};
+
+<DocSection id="summary" title="What works offline">
+
+<DocTable
+  head={["Data", "Offline?", "How"]}
+  rows={[
+    ["Zone (light pollution) for places you have viewed or saved", "yes", "Hive cache, one entry per H3 cell, valid for a year"],
+    ["Weather for places you have viewed or saved", "yes, possibly stale", "Hive cache of hourly and seven-day forecasts"],
+    ["Sun, Moon and planet positions, rise and set", "yes", "computed on the device"],
+    ["Sky state and graphs", "yes, from cached inputs", "pure functions of the cached data"],
+    ["Zone for a new place with no network", "dark-sky default", "zone 1 is assumed, not measured"],
+    ["Object catalogue", "yes, but tiny today", "bundled SQLite file with 3 deep-sky objects and 4 stars"],
+    ["The full zone database", "not built", "see below"],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="zones" title="Zone data">
+
+A zone lookup tries four things in order:
+
+1. The Hive cache, keyed `zone_<H3 cell in hex>`. A hit is used immediately.
+2. The Cloudflare Worker, with a 10-second timeout. A hit is cached.
+3. The expired cache entry, if the network failed.
+4. The dark-sky default (zone 1, no artificial light, sky brightness 22.0) if the cell is nowhere, because the database holds only lit cells.
+
+Zone data is static satellite data, so entries are not refreshed like weather. They expire after 365 days so a new year's data can replace them.
+
+</DocSection>
+
+<DocSection id="weather" title="Weather">
+
+Weather entries are keyed by H3 cell and date, for example `weather_<cell>_<YYYY-MM-DD>` and `weather_<cell>_daily_<YYYY-MM-DD>`, with the date taken at midnight UTC so the key does not depend on the time zone.
+
+- **Fresh** means fetched in the last 24 hours. A fresh entry is returned without a network call.
+- **Stale but safe.** An older entry is returned only if the network fails, flagged as stale, and it is kept until a replacement succeeds.
+- **Pruning.** On app start and on resume, entries older than 09:00 local time today are deleted, without blocking the screen.
+
+</DocSection>
+
+<DocSection id="prefetch" title="Saving a location">
+
+Saving a place fetches and caches, concurrently and silently: the current weather, the hourly forecast, the seven-day forecast and the zone. Several places are processed one at a time with a pause of 300 ms between them. No error is shown if a fetch fails.
+
+</DocSection>
+
+<DocSection id="sync" title="Background sync">
+
+A periodic job runs every 24 hours on Android through WorkManager, and on iOS through the same plugin's background task scheduler (skipped on the simulator, which throws a native exception). It needs a network connection and a battery that is not low.
+
+It refreshes the weather and the zone for the **active** locations: pinned locations, which always count and go first, and any location last viewed less than 11 days ago. Requests are 500 ms apart to be gentle on the battery, and every error is swallowed.
+
+</DocSection>
+
+<DocSection id="device" title="Computed on the device">
+
+Positions, rise and set times, moon phase and the night window need no network (see [Planets and the sky](/planets-sky)). The sky state and the graphs are functions of cached weather and zone data, so they work offline as far as those inputs are cached.
+
+</DocSection>
+
+<DocSection id="missing" title="Not built yet">
+
+- **Full zone download.** The Worker has a `/download` route that streams the 716 MB `zones.db` from R2, and the Worker's README describes a Settings download that then looks cells up locally by binary search. Nothing in the app calls it today, so a new place with no network gets the dark-sky default.
+- **Offline weather beyond the cache.** There is no model that predicts weather offline, so the forecast is only as old as the last fetch.
+- **Object packs.** The plan is a small bundled core plus downloadable country or region packs for faint stars and deep-sky objects, versioned and checked by hash. See the [overview](/sky-science).
+- **Smaller zone packs.** 716 MB is too large to bundle. Regional packs of the same cells are a likely replacement for a single global file.
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation">
+
+Excerpts of the real files, cut out by name, copied into the site and checked against the repository on every build.
+
+<CodeTabs labels={["Zone cache", "Weather and sync"]} second={<>
+<SourceExcerpt file="lib/features/dashboard/data/models/weather_cache_entry.dart" symbols={["isStale"]} />
+<SourceExcerpt file="lib/features/dashboard/data/models/weather_cache_key.dart" symbols={["generate", "generateDaily"]} />
+<SourceExcerpt file="lib/features/dashboard/data/services/weather_cache_pruning_service.dart" symbols={["pruneOldEntries"]} />
+<SourceExcerpt file="lib/features/dashboard/data/services/location_prefetch_service.dart" symbols={["prefetchForLocation"]} />
+<SourceExcerpt file="lib/features/dashboard/data/services/weather_background_sync_service.dart" symbols={["syncActiveLocations", "_shouldSkipLocation"]} />
+<SourceExcerpt file="lib/core/platform/background_sync_handler.dart" symbols={["initializeBackgroundSync"]} />
+</>}>
+
+<SourceExcerpt file="lib/features/data_layer/models/zone_cache_entry.dart" symbols={["isExpired"]} />
+<SourceExcerpt file="lib/features/data_layer/repositories/cached_zone_repository.dart" symbols={["getZoneData"]} />
+
+</CodeTabs>
+
+</DocSection>

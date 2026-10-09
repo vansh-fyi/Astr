@@ -1,0 +1,121 @@
+export const meta = {
+  title: "Weather and clouds",
+  group: "Sky science",
+  description:
+    "What weather data the app fetches, what cloud cover means, how seeing is estimated today, and which forecast variables are not used yet.",
+  sections: [
+    { id: "source", title: "Where weather comes from" },
+    { id: "fetched", title: "What is fetched today" },
+    { id: "cloud", title: "What cloud cover is" },
+    { id: "use", title: "How it is used today" },
+    { id: "seeing", title: "Seeing" },
+    { id: "transparency", title: "Transparency" },
+    { id: "unused", title: "Available but not used" },
+    { id: "terms", title: "Terms of use" },
+    { id: "implementation", title: "Implementation" },
+  ],
+};
+
+<DocSection id="source" title="Where weather comes from">
+
+Weather comes from [Open-Meteo](https://open-meteo.com/), which combines forecasts from several national weather services (ECMWF, NOAA, Météo-France, DWD, the UK Met Office, JMA and others) behind one keyless interface. The app calls it directly. A Cloudflare proxy exists behind a feature flag that is off.
+
+Astr does not model weather. It reads a forecast, hour by hour, for the location's coordinates.
+
+</DocSection>
+
+<DocSection id="fetched" title="What is fetched today">
+
+One request returns an hourly series for 10 past days and 16 forecast days (the maximum Open-Meteo offers) in these variables:
+
+<DocTable
+  head={["Variable", "Unit", "Used for"]}
+  rows={[
+    ["`temperature_2m`", "°C", "temperature, and the seeing estimate"],
+    ["`relativehumidity_2m`", "%", "humidity, and the seeing estimate"],
+    ["`cloudcover`", "% of sky", "cloud cover"],
+    ["`windspeed_10m`", "km/h at 10 m", "wind, and the seeing estimate"],
+    ["`weathercode`", "WMO code", "weather icon"],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="cloud" title="What cloud cover is">
+
+Cloud cover is **not calculated by Astr**. It is a variable from a numerical weather model: the fraction of the sky above a grid cell (about 11 km across) that the model puts cloud in, from 0% to 100%.
+
+It means a share of the sky, not a probability that a given star is hidden. A forecast of 30% means about a third of the sky is covered, and the model does not say which third. It also cannot see clouds smaller than a grid cell or the shape of one hill's weather.
+
+</DocSection>
+
+<DocSection id="use" title="How it is used today">
+
+- For **today**, the home screen takes the forecast hour closest to the current time. That is the cloud **now**, which can be daytime cloud, not the cloud tonight.
+- For **another date**, it takes the day's average cloud cover from the seven-day forecast.
+- The conditions graph plots the hourly values across the night as an area, and the prime-view window weights cloud at 70% (see [Graphs](/graphs)).
+
+The sky-state model replaces this with the hourly values for the night's dark hours (see [Sky states](/sky-states)).
+
+</DocSection>
+
+<DocSection id="seeing" title="Seeing">
+
+Seeing is how much the air blurs a star's image, which matters for planets and double stars. The true Pickering scale is an observer's judgement of a star's diffraction pattern through a telescope. The app does not have that, so it uses a **proxy** built from ground weather and labels it with the Pickering name.
+
+$$ \text{score} = 10 - p_T - p_w + b_h, \qquad \text{clamped to } 1\ldots 10 $$
+
+<DocTable
+  head={["Term", "Rule"]}
+  rows={[
+    ["Temperature range `ΔT` over the next 3 hours", "−2 if over 5 °C, −1 if over 3 °C"],
+    ["Wind speed now", "−3 if over 30 km/h, −2 if over 20, −1 if over 10"],
+    ["Humidity bonus", "+1 if humidity over 70% and `ΔT` under 3 °C"],
+    ["Label", "9 to 10 Excellent, 7 to 8 Good, 5 to 6 Fair, 3 to 4 Poor, 1 to 2 Extremely Poor"],
+  ]}
+/>
+
+This is a heuristic, not a measurement, and its thresholds are not validated against observations (**unverified**). The physics suggests a better proxy: turbulence in the free atmosphere follows the wind shear near the jet stream (200 to 300 hPa), and the lowest kilometre follows heat flux from the ground (SPIE, "Using meteorological forecasts to predict astronomical seeing"). Open-Meteo provides wind at 250 and 300 hPa and the boundary-layer height. A replacement built on those is a **proposal**, to be compared against an independent seeing source before it ships.
+
+</DocSection>
+
+<DocSection id="transparency" title="Transparency">
+
+Transparency is how clear the air is, set mostly by aerosols and water vapour. The app has no transparency measure today; it shows humidity. The sky model uses an extinction coefficient from aerosol optical depth (see [Moonlight and sky brightness](/sky-brightness)), which needs a variable the app does not fetch yet.
+
+</DocSection>
+
+<DocSection id="unused" title="Available but not used">
+
+<DocTable
+  head={["Variable", "What it gives", "Would improve"]}
+  rows={[
+    ["`cloud_cover_low`, `_mid`, `_high`", "cloud cover by height (low under 3 km, mid 3 to 8 km, high above 8 km)", "telling thin high cirrus from thick low cloud"],
+    ["`visibility`", "horizontal viewing distance in metres, affected by low cloud, humidity and aerosols", "transparency"],
+    ["`wind_speed_250hpa`, `wind_speed_300hpa`", "wind near the jet stream", "seeing"],
+    ["`boundary_layer_height`", "depth of the turbulent layer next to the ground", "seeing"],
+    ["`total_column_integrated_water_vapour`", "precipitable water", "transparency"],
+    ["`aerosol_optical_depth`, `dust` (Air Quality API)", "haze and Saharan dust, 0.4° grid, every 3 hours globally", "extinction"],
+  ]}
+/>
+
+</DocSection>
+
+<DocSection id="terms" title="Terms of use">
+
+The free tier is for non-commercial use, with fewer than 10,000 calls a day, 5,000 an hour and 600 a minute. Apps with subscriptions or advertisements count as commercial. Data is under CC BY 4.0, so Open-Meteo must be credited, and the Air Quality data must also credit CAMS. Astr is planned to be free, open source and tip-funded. Whether tips count as non-commercial is not stated in the terms, so it should be confirmed with Open-Meteo before the first store release (**unverified**).
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation">
+
+Excerpts of the real files, cut out by name, copied into the site and checked against the repository on every build.
+
+<CodeTabs labels={["Fetch and use", "Seeing"]} second={<SourceFile file="lib/core/services/seeing_calculator.dart" />}>
+
+<SourceExcerpt file="lib/features/dashboard/data/datasources/open_meteo_weather_service.dart" symbols={["getHourlyForecast"]} />
+<SourceExcerpt file="lib/features/dashboard/presentation/providers/weather_provider.dart" symbols={["WeatherNotifier"]} />
+
+</CodeTabs>
+
+</DocSection>

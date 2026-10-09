@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 export interface DocMeta {
@@ -84,6 +85,62 @@ export function DemoFrame({
       {controls && <div className="docs-example-controls">{controls}</div>}
       <div className="docs-preview">{children}</div>
       {caption && <p className="docs-example-caption">{caption}</p>}
+    </div>
+  );
+}
+
+/** Renders `code`, **bold** and [text](/path) spans inside a table cell. */
+function inline(text: string): ReactNode {
+  return text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).map((part, i) => {
+    if (part.startsWith("`") && part.endsWith("`")) return <code key={i}>{part.slice(1, -1)}</code>;
+    if (part.startsWith("**") && part.endsWith("**")) return <strong key={i}>{part.slice(2, -2)}</strong>;
+    const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
+    if (link) {
+      return link[2].startsWith("/") ? (
+        <Link key={i} href={link[2]}>
+          {link[1]}
+        </Link>
+      ) : (
+        <a key={i} href={link[2]}>
+          {link[1]}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
+/** A table from plain arrays, because the markdown pipeline has no table syntax. Cells may use `code` and **bold**. */
+export function DocTable({
+  head,
+  rows,
+  caption,
+}: {
+  head: string[];
+  rows: string[][];
+  caption?: string;
+}) {
+  return (
+    <div className="docs-table-wrap">
+      <table className="docs-table">
+        {caption && <caption>{caption}</caption>}
+        <thead>
+          <tr>
+            {head.map((h) => (
+              <th key={h}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i}>
+              {row.map((cell, j) => (
+                <td key={j}>{inline(cell)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
