@@ -277,3 +277,54 @@
 .app-ladder-tick i { display: block; width: var(--spacing-f1); height: var(--spacing-f8); background: var(--c-muted); }
 .app-ladder-tick.is-compare { top: var(--spacing-f55); }
 .app-ladder-tick.is-compare i { background: var(--c-accent); }
+
+/* Toggle: a switch. The track is a golden rectangle (55 by 34), the thumb the Fibonacci step 21. */
+.app-toggle {
+  --tone: var(--color-deep-space-200);
+  --track-w: var(--spacing-f55);
+  --track-h: var(--spacing-f34);
+  --thumb: var(--spacing-f21);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-f13);
+  cursor: pointer;
+}
+.app-toggle.is-sm { --track-w: var(--spacing-f34); --track-h: var(--spacing-f21); --thumb: var(--spacing-f13); }
+.app-toggle input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; }
+.app-toggle-track {
+  position: relative;
+  flex: none;
+  width: var(--track-w);
+  height: var(--track-h);
+  border-radius: var(--radius-full);
+  border: var(--spacing-f1) solid var(--hair-strong);
+  background: var(--sheen), var(--fill);
+  box-shadow: var(--highlight);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+.app-toggle-thumb {
+  position: absolute;
+  top: 50%;
+  left: calc((var(--track-h) - var(--thumb)) / 2 - var(--spacing-f1));
+  width: var(--thumb);
+  height: var(--thumb);
+  border-radius: var(--radius-full);
+  background: var(--c-muted);
+  transform: translateY(-50%);
+  transition: left 0.3s cubic-bezier(0.215, 0.61, 0.355, 1), background 0.3s;
+}
+.app-toggle input:checked + .app-toggle-track {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c-text) var(--mag-3), var(--tone)), var(--tone));
+  border-color: color-mix(in srgb, var(--c-text) var(--mag-3), var(--tone));
+  box-shadow: var(--highlight), 0 var(--spacing-f8) var(--spacing-f21) calc(var(--spacing-f8) * -1) var(--tone);
+}
+.app-toggle input:checked + .app-toggle-track .app-toggle-thumb {
+  left: calc(var(--track-w) - var(--thumb) - (var(--track-h) - var(--thumb)) / 2 - var(--spacing-f1));
+  background: var(--c-ink);
+}
+.app-toggle input:focus-visible + .app-toggle-track { outline: var(--spacing-f2) solid var(--tone); outline-offset: var(--spacing-f3); }
+.app-toggle input:disabled + .app-toggle-track { opacity: var(--mag-2); }
+.app-toggle:has(input:disabled) { cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) { .app-toggle-track, .app-toggle-thumb { transition: none; } }

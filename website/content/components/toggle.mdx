@@ -1,0 +1,153 @@
+export const meta = {
+  title: "Toggle",
+  group: "Components",
+  description:
+    "A switch for a setting that is on or off. It is a real checkbox with the switch role, so it works with the keyboard and with screen readers.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery column>
+  <AppToggle label="Cloud cover" defaultChecked />
+  <AppToggle label="Moon altitude" tone="aurora-green" defaultChecked />
+  <AppToggle label="Prime view" tone="aurora-pink" />
+  <AppToggle label="Now" tone="sodium-airglow" size="sm" defaultChecked />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="toggle" />
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`AstrGlassToggle(
+  value: showClouds,
+  onChanged: (bool on) => setState(() => showClouds = on),
+  label: 'Cloud cover',
+  tone: AstrTone.deepSpace,
+)`} />
+
+<DartExcerpt file="content/flutter/astr_glass.dart" symbols={["AstrGlassToggle"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppToggle label="Cloud cover" defaultChecked />
+<AppToggle label="Now" tone="sodium-airglow" size="sm" />`} />
+
+<ReactExcerpt file="src/components/app/app-toggle.tsx" symbols={["AppToggle"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-toggle", ".app-toggle.is-sm", ".app-toggle input", ".app-toggle-track", ".app-toggle-thumb", ".app-toggle input:checked + .app-toggle-track", ".app-toggle input:checked + .app-toggle-track .app-toggle-thumb"]} />
+</CodeTabs>
+
+<DocNote>There is no toggle in the app yet. The Flutter tab is the proposed implementation, built from <code>AstrColors</code>, <code>Mag</code> and <code>AstrSpace</code>.</DocNote>
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "label",
+    "label",
+    "string",
+    "required",
+    "Accessible name, drawn beside the switch unless hideLabel is set."
+  ],
+  [
+    "checked, onChange",
+    "value, onChanged",
+    "boolean",
+    "none",
+    "Controlled state. Flutter passes null to onChanged to disable."
+  ],
+  [
+    "defaultChecked",
+    "none",
+    "boolean",
+    "false",
+    "Uncontrolled initial state (web)."
+  ],
+  [
+    "tone",
+    "tone",
+    "AstrTone",
+    "deep-space",
+    "The colour of the on track."
+  ],
+  [
+    "size",
+    "compact",
+    "sm / boolean",
+    "55 by 34",
+    "Small is 34 by 21."
+  ],
+  [
+    "disabled",
+    "onChanged: null",
+    "boolean",
+    "false",
+    "Not interactive."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens" description="Every value on this component is a system token. The last column is what the app widget uses today, so the gap to close is visible.">
+
+<DocTable
+  head={["Role", "CSS token", "Dart token", "App widget today"]}
+  rows={[
+  [
+    "Track",
+    "--spacing-f55 by --spacing-f34 (a golden rectangle), small f34 by f21",
+    "AstrSpace.f55, f34; compact f34, f21",
+    "new"
+  ],
+  [
+    "Thumb",
+    "--spacing-f21, small --spacing-f13",
+    "AstrSpace.f21, f13",
+    "new"
+  ],
+  [
+    "Off",
+    "--sheen over --fill, border --hair-strong, thumb --color-space-grey-300",
+    "Mag.m5, m8; AstrColors.spaceGrey[300]",
+    "new"
+  ],
+  [
+    "On",
+    "track the tone lightened by --mag-3, thumb --color-space-grey-950, glow like a button",
+    "tone, Mag.m3",
+    "new"
+  ],
+  [
+    "Motion",
+    "0.3s, off with reduced motion",
+    "Duration(milliseconds: 300)",
+    "new"
+  ],
+  [
+    "Disabled",
+    "opacity --mag-2",
+    "Mag.m2",
+    "new"
+  ]
+]}
+/>
+
+</DocSection>

@@ -33,6 +33,7 @@ import { AppCloudCoverGraph, AppConditionsGraph, AppLegend } from "@/components/
 import { AppButton, AppIconTile } from "@/components/app/app-icons";
 import { CssExcerpt, DartExcerpt, ReactExcerpt } from "@/components/app/source";
 import { AppObjectGraph } from "@/components/app/app-object-graph";
+import { AppToggle } from "@/components/app/app-toggle";
 import { Playground } from "@/components/app/playground";
 import { Gallery, Variants } from "@/components/app/showcase";
 import { Flow } from "@/components/docs/viz/flow";
@@ -90,6 +91,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     AppLegend,
     Gallery,
     Playground,
+    AppToggle,
     AppObjectGraph,
     CssExcerpt,
     DartExcerpt,

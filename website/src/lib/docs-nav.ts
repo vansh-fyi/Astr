@@ -25,6 +25,7 @@ export const DOCS_GROUPS = [
     links: [
       { href: "/components/icon-tile", label: "Icon tile" },
       { href: "/components/button", label: "Button" },
+      { href: "/components/toggle", label: "Toggle" },
     ],
   },
   {

@@ -3,6 +3,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { CodeBlock } from "../docs/code-block";
 import { AppButton, AppIconTile, type GlyphName, type TileTone } from "./app-icons";
+import { AppToggle } from "./app-toggle";
 import { TONE_LABEL, dartTone, type Tone } from "./tokens";
 import { AppCloudCoverGraph, AppConditionsGraph } from "./app-graphs";
 import { AppObjectGraph } from "./app-object-graph";
@@ -76,6 +77,18 @@ const CONFIGS: Record<string, Config> = {
     react: (v) => `<AppButton${attrs([["glyph", v.icon ? "compass" : "", ""], ["tone", v.tone, "deep-space"], ["variant", v.variant, "filled"], ["size", v.size, "md"], ["disabled", v.disabled]])}>Explore</AppButton>`,
     flutter: (v) =>
       `AstrGlassButton(\n  label: 'Explore',\n${v.icon ? "  icon: Icons.explore,\n" : ""}${v.tone !== "deep-space" ? `  tone: AstrTone.${dartTone(v.tone as Tone)},\n` : ""}${v.variant !== "filled" ? `  variant: AstrButtonVariant.${v.variant},\n` : ""}${v.size === "sm" ? "  compact: true,\n" : ""}  onPressed: ${v.disabled ? "null" : "() {}"},\n)`,
+  },
+  toggle: {
+    controls: [
+      { kind: "segment", key: "tone", label: "Tone", options: TONES },
+      { kind: "segment", key: "size", label: "Size", options: [{ value: "md", label: "Medium" }, { value: "sm", label: "Small" }] },
+      { kind: "toggle", key: "on", label: "On" },
+      { kind: "toggle", key: "disabled", label: "Disabled" },
+    ],
+    initial: { tone: "deep-space", size: "md", on: true, disabled: false },
+    preview: (v) => <AppToggle key={`${v.on}`} label="Cloud cover" tone={tone(v)} size={v.size === "sm" ? "sm" : undefined} defaultChecked={Boolean(v.on)} disabled={Boolean(v.disabled)} />,
+    react: (v) => `<AppToggle label="Cloud cover"${attrs([["tone", v.tone, "deep-space"], ["size", v.size === "sm" ? "sm" : "", ""], ["defaultChecked", v.on], ["disabled", v.disabled]])} />`,
+    flutter: (v) => `AstrGlassToggle(\n  value: ${v.on},\n  onChanged: ${v.disabled ? "null" : "(bool on) {}"},\n  label: 'Cloud cover',\n${v.tone !== "deep-space" ? `  tone: AstrTone.${dartTone(v.tone as Tone)},\n` : ""}${v.size === "sm" ? "  compact: true,\n" : ""})`,
   },
   "cloud-bar": {
     controls: [
@@ -173,10 +186,8 @@ function ControlRow({ control, value, onChange }: { control: Control; value: str
     return (
       <div className="app-pg-row">
         <span>{control.label}</span>
-        <div className="docs-chip-row">
-          <button type="button" className="app-ui app-button is-glass is-sm" aria-pressed={Boolean(value)} onClick={() => onChange(!value)}>
-            {value ? "On" : "Off"}
-          </button>
+        <div>
+          <AppToggle label={control.label} hideLabel checked={Boolean(value)} onChange={onChange} />
         </div>
       </div>
     );

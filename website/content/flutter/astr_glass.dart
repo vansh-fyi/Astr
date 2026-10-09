@@ -274,3 +274,89 @@ class AstrGlassCard extends StatelessWidget {
     );
   }
 }
+
+/// A switch. The track is a golden rectangle, 55 by 34, with a 21 thumb; when
+/// [compact] it steps down the Fibonacci ladder to 34 by 21 and a 13 thumb.
+/// On, the track fills with the tone and the thumb turns dark.
+class AstrGlassToggle extends StatelessWidget {
+  const AstrGlassToggle({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    required this.label,
+    this.tone = AstrTone.deepSpace,
+    this.compact = false,
+  });
+
+  final bool value;
+
+  /// Null disables the switch.
+  final ValueChanged<bool>? onChanged;
+
+  /// Accessible name, read by screen readers.
+  final String label;
+  final AstrTone tone;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color c = tone.color;
+    final Color text = AstrColors.spaceGrey[50]!;
+    final double trackW = compact ? AstrSpace.f34 : AstrSpace.f55;
+    final double trackH = compact ? AstrSpace.f21 : AstrSpace.f34;
+    final double thumb = compact ? AstrSpace.f13 : AstrSpace.f21;
+    final double inset = (trackH - thumb) / 2;
+    const Duration duration = Duration(milliseconds: 300);
+
+    return Semantics(
+      toggled: value,
+      label: label,
+      child: Opacity(
+        opacity: onChanged == null ? Mag.m2 : 1,
+        child: GestureDetector(
+          onTap: onChanged == null ? null : () => onChanged!(!value),
+          child: AnimatedContainer(
+            duration: duration,
+            curve: Curves.easeOutCubic,
+            width: trackW,
+            height: trackH,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(trackH),
+              border: Border.all(color: value ? Color.alphaBlend(text.withValues(alpha: Mag.m3), c) : text.withValues(alpha: Mag.m5)),
+              gradient: value
+                  ? LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[Color.alphaBlend(text.withValues(alpha: Mag.m3), c), c],
+                    )
+                  : LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[text.withValues(alpha: Mag.m5), text.withValues(alpha: Mag.m8)],
+                    ),
+              boxShadow: value
+                  ? <BoxShadow>[BoxShadow(color: c, blurRadius: AstrSpace.f21, spreadRadius: -AstrSpace.f8, offset: const Offset(0, AstrSpace.f8))]
+                  : null,
+            ),
+            child: AnimatedAlign(
+              duration: duration,
+              curve: Curves.easeOutCubic,
+              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: inset - AstrSpace.f1),
+                child: Container(
+                  width: thumb,
+                  height: thumb,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: value ? _ink : AstrColors.spaceGrey[300],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
