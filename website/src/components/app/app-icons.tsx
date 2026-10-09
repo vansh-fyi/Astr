@@ -26,7 +26,7 @@ const toneVar = (tone: Tone): string => `var(--color-${TONE_STOP[tone]})`;
 /** Glass icon tile. Pass `pressed` for a toggle; `label` is the accessible name. */
 export function AppIconTile({
   glyph,
-  tone = "blue",
+  tone = "deep-space",
   size,
   label,
   pressed,
@@ -58,7 +58,7 @@ export type ButtonVariant = "filled" | "glass" | "outline";
 /** Button. Filled is the default; glass and outline are quieter. */
 export function AppButton({
   glyph,
-  tone = "blue",
+  tone = "deep-space",
   variant = "filled",
   size,
   disabled,

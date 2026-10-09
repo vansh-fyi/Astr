@@ -147,7 +147,12 @@ This is the graph on an object's detail screen, titled Visibility. It answers: *
 
 The graph stops at 70% of its height for 90° so that peak and labels have room. The scale is therefore the same for the object and the moon value but shows each as a share of 70%, not of the full height.
 
-<ObjectGraphDemo />
+<Gallery column>
+  <AppObjectGraph />
+  <AppObjectGraph variant="altitude" tone="amber" />
+</Gallery>
+
+Both variants as the app draws them: the full visibility graph above and the single-curve altitude graph below. Move over either to scrub. See [App components](/components/object-graph) for the controls and the horizon view.
 
 **Scrubbing.** Dragging or tapping shows a line, a dot on the curve and a tooltip with the time and the altitude at the nearest 15-minute point, to a tenth of a degree. The graph also refreshes every minute so the Now line and the current-position dot move.
 

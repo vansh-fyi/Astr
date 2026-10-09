@@ -102,7 +102,7 @@ function HorizonView({ objectId, minutes, color }: { objectId: string; minutes: 
 export function AppObjectGraph({
   variant = "visibility",
   objectId = "high",
-  tone = "blue",
+  tone = "deep-space",
   horizon = false,
 }: {
   variant?: "visibility" | "altitude";

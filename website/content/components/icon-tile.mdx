@@ -15,11 +15,11 @@ export const meta = {
 <DocSection id="preview" title="Preview">
 
 <Gallery>
-  <AppIconTile glyph="moon" tone="blue" label="Moon" />
-  <AppIconTile glyph="cloud" tone="green" label="Cloud" />
-  <AppIconTile glyph="graph" tone="pink" label="Graph" />
-  <AppIconTile glyph="compass" tone="amber" label="Compass" />
-  <AppIconTile glyph="search" tone="red" label="Search" />
+  <AppIconTile glyph="moon" tone="deep-space" label="Moon" />
+  <AppIconTile glyph="cloud" tone="aurora-green" label="Cloud" />
+  <AppIconTile glyph="graph" tone="aurora-pink" label="Graph" />
+  <AppIconTile glyph="compass" tone="sodium-airglow" label="Compass" />
+  <AppIconTile glyph="search" tone="oxygen-airglow" label="Search" />
 </Gallery>
 
 </DocSection>
@@ -36,7 +36,7 @@ export const meta = {
 <CodeBlock lang="dart" filename="Usage" code={`AstrGlassTile(
   icon: Icons.nightlight_round,
   label: 'Moon',
-  tone: AstrTone.blue,
+  tone: AstrTone.deepSpace,
   size: AstrTileSize.md, // 55
   selected: false,
   onPressed: () {},
@@ -45,8 +45,8 @@ export const meta = {
 <DartExcerpt file="content/flutter/astr_glass.dart" symbols={["AstrTone", "AstrTileSize", "AstrGlassTile"]} />
 
 </>}>
-<CodeBlock lang="javascript" filename="Usage" code={`<AppIconTile glyph="moon" tone="blue" label="Moon" />
-<AppIconTile glyph="graph" tone="green" label="Graphs" pressed />`} />
+<CodeBlock lang="javascript" filename="Usage" code={`<AppIconTile glyph="moon" tone="deep-space" label="Moon" />
+<AppIconTile glyph="graph" tone="aurora-green" label="Graphs" pressed />`} />
 
 <ReactExcerpt file="src/components/app/app-icons.tsx" symbols={["AppIconTile", "Glyph"]} />
 
@@ -73,7 +73,7 @@ export const meta = {
     "tone",
     "tone",
     "AstrTone",
-    "blue",
+    "deep-space",
     "Accent colour; a system stop."
   ],
   [

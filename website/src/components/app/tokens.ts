@@ -30,12 +30,25 @@ export const GRAPH = {
   prime: "aurora-green-400",
 } as const satisfies Record<string, StopName>;
 
-export type Tone = "blue" | "green" | "pink" | "amber" | "red";
+/** The accent tones, named by the colour they are: the system's own colour names. */
+export type Tone = "deep-space" | "aurora-green" | "aurora-pink" | "sodium-airglow" | "oxygen-airglow";
 
+/** The stop each tone uses. */
 export const TONE_STOP: Record<Tone, StopName> = {
-  blue: "deep-space-200",
-  green: "aurora-green-400",
-  pink: "aurora-pink-400",
-  amber: "sodium-airglow-400",
-  red: "oxygen-airglow-400",
+  "deep-space": "deep-space-200",
+  "aurora-green": "aurora-green-400",
+  "aurora-pink": "aurora-pink-400",
+  "sodium-airglow": "sodium-airglow-400",
+  "oxygen-airglow": "oxygen-airglow-400",
 };
+
+export const TONE_LABEL: Record<Tone, string> = {
+  "deep-space": "Deep space",
+  "aurora-green": "Aurora green",
+  "aurora-pink": "Aurora pink",
+  "sodium-airglow": "Sodium airglow",
+  "oxygen-airglow": "Oxygen airglow",
+};
+
+/** The Dart enum member for a tone: `aurora-pink` is `AstrTone.auroraPink`. */
+export const dartTone = (tone: Tone): string => tone.replace(/-(\w)/g, (_, c: string) => c.toUpperCase());

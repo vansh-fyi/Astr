@@ -26,10 +26,8 @@ import { ScaleSource } from "@/components/docs/demos/scale-source";
 import { SourceExcerpt, SourceFile } from "@/components/docs/demos/source-file";
 import { SkyCalculator, ZoneCalculator } from "@/components/docs/demos/sky-calculators";
 import { ExtinctionTable, KernelParameters, KernelTable, LegacyBridgeTable, MoonGrid, ValidationTable, VectorStatus, ZoneImpactTable, ZoneLadderTable } from "@/components/docs/demos/sky-tables";
+import { AppLadderAxis, AppMoonCostChart, AppNightStrip } from "@/components/app/science";
 import { KernelFalloff } from "@/components/docs/viz/kernel-chart";
-import { MoonCostChart, NightStrip } from "@/components/docs/viz/sky-charts";
-import { ConditionsGraphDemo, ObjectGraphDemo } from "@/components/docs/viz/night-graphs";
-import { CloudBar, CloudSkyTiles } from "@/components/docs/viz/cloud-visuals";
 import { AppCloudBar, AppConditionsCard, AppMoonCard, AppSkyState, AppStage, AppVisibilityCard } from "@/components/app/app-widgets";
 import { AppCloudCoverGraph, AppConditionsGraph, AppLegend } from "@/components/app/app-graphs";
 import { AppButton, AppIconTile } from "@/components/app/app-icons";
@@ -38,8 +36,6 @@ import { AppObjectGraph } from "@/components/app/app-object-graph";
 import { Playground } from "@/components/app/playground";
 import { Gallery, Variants } from "@/components/app/showcase";
 import { Flow } from "@/components/docs/viz/flow";
-import { MoonPhaseIcon, MoonPhaseStrip } from "@/components/docs/viz/moon-visuals";
-import { LadderAxis, ZoneSkies } from "@/components/docs/viz/zone-visuals";
 import { StopMatrix } from "@/components/docs/demos/stop-matrix";
 import { TypeScale, TypeTable } from "@/components/docs/demos/type-scale";
 
@@ -78,15 +74,11 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     LadderTable,
     SampleTable,
     CssSource,
-    LadderAxis,
-    CloudBar,
-    ConditionsGraphDemo,
     KernelFalloff,
-    MoonCostChart,
-    NightStrip,
-    ObjectGraphDemo,
-    CloudSkyTiles,
     Flow,
+    AppLadderAxis,
+    AppMoonCostChart,
+    AppNightStrip,
     AppCloudBar,
     AppConditionsCard,
     AppMoonCard,
@@ -105,9 +97,6 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     AppButton,
     AppIconTile,
     Variants,
-    MoonPhaseIcon,
-    MoonPhaseStrip,
-    ZoneSkies,
     SourceFile,
     SourceExcerpt,
     SkyCalculator,

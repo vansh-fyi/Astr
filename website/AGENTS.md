@@ -164,6 +164,10 @@ The web components are built only from design-system tokens, and `check-docs.mjs
 
 The app's own widget Dart (`AppColors`, `AppSpacing`, hex and pixel values) does not use these tokens yet. Each component page ends with a Design tokens table naming the CSS token, the Dart token (`AstrColors`, `Mag`, `AstrSpace`, `AstrType`) and what the app widget uses today, so the gap to close is visible. `content/flutter/astr_glass.dart` is built only from Astr tokens and is the target shape: it holds the proposed tile, button and card. A new component adds its CSS, its React, its Dart tokens and its page. New component pages go in `docs-nav.ts` and the page lists in `scripts/check-docs.mjs`.
 
+The documentation interface is made of these components. Its controls (variant chips, the code tabs, Copy, the search trigger, dialog Close, the playground controls) are the glass and outline `app-button` classes, and the mobile menu is an `app-tile`; a pressed or selected quiet button fills with its tone. The docs cards (notes, examples, code blocks, tables) share the card material through the `--docs-glass*` variables, which are the `--sheen` and `--fill` of the app card. Do not give chrome its own button or card styling: `check-docs.mjs` fails if it comes back. The first-pass chart components are gone; the science pages use `science.tsx` (night strip, moon-cost chart, skyglow kernel chart, zone ladder) and the graph components.
+
+Tones are named by the colour they are, never by a hue word: `deep-space`, `aurora-green`, `aurora-pink`, `sodium-airglow`, `oxygen-airglow` (Dart: `AstrTone.deepSpace` and so on). Do not call a tone blue, pink or amber in props, labels or code.
+
 ## Visual components for the science pages
 
 Text-heavy sections are shown with components in `src/components/docs/viz/`. Add new ones there, register them in `src/mdx-components.tsx`, and style them in `docs.css` under the `viz-` prefix.

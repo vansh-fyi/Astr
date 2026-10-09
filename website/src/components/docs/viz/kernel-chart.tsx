@@ -1,12 +1,12 @@
 import { pythonNumber } from "@/lib/source";
-import { KernelChart } from "./sky-charts";
+import { AppKernelChart } from "@/components/app/science";
 
 const FILE = "scripts/apply_skyglow.py";
 
 /** Reads the kernel constants from the pipeline source and draws the falloff for the script default and for production. */
 export function KernelFalloff() {
   return (
-    <KernelChart
+    <AppKernelChart
       fractions={[
         { value: pythonNumber(FILE, "SCATTER_FRACTION"), label: `F = ${pythonNumber(FILE, "SCATTER_FRACTION")} (script default)`, dash: true },
         { value: 0.06, label: "F = 0.06 (production data)", dash: false },

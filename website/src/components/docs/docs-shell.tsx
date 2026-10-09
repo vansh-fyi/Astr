@@ -38,7 +38,7 @@ function SidebarHead({ onSearch }: { onSearch: () => void }) {
       </Link>
       <button
         type="button"
-        className="docs-search-trigger"
+        className="docs-search-trigger app-ui app-button is-glass is-sm is-block"
         onClick={onSearch}
         aria-label="Search the colour system"
       >
@@ -99,24 +99,18 @@ export function DocsShell({ children }: { children: ReactNode }) {
       <a className="docs-skip" href="#documentation-content">
         Skip to content
       </a>
-      <button
-        type="button"
-        className="docs-mobile-trigger"
-        aria-label="Open navigation"
-        onClick={() => mobileDialog.current?.showModal()}
-      >
-        <svg
-          width="21"
-          height="21"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.25"
-          aria-hidden="true"
+      <div className="docs-mobile-trigger">
+        <button
+          type="button"
+          className="app-ui app-tile"
+          aria-label="Open navigation"
+          onClick={() => mobileDialog.current?.showModal()}
         >
-          <path d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
       <div className="docs-workspace">
         <aside className="docs-sidebar">
           <SidebarHead onSearch={() => searchDialog.current?.showModal()} />
@@ -150,7 +144,7 @@ export function DocsShell({ children }: { children: ReactNode }) {
           />
           <button
             type="button"
-            className="docs-dialog-close"
+            className="docs-dialog-close app-ui app-button is-outline is-sm"
             onClick={() => searchDialog.current?.close()}
             aria-label="Close search"
           >
@@ -188,7 +182,7 @@ export function DocsShell({ children }: { children: ReactNode }) {
       >
         <button
           type="button"
-          className="docs-dialog-close"
+          className="docs-dialog-close app-ui app-button is-outline is-sm"
           onClick={() => mobileDialog.current?.close()}
         >
           Close

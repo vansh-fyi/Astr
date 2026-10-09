@@ -4,7 +4,8 @@
  * from the phi steps. Nothing here is a hex, an rgb() or a pixel number: check-docs.mjs fails on all three.
  * Glow belongs to buttons and tiles; cards and graphs are plain glass.
  */
-.app-ui {
+/* The vars are on :root too so the docs chrome can share the card material. */
+:root, .app-ui {
   --c-ink: var(--color-space-grey-950);
   --c-text: var(--color-space-grey-50);
   --c-muted: var(--color-space-grey-300);
@@ -218,7 +219,23 @@
   font-weight: 500;
 }
 .app-button.is-glass svg { fill: var(--tone); }
+/* Small quiet buttons are controls, often many in a row: no outer glow. */
+.app-button.is-glass.is-sm, .app-button.is-outline.is-sm { box-shadow: var(--highlight); }
+.app-button.is-glass.is-sm:hover { box-shadow: var(--highlight); }
 .app-button.is-outline { background: transparent; border-color: var(--tone); color: var(--tone); box-shadow: none; font-weight: 500; }
+/* Stroke icons (a menu, a magnifier) keep their outline instead of being filled. */
+.app-ui svg[fill="none"] { fill: none; }
+
+/* Toggle state of a quiet button: pressed or selected fills with the tone, like the default button. */
+.app-button.is-glass[aria-pressed="true"],
+.app-button.is-glass[aria-selected="true"] {
+  box-shadow: var(--highlight), 0 var(--spacing-f8) var(--spacing-f21) calc(var(--spacing-f8) * -1) var(--tone);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c-text) var(--mag-3), var(--tone)), var(--tone));
+  border-color: color-mix(in srgb, var(--c-text) var(--mag-3), var(--tone));
+  color: var(--c-ink);
+  font-weight: 700;
+}
+.app-button.is-block { display: flex; width: 100%; justify-content: flex-start; }
 .app-button.is-sm { height: var(--spacing-f34); padding: 0 var(--spacing-f13); font-size: var(--text-s-1); }
 .app-button[disabled] { opacity: var(--mag-2); cursor: not-allowed; transform: none; box-shadow: none; }
 @media (prefers-reduced-motion: reduce) { .app-tile, .app-button { transition: none; } .app-tile:hover, .app-button:hover { transform: none; } }
@@ -236,3 +253,27 @@
 .app-pg-range output { min-width: var(--spacing-f55); font-variant-numeric: tabular-nums; }
 .app-pg .app-stage { min-height: var(--spacing-f144); align-content: center; }
 @container (max-width: 38rem) { .app-pg-row { grid-template-columns: 1fr; } }
+
+/* Science charts: a glass plot, readout cells, hour cells and the zone ladder. */
+.app-sci { flex-wrap: nowrap; align-items: stretch; justify-content: flex-start; }
+.app-sci-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-f21); }
+.app-chart { border-radius: var(--radius-f13); border: var(--spacing-f1) solid var(--hair); background: var(--sheen), var(--fill); box-shadow: var(--highlight); overflow: hidden; }
+.app-chart svg { display: block; width: 100%; }
+.app-chart svg text { font-family: inherit; }
+.app-chart-key { margin: 0; font-size: var(--text-s-1); line-height: var(--text-s-1--line-height); color: var(--c-muted); }
+.app-readout { display: grid; align-items: start; grid-template-columns: repeat(auto-fit, minmax(var(--spacing-f144), 1fr)); gap: var(--spacing-f8); margin: 0; }
+.app-readout > div { display: grid; align-content: start; gap: var(--spacing-f2); padding: var(--spacing-f8) var(--spacing-f13); border-radius: var(--radius-f13); border: var(--spacing-f1) solid var(--hair); background: var(--sheen), var(--fill); box-shadow: var(--highlight); }
+.app-readout dt, .app-readout dd { margin: 0; padding: 0; }
+.app-hours { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--spacing-f34), 1fr)); gap: var(--spacing-f3); }
+.app-hour { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: grid; justify-items: center; gap: var(--spacing-f3); padding: var(--spacing-f8) var(--spacing-f3); border-radius: var(--radius-f13); border: var(--spacing-f1) solid var(--hair); background: var(--sheen), var(--fill); box-shadow: var(--highlight); }
+.app-hour i { display: block; width: 100%; height: var(--spacing-f21); border-radius: var(--radius-f5); background: var(--c-accent); }
+.app-hour[data-window] { border-color: var(--c-accent); }
+.app-hour[aria-pressed="true"] { background: color-mix(in srgb, var(--c-accent) var(--mag-4), transparent); }
+.app-hour:focus-visible { outline: var(--spacing-f2) solid var(--c-accent); outline-offset: var(--spacing-f2); }
+.app-ladder { position: relative; height: var(--spacing-f55); border-radius: var(--radius-f13); border: var(--spacing-f1) solid var(--hair); background: var(--sheen), var(--fill); overflow: hidden; }
+.app-ladder-band { position: absolute; top: 0; bottom: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--c-accent) var(--band), transparent); border-left: var(--spacing-f1) solid var(--hair); }
+.app-ladder-ticks { position: relative; height: var(--spacing-f89); }
+.app-ladder-tick { position: absolute; top: 0; display: grid; justify-items: center; gap: var(--spacing-f2); transform: translateX(-50%); }
+.app-ladder-tick i { display: block; width: var(--spacing-f1); height: var(--spacing-f8); background: var(--c-muted); }
+.app-ladder-tick.is-compare { top: var(--spacing-f55); }
+.app-ladder-tick.is-compare i { background: var(--c-accent); }

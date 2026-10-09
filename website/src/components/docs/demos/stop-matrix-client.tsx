@@ -34,7 +34,7 @@ export function StopMatrixClient({
             <button
               type="button"
               key={p.id}
-              className="docs-chip-button"
+              className="app-ui app-button is-glass is-sm"
               aria-pressed={p.id === paletteId}
               onClick={() => setPaletteId(p.id)}
             >

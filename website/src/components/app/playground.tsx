@@ -3,6 +3,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { CodeBlock } from "../docs/code-block";
 import { AppButton, AppIconTile, type GlyphName, type TileTone } from "./app-icons";
+import { TONE_LABEL, dartTone, type Tone } from "./tokens";
 import { AppCloudCoverGraph, AppConditionsGraph } from "./app-graphs";
 import { AppObjectGraph } from "./app-object-graph";
 import { AppStage, AppCloudBar, AppConditionsCard, AppMoonCard, AppSkyState, AppVisibilityCard, type SkyStateKey, moonPhase } from "./app-widgets";
@@ -24,7 +25,7 @@ interface Config {
 }
 
 const opts = (...values: string[]): Opt[] => values.map((value) => ({ value }));
-const TONES = opts("blue", "green", "pink", "amber", "red");
+const TONES: Opt[] = (Object.keys(TONE_LABEL) as Tone[]).map((value) => ({ value, label: TONE_LABEL[value] }));
 const tone = (v: Values) => v.tone as TileTone;
 const ZONE_MPSAS = [22.0, 21.85, 21.6, 21.3, 20.9, 20.4, 19.8, 19.0, 18.2];
 /** Phase angle in degrees (0 new, 180 full) for an illuminated percentage, on the waxing or the waning side. */
@@ -50,13 +51,13 @@ const CONFIGS: Record<string, Config> = {
       { kind: "segment", key: "size", label: "Size", options: [{ value: "sm", label: "Small" }, { value: "md", label: "Medium" }, { value: "lg", label: "Large" }] },
       { kind: "segment", key: "state", label: "State", options: opts("default", "selected", "disabled") },
     ],
-    initial: { glyph: "moon", tone: "blue", size: "md", state: "default" },
+    initial: { glyph: "moon", tone: "deep-space", size: "md", state: "default" },
     preview: (v) => (
       <AppIconTile glyph={v.glyph as GlyphName} tone={tone(v)} size={v.size === "md" ? undefined : (v.size as "sm" | "lg")} label={String(v.glyph)} pressed={v.state === "selected" ? true : undefined} disabled={v.state === "disabled"} />
     ),
-    react: (v) => `<AppIconTile glyph="${v.glyph}" label="${pascal(String(v.glyph))}"${attrs([["tone", v.tone, "blue"], ["size", v.size, "md"]])}${v.state === "selected" ? " pressed" : v.state === "disabled" ? " disabled" : ""} />`,
+    react: (v) => `<AppIconTile glyph="${v.glyph}" label="${pascal(String(v.glyph))}"${attrs([["tone", v.tone, "deep-space"], ["size", v.size, "md"]])}${v.state === "selected" ? " pressed" : v.state === "disabled" ? " disabled" : ""} />`,
     flutter: (v) =>
-      `AstrGlassTile(\n  icon: ${ICONS[String(v.glyph)]},\n  label: '${pascal(String(v.glyph))}',\n${v.tone !== "blue" ? `  tone: AstrTone.${v.tone},\n` : ""}${v.size !== "md" ? `  size: AstrTileSize.${v.size},\n` : ""}${v.state === "selected" ? "  selected: true,\n" : ""}  onPressed: ${v.state === "disabled" ? "null" : "() {}"},\n)`,
+      `AstrGlassTile(\n  icon: ${ICONS[String(v.glyph)]},\n  label: '${pascal(String(v.glyph))}',\n${v.tone !== "deep-space" ? `  tone: AstrTone.${dartTone(v.tone as Tone)},\n` : ""}${v.size !== "md" ? `  size: AstrTileSize.${v.size},\n` : ""}${v.state === "selected" ? "  selected: true,\n" : ""}  onPressed: ${v.state === "disabled" ? "null" : "() {}"},\n)`,
   },
   button: {
     controls: [
@@ -66,15 +67,15 @@ const CONFIGS: Record<string, Config> = {
       { kind: "toggle", key: "icon", label: "Icon" },
       { kind: "toggle", key: "disabled", label: "Disabled" },
     ],
-    initial: { variant: "filled", tone: "blue", size: "md", icon: true, disabled: false },
+    initial: { variant: "filled", tone: "deep-space", size: "md", icon: true, disabled: false },
     preview: (v) => (
       <AppButton glyph={v.icon ? "compass" : undefined} tone={tone(v)} variant={v.variant as "filled"} size={v.size === "sm" ? "sm" : undefined} disabled={Boolean(v.disabled)}>
         Explore
       </AppButton>
     ),
-    react: (v) => `<AppButton${attrs([["glyph", v.icon ? "compass" : "", ""], ["tone", v.tone, "blue"], ["variant", v.variant, "filled"], ["size", v.size, "md"], ["disabled", v.disabled]])}>Explore</AppButton>`,
+    react: (v) => `<AppButton${attrs([["glyph", v.icon ? "compass" : "", ""], ["tone", v.tone, "deep-space"], ["variant", v.variant, "filled"], ["size", v.size, "md"], ["disabled", v.disabled]])}>Explore</AppButton>`,
     flutter: (v) =>
-      `AstrGlassButton(\n  label: 'Explore',\n${v.icon ? "  icon: Icons.explore,\n" : ""}${v.tone !== "blue" ? `  tone: AstrTone.${v.tone},\n` : ""}${v.variant !== "filled" ? `  variant: AstrButtonVariant.${v.variant},\n` : ""}${v.size === "sm" ? "  compact: true,\n" : ""}  onPressed: ${v.disabled ? "null" : "() {}"},\n)`,
+      `AstrGlassButton(\n  label: 'Explore',\n${v.icon ? "  icon: Icons.explore,\n" : ""}${v.tone !== "deep-space" ? `  tone: AstrTone.${dartTone(v.tone as Tone)},\n` : ""}${v.variant !== "filled" ? `  variant: AstrButtonVariant.${v.variant},\n` : ""}${v.size === "sm" ? "  compact: true,\n" : ""}  onPressed: ${v.disabled ? "null" : "() {}"},\n)`,
   },
   "cloud-bar": {
     controls: [
@@ -147,14 +148,14 @@ const CONFIGS: Record<string, Config> = {
       { kind: "segment", key: "tone", label: "Highlight", options: TONES },
       { kind: "toggle", key: "horizon", label: "Horizon view" },
     ],
-    initial: { variant: "visibility", object: "high", tone: "blue", horizon: false },
+    initial: { variant: "visibility", object: "high", tone: "deep-space", horizon: false },
     column: true,
     preview: (v) => <AppObjectGraph variant={v.variant as "visibility"} objectId={String(v.object)} tone={tone(v)} horizon={Boolean(v.horizon)} />,
-    react: (v) => `<AppObjectGraph${attrs([["variant", v.variant, "visibility"], ["objectId", v.object, "high"], ["tone", v.tone, "blue"], ["horizon", v.horizon]])} />`,
+    react: (v) => `<AppObjectGraph${attrs([["variant", v.variant, "visibility"], ["objectId", v.object, "high"], ["tone", v.tone, "deep-space"], ["horizon", v.horizon]])} />`,
     flutter: (v) =>
       v.variant === "visibility"
-        ? `VisibilityGraphWidget(\n  objectId: '${v.object}',\n${v.tone !== "blue" ? `  highlightColor: AstrTone.${v.tone}.color,\n` : ""})${v.horizon ? "\n// Horizon view: proposed, not in the app yet." : ""}`
-        : `AltitudeGraph(\n  themeColor: AstrTone.${v.tone}.color,\n)`,
+        ? `VisibilityGraphWidget(\n  objectId: '${v.object}',\n${v.tone !== "deep-space" ? `  highlightColor: AstrTone.${dartTone(v.tone as Tone)}.color,\n` : ""})${v.horizon ? "\n// Horizon view: proposed, not in the app yet." : ""}`
+        : `AltitudeGraph(\n  themeColor: AstrTone.${dartTone(v.tone as Tone)}.color,\n)`,
   },
   "cloud-cover-graph": {
     controls: [{ kind: "segment", key: "night", label: "Forecast", options: [{ value: "night", label: "Night" }, { value: "overcast", label: "Overcast" }, { value: "clear", label: "Clear" }] }],
@@ -173,7 +174,7 @@ function ControlRow({ control, value, onChange }: { control: Control; value: str
       <div className="app-pg-row">
         <span>{control.label}</span>
         <div className="docs-chip-row">
-          <button type="button" className="docs-chip-button" aria-pressed={Boolean(value)} onClick={() => onChange(!value)}>
+          <button type="button" className="app-ui app-button is-glass is-sm" aria-pressed={Boolean(value)} onClick={() => onChange(!value)}>
             {value ? "On" : "Off"}
           </button>
         </div>
@@ -194,7 +195,7 @@ function ControlRow({ control, value, onChange }: { control: Control; value: str
       <span>{control.label}</span>
       <div className="docs-chip-row">
         {control.options.map((o) => (
-          <button key={o.value} type="button" className="docs-chip-button" aria-pressed={value === o.value} onClick={() => onChange(o.value)}>
+          <button key={o.value} type="button" className="app-ui app-button is-glass is-sm" aria-pressed={value === o.value} onClick={() => onChange(o.value)}>
             {o.label ?? pascal(o.value)}
           </button>
         ))}
@@ -220,7 +221,7 @@ export function Playground({ name }: { name: string }) {
       <AppStage column={config.column}>{config.preview(values)}</AppStage>
       <div className="docs-tablist" role="tablist" aria-label="Variant code">
         {(["react", "flutter"] as const).map((t) => (
-          <button key={t} type="button" role="tab" className="docs-tab" aria-selected={tab === t} onClick={() => setTab(t)}>
+          <button key={t} type="button" role="tab" className="docs-tab app-ui app-button is-glass is-sm" aria-selected={tab === t} onClick={() => setTab(t)}>
             {t === "react" ? "React" : "Flutter"}
           </button>
         ))}

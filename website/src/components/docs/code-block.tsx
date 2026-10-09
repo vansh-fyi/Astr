@@ -22,7 +22,7 @@ export function CopyButton({
   return (
     <button
       type="button"
-      className="docs-copy"
+      className="docs-copy app-ui app-button is-outline is-sm"
       onClick={copy}
       aria-label={status === "copied" ? "Copied" : `${label} to clipboard`}
     >

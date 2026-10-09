@@ -8,21 +8,22 @@ import 'astr_opacity.dart';
 import 'astr_spacing.dart';
 import 'astr_type.dart';
 
-/// The five accent tones for glass tiles and buttons. Each is a stop from
-/// [AstrColors], so a tone can never drift from the colour system.
+/// The five accent tones for glass tiles and buttons, named by the colour they
+/// are. Each is a stop from [AstrColors], so a tone can never drift from the
+/// colour system.
 enum AstrTone {
-  blue,
-  green,
-  pink,
-  amber,
-  red;
+  deepSpace,
+  auroraGreen,
+  auroraPink,
+  sodiumAirglow,
+  oxygenAirglow;
 
   Color get color => switch (this) {
-        AstrTone.blue => AstrColors.deepSpace[200]!,
-        AstrTone.green => AstrColors.auroraGreen[400]!,
-        AstrTone.pink => AstrColors.auroraPink[400]!,
-        AstrTone.amber => AstrColors.sodiumAirglow[400]!,
-        AstrTone.red => AstrColors.oxygenAirglow[400]!,
+        AstrTone.deepSpace => AstrColors.deepSpace[200]!,
+        AstrTone.auroraGreen => AstrColors.auroraGreen[400]!,
+        AstrTone.auroraPink => AstrColors.auroraPink[400]!,
+        AstrTone.sodiumAirglow => AstrColors.sodiumAirglow[400]!,
+        AstrTone.oxygenAirglow => AstrColors.oxygenAirglow[400]!,
       };
 }
 
@@ -48,7 +49,7 @@ class AstrGlassTile extends StatelessWidget {
     super.key,
     required this.icon,
     required this.label,
-    this.tone = AstrTone.blue,
+    this.tone = AstrTone.deepSpace,
     this.size = AstrTileSize.md,
     this.selected = false,
     this.onPressed,
@@ -133,7 +134,7 @@ class AstrGlassButton extends StatelessWidget {
     super.key,
     required this.label,
     this.icon,
-    this.tone = AstrTone.blue,
+    this.tone = AstrTone.deepSpace,
     this.variant = AstrButtonVariant.filled,
     this.compact = false,
     this.onPressed,

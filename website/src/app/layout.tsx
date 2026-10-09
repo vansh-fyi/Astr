@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "katex/dist/katex.min.css";
 import "./styles.css";
+import "../components/app/app-ui.css";
 import { DocsShell } from "@/components/docs/docs-shell";
 
 const inter = Inter({

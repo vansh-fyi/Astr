@@ -43,7 +43,7 @@ export function CodeTabsClient({
             type="button"
             role="tab"
             id={`${id}-tab-${tab.key}`}
-            className="docs-tab"
+            className="docs-tab app-ui app-button is-glass is-sm"
             aria-selected={active === tab.key}
             aria-controls={`${id}-panel-${tab.key}`}
             tabIndex={active === tab.key ? 0 : -1}

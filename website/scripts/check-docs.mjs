@@ -156,6 +156,19 @@ function scaleChecks() {
   const usedStops = new Set([...tokensTs.matchAll(/"((?:space-grey|deep-space|aurora-green|aurora-pink|sodium-airglow|oxygen-airglow)-\d+)"/g)].map((m) => m[1]));
   for (const stopName of usedStops) assert(stylesCss.includes(`var(--color-${stopName})`), `styles.css must keep --color-${stopName} alive (tokens.ts uses it at run time)`);
   ok("app components: tokens only, no raw hex, rgb() or pixel values");
+  // The documentation interface is made of the documented components: its controls carry the button and tile
+  // classes, its cards share the card material, and the first-pass chart components are gone.
+  const docsCss = readFileSync(join(ROOT, "src/components/docs/docs.css"), "utf8");
+  for (const dead of [".docs-chip-button", ".docs-copy {", ".docs-tab {", ".docs-search-trigger {\n    display", ".docs-dialog-close {\n    padding"])
+    assert(!docsCss.includes(dead), `docs.css still styles ${dead.trim()} itself: use the app-button classes`);
+  assert(docsCss.includes("--docs-glass-block: var(--sheen), var(--fill)"), "docs.css cards must use the card material (--sheen over --fill)");
+  assert(!/\.viz-(?!flow)/.test(docsCss), "docs.css has rules for the removed first-pass chart components");
+  for (const [file, needles] of [["src/components/docs/code-block.tsx", ["app-button"]], ["src/components/docs/code-tabs-client.tsx", ["app-button"]], ["src/components/docs/docs-shell.tsx", ["app-button", "app-tile"]]])
+    for (const needle of needles) assert(readFileSync(join(ROOT, file), "utf8").includes(needle), `${file} must use the ${needle} component classes`);
+  for (const gone of ["sky-charts", "night-graphs", "cloud-visuals", "moon-visuals", "zone-visuals"])
+    assert(!existsSync(join(ROOT, `src/components/docs/viz/${gone}.tsx`)), `first-pass chart component ${gone}.tsx should be deleted`);
+  ok("docs interface: controls use the button and tile components, cards use the card material, old charts removed");
+
 
   ok("scale.css: Fibonacci spacing, radii, widths and breakpoints, phi-derived type, no colour; Dart mirrors match");
 }
