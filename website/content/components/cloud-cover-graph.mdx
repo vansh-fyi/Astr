@@ -1,0 +1,117 @@
+export const meta = {
+  title: "Cloud cover graph",
+  group: "Components",
+  description:
+    "The hourly forecast's cloud area with straight edges, a half-opacity stroke and the NOW marker.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "implementation", title: "Implementation" },
+    { id: "variants", title: "Variants" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery column>
+  <AppCloudCoverGraph />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`CustomPaint(
+  painter: CloudCoverGraphPainter(
+    data: hourly,
+    startTime: start,
+    endTime: end,
+    cloudColor: Colors.white24,
+    nowIndicatorColor: GraphTheme.nowIndicatorColor,
+  ),
+)`} />
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/cloud_cover_graph_painter.dart" symbols={["CloudCoverGraphPainter"]} />
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/graph_legend_item.dart" symbols={["GraphLegendItem"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppCloudCoverGraph data={[10, 12, 20, 35, 45, 30, 15]} />`} />
+
+<ReactExcerpt file="src/components/app/app-graphs.tsx" symbols={["AppCloudCoverGraph", "AppLegend"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-graph", ".app-graph svg", ".app-legend"]} />
+</CodeTabs>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants">
+
+<Variants wide items={[
+  { label: "Night forecast", preview: <AppCloudCoverGraph />, dart: "CloudCoverGraphPainter(data: hourly, startTime: start, endTime: end, cloudColor: Colors.white24, nowIndicatorColor: GraphTheme.nowIndicatorColor)" },
+  { label: "Overcast", preview: <AppCloudCoverGraph data={[80, 85, 90, 95, 92, 88, 90]} />, dart: "CloudCoverGraphPainter(data: overcastHourly, ...)" },
+  { label: "Clear", preview: <AppCloudCoverGraph data={[3, 2, 0, 0, 1, 2, 4]} />, dart: "CloudCoverGraphPainter(data: clearHourly, ...)" }
+]} />
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "data",
+    "data",
+    "number[] / List<HourlyForecast>",
+    "sample night",
+    "Cloud cover percent per hour."
+  ],
+  [
+    "color",
+    "cloudColor",
+    "colour",
+    "white at 24%",
+    "Fill and stroke."
+  ],
+  [
+    "height",
+    "parent height",
+    "number",
+    "120",
+    "Pixels."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens">
+
+<DocTable
+  head={["Token", "CSS", "Dart", "Value"]}
+  rows={[
+  [
+    "Fill",
+    "white at 24%",
+    "Colors.white24",
+    "24%"
+  ],
+  [
+    "Stroke",
+    "fill colour at 50%, 2 px",
+    "cloudColor.withValues(alpha: 0.5)",
+    "2"
+  ],
+  [
+    "Now",
+    "#F97316",
+    "GraphTheme.nowIndicatorColor",
+    "orange"
+  ]
+]}
+/>
+
+</DocSection>

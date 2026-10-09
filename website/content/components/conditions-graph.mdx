@@ -1,0 +1,124 @@
+export const meta = {
+  title: "Conditions graph",
+  group: "Components",
+  description:
+    "Cloud cover, the moon's altitude, the moon rise marker, the prime view window and the current time on one night.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "implementation", title: "Implementation" },
+    { id: "variants", title: "Variants" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery column>
+  <AppConditionsGraph />
+  <AppLegend items={[{ label: "Cloud cover", color: "rgba(255,255,255,0.3)" }, { label: "Moon altitude", color: "#6366f1" }, { label: "Prime view", color: "#10b981" }, { label: "Now", color: "#fb923c" }]} />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`ConditionsGraph(
+  cloudCoverData: hourly,
+  moonCurve: curve,
+  moonRiseTime: rise,
+  primeViewWindow: window,
+  startTime: start,
+  endTime: end,
+)`} />
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/conditions_graph.dart" symbols={["ConditionsGraph"]} />
+
+<SourceExcerpt file="lib/features/dashboard/presentation/theme/graph_theme.dart" symbols={["GraphTheme"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppConditionsGraph />
+<AppConditionsGraph layers={{ cloud: true, moon: false, prime: false }} />`} />
+
+<ReactExcerpt file="src/components/app/app-graphs.tsx" symbols={["smooth", "AppConditionsGraph"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-graph", ".app-graph svg", ".app-legend"]} />
+</CodeTabs>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants">
+
+<Variants wide items={[
+  { label: "All layers", preview: <AppConditionsGraph />, dart: "ConditionsGraph(cloudCoverData: hourly, moonCurve: curve, moonRiseTime: rise, primeViewWindow: window, startTime: start, endTime: end)" },
+  { label: "Cloud only", preview: <AppConditionsGraph layers={{ moon: false, moonRise: false, prime: false }} />, dart: "ConditionsGraph(cloudCoverData: hourly, startTime: start, endTime: end)" },
+  { label: "Moon only", preview: <AppConditionsGraph layers={{ cloud: false, prime: false }} />, dart: "ConditionsGraph(moonCurve: curve, moonRiseTime: rise, startTime: start, endTime: end)" },
+  { label: "Without now", note: "Outside the night window there is no NOW marker.", preview: <AppConditionsGraph layers={{ now: false }} />, dart: "ConditionsGraph(/* now outside [startTime, endTime] */)" }
+]} />
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "layers",
+    "which of cloudCoverData, moonCurve, moonRiseTime, primeViewWindow are passed",
+    "object",
+    "all on",
+    "Each layer draws only when its data is present."
+  ],
+  [
+    "height",
+    "parent height",
+    "number",
+    "200",
+    "Includes 30 px for the time labels."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens">
+
+<DocTable
+  head={["Token", "CSS", "Dart", "Value"]}
+  rows={[
+  [
+    "Cloud",
+    "white 25% to 5% gradient, 30% stroke",
+    "Colors.white",
+    "white"
+  ],
+  [
+    "Moon",
+    "#1E1B4B at 50%, #6366F1 stroke",
+    "GraphTheme.moonFillColor, moonStrokeColor",
+    "indigo"
+  ],
+  [
+    "Prime view",
+    "#10B981 band, #6EE7B7 label",
+    "GraphTheme.primeViewColor",
+    "emerald"
+  ],
+  [
+    "Now",
+    "#F97316 line, #FB923C label",
+    "GraphTheme.nowIndicatorColor",
+    "orange"
+  ],
+  [
+    "Grid",
+    "white at 5%",
+    "Colors.white.withValues(alpha: 0.05)",
+    "5%"
+  ]
+]}
+/>
+
+</DocSection>

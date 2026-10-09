@@ -1,12 +1,11 @@
 import "./app-ui.css";
 
-export type GlyphName = "moon" | "cloud" | "star" | "graph" | "search" | "compass" | "layers" | "telescope";
+export type GlyphName = "moon" | "cloud" | "graph" | "search" | "compass" | "layers" | "telescope";
 
 /** Filled glyphs on a 24 grid, solid shapes so the glow reads like the reference. */
 const GLYPHS: Record<GlyphName, string> = {
   moon: "M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z",
   cloud: "M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1-.5 8.5H7Z",
-  star: "m12 2.5 2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8L12 2.5Z",
   graph: "M4 20V4h2v14h14v2H4Zm4-4V10h3v6H8Zm5 0V6h3v10h-3Zm5 0v-4h2v4h-2Z",
   search: "M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.3 4.3-1.3 1.3-4.3-4.3A7.5 7.5 0 1 1 10.5 3Z",
   compass: "M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm3.8 6.2-5.6 2-2 5.6 5.6-2 2-5.6Z",
@@ -49,7 +48,7 @@ export function AppIconTile({
     <button
       type="button"
       className={`app-ui app-tile${size ? ` is-${size}` : ""}`}
-      style={{ ["--tile" as string]: TONES[tone] }}
+      style={{ ["--tone" as string]: TONES[tone] }}
       aria-label={label}
       aria-pressed={pressed}
       disabled={disabled}
@@ -59,20 +58,27 @@ export function AppIconTile({
   );
 }
 
-/** Pill button on the same glass, for actions that carry a word. */
+export type ButtonVariant = "filled" | "glass" | "outline";
+
+/** Button. Filled is the default; glass and outline are quieter. */
 export function AppButton({
   glyph,
   tone = "blue",
+  variant = "filled",
+  size,
   disabled,
   children,
 }: {
   glyph?: GlyphName;
   tone?: TileTone;
+  variant?: ButtonVariant;
+  size?: "sm" | "lg";
   disabled?: boolean;
   children: string;
 }) {
+  const cls = ["app-ui app-button", variant !== "filled" && `is-${variant}`, size && `is-${size}`].filter(Boolean).join(" ");
   return (
-    <button type="button" className="app-ui app-button" style={{ ["--tile" as string]: TONES[tone] }} disabled={disabled}>
+    <button type="button" className={cls} style={{ ["--tone" as string]: TONES[tone] }} disabled={disabled}>
       {glyph && <Glyph name={glyph} />}
       {children}
     </button>

@@ -15,8 +15,8 @@ const GLOBALS = join(ROOT, "src/app/globals.css");
 const SCALE = join(ROOT, "src/app/scale.css");
 const EXPECTED_SHA =
   "3e3d60003ee84a7bface6a8ff088f03c592c141c875c80eb0b8cd79e2231ae1c";
-const PAGES = ["/", "/colour-stops", "/opacity-ladder", "/gradients", "/spacing", "/typography", "/layout", "/components", "/sky-science", "/zone-scale", "/light-pollution", "/sky-brightness", "/sky-states", "/weather-clouds", "/planets-sky", "/graphs", "/offline"];
-const LABELS = ["Introduction", "Colour stops", "Opacity ladder", "Gradients", "Spacing", "Typography", "Layout and size", "App components", "Overview", "Zone scale", "Light pollution data", "Moonlight and sky brightness", "Sky states", "Weather and clouds", "Planets and the sky", "Graphs", "Offline and sync"];
+const PAGES = ["/", "/colour-stops", "/opacity-ladder", "/gradients", "/spacing", "/typography", "/layout", "/components", "/components/icon-tile", "/components/button", "/components/cloud-bar", "/components/visibility-card", "/components/moon-card", "/components/conditions-card", "/components/sky-state", "/components/conditions-graph", "/components/cloud-cover-graph", "/sky-science", "/zone-scale", "/light-pollution", "/sky-brightness", "/sky-states", "/weather-clouds", "/planets-sky", "/graphs", "/offline"];
+const LABELS = ["Introduction", "Colour stops", "Opacity ladder", "Gradients", "Spacing", "Typography", "Layout and size", "Overview", "Icon tile", "Button", "Cloud bar", "Visibility card", "Moon card", "Conditions card", "Sky state background", "Conditions graph", "Cloud cover graph", "Overview", "Zone scale", "Light pollution data", "Moonlight and sky brightness", "Sky states", "Weather and clouds", "Planets and the sky", "Graphs", "Offline and sync"];
 const PHI = (1 + Math.sqrt(5)) / 2;
 
 function fail(message) {
@@ -182,7 +182,7 @@ function staticChecks() {
 
   scaleChecks();
 
-  for (const name of ["introduction", "colour-stops", "opacity-ladder", "gradients", "spacing", "typography", "layout", "sky-science", "zone-scale", "light-pollution", "sky-brightness", "sky-states", "weather-clouds", "planets-sky", "graphs", "offline"]) {
+  for (const name of ["introduction", "colour-stops", "opacity-ladder", "gradients", "spacing", "typography", "layout", "components", "sky-science", "zone-scale", "light-pollution", "sky-brightness", "sky-states", "weather-clouds", "planets-sky", "graphs", "offline"]) {
     const src = readFileSync(join(ROOT, `content/${name}.mdx`), "utf8");
     assert(src.includes("export const meta"), `${name}.mdx has no meta export`);
     const metaBlock = src.slice(src.indexOf("export const meta"), src.indexOf("};") + 2);

@@ -33,6 +33,7 @@ import { CloudBar, CloudSkyTiles } from "@/components/docs/viz/cloud-visuals";
 import { AppCloudBar, AppConditionsCard, AppMoonCard, AppSkyState, AppStage, AppVisibilityCard } from "@/components/app/app-widgets";
 import { AppCloudCoverGraph, AppConditionsGraph, AppLegend } from "@/components/app/app-graphs";
 import { AppButton, AppIconTile } from "@/components/app/app-icons";
+import { CssExcerpt, DartExcerpt, ReactExcerpt } from "@/components/app/source";
 import { Gallery, Variants } from "@/components/app/showcase";
 import { Flow } from "@/components/docs/viz/flow";
 import { MoonPhaseIcon, MoonPhaseStrip } from "@/components/docs/viz/moon-visuals";
@@ -94,6 +95,9 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     AppConditionsGraph,
     AppLegend,
     Gallery,
+    CssExcerpt,
+    DartExcerpt,
+    ReactExcerpt,
     AppButton,
     AppIconTile,
     Variants,

@@ -1,0 +1,129 @@
+export const meta = {
+  title: "Cloud bar",
+  group: "Components",
+  description:
+    "Cloud cover as a label, a percentage and an eight pixel track whose glowing fill animates to the new value over a second.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "implementation", title: "Implementation" },
+    { id: "variants", title: "Variants" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery column>
+  <AppCloudBar value={45} />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`const CloudBar(cloudCoverPercentage: 45)
+const CloudBar(cloudCoverPercentage: 0, isLoading: true)`} />
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/cloud_bar.dart" symbols={["CloudBar", "_CloudBarState"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppCloudBar value={45} />
+<AppCloudBar value={0} state="loading" />`} />
+
+<ReactExcerpt file="src/components/app/app-widgets.tsx" symbols={["AppCloudBar"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-cloudbar", ".app-cloudbar-head", ".app-cloudbar-track", ".app-cloudbar-fill", ".app-spinner"]} />
+</CodeTabs>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants">
+
+<Variants items={[
+  { label: "Clear", note: "Little cloud: a short fill.", preview: <AppCloudBar value={12} />, dart: "CloudBar(cloudCoverPercentage: 12)" },
+  { label: "Partly cloudy", preview: <AppCloudBar value={45} />, dart: "CloudBar(cloudCoverPercentage: 45)" },
+  { label: "Overcast", preview: <AppCloudBar value={100} />, dart: "CloudBar(cloudCoverPercentage: 100)" },
+  { label: "Loading", note: "A spinner replaces the percentage and the track is empty.", preview: <AppCloudBar value={0} state="loading" />, dart: "CloudBar(cloudCoverPercentage: 0, isLoading: true)" },
+  { label: "Error", note: "The message replaces the track.", preview: <AppCloudBar value={0} state="error" message="Weather unavailable" />, dart: "CloudBar(cloudCoverPercentage: 0, errorMessage: 'Weather unavailable')" }
+]} />
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "value",
+    "cloudCoverPercentage",
+    "number / double",
+    "required",
+    "0 to 100."
+  ],
+  [
+    "state",
+    "isLoading, errorMessage",
+    "data, loading, error",
+    "data",
+    "Which of the three bodies to show."
+  ],
+  [
+    "message",
+    "errorMessage",
+    "string",
+    "none",
+    "Shown in the error state."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens">
+
+<DocTable
+  head={["Token", "CSS", "Dart", "Value"]}
+  rows={[
+  [
+    "Surface",
+    "rgb(12 15 17 / 0.8)",
+    "AppColors.surfaceGlass",
+    "#CC0C0F11"
+  ],
+  [
+    "Border",
+    "#0C1E33",
+    "AppColors.borderSubtle",
+    "#0C1E33"
+  ],
+  [
+    "Track",
+    "rgb(60 73 87 / 0.3)",
+    "AppColors.cloudTrack",
+    "#4D3C4957"
+  ],
+  [
+    "Fill",
+    "#3A96FF with glow",
+    "AppColors.accentSecondary + glowShadow",
+    "#3A96FF"
+  ],
+  [
+    "Track height",
+    "8",
+    "AppSpacing.kCloudTrackHeight",
+    "8"
+  ],
+  [
+    "Radius",
+    "12",
+    "AppSpacing.kInnerRadius",
+    "12"
+  ]
+]}
+/>
+
+</DocSection>

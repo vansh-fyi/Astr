@@ -1,0 +1,135 @@
+export const meta = {
+  title: "Visibility card",
+  group: "Components",
+  description:
+    "The Astr zone as a pill, a sky label, the sky brightness in magnitudes per square arcsecond and five rating bars. Zone 1 lights five bars and zone 9 lights one.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "implementation", title: "Implementation" },
+    { id: "variants", title: "Variants" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery>
+  <AppVisibilityCard zone={1} mpsas={22.0} />
+  <AppVisibilityCard zone={2} mpsas={21.85} />
+  <AppVisibilityCard zone={3} mpsas={21.6} />
+  <AppVisibilityCard zone={4} mpsas={21.3} />
+  <AppVisibilityCard zone={5} mpsas={20.9} />
+  <AppVisibilityCard zone={6} mpsas={20.4} />
+  <AppVisibilityCard zone={7} mpsas={19.8} />
+  <AppVisibilityCard zone={8} mpsas={19.0} />
+  <AppVisibilityCard zone={9} mpsas={18.2} />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`VisibilityMiniCard(
+  lightPollution: LightPollution(zone: 5, mpsas: 20.9),
+)`} />
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/visibility_mini_card.dart" symbols={["VisibilityMiniCard"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppVisibilityCard zone={5} mpsas={20.9} />`} />
+
+<ReactExcerpt file="src/components/app/app-widgets.tsx" symbols={["skyLabel", "activeBars", "AppVisibilityCard"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-card", ".app-card.is-mini", ".app-zone-pill", ".app-rating", ".app-rating i", ".app-rating i.on"]} />
+</CodeTabs>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants">
+
+<Variants items={[
+  { label: "Dark sky", note: "Zones 1 and 2: five bars.", preview: <AppVisibilityCard zone={1} mpsas={22.0} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 1, mpsas: 22.0))" },
+  { label: "Rural", note: "Zones 3 and 4: four bars.", preview: <AppVisibilityCard zone={3} mpsas={21.6} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 3, mpsas: 21.6))" },
+  { label: "Suburban", note: "Zones 5 and 6: three bars. The label is wider than the card at 28 px, as it is in the app.", preview: <AppVisibilityCard zone={5} mpsas={20.9} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 5, mpsas: 20.9))" },
+  { label: "Urban", note: "Zones 7 to 9: two bars, then one.", preview: <AppVisibilityCard zone={9} mpsas={18.2} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 9, mpsas: 18.2))" }
+]} />
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "zone",
+    "lightPollution.visibilityIndex",
+    "1 to 9",
+    "required",
+    "The Astr zone."
+  ],
+  [
+    "mpsas",
+    "lightPollution.mpsas",
+    "number / double",
+    "required",
+    "Sky brightness, mag/arcsec\u00b2."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens">
+
+<DocTable
+  head={["Token", "CSS", "Dart", "Value"]}
+  rows={[
+  [
+    "Size",
+    "164 by 154",
+    "kMiniCardWidth, kMiniCardHeight",
+    "164, 154"
+  ],
+  [
+    "Fill",
+    "rgb(12 15 17 / 0.5), blur 2 px",
+    "AppColors.surfaceOverlay",
+    "#800C0F11"
+  ],
+  [
+    "Border",
+    "#1B3766",
+    "AppColors.borderPrimary",
+    "#1B3766"
+  ],
+  [
+    "Pill fill",
+    "rgb(58 150 255 / 0.2)",
+    "AppColors.zonePillFill",
+    "#333A96FF"
+  ],
+  [
+    "Pill text",
+    "#B0D5FF",
+    "AppColors.zonePillText",
+    "#B0D5FF"
+  ],
+  [
+    "Lit bar",
+    "#3A96FF with glow",
+    "AppColors.ratingBarActive",
+    "#3A96FF"
+  ],
+  [
+    "Unlit bar",
+    "rgb(60 73 87 / 0.3)",
+    "AppColors.ratingBarInactive",
+    "#4D3C4957"
+  ]
+]}
+/>
+
+</DocSection>

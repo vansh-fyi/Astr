@@ -1,0 +1,108 @@
+export const meta = {
+  title: "Sky state background",
+  group: "Components",
+  description:
+    "Each of the six sky states has an illustrated sky drawn at half opacity under a blue wash.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "implementation", title: "Implementation" },
+    { id: "variants", title: "Variants" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery>
+  <AppSkyState state="milkyWayVisible" />
+  <AppSkyState state="starrySkies" />
+  <AppSkyState state="planetsVisible" />
+  <AppSkyState state="fewStars" />
+  <AppSkyState state="cloudy" />
+  <AppSkyState state="tooMuchLight" />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`SkyStateBackground(skyState: SkyState.starrySkies)`} />
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/sky_state_background.dart" symbols={["SkyStateBackground", "SkyStateAssets"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppSkyState state="starrySkies" note="Clear and dark" />`} />
+
+<ReactExcerpt file="src/components/app/app-widgets.tsx" symbols={["AppSkyState"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-state", ".app-state img", ".app-state::after", ".app-state > div"]} />
+</CodeTabs>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants">
+
+<Variants items={[
+  { label: "Milky Way visible", preview: <AppSkyState state="milkyWayVisible" />, dart: "SkyStateBackground(skyState: SkyState.milkyWayVisible)" },
+  { label: "Starry skies", preview: <AppSkyState state="starrySkies" />, dart: "SkyStateBackground(skyState: SkyState.starrySkies)" },
+  { label: "Planets visible", preview: <AppSkyState state="planetsVisible" />, dart: "SkyStateBackground(skyState: SkyState.planetsVisible)" },
+  { label: "Few stars", preview: <AppSkyState state="fewStars" />, dart: "SkyStateBackground(skyState: SkyState.fewStars)" },
+  { label: "Cloudy", preview: <AppSkyState state="cloudy" />, dart: "SkyStateBackground(skyState: SkyState.cloudy)" },
+  { label: "Too much light", preview: <AppSkyState state="tooMuchLight" />, dart: "SkyStateBackground(skyState: SkyState.tooMuchLight)" }
+]} />
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "state",
+    "skyState",
+    "SkyStateKey / SkyState",
+    "required",
+    "One of six."
+  ],
+  [
+    "note",
+    "none",
+    "string",
+    "none",
+    "Optional caption on the web tile."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens">
+
+<DocTable
+  head={["Token", "CSS", "Dart", "Value"]}
+  rows={[
+  [
+    "Image opacity",
+    "0.5",
+    "opacity: 0.5",
+    "50%"
+  ],
+  [
+    "Wash",
+    "rgb(68 138 255 / 0.2) to clear, top to bottom",
+    "Color(0x33448AFF)",
+    "20%"
+  ],
+  [
+    "Base",
+    "#0C0F11",
+    "AppColors.surface",
+    "#0C0F11"
+  ]
+]}
+/>
+
+</DocSection>
