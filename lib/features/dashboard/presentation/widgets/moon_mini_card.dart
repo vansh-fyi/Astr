@@ -67,7 +67,7 @@ class MoonMiniCard extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    top: 36,
+                    top: 32,
                     left: 33,
                     width: 98,
                     height: 92,
