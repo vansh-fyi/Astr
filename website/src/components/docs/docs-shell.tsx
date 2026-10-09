@@ -90,6 +90,10 @@ export function DocsShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="docs-root">
+      <div className="docs-glow" aria-hidden="true">
+        <span className="gradient-moffat [--grad-color:var(--color-deep-space-300)]" />
+        <span className="gradient-moffat [--grad-color:var(--color-deep-space-200)]" />
+      </div>
       <a className="docs-skip" href="#documentation-content">
         Skip to content
       </a>
