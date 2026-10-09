@@ -71,16 +71,21 @@ class VisibilityMiniCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Sky label (e.g. "Rural Sky"): wraps to a second line instead of overflowing.
+                  // Sky label (e.g. "Rural Sky"): 20 px so the longest, "Suburban Sky",
+                  // fits on one line; scaled down further if a font is wider.
                   Expanded(
-                    child: Text(
-                      _getSkyLabel(astrZone),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.title.copyWith(
-                        fontSize: 28,
-                        height: 1.1,
-                        letterSpacing: -0.5,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          _getSkyLabel(astrZone),
+                          maxLines: 1,
+                          style: AppTypography.title.copyWith(
+                            fontSize: 20,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
                       ),
                     ),
                   ),
