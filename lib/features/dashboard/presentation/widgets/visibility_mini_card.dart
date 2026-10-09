@@ -75,7 +75,6 @@ class VisibilityMiniCard extends StatelessWidget {
                   // fits on one line; scaled down further if a font is wider.
                   Expanded(
                     child: Align(
-                      alignment: Alignment.centerLeft,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
