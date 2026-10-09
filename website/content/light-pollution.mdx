@@ -22,17 +22,14 @@ export const meta = {
 
 A satellite looks down and measures light that escapes upwards. A person on the ground looks up and sees light scattered through the air from cities tens of kilometres away. The pipeline turns the first into an estimate of the second, one cell at a time.
 
-<DocTable
-  head={["Step", "What happens", "Script"]}
-  rows={[
-    ["1. Read", "The annual night-lights image is read in strips of 200 rows. Each pixel above a small floor becomes an H3 cell, keeping the maximum radiance per cell in a disk-backed accumulator.", "`generate_zones_vnl.py`"],
-    ["2. Downsample", "The image is block-averaged by a factor of 12 into a coarse grid of about 5.5 km pixels.", "`apply_skyglow.py`"],
-    ["3. Scatter", "A scatter kernel is convolved with the coarse grid (FFT) to estimate skyglow from every lit pixel within 80 km.", "`apply_skyglow.py`"],
-    ["4. Rescan", "The full-resolution image is read again. Each pixel gets its direct radiance plus the scatter from the coarse grid. Cells at or above 0.25 nW/cm²/sr are kept.", "`apply_skyglow.py`"],
-    ["5. Write", "Cells are sorted by H3 index and written to a binary `zones.db` with a zone, the radiance and a sky brightness per cell.", "`apply_skyglow.py`"],
-    ["6. Publish", "The file is split into SQL parts for the D1 database and uploaded to R2 for download.", "`export_zones_to_sql.py`, `upload_to_r2.py`"],
-  ]}
-/>
+<Flow steps={[
+  { title: "Read", text: <>The annual night-lights image is read in strips of 200 rows. Each pixel above a small floor becomes an H3 cell, keeping the maximum radiance per cell in a disk-backed accumulator. <code>generate_zones_vnl.py</code></> },
+  { title: "Downsample", text: <>The image is block-averaged by a factor of 12 into a coarse grid of about 5.5 km pixels. <code>apply_skyglow.py</code></> },
+  { title: "Scatter", text: <>A scatter kernel is convolved with the coarse grid (FFT) to estimate skyglow from every lit pixel within 80 km. <code>apply_skyglow.py</code></> },
+  { title: "Rescan", text: <>The full-resolution image is read again. Each pixel gets its direct radiance plus the scatter from the coarse grid. Cells at or above 0.25 nW/cm²/sr are kept. <code>apply_skyglow.py</code></> },
+  { title: "Write", text: <>Cells are sorted by H3 index and written to a binary <code>zones.db</code> with a zone, the radiance and a sky brightness per cell. <code>apply_skyglow.py</code></> },
+  { title: "Publish", text: <>The file is split into SQL parts for the D1 database and uploaded to R2 for download. <code>export_zones_to_sql.py</code>, <code>upload_to_r2.py</code></>, outcome: true },
+]} />
 
 Cells below the floor are not stored. A location that is not in the file is a dark site and counts as zone 1.
 
@@ -55,6 +52,8 @@ $$ k(d) = \frac{F\,e^{-d/L}}{1 + (d/d_0)^{\beta}}, \qquad \text{skyglow} = \sum_
 <KernelParameters />
 
 Production data was regenerated with $F = 0.06$ instead of the script's default. That run reset the accumulator and passed `--fraction 0.06` on the command line, so the script's own default still reads 0.12 and a plain run does not reproduce the data. The earlier documentation also listed a table of distances that did not follow from the formula. This is the table the formula gives for the production fraction:
+
+<KernelFalloff />
 
 <KernelTable fraction={0.06} />
 

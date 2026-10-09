@@ -26,6 +26,19 @@ $$ r = \frac{L_{\text{art}}}{L_{\text{nat}}}, \qquad L_{\text{nat}} = 174\ \mu\t
 
 The value 174 µcd/m² for a natural sky is from Falchi et al. (2016). Zero means a natural sky, and one means artificial light equals the natural background.
 
+<DocTable
+  head={["Symbol", "Meaning", "Unit"]}
+  rows={[
+    ["$r$", "ratio of artificial to natural zenith brightness", "none"],
+    ["$L_{\\text{art}}$", "zenith luminance added by artificial light", "µcd/m²"],
+    ["$L_{\\text{nat}}$", "natural zenith luminance, 174", "µcd/m²"],
+    ["$R$", "radiance seen by the satellite, plus modelled skyglow", "nW/cm²/sr"],
+    ["$\\text{SQM}$", "sky brightness as a sky meter reads it (a larger number is darker)", "mag/arcsec²"],
+    ["$\\text{NELM}$", "naked-eye limiting magnitude, the faintest star you can see", "magnitude"],
+    ["$z$", "the zone, 1 to 9", "none"],
+  ]}
+/>
+
 <VectorStatus />
 
 </DocSection>
@@ -37,6 +50,10 @@ Zones are a doubling ladder that starts at $r = 0.32$. Each edge is twice the on
 $$ \text{zone}(r) = \begin{cases} 1 & r < 0.32 \\ 2 + \lfloor \log_2 (r / 0.32) \rfloor & 0.32 \le r < 40.96 \\ 9 & r \ge 40.96 \end{cases} $$
 
 Implementations compare against the list of edges instead of computing a logarithm, so a value on an edge cannot land on the wrong side through rounding.
+
+<ZoneSkies />
+
+<LadderAxis />
 
 <ZoneLadderTable />
 
@@ -77,11 +94,11 @@ NELM is the naked-eye limiting magnitude, an empirical fit between sky-meter rea
 <DocTable
   head={["Input", "Result"]}
   rows={[
-    ["`r < 0`", "Counts as 0, zone 1"],
-    ["`r` is NaN", "Error (`ValueError` in Python, `ArgumentError` in Dart)"],
-    ["`r` is infinite", "Zone 9"],
+    ["$r < 0$", "Counts as 0, zone 1"],
+    ["$r$ is not a number", "Error (`ValueError` in Python, `ArgumentError` in Dart)"],
+    ["$r$ is infinite", "Zone 9"],
     ["A cell is absent from `zones.db`", "Implicit zone 1, sky brightness 22.0"],
-    ["`SQM` at or above 22.0", "`r = 0`"],
+    ["$\\text{SQM} \\ge 22.0$", "$r = 0$"],
   ]}
 />
 
@@ -92,6 +109,8 @@ NELM is the naked-eye limiting magnitude, an empirical fit between sky-meter rea
 The current `zones.db` was built from radiance $R$ in nW/cm²/sr (VIIRS light plus modelled skyglow, see [Light pollution data](/light-pollution)) with a fit and thresholds. This is the **legacy chain**:
 
 $$ \text{SQM} = 22.0 - 1.7\log_{10}(1 + 2R) \quad\Rightarrow\quad r = (1 + 2R)^{0.68} - 1 $$
+
+<LadderAxis legacy />
 
 <LegacyBridgeTable />
 
@@ -115,7 +134,7 @@ Only the 25-city validation set's Anchorage changes zone (8 to 9, at a radiance 
   head={["Today", "Holds", "Should be"]}
   rows={[
     ["JSON `bortle`", "the Astr zone", "`zone`"],
-    ["JSON `ratio` and `ZoneData.ratio`", "the radiance in nW/cm²/sr", "`radiance` (and `r` becomes the ratio)"],
+    ["JSON `ratio` and `ZoneData.ratio`", "the radiance $R$ in nW/cm²/sr", "`radiance`, so that the name ratio can mean $r$"],
     ["`bortleClass` in older code", "the Astr zone", "`astrZone` (already renamed in the app model)"],
   ]}
 />

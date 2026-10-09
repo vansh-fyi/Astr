@@ -20,6 +20,19 @@ export const meta = {
 
 <DocSection id="overview" title="Overview">
 
+<DocTable
+  head={["Symbol", "Meaning", "Unit"]}
+  rows={[
+    ["$c$", "cloud cover as a fraction of the sky, 0 to 1", "none"],
+    ["$r$", "artificial brightness over natural brightness at the place", "none"],
+    ["$b_{\\text{moon}}$", "scattered moonlight over natural brightness", "none"],
+    ["$r_{\\text{eff}}$", "$r + b_{\\text{moon}}$, the artificial and moon light together", "none"],
+    ["$\\text{NELM}_{\\text{eff}}$", "limiting magnitude with the moon included", "magnitude"],
+    ["$u$", "utility of an hour: expected visible stars relative to a natural clear sky", "none"],
+    ["$\\Delta_{\\text{light}},\\ \\Delta_{\\text{moon}}$", "limiting magnitude lost to light pollution, and to the moon", "magnitude"],
+  ]}
+/>
+
 The verdict comes from four ingredients: the **place** (how much artificial light there is, the zone ratio $r$), the **sky** (cloud cover and air clarity from a forecast), the **moon** (scattered moonlight, see [Moonlight and sky brightness](/sky-brightness)) and the **Sun** (whether it is dark at all). It is one of six states, plus a plain statement of what limits the sky: cloud, moon, light pollution or nothing.
 
 <VectorStatus />
@@ -32,11 +45,11 @@ The verdict comes from four ingredients: the **place** (how much artificial ligh
   head={["Input", "Source", "Used for"]}
   rows={[
     ["Sun altitude", "ephemeris", "dark: at or below −18°"],
-    ["Moon altitude, azimuth, illuminated fraction", "ephemeris", "moonlight `b_moon`"],
-    ["Total cloud cover", "forecast (Open-Meteo `cloud_cover`)", "cloud fraction `c`, percent over 100"],
-    ["Aerosol optical depth at 550 nm", "forecast (CAMS through Open-Meteo Air Quality), or none", "extinction `k_V`"],
-    ["Elevation", "forecast response or an elevation model", "extinction `k_V`"],
-    ["`r`", "zone data: the ratio from the cell's sky brightness, or `r` directly after calibration", "artificial light"],
+    ["Moon altitude, azimuth, illuminated fraction", "ephemeris", "moonlight $b_{\\text{moon}}$"],
+    ["Total cloud cover", "forecast (Open-Meteo `cloud_cover`)", "cloud fraction $c$, percent over 100"],
+    ["Aerosol optical depth at 550 nm", "forecast (CAMS through Open-Meteo Air Quality), or none", "extinction $k_V$"],
+    ["Elevation", "forecast response or an elevation model", "extinction $k_V$"],
+    ["Artificial light", "zone data: the ratio $r$ from the cell's sky brightness, or $r$ directly after calibration", "$r$"],
   ]}
 />
 
@@ -65,7 +78,7 @@ The state is a function of the cloud fraction $c$, the artificial ratio $r$ and 
 <DocTable
   head={["Order", "Condition", "State"]}
   rows={[
-    ["1", "`c > 0.70`", "Cloudy"],
+    ["1", "$c > 0.70$", "Cloudy"],
     ["2", "effective zone 9 and the artificial zone is also 9", "Too much light"],
     ["3", "effective zone 8, or zone 9 caused only by the moon", "Few stars"],
     ["4", "effective zone 6 or 7", "Planets visible"],
@@ -75,6 +88,8 @@ The state is a function of the cloud fraction $c$, the artificial ratio $r$ and 
 />
 
 **Cloud caps.** Milky Way needs $c \le 0.30$, otherwise it becomes Starry sky. Starry sky needs $c \le 0.50$, otherwise it becomes Planets visible. The cuts 0.30, 0.50 and 0.70 are the values the app already uses (proposals to tune).
+
+<CloudBar value={42} cuts />
 
 **The moon cannot create "Too much light".** That state describes light pollution, so a moon-driven worst case is Few stars.
 
@@ -89,18 +104,24 @@ The state is a function of the cloud fraction $c$, the artificial ratio $r$ and 
 <DocTable
   head={["Primary cause", "When"]}
   rows={[
-    ["`cloud`", "the state is Cloudy, or cloud capped the state"],
-    ["`moon`", "otherwise, the moon costs at least 0.25 magnitudes of limiting magnitude and more than light pollution does"],
-    ["`light`", "otherwise, light pollution costs at least 0.25 magnitudes against a natural sky"],
-    ["`none`", "otherwise"],
+    ["**Cloud**", "the state is Cloudy, or cloud capped the state"],
+    ["**The moon**", "otherwise, $\\Delta_{\\text{moon}} \\ge 0.25$ and $\\Delta_{\\text{moon}} > \\Delta_{\\text{light}}$"],
+    ["**Light pollution**", "otherwise, $\\Delta_{\\text{light}} \\ge 0.25$"],
+    ["**Nothing significant**", "otherwise"],
   ]}
 />
 
-It also returns `light_loss` and `moon_loss`, the limiting-magnitude losses in magnitudes. The 0.25 cut is a proposal.
+The two losses are measured in magnitudes of limiting magnitude:
+
+$$ \Delta_{\text{light}} = \text{NELM}_{\text{natural}} - \text{NELM}(r) \qquad \Delta_{\text{moon}} = \text{NELM}(r) - \text{NELM}(r + b_{\text{moon}}) $$
+
+The 0.25 cut is a proposal.
 
 </DocSection>
 
 <DocSection id="night" title="The night, the hero and the chip">
+
+<NightStrip />
 
 - **Night state.** The state of the best window, computed from the window's mean cloud and mean $r_{\text{eff}}$, so a moon-up hour counts in luminance and not in magnitudes. With no window, the state comes from the dark hours, so a cloudy night or a city sky still gets an honest label. With no dark hour at all (polar summer) there is no verdict.
 - **Hero.** Shows the night state, and the date arrows move the night.
@@ -129,7 +150,7 @@ Today's home screen reads a single **current-hour** cloud value for today, and a
   head={["Today", "Becomes"]}
   rows={[
     ["`QualitativeConditionService.evaluate` (40/35/25 score, Bortle cut-offs)", "`skyState`"],
-    ["`DarknessCalculator.calculateDarkness` (`4 × phase × sin(altitude)`)", "`sqmEffective` with `moonRatio`"],
+    ["`DarknessCalculator.calculateDarkness` ($4\\,i\\sin a$ for a moon at altitude $a$)", "`sqmEffective` with `moonRatio`"],
     ["`PrimeViewCalculator` (cloud 0.7, moon 0.3, lowest average)", "`bestWindow`"],
     ["`BortleMpsasConverter`", "removed"],
     ["`QualityCalculator` and `StargazingLogic` (unused)", "removed"],

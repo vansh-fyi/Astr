@@ -36,10 +36,12 @@ export const meta = {
 
 A zone lookup tries four things in order:
 
-1. The Hive cache, keyed `zone_<H3 cell in hex>`. A hit is used immediately.
-2. The Cloudflare Worker, with a 10-second timeout. A hit is cached.
-3. The expired cache entry, if the network failed.
-4. The dark-sky default (zone 1, no artificial light, sky brightness 22.0) if the cell is nowhere, because the database holds only lit cells.
+<Flow steps={[
+  { title: "The Hive cache", text: <>Keyed <code>zone_&lt;H3 cell in hex&gt;</code>. A hit is used immediately.</> },
+  { title: "The Cloudflare Worker", text: <>With a 10-second timeout. A hit is cached.</> },
+  { title: "The expired cache entry", text: <>Used if the network failed.</> },
+  { title: "The dark-sky default", text: <>Zone 1, no artificial light, sky brightness 22.0, if the cell is nowhere, because the database holds only lit cells.</>, outcome: true },
+]} />
 
 Zone data is static satellite data, so entries are not refreshed like weather. They expire after 365 days so a new year's data can replace them.
 

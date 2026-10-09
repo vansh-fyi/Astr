@@ -1,3 +1,4 @@
+import katex from "katex";
 import { readSource } from "@/lib/source";
 import { assertAstrVectors } from "@/lib/sky-vectors";
 import * as zone from "@/lib/astr-zone";
@@ -275,37 +276,39 @@ const KERNEL_SOURCE = "scripts/apply_skyglow.py";
 
 /** Parameters of the skyglow kernel, read from the pipeline source so the page cannot disagree with it. */
 export function KernelParameters() {
-  const names: [string, string, string][] = [
-    ["SCATTER_FRACTION", "Scatter fraction F", "Share of upward light that scatters horizontally (script default)"],
-    ["SCATTER_SCALE_KM", "Scale length L (km)", "Exponential attenuation length"],
-    ["D_REF_KM", "Reference distance d0 (km)", "Where the power law takes over"],
-    ["SCATTER_POWER", "Power β", "Power-law falloff"],
-    ["MAX_RADIUS_KM", "Maximum radius (km)", "Scatter beyond this is dropped"],
-    ["PIXEL_KM", "Coarse pixel (km)", "Size of one pixel of the downsampled grid at the equator"],
-    ["DOWNSAMPLE", "Downsample factor", "15 arc-second pixels averaged into one coarse pixel"],
-    ["H3_RESOLUTION", "H3 resolution", "Cell size of the stored zones"],
+  const names: [string, string, string, string][] = [
+    ["F", "SCATTER_FRACTION", "Scatter fraction", "share of upward light that scatters horizontally (the script's default)"],
+    ["L", "SCATTER_SCALE_KM", "Scale length, km", "exponential attenuation length"],
+    ["d_0", "D_REF_KM", "Reference distance, km", "where the power law takes over"],
+    ["\\beta", "SCATTER_POWER", "Power", "power-law falloff"],
+    ["d_{\\max}", "MAX_RADIUS_KM", "Maximum radius, km", "scatter beyond this is dropped"],
+    ["p", "PIXEL_KM", "Coarse pixel, km", "size of one pixel of the downsampled grid at the equator"],
+    ["n", "DOWNSAMPLE", "Downsample factor", "15 arc-second pixels averaged into one coarse pixel"],
+    ["h", "H3_RESOLUTION", "H3 resolution", "cell size of the stored zones"],
   ];
   return (
     <div className="docs-table-wrap">
-      <table className="docs-table" data-nowrap-first="">
-        <caption>Read from {KERNEL_SOURCE} when the site is built.</caption>
+      <table className="docs-table">
+        <caption>Values are read from {KERNEL_SOURCE} when the site is built.</caption>
         <thead>
           <tr>
-            <th>Constant</th>
+            <th>Symbol</th>
             <th>Meaning</th>
-            <th>Value in the script</th>
+            <th>Value</th>
+            <th>Script constant</th>
           </tr>
         </thead>
         <tbody>
-          {names.map(([name, label, note]) => (
+          {names.map(([symbol, name, label, note]) => (
             <tr key={name}>
+              <td dangerouslySetInnerHTML={{ __html: katex.renderToString(symbol, { throwOnError: true }) }} />
+              <td>
+                {label}: {note}.
+              </td>
+              <td>{pythonNumber(KERNEL_SOURCE, name)}</td>
               <td>
                 <code>{name}</code>
               </td>
-              <td>
-                {label}. {note}.
-              </td>
-              <td>{pythonNumber(KERNEL_SOURCE, name)}</td>
             </tr>
           ))}
         </tbody>

@@ -1,3 +1,4 @@
+import katex from "katex";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -89,9 +90,13 @@ export function DemoFrame({
   );
 }
 
-/** Renders `code`, **bold** and [text](/path) spans inside a table cell. */
+/** Renders $math$ (KaTeX, so a bad formula fails the build), `code`, **bold** and [text](/path) inside a cell. */
 function inline(text: string): ReactNode {
-  return text.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).map((part, i) => {
+  return text.split(/(\$[^$]+\$|`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).map((part, i) => {
+    if (part.length > 2 && part.startsWith("$") && part.endsWith("$")) {
+      const html = katex.renderToString(part.slice(1, -1), { throwOnError: true });
+      return <span key={i} dangerouslySetInnerHTML={{ __html: html }} />;
+    }
     if (part.startsWith("`") && part.endsWith("`")) return <code key={i}>{part.slice(1, -1)}</code>;
     if (part.startsWith("**") && part.endsWith("**")) return <strong key={i}>{part.slice(2, -2)}</strong>;
     const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);

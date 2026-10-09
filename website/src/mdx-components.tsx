@@ -26,6 +26,13 @@ import { ScaleSource } from "@/components/docs/demos/scale-source";
 import { SourceExcerpt, SourceFile } from "@/components/docs/demos/source-file";
 import { SkyCalculator, ZoneCalculator } from "@/components/docs/demos/sky-calculators";
 import { ExtinctionTable, KernelParameters, KernelTable, LegacyBridgeTable, MoonGrid, ValidationTable, VectorStatus, ZoneImpactTable, ZoneLadderTable } from "@/components/docs/demos/sky-tables";
+import { KernelFalloff } from "@/components/docs/viz/kernel-chart";
+import { MoonCostChart, NightStrip } from "@/components/docs/viz/sky-charts";
+import { ConditionsGraphDemo, ObjectGraphDemo } from "@/components/docs/viz/night-graphs";
+import { CloudBar, CloudSkyTiles } from "@/components/docs/viz/cloud-visuals";
+import { Flow } from "@/components/docs/viz/flow";
+import { MoonPhaseIcon, MoonPhaseStrip } from "@/components/docs/viz/moon-visuals";
+import { LadderAxis, ZoneSkies } from "@/components/docs/viz/zone-visuals";
 import { StopMatrix } from "@/components/docs/demos/stop-matrix";
 import { TypeScale, TypeTable } from "@/components/docs/demos/type-scale";
 
@@ -64,6 +71,18 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     LadderTable,
     SampleTable,
     CssSource,
+    LadderAxis,
+    CloudBar,
+    ConditionsGraphDemo,
+    KernelFalloff,
+    MoonCostChart,
+    NightStrip,
+    ObjectGraphDemo,
+    CloudSkyTiles,
+    Flow,
+    MoonPhaseIcon,
+    MoonPhaseStrip,
+    ZoneSkies,
     SourceFile,
     SourceExcerpt,
     SkyCalculator,

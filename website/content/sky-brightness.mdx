@@ -21,11 +21,20 @@ export const meta = {
 Light adds as luminance, not as magnitudes. So every contribution is expressed in **natural units**, where 1.0 is the natural zenith sky brightness (22.0 mag/arcsec², 174 µcd/m²), and the sum is converted afterwards.
 
 <DocTable
-  head={["Symbol", "Meaning"]}
+  head={["Symbol", "Meaning", "Unit"]}
   rows={[
-    ["`r`", "artificial brightness over natural brightness (the zone quantity, see [Zone scale](/zone-scale))"],
-    ["`b_moon`", "scattered moonlight over natural brightness"],
-    ["`total`", "`1 + r + b_moon`"],
+    ["$r$", "artificial brightness over natural brightness (the zone quantity, see [Zone scale](/zone-scale))", "none"],
+    ["$b_{\\text{moon}}$", "scattered moonlight over natural brightness", "none"],
+    ["$1 + r + b_{\\text{moon}}$", "total brightness, in natural units", "none"],
+    ["$\\text{SQM}_{\\text{eff}}$", "effective sky brightness with the moon added", "mag/arcsec²"],
+    ["$\\text{NELM}_{\\text{eff}}$", "the naked-eye limiting magnitude that follows from it", "magnitude"],
+    ["$\\alpha$", "moon phase angle, 0 at full moon and 180 at new", "degrees"],
+    ["$\\rho$", "angle between the moon and the part of the sky looked at", "degrees"],
+    ["$Z,\\ Z_m$", "zenith distance of the sky position, and of the moon", "degrees"],
+    ["$k_V$", "extinction coefficient in the V band: how much the air dims light", "mag per airmass"],
+    ["$\\tau_{550}$", "aerosol optical depth at 550 nm", "none"],
+    ["$P / P_0$", "station pressure over sea-level pressure", "none"],
+    ["$i$", "illuminated fraction of the moon, 0 to 1", "none"],
   ]}
 />
 
@@ -84,6 +93,8 @@ An hour is **dark** when the Sun is at or below −18°. Between sunset and that
 A site of each zone under a range of moons, computed with the functions above.
 
 <MoonGrid />
+
+<MoonCostChart />
 
 A high full moon takes a pristine site to about the limiting magnitude of a zone 8 city, which matches the experience that a full moon wipes out the Milky Way. In a bright city the moon barely matters.
 

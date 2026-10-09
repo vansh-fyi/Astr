@@ -64,6 +64,8 @@ This is the graph at the top of the atmospherics sheet. It answers one question:
   ]}
 />
 
+<ConditionsGraphDemo />
+
 **Reading it.** You want a low cloud area and the moon area either absent or low. A tall moon area under low cloud means a bright, high moon. A prime-view band that sits where the moon area is zero is the best case.
 
 **Not on the graph.** The graph does not show the moon's phase. A full moon and a thin crescent draw the same area, because only altitude is plotted. The phase enters the prime-view calculation, not the picture.
@@ -76,7 +78,16 @@ Prime view is the app's recommended stretch of the night. It uses the hourly sam
 
 $$ \text{score}(t) = 0.7\,\frac{c(t)}{100} + 0.3\,\frac{i\,\max(a(t), 0)}{90} $$
 
-where $c$ is the forecast cloud cover in percent, $i$ is the moon's illuminated fraction (one number for the night), and $a$ is the moon's altitude in degrees at that hour, linearly interpolated between the 15-minute points. Lower is better, and 0 is a perfectly clear sky with no moon above the horizon.
+<DocTable
+  head={["Symbol", "Meaning", "Unit"]}
+  rows={[
+    ["$c(t)$", "forecast cloud cover at hour $t$", "percent"],
+    ["$i$", "the moon's illuminated fraction, one number for the night", "0 to 1"],
+    ["$a(t)$", "the moon's altitude at hour $t$, linearly interpolated between the 15-minute points", "degrees"],
+  ]}
+/>
+
+In words: Lower is better, and 0 is a perfectly clear sky with no moon above the horizon.
 
 Choosing the window:
 
@@ -131,6 +142,8 @@ This is the graph on an object's detail screen, titled Visibility. It answers: *
 
 The graph stops at 70% of its height for 90° so that peak and labels have room. The scale is therefore the same for the object and the moon value but shows each as a share of 70%, not of the full height.
 
+<ObjectGraphDemo />
+
 **Scrubbing.** Dragging or tapping shows a line, a dot on the curve and a tooltip with the time and the altitude at the nearest 15-minute point, to a tenth of a degree. The graph also refreshes every minute so the Now line and the current-position dot move.
 
 **Calculated but not drawn.** The data also holds "optimal windows": hours when the object is above 30° and the moon value is below 30, and sunrise and sunset times. The code comments call both thresholds arbitrary. The windows are computed and never drawn, so they do not appear anywhere on screen.
@@ -152,6 +165,10 @@ The graph stops at 70% of its height for 90° so that peak and labels have room.
     ["Highlights", "up to three bright objects", "see below"],
   ]}
 />
+
+<CloudBar value={37} />
+
+<MoonPhaseStrip />
 
 **Moon phase names** come from the phase angle in degrees: new moon at 355 or above and 5 or below, waxing crescent above 5 and below 85, first quarter from 85 to 95, waxing gibbous above 95 and below 175, full moon from 175 to 185, waning gibbous above 185 and below 265, last quarter from 265 to 275, waning crescent above 275 and below 355. Each band selects one of eight pictures.
 

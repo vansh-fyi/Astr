@@ -29,13 +29,13 @@ Astr does not model weather. It reads a forecast, hour by hour, for the location
 One request returns an hourly series for 10 past days and 16 forecast days (the maximum Open-Meteo offers) in these variables:
 
 <DocTable
-  head={["Variable", "Unit", "Used for"]}
+  head={["Quantity", "Open-Meteo variable", "Unit", "Used for"]}
   rows={[
-    ["`temperature_2m`", "°C", "temperature, and the seeing estimate"],
-    ["`relativehumidity_2m`", "%", "humidity, and the seeing estimate"],
-    ["`cloudcover`", "% of sky", "cloud cover"],
-    ["`windspeed_10m`", "km/h at 10 m", "wind, and the seeing estimate"],
-    ["`weathercode`", "WMO code", "weather icon"],
+    ["Air temperature at 2 m", "`temperature_2m`", "°C", "temperature, and the seeing estimate"],
+    ["Relative humidity at 2 m", "`relativehumidity_2m`", "%", "humidity, and the seeing estimate"],
+    ["Total cloud cover", "`cloudcover`", "% of sky", "cloud cover"],
+    ["Wind speed at 10 m", "`windspeed_10m`", "km/h", "wind, and the seeing estimate"],
+    ["Weather code", "`weathercode`", "WMO code", "weather icon"],
   ]}
 />
 
@@ -44,6 +44,8 @@ One request returns an hourly series for 10 past days and 16 forecast days (the 
 <DocSection id="cloud" title="What cloud cover is">
 
 Cloud cover is **not calculated by Astr**. It is a variable from a numerical weather model: the fraction of the sky above a grid cell (about 11 km across) that the model puts cloud in, from 0% to 100%.
+
+<CloudSkyTiles />
 
 It means a share of the sky, not a probability that a given star is hidden. A forecast of 30% means about a third of the sky is covered, and the model does not say which third. It also cannot see clouds smaller than a grid cell or the shape of one hill's weather.
 
@@ -66,12 +68,12 @@ Seeing is how much the air blurs a star's image, which matters for planets and d
 $$ \text{score} = 10 - p_T - p_w + b_h, \qquad \text{clamped to } 1\ldots 10 $$
 
 <DocTable
-  head={["Term", "Rule"]}
+  head={["Symbol", "Meaning", "Rule"]}
   rows={[
-    ["Temperature range `ΔT` over the next 3 hours", "−2 if over 5 °C, −1 if over 3 °C"],
-    ["Wind speed now", "−3 if over 30 km/h, −2 if over 20, −1 if over 10"],
-    ["Humidity bonus", "+1 if humidity over 70% and `ΔT` under 3 °C"],
-    ["Label", "9 to 10 Excellent, 7 to 8 Good, 5 to 6 Fair, 3 to 4 Poor, 1 to 2 Extremely Poor"],
+    ["$p_T$", "penalty for the temperature range $\\Delta T$ over the next 3 hours", "2 if $\\Delta T > 5\\,^\\circ\\text{C}$, 1 if $\\Delta T > 3\\,^\\circ\\text{C}$"],
+    ["$p_w$", "penalty for the wind speed $w$ now", "3 if $w > 30$ km/h, 2 if $w > 20$, 1 if $w > 10$"],
+    ["$b_h$", "bonus for stable humid air", "1 if humidity is over 70% and $\\Delta T < 3\\,^\\circ\\text{C}$"],
+    ["score", "the result, 1 to 10, and its label", "9 to 10 Excellent, 7 to 8 Good, 5 to 6 Fair, 3 to 4 Poor, 1 to 2 Extremely Poor"],
   ]}
 />
 
@@ -88,14 +90,14 @@ Transparency is how clear the air is, set mostly by aerosols and water vapour. T
 <DocSection id="unused" title="Available but not used">
 
 <DocTable
-  head={["Variable", "What it gives", "Would improve"]}
+  head={["Quantity", "Open-Meteo variable", "What it gives", "Would improve"]}
   rows={[
-    ["`cloud_cover_low`, `_mid`, `_high`", "cloud cover by height (low under 3 km, mid 3 to 8 km, high above 8 km)", "telling thin high cirrus from thick low cloud"],
-    ["`visibility`", "horizontal viewing distance in metres, affected by low cloud, humidity and aerosols", "transparency"],
-    ["`wind_speed_250hpa`, `wind_speed_300hpa`", "wind near the jet stream", "seeing"],
-    ["`boundary_layer_height`", "depth of the turbulent layer next to the ground", "seeing"],
-    ["`total_column_integrated_water_vapour`", "precipitable water", "transparency"],
-    ["`aerosol_optical_depth`, `dust` (Air Quality API)", "haze and Saharan dust, 0.4° grid, every 3 hours globally", "extinction"],
+    ["Cloud cover by height", "`cloud_cover_low`, `_mid`, `_high`", "low under 3 km, mid 3 to 8 km, high above 8 km", "telling thin high cirrus from thick low cloud"],
+    ["Visibility", "`visibility`", "horizontal viewing distance in metres, affected by low cloud, humidity and aerosols", "transparency"],
+    ["Wind near the jet stream", "`wind_speed_250hpa`, `wind_speed_300hpa`", "wind speed at those pressure levels", "seeing"],
+    ["Boundary layer depth", "`boundary_layer_height`", "depth of the turbulent layer next to the ground", "seeing"],
+    ["Precipitable water", "`total_column_integrated_water_vapour`", "water vapour in the whole column of air", "transparency"],
+    ["Aerosol optical depth, dust", "`aerosol_optical_depth`, `dust` (Air Quality API)", "haze and Saharan dust, 0.4° grid, every 3 hours globally", "extinction"],
   ]}
 />
 

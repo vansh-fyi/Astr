@@ -156,6 +156,20 @@ These facts come from the sky science pages, which are the source of truth. Link
 - Each image has meaningful alternative text and is tied to the palette it inspired. Keep that mapping in the configuration, not in pages.
 - The introduction shows them as a bento with each palette's eleven stops on the caption. New images must be pushed before the CDN can serve them.
 
+## Visual components for the science pages
+
+Text-heavy sections are shown with components in `src/components/docs/viz/`. Add new ones there, register them in `src/mdx-components.tsx`, and style them in `docs.css` under the `viz-` prefix.
+
+- Compute from the real model. Visuals call the TypeScript ports of the model functions (the same ports the vector checks hold to the Python and Dart references), or read constants from the copied source, so a visual cannot drift from the spec. Never hard-code a number a script owns.
+- Share helpers in `src/lib/viz.ts` (seeded random numbers, chart height of width over φ², scales, noise fields) and example data in `src/lib/viz-data.ts`. Charts size from their container with `use-width.ts`, never from the viewport.
+- Use the glass recipe and the 66 stops. Distinguish chart series by form (line, dash, fill, dot), not hue, so Red Mode keeps working.
+- Provide controls and readouts where they teach: a scrubber, a toggle, a limiting-factor chip.
+- Keep each component a mirror candidate for Flutter: the app draws the same pictures, so keep geometry in plain functions.
+
+## Mathematical notation in prose and tables
+
+Describe equations with the symbols the equation uses, rendered as `$...$` math, with a symbol key (symbol, meaning, unit) near the top of each science page. Tables must not explain a formula with code variable names. Real code identifiers (file names, JSON keys, function names, API variables) stay as code, in a separate column when both are useful. `DocTable` cells accept math, code, bold and links.
+
 ## Layout rules
 
 - There is no top bar. The brand and the search field sit at the top of the left sidebar, and a small floating menu button appears on narrow screens.
