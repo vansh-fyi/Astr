@@ -1,5 +1,9 @@
 # Skyglow Propagation Model
 
+> Updated 2026-10-09. Parameters now match the production `zones.db` (scatter fraction 0.06, retuned from 0.12
+> in Phase 2). The zone thresholds and SQM fit shown here are the **legacy v2 chain**; the zone definition is in
+> [astr_zone_scale.md](astr_zone_scale.md) (v2.0).
+
 How the Astr app accounts for atmospheric light scatter from nearby cities.
 
 ## The Problem
@@ -22,24 +26,29 @@ scatter(d) = R × F × exp(-d / L) / (1 + (d / d₀)^β)
 
 | Parameter | Value | Physical Meaning |
 |-----------|-------|------------------|
-| `F` (fraction) | 0.12 | 12% of upward light scatters horizontally |
+| `F` (fraction) | 0.06 | 6% of upward light scatters horizontally (production). `scripts/apply_skyglow.py` still defaults to 0.12; pass `--fraction 0.06` to reproduce the production data |
 | `L` (scale) | 20 km | Exponential attenuation length (Rayleigh + Mie) |
 | `d₀` (reference) | 10 km | Power-law transition distance |
 | `β` (power) | 2.5 | Combined geometric + atmospheric decay |
 | Max radius | 80 km | Scatter negligible beyond this |
 
-### Scatter Intensity at Key Distances
+### Contribution of one lit pixel at key distances
 
-For a city with radiance = 40 nW/cm²/sr (like Dehradun):
+The kernel gives each source pixel a weight `k(d) = F exp(-d/L) / (1 + (d/d0)^β)`. The skyglow at the observer is
+the sum over all lit pixels within 80 km of `R_i k(d_i)`. For a single pixel with radiance 40 nW/cm²/sr and
+the production fraction F = 0.06:
 
-| Distance | Scatter (nW) | Resulting Zone |
-|----------|-------------|----------------|
-| 5 km | 2.83 | Zone 5 |
-| 10 km | 1.16 | Zone 4 |
-| 20 km | 0.22 | Zone 3 |
-| 30 km | 0.047 | Zone 2 |
-| 50 km | 0.005 | Zone 1–2 |
-| 80 km | ~0.0003 | Zone 1 |
+| Distance | k(d) | Contribution (nW/cm²/sr) |
+|---|---|---|
+| 5 km | 0.0397 | 1.59 |
+| 10 km | 0.0182 | 0.73 |
+| 20 km | 0.00332 | 0.133 |
+| 30 km | 0.00081 | 0.032 |
+| 50 km | 0.00009 | 0.0035 |
+| 80 km | 0.00001 | 0.0002 |
+
+A city is many such pixels, so its skyglow is far larger than one pixel's. (The earlier table in this file
+did not reproduce from the formula and has been replaced.)
 
 ## Implementation
 
@@ -54,7 +63,11 @@ VNL Raster (15" / ~500m) → Downsample 12× (~5.5 km) → FFT Convolve → Re-s
 3. **Re-scan:** Read the original VNL again at full resolution in strips of 200 rows. For each pixel, add the nearest-neighbor interpolated scatter value from the coarse grid. If `direct + scatter ≥ 0.25 nW` (Zone 2 threshold), store the H3 cell at **resolution 8** (~0.74 km²).
 4. **Write:** Stream sorted cells from SQLite accumulator → binary `zones.db` with ASTR header format.
 
-### Zone Classification (Calibrated Thresholds)
+### Zone Classification (legacy v2 thresholds)
+
+These are the thresholds that built the current `zones.db`. Zones are now defined on the artificial/natural
+brightness ratio (see [astr_zone_scale.md](astr_zone_scale.md)); under that definition about 13.6% of stored
+cells move by one zone, and the edges become R = 0.252, 0.535, 1.18, 2.74, 6.68, 17.0, 45.0 and 121.
 
 | Radiance (nW/cm²/sr) | Zone |
 |----------------------|------|
@@ -78,6 +91,9 @@ Where the sum is over all lit source pixels within 80 km, computed efficiently v
 
 ## Effect on Zones
 
+Illustrative only. These rows were written for the original 0.12 fraction and were not re-measured for the
+production 0.06 data **(unverified)**.
+
 | Scenario | Without Skyglow | With Skyglow |
 |----------|----------------|-------------|
 | City center (NYC) | Zone 9 | Zone 9 (no change) |
@@ -88,7 +104,8 @@ Where the sum is over all lit source pixels within 80 km, computed efficiently v
 
 ## Tuning
 
-Parameters can be adjusted via CLI flags:
+Parameters can be adjusted via CLI flags. Because the accumulator keeps the maximum value per cell, lowering a
+parameter requires `--reset-accum` (the production retune to 0.06 used `--reset-accum --batch 10`):
 
 ```bash
 python apply_skyglow.py --tif "../VNL NPP 2024 Global Masked Data.tif.gz" --fraction 0.15 --scale-km 25

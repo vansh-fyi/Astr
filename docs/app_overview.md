@@ -62,19 +62,10 @@ Astr is a stargazing planner that helps you find the best times and places to ob
 
 ## Zone Scale
 
-Astr uses a custom 9-zone scale derived from VIIRS radiance data:
-
-| Zone | Stars Visible | What You See |
-|------|---------------|--------------|
-| 1 | ~15,000 | Zodiacal light, gegenschein |
-| 2 | ~10,000 | Milky Way with dark lanes |
-| 3 | ~7,000 | Milky Way clearly visible |
-| 4 | ~4,500 | Milky Way visible |
-| 5 | ~2,500 | Milky Way barely visible |
-| 6 | ~1,000 | No Milky Way |
-| 7 | ~500 | Major constellations only |
-| 8 | ~200 | Orion's belt visible |
-| 9 | ~50 | Only planets + brightest stars |
+Astr uses its own 9-zone scale: each zone is a band of artificial sky brightness relative to the natural sky,
+doubling from zone 2 at 0.32 times natural to zone 9 at 41 times natural. Zone 4 is where the Milky Way fades
+and zone 9 is the top class. The old table of "stars visible" counts was unsourced and has been removed; sky
+brightness and limiting magnitude per zone are in the specification.
 
 See [astr_zone_scale.md](astr_zone_scale.md) for the formula and [skyglow_propagation.md](skyglow_propagation.md) for the atmospheric scatter model.
 
