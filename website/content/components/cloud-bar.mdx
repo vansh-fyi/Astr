@@ -5,8 +5,8 @@ export const meta = {
     "Cloud cover as a label, a percentage and an eight pixel track whose glowing fill animates to the new value over a second.",
   sections: [
     { id: "preview", title: "Preview" },
-    { id: "implementation", title: "Implementation" },
     { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
     { id: "api", title: "API reference" },
     { id: "tokens", title: "Design tokens" },
   ],
@@ -20,11 +20,19 @@ export const meta = {
 
 </DocSection>
 
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="cloud-bar" />
+
+</DocSection>
+
 <DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
 
 <CodeTabs labels={["React", "Flutter"]} second={<>
 <CodeBlock lang="dart" filename="Usage" code={`const CloudBar(cloudCoverPercentage: 45)
 const CloudBar(cloudCoverPercentage: 0, isLoading: true)`} />
+
+<DartExcerpt file="content/flutter/astr_glass.dart" symbols={["AstrGlassCard"]} />
 
 <SourceExcerpt file="lib/features/dashboard/presentation/widgets/cloud_bar.dart" symbols={["CloudBar", "_CloudBarState"]} />
 
@@ -37,17 +45,7 @@ const CloudBar(cloudCoverPercentage: 0, isLoading: true)`} />
 <CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-cloudbar", ".app-cloudbar-head", ".app-cloudbar-track", ".app-cloudbar-fill", ".app-spinner"]} />
 </CodeTabs>
 
-</DocSection>
-
-<DocSection id="variants" title="Variants">
-
-<Variants items={[
-  { label: "Clear", note: "Little cloud: a short fill.", preview: <AppCloudBar value={12} />, dart: "CloudBar(cloudCoverPercentage: 12)" },
-  { label: "Partly cloudy", preview: <AppCloudBar value={45} />, dart: "CloudBar(cloudCoverPercentage: 45)" },
-  { label: "Overcast", preview: <AppCloudBar value={100} />, dart: "CloudBar(cloudCoverPercentage: 100)" },
-  { label: "Loading", note: "A spinner replaces the percentage and the track is empty.", preview: <AppCloudBar value={0} state="loading" />, dart: "CloudBar(cloudCoverPercentage: 0, isLoading: true)" },
-  { label: "Error", note: "The message replaces the track.", preview: <AppCloudBar value={0} state="error" message="Weather unavailable" />, dart: "CloudBar(cloudCoverPercentage: 0, errorMessage: 'Weather unavailable')" }
-]} />
+<DocNote>The cards use the glass surface: the Flutter tab starts with <code>AstrGlassCard</code>, the proposed shell. The app widget below it is the current outlined card, which adopts <code>AstrGlassCard</code> as its container.</DocNote>
 
 </DocSection>
 

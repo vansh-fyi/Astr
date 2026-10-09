@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import "./app-ui.css";
+import { AppButton } from "./app-icons";
 
 /** The dark app surface that every widget sits on. */
 export function AppStage({ children, column }: { children: ReactNode; column?: boolean }) {
@@ -121,7 +122,7 @@ export function AppConditionsCard({
           <div className="app-heading">{title}</div>
           <div className="app-label-sm" style={{ marginTop: 4 }}>{subtitle}</div>
         </div>
-        <span className="app-explore">Explore</span>
+        <AppButton size="sm">Explore</AppButton>
       </div>
       <div className="abs" style={{ top: 69, left: 16, right: 16 }}>
         <AppCloudBar value={cloud} />

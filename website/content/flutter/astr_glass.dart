@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'astr_colors.dart';
@@ -205,6 +207,67 @@ class AstrGlassButton extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The glass surface for cards: a sheen over the overlay colour, a hairline
+/// edge, an inset top highlight and a bloom of [tone] along the bottom edge.
+/// Mini cards are 164 by 154 and the conditions card 345 by 242.
+class AstrGlassCard extends StatelessWidget {
+  const AstrGlassCard({
+    super.key,
+    required this.child,
+    this.width,
+    this.height,
+    this.tone = AstrTone.blue,
+  });
+
+  final Widget child;
+  final double? width;
+  final double? height;
+  final AstrTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color c = tone.color;
+    final BorderRadius radius = BorderRadius.circular(16);
+
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: radius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  Colors.white.withValues(alpha: 0.09),
+                  Colors.white.withValues(alpha: 0.02),
+                ],
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(color: c.withValues(alpha: Mag.m3), blurRadius: 36, spreadRadius: -18, offset: const Offset(0, 14)),
+              ],
+            ),
+            foregroundDecoration: BoxDecoration(
+              borderRadius: radius,
+              gradient: RadialGradient(
+                center: const Alignment(0, 1.2),
+                radius: 0.9,
+                colors: <Color>[c.withValues(alpha: Mag.m3), Colors.transparent],
+              ),
+            ),
+            child: child,
           ),
         ),
       ),

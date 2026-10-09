@@ -5,8 +5,8 @@ export const meta = {
     "A pill button, filled with its colour by default. Glass and outline are the quieter weights for secondary actions.",
   sections: [
     { id: "preview", title: "Preview" },
-    { id: "implementation", title: "Implementation" },
     { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
     { id: "api", title: "API reference" },
     { id: "tokens", title: "Design tokens" },
   ],
@@ -20,6 +20,12 @@ export const meta = {
   <AppButton tone="pink" variant="glass">Share</AppButton>
   <AppButton tone="amber" variant="outline">Details</AppButton>
 </Gallery>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="button" />
 
 </DocSection>
 
@@ -46,19 +52,6 @@ export const meta = {
 </CodeTabs>
 
 <DocNote>There is no button in the app yet. The Flutter tab is the proposed implementation, built from <code>AstrColors</code> and <code>Mag</code>.</DocNote>
-
-</DocSection>
-
-<DocSection id="variants" title="Variants">
-
-<Variants items={[
-  { label: "Filled", note: "The default: the tone is the fill, with dark text. Use for the one main action on a screen.", preview: <><AppButton tone="blue">Explore</AppButton><AppButton tone="green">Save</AppButton><AppButton tone="pink">Report</AppButton></>, dart: "AstrGlassButton(label: 'Explore')" },
-  { label: "Glass", note: "Tinted surface with light text, for secondary actions.", preview: <><AppButton variant="glass" tone="blue">Explore</AppButton><AppButton variant="glass" tone="amber">Remind me</AppButton></>, dart: "AstrGlassButton(label: 'Explore', variant: AstrButtonVariant.glass)" },
-  { label: "Outline", note: "Edge only, for tertiary actions.", preview: <><AppButton variant="outline" tone="blue">Details</AppButton><AppButton variant="outline" tone="red">Remove</AppButton></>, dart: "AstrGlassButton(label: 'Details', variant: AstrButtonVariant.outline)" },
-  { label: "With an icon", note: "The glyph takes the text colour in filled and outline, and the tone in glass.", preview: <><AppButton glyph="compass" tone="blue">Explore</AppButton><AppButton glyph="compass" variant="glass" tone="blue">Explore</AppButton><AppButton glyph="compass" variant="outline" tone="blue">Explore</AppButton></>, dart: "AstrGlassButton(label: 'Explore', icon: Icons.explore)" },
-  { label: "Sizes", note: "32, 44 and 54 tall.", preview: <><AppButton size="sm">Small</AppButton><AppButton>Medium</AppButton><AppButton size="lg">Large</AppButton></>, dart: "// Flutter: one height, 44. Wrap in SizedBox(height: ...) for the others." },
-  { label: "Disabled", note: "Forty percent opacity, no lift.", preview: <><AppButton disabled>Unavailable</AppButton><AppButton variant="outline" disabled>Unavailable</AppButton></>, dart: "AstrGlassButton(label: 'Unavailable', onPressed: null)" }
-]} />
 
 </DocSection>
 

@@ -5,8 +5,8 @@ export const meta = {
     "A tinted glass square that holds one glyph and fills with its colour when selected. Use it for icon-only actions where a label would crowd the screen.",
   sections: [
     { id: "preview", title: "Preview" },
-    { id: "implementation", title: "Implementation" },
     { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
     { id: "api", title: "API reference" },
     { id: "tokens", title: "Design tokens" },
   ],
@@ -21,6 +21,12 @@ export const meta = {
   <AppIconTile glyph="compass" tone="amber" label="Compass" />
   <AppIconTile glyph="search" tone="red" label="Search" />
 </Gallery>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="icon-tile" />
 
 </DocSection>
 
@@ -48,17 +54,6 @@ export const meta = {
 </CodeTabs>
 
 <DocNote>There is no tile in the app yet. The Flutter tab is the proposed implementation; it uses only <code>AstrColors</code> and <code>Mag</code> from <code>content/flutter</code>.</DocNote>
-
-</DocSection>
-
-<DocSection id="variants" title="Variants">
-
-<Variants items={[
-  { label: "Tones", note: "Five colour stops from the system: deep space, aurora green and pink, sodium and oxygen airglow.", preview: <><AppIconTile glyph="moon" tone="blue" label="blue" /><AppIconTile glyph="moon" tone="green" label="green" /><AppIconTile glyph="moon" tone="pink" label="pink" /><AppIconTile glyph="moon" tone="amber" label="amber" /><AppIconTile glyph="moon" tone="red" label="red" /></>, dart: "AstrGlassTile(icon: icon, label: 'Moon', tone: AstrTone.green)" },
-  { label: "Sizes", note: "44, 72 and 96. The radius stays 28% of the edge.", preview: <><AppIconTile glyph="moon" size="sm" label="Moon" /><AppIconTile glyph="moon" label="Moon" /><AppIconTile glyph="moon" size="lg" label="Moon" /></>, dart: "AstrGlassTile(icon: icon, label: 'Moon', size: AstrTileSize.lg)" },
-  { label: "Selected", note: "A selected tile fills with its tone and the glyph turns dark.", preview: <><AppIconTile glyph="graph" tone="green" label="Graphs" /><AppIconTile glyph="graph" tone="green" pressed label="Graphs" /></>, dart: "AstrGlassTile(icon: icon, label: 'Graphs', tone: AstrTone.green, selected: true)" },
-  { label: "Disabled", note: "Forty percent opacity, no hover lift, no tap.", preview: <AppIconTile glyph="search" label="Search" disabled />, dart: "AstrGlassTile(icon: icon, label: 'Search', onPressed: null)" }
-]} />
 
 </DocSection>
 

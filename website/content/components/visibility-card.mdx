@@ -5,8 +5,8 @@ export const meta = {
     "The Astr zone as a pill, a sky label, the sky brightness in magnitudes per square arcsecond and five rating bars. Zone 1 lights five bars and zone 9 lights one.",
   sections: [
     { id: "preview", title: "Preview" },
-    { id: "implementation", title: "Implementation" },
     { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
     { id: "api", title: "API reference" },
     { id: "tokens", title: "Design tokens" },
   ],
@@ -28,12 +28,20 @@ export const meta = {
 
 </DocSection>
 
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="visibility-card" />
+
+</DocSection>
+
 <DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
 
 <CodeTabs labels={["React", "Flutter"]} second={<>
 <CodeBlock lang="dart" filename="Usage" code={`VisibilityMiniCard(
   lightPollution: LightPollution(zone: 5, mpsas: 20.9),
 )`} />
+
+<DartExcerpt file="content/flutter/astr_glass.dart" symbols={["AstrGlassCard"]} />
 
 <SourceExcerpt file="lib/features/dashboard/presentation/widgets/visibility_mini_card.dart" symbols={["VisibilityMiniCard"]} />
 
@@ -45,16 +53,7 @@ export const meta = {
 <CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-card", ".app-card.is-mini", ".app-zone-pill", ".app-rating", ".app-rating i", ".app-rating i.on"]} />
 </CodeTabs>
 
-</DocSection>
-
-<DocSection id="variants" title="Variants">
-
-<Variants items={[
-  { label: "Dark sky", note: "Zones 1 and 2: five bars.", preview: <AppVisibilityCard zone={1} mpsas={22.0} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 1, mpsas: 22.0))" },
-  { label: "Rural", note: "Zones 3 and 4: four bars.", preview: <AppVisibilityCard zone={3} mpsas={21.6} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 3, mpsas: 21.6))" },
-  { label: "Suburban", note: "Zones 5 and 6: three bars. The label is wider than the card at 28 px, as it is in the app.", preview: <AppVisibilityCard zone={5} mpsas={20.9} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 5, mpsas: 20.9))" },
-  { label: "Urban", note: "Zones 7 to 9: two bars, then one.", preview: <AppVisibilityCard zone={9} mpsas={18.2} />, dart: "VisibilityMiniCard(lightPollution: LightPollution(zone: 9, mpsas: 18.2))" }
-]} />
+<DocNote>The cards use the glass surface: the Flutter tab starts with <code>AstrGlassCard</code>, the proposed shell. The app widget below it is the current outlined card, which adopts <code>AstrGlassCard</code> as its container.</DocNote>
 
 </DocSection>
 

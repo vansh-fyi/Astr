@@ -5,8 +5,8 @@ export const meta = {
     "The hourly forecast's cloud area with straight edges, a half-opacity stroke and the NOW marker.",
   sections: [
     { id: "preview", title: "Preview" },
-    { id: "implementation", title: "Implementation" },
     { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
     { id: "api", title: "API reference" },
     { id: "tokens", title: "Design tokens" },
   ],
@@ -17,6 +17,12 @@ export const meta = {
 <Gallery column>
   <AppCloudCoverGraph />
 </Gallery>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="cloud-cover-graph" />
 
 </DocSection>
 
@@ -44,16 +50,6 @@ export const meta = {
 
 <CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-graph", ".app-graph svg", ".app-legend"]} />
 </CodeTabs>
-
-</DocSection>
-
-<DocSection id="variants" title="Variants">
-
-<Variants wide items={[
-  { label: "Night forecast", preview: <AppCloudCoverGraph />, dart: "CloudCoverGraphPainter(data: hourly, startTime: start, endTime: end, cloudColor: Colors.white24, nowIndicatorColor: GraphTheme.nowIndicatorColor)" },
-  { label: "Overcast", preview: <AppCloudCoverGraph data={[80, 85, 90, 95, 92, 88, 90]} />, dart: "CloudCoverGraphPainter(data: overcastHourly, ...)" },
-  { label: "Clear", preview: <AppCloudCoverGraph data={[3, 2, 0, 0, 1, 2, 4]} />, dart: "CloudCoverGraphPainter(data: clearHourly, ...)" }
-]} />
 
 </DocSection>
 
