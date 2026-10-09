@@ -56,8 +56,10 @@ export function AppVisibilityCard({ zone, mpsas }: { zone: number; mpsas: number
         <span className="app-label-sm">VISIBILITY</span>
         <span className="app-zone-pill">Zone {zone}</span>
       </div>
-      <span className="app-title app-vis-label">{skyLabel(zone)}</span>
-      <span className="app-label-sm">{mpsas.toFixed(2)} MPSAS</span>
+      <div className="app-vis-body">
+        <span className="app-title app-vis-label">{skyLabel(zone)}</span>
+        <span className="app-label-sm">{mpsas.toFixed(2)} MPSAS</span>
+      </div>
       <div className="app-rating">
         {Array.from({ length: 5 }, (_, i) => (
           <i key={i} className={i < bars ? "on" : undefined} />

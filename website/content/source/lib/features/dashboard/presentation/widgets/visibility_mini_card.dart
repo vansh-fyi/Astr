@@ -71,27 +71,33 @@ class VisibilityMiniCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Sky label (e.g. "Rural Sky"): 20 px so the longest, "Suburban Sky",
-                  // fits on one line; scaled down further if a font is wider.
+                  // Sky label (e.g. "Rural Sky") with the MPSAS value directly below it, centred
+                  // in the space above the bars. 20 px so the longest label, "Suburban Sky", fits on
+                  // one line; it scales down further if a font is wider.
                   Expanded(
-                    child: Align(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          _getSkyLabel(astrZone),
-                          maxLines: 1,
-                          style: AppTypography.title.copyWith(
-                            fontSize: 20,
-                            letterSpacing: -0.3,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              _getSkyLabel(astrZone),
+                              maxLines: 1,
+                              style: AppTypography.title.copyWith(
+                                fontSize: 20,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${lightPollution.mpsas.toStringAsFixed(2)} MPSAS',
+                            style: AppTypography.labelSm.copyWith(color: AppColors.textMuted),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  // MPSAS value sits directly above the rating bars.
-                  Text(
-                    '${lightPollution.mpsas.toStringAsFixed(2)} MPSAS',
-                    style: AppTypography.labelSm.copyWith(color: AppColors.textMuted),
                   ),
                   const SizedBox(height: 6),
                   // Rating bars
