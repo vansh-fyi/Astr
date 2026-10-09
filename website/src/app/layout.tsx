@@ -23,11 +23,11 @@ const satoshi = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: "Astr colour system",
-    template: "%s · Astr colour system",
+    default: "Astr design system",
+    template: "%s · Astr design system",
   },
   description:
-    "Fixed colour stops, the Pogson opacity ladder and natural-law gradients that make up the Astr colour system.",
+    "Colour stops, the Pogson opacity ladder and natural-law gradients, plus Fibonacci spacing, golden-ratio type and layout that make up the Astr design system.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

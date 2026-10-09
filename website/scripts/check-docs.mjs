@@ -11,10 +11,12 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const GLOBALS = join(ROOT, "src/app/globals.css");
+const SCALE = join(ROOT, "src/app/scale.css");
 const EXPECTED_SHA =
   "3e3d60003ee84a7bface6a8ff088f03c592c141c875c80eb0b8cd79e2231ae1c";
-const PAGES = ["/", "/colour-stops", "/opacity-ladder", "/gradients"];
-const LABELS = ["Introduction", "Colour stops", "Opacity ladder", "Gradients"];
+const PAGES = ["/", "/colour-stops", "/opacity-ladder", "/gradients", "/spacing", "/typography", "/layout"];
+const LABELS = ["Introduction", "Colour stops", "Opacity ladder", "Gradients", "Spacing", "Typography", "Layout and size"];
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 function fail(message) {
   console.error(`FAIL: ${message}`);
@@ -38,6 +40,84 @@ function walk(dir, skip = new Set(["node_modules", ".next"])) {
     else out.push(full);
   }
   return out;
+}
+
+// ----------------------------------------------------------------- scale ----
+const remPx = (v) => parseFloat(v) * 16;
+const near = (a, b, eps) => Math.abs(a - b) <= eps;
+
+function scaleChecks() {
+  const raw = readFileSync(SCALE, "utf8");
+  const text = raw.replace(/\/\*[\s\S]*?\*\//g, "");
+  assert(!/--color-|--mag-|#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(text), "scale.css must not define or use a colour");
+  const tok = new Map();
+  for (const m of text.matchAll(/^\s*(--[\w-]+)\s*:\s*([^;]+);/gm)) tok.set(m[1], m[2].trim());
+
+  const fib = [1, 1];
+  while (fib.length < 20) fib.push(fib.at(-1) + fib.at(-2));
+  const isFib = (n) => fib.includes(n);
+  const px = (name) => {
+    assert(tok.has(name), `scale.css lacks ${name}`);
+    return remPx(tok.get(name));
+  };
+  const group = (prefix) => [...tok.keys()].filter((k) => k.startsWith(prefix) && !k.includes("--", prefix.length));
+  for (const prefix of ["--spacing-f", "--radius-f", "--container-f", "--breakpoint-f"]) {
+    const keys = group(prefix);
+    assert(keys.length > 0, `scale.css has no ${prefix}* tokens`);
+    for (const k of keys) {
+      const n = Number(k.slice(prefix.length));
+      assert(isFib(n), `${k} is not a Fibonacci number`);
+      assert(px(k) === n, `${k} is ${tok.get(k)}, expected ${n}px`);
+    }
+  }
+  assert(group("--spacing-f").length === 11, "expected 11 spacing steps");
+  assert(near(Number(tok.get("--phi")), PHI, 0.0005), "--phi is not the golden ratio");
+  assert(near(Number(tok.get("--phi-inverse")), 1 / PHI, 0.0005), "--phi-inverse is wrong");
+  assert(near(Number(tok.get("--phi-inverse-squared")), 1 / PHI ** 2, 0.0005), "--phi-inverse-squared is wrong");
+  assert(near(1.618, PHI, 0.0005) && tok.get("--aspect-golden") === "1.618 / 1", "--aspect-golden is not phi to 1");
+  for (let n = -2; n <= 6; n++) {
+    const k = `--text-s${n}`;
+    const size = Math.round(16 * PHI ** (n / 2));
+    assert(px(k) === size, `${k} is ${tok.get(k)}, expected ${size}px`);
+    const lh = 1 + PHI ** -(1 + n / 2);
+    assert(near(Number(tok.get(`${k}--line-height`)), lh, 0.0005), `${k}--line-height drifted from ${lh.toFixed(3)}`);
+    const tr = -(PHI ** (n / 2) - 1) / 89;
+    assert(near(parseFloat(tok.get(`${k}--letter-spacing`)), tr, 0.00005), `${k}--letter-spacing drifted from ${tr.toFixed(4)}`);
+  }
+  // 233 + 377 = 610 keeps the panes golden.
+  assert(px("--container-f233") + px("--container-f377") === px("--container-f610"), "panes are not consecutive Fibonacci widths");
+
+  // Dart mirrors must agree with the stylesheet value for value.
+  const dart = (f) => readFileSync(join(ROOT, "content/flutter", f), "utf8");
+  const consts = (src, cls) => {
+    const body = new RegExp(`abstract final class ${cls} \\{([\\s\\S]*?)\\n\\}`).exec(src)?.[1] ?? "";
+    return new Map([...body.matchAll(/static const double (\w+) = (-?[\d.]+);/g)].map((m) => [m[1], Number(m[2])]));
+  };
+  const sp = dart("astr_spacing.dart");
+  const space = consts(sp, "AstrSpace");
+  for (const k of group("--spacing-f")) assert(space.get(k.slice(10)) === px(k), `AstrSpace.${k.slice(10)} drifted from ${k}`);
+  const rad = consts(sp, "AstrRadius");
+  for (const k of group("--radius-f")) assert(rad.get(k.slice(9)) === px(k), `AstrRadius.${k.slice(9)} drifted from ${k}`);
+  const ty = dart("astr_type.dart");
+  const tcs = consts(ty, "AstrType");
+  const list = (name) => (new RegExp(`${name} = <double>\\[([^\\]]*)\\]`).exec(ty)?.[1] ?? "").split(",").map((v) => v.replace(/\/\/.*/g, "").trim()).filter(Boolean).map(Number);
+  const leadList = list("leading");
+  const trackList = list("tracking");
+  assert(leadList.length === 9 && trackList.length === 9, "astr_type.dart needs nine leading and tracking values");
+  for (let n = -2; n <= 6; n++) {
+    const k = `--text-s${n}`;
+    const name = n < 0 ? `sNeg${-n}` : `s${n}`;
+    assert(tcs.get(name) === px(k), `AstrType.${name} drifted from ${k}`);
+    assert(leadList[n + 2] === Number(tok.get(`${k}--line-height`)), `AstrType.leading[${n + 2}] drifted from ${k}--line-height`);
+    assert(trackList[n + 2] === parseFloat(tok.get(`${k}--letter-spacing`)), `AstrType.tracking[${n + 2}] drifted from ${k}--letter-spacing`);
+  }
+  const lay = consts(dart("astr_layout.dart"), "AstrLayout");
+  for (const [name, token] of [["w233", "--container-f233"], ["w377", "--container-f377"], ["w610", "--container-f610"], ["w987", "--container-f987"], ["bp377", "--breakpoint-f377"], ["bp610", "--breakpoint-f610"], ["bp987", "--breakpoint-f987"], ["bp1597", "--breakpoint-f1597"]])
+    assert(lay.get(name) === px(token), `AstrLayout.${name} drifted from ${token}`);
+  assert(lay.get("major") === Number(tok.get("--phi-inverse")) && lay.get("minor") === Number(tok.get("--phi-inverse-squared")) && lay.get("goldenAspect") === 1.618, "AstrLayout golden constants drifted");
+  const size = consts(dart("astr_layout.dart"), "AstrSize");
+  for (const [name, v] of size) assert(isFib(v), `AstrSize.${name} = ${v} is not a Fibonacci number`);
+  ok("scale.css: Fibonacci spacing, radii, widths and breakpoints, phi-derived type, no colour; Dart mirrors match");
 }
 
 // ---------------------------------------------------------------- static ----
@@ -76,7 +156,9 @@ function staticChecks() {
   assert(text.includes("@theme static"), "missing @theme static");
   ok("globals.css: 66 stops, 11 --mag steps, 2 utilities, @theme static");
 
-  for (const name of ["introduction", "colour-stops", "opacity-ladder", "gradients"]) {
+  scaleChecks();
+
+  for (const name of ["introduction", "colour-stops", "opacity-ladder", "gradients", "spacing", "typography", "layout"]) {
     const src = readFileSync(join(ROOT, `content/${name}.mdx`), "utf8");
     assert(src.includes("export const meta"), `${name}.mdx has no meta export`);
     const metaBlock = src.slice(src.indexOf("export const meta"), src.indexOf("};") + 2);
@@ -105,7 +187,7 @@ function staticChecks() {
     dartFiles.every((f) => f.includes(`${join(ROOT, "content", "flutter")}/`)),
     "a .dart file lives outside website/content/flutter",
   );
-  for (const name of ["astr_colors.dart", "astr_opacity.dart", "astr_gradients.dart"])
+  for (const name of ["astr_colors.dart", "astr_opacity.dart", "astr_gradients.dart", "astr_spacing.dart", "astr_type.dart", "astr_layout.dart"])
     assert(
       dartFiles.some((f) => f.endsWith(`/${name}`)),
       `content/flutter/${name} is missing`,
@@ -142,7 +224,7 @@ function checkPage(path, html) {
 
   const sidebar = /<aside class="docs-sidebar">([\s\S]*?)<\/aside>/.exec(html)?.[1] ?? "";
   assert(sidebar, `${where}: no sidebar`);
-  assert(count(sidebar, "<a ") === 5, `${where}: sidebar must have the brand link plus 4 page links`);
+  assert(count(sidebar, "<a ") === 1 + LABELS.length, `${where}: sidebar must have the brand link plus ${LABELS.length} page links`);
   assert(!html.includes('class="docs-header'), `${where}: top bar (docs-header) must not exist`);
   assert(html.includes("astr-icon"), `${where}: Astr app icon missing`);
   for (const label of LABELS) assert(sidebar.includes(label), `${where}: sidebar lacks ${label}`);
@@ -162,6 +244,19 @@ function checkPage(path, html) {
     assert(html.includes("gradient-extinction") && html.includes("gradient-moffat"), `${where}: gradient utilities missing`);
     assert(count(html, "<option") >= 132, `${where}: expected at least 132 options`);
     assert(html.includes("0.50572"), `${where}: Kasten-Young constant missing from TeX`);
+  }
+  if (path === "/spacing") {
+    assert(html.includes('class="katex"'), `${where}: no KaTeX output`);
+    assert(html.includes("docs-spiral-curve"), `${where}: spiral missing`);
+    assert(count(html, "--spacing-f") >= 11, `${where}: spacing tokens missing`);
+  }
+  if (path === "/typography") {
+    assert(html.includes('class="katex"'), `${where}: no KaTeX output`);
+    assert(count(html, 'class="docs-typerow"') === 9, `${where}: expected nine type rows`);
+  }
+  if (path === "/layout") {
+    assert(html.includes('class="katex"'), `${where}: no KaTeX output`);
+    assert(html.includes("docs-panes"), `${where}: pane diagram missing`);
   }
   if (path === "/") {
     assert(count(html, 'class="docs-bento-tile"') === 6, `${where}: bento must have six tiles`);
@@ -208,7 +303,7 @@ async function httpChecks(mode) {
     }
     const icon = await fetch(`${base}/icon.png`);
     assert(icon.status === 200, `/icon.png: status ${icon.status}`);
-    ok(`${mode}: four pages return 200 with the expected content, icon.png is 200`);
+    ok(`${mode}: all pages return 200 with the expected content, icon.png is 200`);
 
     for (const path of PAGES) chromeRan = chromeConsoleCheck(base + path) || chromeRan;
     if (chromeRan) ok(`${mode}: headless Chrome console is clean`);

@@ -1,0 +1,85 @@
+/*
+ * Astr proportion system: spacing, type, radii, sizes and layout widths.
+ * Base unit is 16 px = 1 rem on the web = 16 dp/sp in Flutter.
+ *
+ * Spacing, sizes and radii are Fibonacci numbers (1 2 3 5 8 13 21 34 55 89 144).
+ * Consecutive terms tend to the golden ratio phi = (1 + sqrt 5) / 2.
+ * Type steps: size(n) = round(16 * phi^(n/2)) px, leading(n) = 1 + phi^-(1 + n/2),
+ * tracking(n) = -(phi^(n/2) - 1) / 89 em. Every value is exact in rem.
+ * Colour lives in globals.css only; nothing here defines a colour.
+ * check-docs.mjs recomputes every value from the formulas and fails on drift.
+ */
+@theme static {
+  --phi: 1.618;
+  --phi-inverse: 0.618;
+  --phi-inverse-squared: 0.382;
+
+  /* Heading face. Satoshi is loaded once in the root layout. Usage: font-heading */
+  --font-heading: var(--font-satoshi), system-ui, sans-serif;
+
+  /* Spacing: Fibonacci. Usage: p-f13, gap-f8, mt-f55 */
+  --spacing-f1: 0.0625rem;
+  --spacing-f2: 0.125rem;
+  --spacing-f3: 0.1875rem;
+  --spacing-f5: 0.3125rem;
+  --spacing-f8: 0.5rem;
+  --spacing-f13: 0.8125rem;
+  --spacing-f21: 1.3125rem;
+  --spacing-f34: 2.125rem;
+  --spacing-f55: 3.4375rem;
+  --spacing-f89: 5.5625rem;
+  --spacing-f144: 9rem;
+
+  /* Type: step n, size = round(16 * phi^(n/2)). Usage: text-s0, text-s-1 */
+  --text-s-2: 0.625rem;
+  --text-s-2--line-height: 2;
+  --text-s-2--letter-spacing: 0.0043em;
+  --text-s-1: 0.8125rem;
+  --text-s-1--line-height: 1.786;
+  --text-s-1--letter-spacing: 0.0024em;
+  --text-s0: 1rem;
+  --text-s0--line-height: 1.618;
+  --text-s0--letter-spacing: 0em;
+  --text-s1: 1.25rem;
+  --text-s1--line-height: 1.486;
+  --text-s1--letter-spacing: -0.0031em;
+  --text-s2: 1.625rem;
+  --text-s2--line-height: 1.382;
+  --text-s2--letter-spacing: -0.0069em;
+  --text-s3: 2.0625rem;
+  --text-s3--line-height: 1.300;
+  --text-s3--letter-spacing: -0.0119em;
+  --text-s4: 2.625rem;
+  --text-s4--line-height: 1.236;
+  --text-s4--letter-spacing: -0.0182em;
+  --text-s5: 3.3125rem;
+  --text-s5--line-height: 1.186;
+  --text-s5--letter-spacing: -0.0262em;
+  --text-s6: 4.25rem;
+  --text-s6--line-height: 1.146;
+  --text-s6--letter-spacing: -0.0364em;
+
+  /* Radii: Fibonacci. Pills use rounded-full. Usage: rounded-f21 */
+  --radius-f3: 0.1875rem;
+  --radius-f5: 0.3125rem;
+  --radius-f8: 0.5rem;
+  --radius-f13: 0.8125rem;
+  --radius-f21: 1.3125rem;
+  --radius-f34: 2.125rem;
+
+  /* Widths: Fibonacci. Usage: w-f233, max-w-f610 */
+  --container-f233: 14.5625rem;
+  --container-f377: 23.5625rem;
+  --container-f610: 38.125rem;
+  --container-f987: 61.6875rem;
+
+  /* Breakpoints: Fibonacci. Usage: f610:grid-cols-2 */
+  --breakpoint-f377: 23.5625rem;
+  --breakpoint-f610: 38.125rem;
+  --breakpoint-f987: 61.6875rem;
+  --breakpoint-f1597: 99.8125rem;
+
+  /* Golden rectangle. Usage: aspect-golden */
+  --aspect-golden: 1.618 / 1;
+  --aspect-golden-portrait: 1 / 1.618;
+}

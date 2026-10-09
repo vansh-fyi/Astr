@@ -6,6 +6,7 @@ export const meta = {
     { id: "what-it-is", title: "What it is" },
     { id: "layers", title: "Three layers" },
     { id: "any-stop-any-opacity", title: "Any stop, any opacity" },
+    { id: "proportion", title: "Proportion" },
     { id: "source-of-truth", title: "Source of truth" },
   ],
 };
@@ -65,8 +66,14 @@ The Flutter files live in `content/flutter/` and mirror `globals.css` value for 
 
 </DocSection>
 
+<DocSection id="proportion" title="Proportion">
+
+Colour is half of the system. The other half is proportion: spacing, type, radii and layout taken from the Fibonacci sequence and the golden ratio. Start with [Spacing](/spacing), then [Typography](/typography) and [Layout and size](/layout).
+
+</DocSection>
+
 <DocSection id="source-of-truth" title="Source of truth">
 
-Everything on these pages is read from one file, `src/app/globals.css`, at build time: the `@theme` block holds the stops, `@theme static` holds the ladder, and two `@utility` blocks hold the gradients. Palettes and ladder values are parsed from it. The gradient sample tables are recomputed from their formulas and compared with the CSS, and the build fails if the two disagree.
+Colour on these pages is read from one file, `src/app/globals.css`, at build time (spacing and type come from `src/app/scale.css` in the same way): the `@theme` block holds the stops, `@theme static` holds the ladder, and two `@utility` blocks hold the gradients. Palettes and ladder values are parsed from it. The gradient sample tables are recomputed from their formulas and compared with the CSS, and the build fails if the two disagree.
 
 </DocSection>

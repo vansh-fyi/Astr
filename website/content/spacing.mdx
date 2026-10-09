@@ -1,0 +1,95 @@
+export const meta = {
+  title: "Spacing",
+  group: "Proportion system",
+  description:
+    "Eleven spacing steps taken from the Fibonacci sequence on a 16 px base, with the corner radii that go with them.",
+  sections: [
+    { id: "sequence", title: "The sequence" },
+    { id: "ratio", title: "Why it works" },
+    { id: "scale", title: "The scale" },
+    { id: "radii", title: "Corner radii" },
+    { id: "rules", title: "Rules" },
+    { id: "usage", title: "Usage" },
+  ],
+};
+
+<DocSection id="sequence" title="The sequence">
+
+Each Fibonacci number is the sum of the two before it:
+
+$$ F(n) = F(n-1) + F(n-2), \qquad F(1) = F(2) = 1 $$
+
+Draw a square for each term and wind them around one another, and the corners of the squares trace a spiral. It is the same shape as a nautilus shell, a sunflower head or the arms of a galaxy: growth in which each step is a fixed proportion of the last.
+
+<FibonacciSpiral />
+
+</DocSection>
+
+<DocSection id="ratio" title="Why it works">
+
+The ratio of neighbouring terms settles on the golden ratio, so any two adjacent steps in the scale feel related:
+
+$$ \varphi = \frac{1+\sqrt{5}}{2} \approx 1.618034, \qquad \lim_{n\to\infty}\frac{F(n)}{F(n-1)} = \varphi $$
+
+<RatioTable />
+
+The first few steps are coarse (1, 2, 3, 5 differ by 100%, 50%, 67%) and by the tenth term the ratio is within a thousandth of phi. That matches how spacing is used: small steps are fine adjustments and large steps separate regions.
+
+</DocSection>
+
+<DocSection id="scale" title="The scale">
+
+The base is 16 px, which is 1 rem on the web and 16 dp in Flutter. Every step is a whole number of pixels and is exact in rem, so the web and Flutter agree to the pixel. Tailwind reads the tokens as `p-f13`, `gap-f8` and so on; the number is the pixel value.
+
+<SpacingScale />
+
+</DocSection>
+
+<DocSection id="radii" title="Corner radii">
+
+Radii use the same numbers. Anything fully rounded is a pill and uses the platform's full-round shape instead of a number.
+
+<RadiusScale />
+
+</DocSection>
+
+<DocSection id="rules" title="Rules">
+
+1. **Use only these steps** for padding, margin, gap, offsets and radii. Never write a pixel value that is not on the scale.
+2. **Neighbours inside, a step up outside.** Space between related things is one step smaller than the space around the group. Padding inside a card is 21, the gap between cards is 21 or 34, and the gap between sections is 55.
+3. **Skip a step to make a difference visible.** If two gaps need to read as different, use steps that are two apart (8 and 21), not neighbours (13 and 21).
+4. **Never subdivide a step.** If a gap needs half of 13, the layout needs a different structure, not a new number.
+5. **Do not carry meaning through space alone.** Separation also needs a visible boundary, label or alignment, because spacing is lost when text is enlarged.
+
+<DocNote>
+
+Spacing is not the line height. Text sets its own leading from the type scale, so a stack of paragraphs is spaced by the scale and the lines inside each paragraph by their step.
+
+</DocNote>
+
+</DocSection>
+
+<DocSection id="usage" title="Usage">
+
+<CodeTabs flutter={<DartSource file="astr_spacing.dart" />}>
+
+```html
+<!-- Tailwind: the number is the pixel value -->
+<div class="grid gap-f21 p-f21 rounded-f21">
+  <p class="mb-f13">…</p>
+</div>
+```
+
+```css
+/* the equivalent plain CSS */
+.card {
+  padding: var(--spacing-f21);
+  border-radius: var(--radius-f21);
+}
+```
+
+<ScaleSource prefixes={["--spacing-", "--radius-"]} />
+
+</CodeTabs>
+
+</DocSection>

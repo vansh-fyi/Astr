@@ -1,0 +1,88 @@
+export const meta = {
+  title: "Typography",
+  group: "Proportion system",
+  description:
+    "Nine type steps, each a half golden ratio above the last, with leading and tracking derived from the same ratio.",
+  sections: [
+    { id: "fonts", title: "Typefaces" },
+    { id: "formula", title: "Formula" },
+    { id: "scale", title: "The scale" },
+    { id: "table", title: "Computed values" },
+    { id: "rules", title: "Rules" },
+    { id: "usage", title: "Usage" },
+  ],
+};
+
+<DocSection id="fonts" title="Typefaces">
+
+Satoshi sets headings and the wordmark. Inter sets everything else. There are no other typefaces. Satoshi ships in two weights, 500 and 700, and Inter is used at 400 and 600.
+
+</DocSection>
+
+<DocSection id="formula" title="Formula">
+
+A full golden step per level is too large for an interface: from a 16 px body it jumps to 26 px and then 42 px. Half a step keeps the ratio and gives usable sizes. With the body as step 0:
+
+$$ \text{size}(n) = \operatorname{round}\!\left(16\,\varphi^{\,n/2}\right)\text{ px} $$
+
+Two steps up is one golden ratio, so every second step has the same relation as neighbouring Fibonacci numbers. Space between lines gets looser as type gets smaller and tightens towards solid as type grows. The leading is a multiple of the size:
+
+$$ \text{leading}(n) = 1 + \varphi^{-(1+n/2)} $$
+
+At the body size this is exactly phi, 1.618. As n grows it falls towards 1. Large type is also tracked in slightly, and small type out:
+
+$$ \text{tracking}(n) = -\,\frac{\varphi^{\,n/2}-1}{89}\ \text{em} $$
+
+89 is a Fibonacci number, and it keeps the largest display size at about minus 0.036 em.
+
+</DocSection>
+
+<DocSection id="scale" title="The scale">
+
+Each row is set in its real size, leading and tracking.
+
+<TypeScale />
+
+</DocSection>
+
+<DocSection id="table" title="Computed values">
+
+<TypeTable />
+
+</DocSection>
+
+<DocSection id="rules" title="Rules">
+
+1. **Use only these steps.** Body copy is step 0. Do not pick an in-between size.
+2. **Body is Inter, headings are Satoshi.** Steps 2 and up are headings and use Satoshi 700. Steps below 2 are Inter.
+3. **Leading and tracking come with the step.** Never set them independently; use the pair in the token.
+4. **A heading is at least two steps above the text it introduces.** That keeps the golden relation between heading and body.
+5. **Measure is 610 px.** At step 0 that holds about 76 characters, which is the upper end of comfortable reading. Do not widen prose past it.
+6. **Respect platform text scaling.** Sizes are in rem on the web and sp in Flutter, so they follow the user's setting. Layouts must survive 200 percent.
+
+</DocSection>
+
+<DocSection id="usage" title="Usage">
+
+<CodeTabs flutter={<DartSource file="astr_type.dart" />}>
+
+```html
+<!-- Tailwind: size, leading and tracking come together -->
+<h2 class="font-heading text-s4">Tonight’s sky</h2>
+<p class="text-s0">Cloud cover is 12 percent after midnight.</p>
+```
+
+```css
+/* the equivalent plain CSS */
+h2 {
+  font-size: var(--text-s4);
+  line-height: var(--text-s4--line-height);
+  letter-spacing: var(--text-s4--letter-spacing);
+}
+```
+
+<ScaleSource prefixes={["--text-"]} />
+
+</CodeTabs>
+
+</DocSection>

@@ -10,13 +10,13 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Astr design system: agent rules
 
-This folder is the documentation site for the Astr design system. It is a Next.js app that will grow into the full design documentation and Flutter reference. Right now its scope is colour only: the colour stops, the opacity ladder and gradients. Read this file before changing anything here, and follow it exactly.
+This folder is the documentation site for the Astr design system. It is a Next.js app that will grow into the full design documentation and Flutter reference. Its scope is two systems: colour (the colour stops, the opacity ladder and gradients) and proportion (spacing, typography, layout and element sizes). Read this file before changing anything here, and follow it exactly.
 
 This file contains no code on purpose. Rules are written in plain language. The authoritative values live in the files named below, never in this document.
 
 ## Scope
 
-- Colour only. Do not add component documentation, typography pages or layout pages until the owner asks for them, one at a time.
+- Colour and proportion only. Do not add component documentation or any other new page until the owner asks for it, one at a time. The owner asked for the three proportion pages together, which is why spacing, typography and layout exist.
 - The Flutter application in the repository root is outdated and is used for functionality only. Never read it for design guidance and never edit it from this folder's work. Design rules come from this site, not from the app.
 - The sepcare project, kept next to this repository, is the reference for the documentation shell's design language. Follow its layout, spacing, sizing and tone closely. Do not copy its colours, its content or anything clinical.
 
@@ -60,6 +60,17 @@ This file contains no code on purpose. Rules are written in plain language. The 
 - Interpolation is always in sRGB so the web and Flutter render the same.
 - A new gradient needs all of the following before it ships: a named natural law, its formula written in the page's markdown, the sampled stops with raw and snapped values in a table, a cross-check against the stylesheet that fails the build on drift, and matching Flutter code. If any of these is missing, do not add it.
 
+## Proportion system
+
+- Proportion is derived from nature, like colour. Spacing, radii, element sizes, pane widths and breakpoints are Fibonacci numbers. Type steps are half golden-ratio steps. The base is sixteen pixels, which is one rem on the web and sixteen dp or sp in Flutter.
+- The proportion stylesheet in the app source folder is the only place these values are defined, exactly as the global stylesheet is for colour. It defines no colour and no opacity.
+- Never write a pixel size, gap, radius or font size that is not on the scale. If something does not fit, change the structure or tell the owner. Do not add a step.
+- Never edit, round or reorder a step. Every value must be reproducible from its formula. The verification script recomputes the formulas and compares the stylesheet and the Dart files value for value, and fails on drift. Treat a failure as a stop sign.
+- Type: size, leading and tracking always come together from one step. Body is step zero. Headings are two steps or more above the text they introduce.
+- Layout: the reading measure is six hundred ten pixels. Panes use consecutive Fibonacci widths. Compact controls are drawn at thirty-four and tapped at fifty-five.
+- Media queries cannot read variables, so a breakpoint written in the shell stylesheet is a literal. It must be a Fibonacci breakpoint or a sum of pane widths, and its comment must say which.
+- The same page rules apply to the proportion pages: markdown with embedded components, formulas on the page, one code tabs block, and Dart files in the Flutter folder.
+
 ## Typography and brand
 
 - Satoshi for headings and the wordmark. Inter for body text. No other typefaces.
@@ -76,9 +87,9 @@ This file contains no code on purpose. Rules are written in plain language. The 
 ## Layout rules
 
 - There is no top bar. The brand and the search field sit at the top of the left sidebar, and a small floating menu button appears on narrow screens.
-- Three panes: sidebar, article, and an on-this-page outline. The article scrolls without a visible scrollbar. Keep it that way.
+- Three panes: sidebar, article, and an on-this-page outline. The sidebar holds two groups, the colour system and the proportion system. The article scrolls without a visible scrollbar. Keep it that way.
 - Do not add banners, headers, footers, announcement strips or other chrome that was not requested.
-- Keep sizing, spacing and radii consistent with the existing shell stylesheet. Reuse its roles instead of introducing new ones.
+- Keep sizing, spacing and radii consistent with the existing shell stylesheet. Reuse its roles instead of introducing new ones. The shell's pane widths, section gaps and core text already use the proportion tokens; move remaining literal sizes onto the scale whenever you touch them.
 
 ## Writing pages
 

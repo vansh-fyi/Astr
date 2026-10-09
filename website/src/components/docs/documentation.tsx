@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 export interface DocMeta {
   title: string;
   description: string;
+  /** Eyebrow above the title. Defaults to the colour system. */
+  group?: string;
   sections: { id: string; title: string }[];
 }
 
@@ -17,7 +19,7 @@ export function DocPage({
     <div className="docs-page">
       <article className="docs-article" tabIndex={0} aria-label={meta.title}>
         <header className="docs-page-header">
-          <p className="docs-eyebrow">Colour system</p>
+          <p className="docs-eyebrow">{meta.group ?? "Colour system"}</p>
           <h1>{meta.title}</h1>
           <p className="docs-lead">{meta.description}</p>
         </header>

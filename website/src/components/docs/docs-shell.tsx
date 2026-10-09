@@ -3,26 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { DOCS_GROUP, DOCS_LINKS } from "@/lib/docs-nav";
+import { DOCS_GROUPS, DOCS_LINKS } from "@/lib/docs-nav";
 import { AstrMark, Wordmark } from "./brand";
 
 function DocumentationNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Documentation">
-      <div className="docs-nav-group">
-        <h2>{DOCS_GROUP}</h2>
-        {DOCS_LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            aria-current={pathname === link.href ? "page" : undefined}
-            onClick={onNavigate}
-          >
-            {link.label}
-          </Link>
-        ))}
-      </div>
+      {DOCS_GROUPS.map((group) => (
+        <div className="docs-nav-group" key={group.name}>
+          <h2>{group.name}</h2>
+          {group.links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={pathname === link.href ? "page" : undefined}
+              onClick={onNavigate}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      ))}
     </nav>
   );
 }
@@ -65,7 +67,7 @@ export function DocsShell({ children }: { children: ReactNode }) {
   const mobileDialog = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState("");
   const results = DOCS_LINKS.filter((link) =>
-    `${link.label} ${DOCS_GROUP}`
+    `${link.label} ${link.group}`
       .toLowerCase()
       .includes(query.trim().toLowerCase()),
   );
@@ -167,7 +169,7 @@ export function DocsShell({ children }: { children: ReactNode }) {
                 }}
               >
                 <span>{link.label}</span>
-                <small>{DOCS_GROUP}</small>
+                <small>{link.group}</small>
               </Link>
             ))
           ) : (

@@ -13,12 +13,18 @@ import { CodeTabs } from "@/components/docs/code-tabs";
 import { DocNote, DocSection } from "@/components/docs/documentation";
 import { DartSource } from "@/components/docs/demos/dart-source";
 import { CssSource } from "@/components/docs/demos/css-source";
+import { FibonacciSpiral } from "@/components/docs/demos/fibonacci-spiral";
 import { GradientPlayground } from "@/components/docs/demos/gradient-playground";
+import { GoldenSplit, PaneDiagram, SizeTable } from "@/components/docs/demos/layout-demos";
 import { LadderTable } from "@/components/docs/demos/ladder-table";
 import { OpacityDemo } from "@/components/docs/demos/opacity-demo";
 import { PaletteBento, PaletteCredits, PaletteGrid, PaletteStrip } from "@/components/docs/demos/palette-grid";
+import { RatioTable } from "@/components/docs/demos/ratio-table";
 import { SampleTable } from "@/components/docs/demos/sample-table";
+import { RadiusScale, SpacingScale } from "@/components/docs/demos/spacing-scale";
+import { ScaleSource } from "@/components/docs/demos/scale-source";
 import { StopMatrix } from "@/components/docs/demos/stop-matrix";
+import { TypeScale, TypeTable } from "@/components/docs/demos/type-scale";
 
 function MdxLink({ href = "", children, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement>) {
   if (href.startsWith("/"))
@@ -54,10 +60,20 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     LadderTable,
     SampleTable,
     CssSource,
+    ScaleSource,
     DartSource,
     OpacityDemo,
     StopMatrix,
     GradientPlayground,
+    FibonacciSpiral,
+    RatioTable,
+    SpacingScale,
+    RadiusScale,
+    TypeScale,
+    TypeTable,
+    PaneDiagram,
+    GoldenSplit,
+    SizeTable,
     p: ({ children }) => <p className="docs-description">{children}</p>,
     h3: ({ children }) => <h3>{children}</h3>,
     a: MdxLink,

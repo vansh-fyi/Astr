@@ -46,11 +46,11 @@
       color-mix(in srgb, var(--color-space-grey-950) var(--mag-1), transparent);
     --docs-blur: blur(16px) saturate(1.4);
     --docs-ease: cubic-bezier(0.23, 1, 0.32, 1);
-    --docs-radius: 16px;
-    --docs-sidebar-width: 216px;
-    --docs-article-width: 760px;
-    --docs-outline-width: 176px;
-    --docs-section-gap: 48px;
+    --docs-radius: var(--radius-f21);
+    --docs-sidebar-width: var(--container-f233);
+    --docs-article-width: var(--container-f610);
+    --docs-outline-width: var(--spacing-f144);
+    --docs-section-gap: var(--spacing-f55);
     position: fixed;
     inset: 0;
     height: 100dvh;
@@ -59,7 +59,7 @@
     flex-direction: column;
     background: var(--docs-surface);
     color: var(--docs-text);
-    font: 400 14px/1.5 var(--docs-font);
+    font: 400 var(--text-s-1) / var(--text-s0--line-height) var(--docs-font);
   }
   .docs-glow {
     position: absolute;
@@ -102,8 +102,8 @@
     margin: 0 auto;
     flex: 1;
     min-height: 0;
-    padding: 0 32px;
-    gap: 40px;
+    padding: 0 var(--spacing-f34);
+    gap: var(--spacing-f55);
     position: relative;
   }
   .docs-sidebar {
@@ -195,8 +195,8 @@
     display: block;
     padding: 6px 10px;
     border-radius: 999px;
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: var(--text-s-1);
+    line-height: var(--text-s0--line-height);
     color: var(--docs-text-secondary);
     transition: background-color 200ms var(--docs-ease),
       box-shadow 200ms var(--docs-ease), color 200ms var(--docs-ease);
@@ -227,7 +227,7 @@
     grid-template-columns: minmax(0, var(--docs-article-width)) var(
         --docs-outline-width
       );
-    gap: 48px;
+    gap: var(--spacing-f34);
     height: 100%;
     min-height: 0;
     overflow: hidden;
@@ -238,7 +238,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: none;
-    padding: 44px 4px 80px;
+    padding: var(--spacing-f55) var(--spacing-f5) var(--spacing-f89);
     scroll-padding-top: 24px;
   }
   .docs-article::-webkit-scrollbar {
@@ -253,16 +253,16 @@
     margin-bottom: 12px;
   }
   .docs-page-header h1 {
-    font: 700 32px/1.25 var(--docs-font-heading);
-    letter-spacing: -1px;
+    font: 700 var(--text-s3) / var(--text-s3--line-height) var(--docs-font-heading);
+    letter-spacing: var(--text-s3--letter-spacing);
     margin-bottom: 12px;
     color: var(--docs-text-strong);
   }
   .docs-lead {
-    max-width: 640px;
+    max-width: var(--container-f610);
     color: var(--docs-text-secondary);
-    font-size: 15px;
-    line-height: 1.7;
+    font-size: var(--text-s0);
+    line-height: var(--text-s0--line-height);
     text-wrap: pretty;
   }
   .docs-outline {
@@ -299,9 +299,9 @@
     scroll-margin-top: 96px;
   }
   .docs-section > h2 {
-    font: 650 21px/1.4 var(--docs-font-heading);
-    letter-spacing: -0.4px;
-    margin-bottom: 16px;
+    font: 700 var(--text-s2) / var(--text-s2--line-height) var(--docs-font-heading);
+    letter-spacing: var(--text-s2--letter-spacing);
+    margin-bottom: var(--spacing-f21);
     color: var(--docs-text-strong);
   }
   .docs-section > h2 a {
@@ -319,25 +319,25 @@
     opacity: 1;
   }
   .docs-description {
-    font-size: 14px;
-    line-height: 1.75;
+    font-size: var(--text-s0);
+    line-height: var(--text-s0--line-height);
     color: var(--docs-text-secondary);
     margin-bottom: 20px;
     text-wrap: pretty;
   }
   .docs-section h3,
   .docs-ramp h3 {
-    font: 600 14px var(--docs-font);
+    font: 600 var(--text-s0) var(--docs-font);
     color: var(--docs-text-strong);
-    margin: 28px 0 10px;
+    margin: var(--spacing-f34) 0 var(--spacing-f8);
   }
   .docs-section ul,
   .docs-section ol {
     margin: 0 0 20px;
-    padding-left: 22px;
+    padding-left: var(--spacing-f21);
     color: var(--docs-text-secondary);
-    font-size: 14px;
-    line-height: 1.75;
+    font-size: var(--text-s0);
+    line-height: var(--text-s0--line-height);
   }
   .docs-section ul {
     list-style: disc;
@@ -500,9 +500,9 @@
   .docs-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: var(--text-s-1);
     text-align: left;
-    line-height: 1.7;
+    line-height: var(--text-s0--line-height);
   }
   .docs-table th {
     font-weight: 500;
@@ -534,16 +534,16 @@
     color: var(--docs-muted);
   }
   .docs-note {
-    padding: 16px 20px;
+    padding: var(--spacing-f13) var(--spacing-f21);
     border-radius: var(--docs-radius);
     box-shadow: inset 0 0 0 1px var(--docs-ring), inset 2px 0 0 var(--docs-accent), var(--docs-sheen);
     -webkit-backdrop-filter: var(--docs-blur);
     backdrop-filter: var(--docs-blur);
     background: var(--docs-glass-block);
     color: var(--docs-text-secondary);
-    font-size: 13px;
-    line-height: 1.75;
-    margin: 24px 0;
+    font-size: var(--text-s-1);
+    line-height: var(--text-s0--line-height);
+    margin: var(--spacing-f21) 0;
   }
   .docs-ramp {
     margin: 28px 0;
@@ -1021,7 +1021,8 @@
   .docs-skip:focus {
     top: 12px;
   }
-  @media (max-width: 1279px) {
+  /* Media queries cannot read variables. 1143 = 233 + 55 + 610 + 34 + 144 + 2 x 34 - 1: the panes plus gaps and gutters. */
+  @media (max-width: 1143px) {
     .docs-page {
       grid-template-columns: minmax(0, 1fr);
       max-width: var(--docs-article-width);
@@ -1033,7 +1034,8 @@
       gap: 28px;
     }
   }
-  @media (max-width: 900px) {
+  /* 987 is the Fibonacci breakpoint f987. */
+  @media (max-width: 986px) {
     .docs-workspace {
       grid-template-columns: minmax(0, 1fr);
       padding: 0 24px;
@@ -1065,7 +1067,8 @@
       margin: 0 0 24px auto;
     }
   }
-  @media (max-width: 600px) {
+  /* 610 is the Fibonacci breakpoint f610. */
+  @media (max-width: 609px) {
     .docs-bento {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       grid-auto-rows: 200px;
@@ -1102,6 +1105,174 @@
     }
     .docs-example {
       overflow-x: auto;
+    }
+  }
+}
+
+@layer components {
+  .docs-spiral {
+    margin: var(--spacing-f21) 0;
+    padding: var(--spacing-f21);
+    border-radius: var(--radius-f21);
+    background: var(--docs-glass-block);
+    box-shadow: inset 0 0 0 1px var(--docs-ring), var(--docs-sheen);
+  }
+  .docs-spiral svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--aspect-golden);
+  }
+  .docs-spiral-square {
+    fill: color-mix(in srgb, var(--color-space-grey-50) var(--mag-9), transparent);
+    stroke: color-mix(in srgb, var(--color-space-grey-50) var(--mag-5), transparent);
+    vector-effect: non-scaling-stroke;
+    stroke-width: 1px;
+  }
+  .docs-spiral-curve {
+    fill: none;
+    stroke: var(--docs-accent);
+    stroke-width: 2px;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+  }
+  .docs-spiral-label {
+    fill: var(--docs-muted);
+    font-family: var(--docs-font-mono);
+  }
+  .docs-spiral figcaption,
+  .docs-panes figcaption,
+  .docs-golden figcaption {
+    margin-top: var(--spacing-f13);
+    font-size: var(--text-s-1);
+    line-height: var(--text-s-1--line-height);
+    color: var(--docs-muted);
+  }
+  .docs-bar {
+    display: block;
+    height: var(--spacing-f8);
+    border-radius: 999px;
+    background: var(--docs-accent);
+  }
+  .docs-radii {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--spacing-f89), 1fr));
+    gap: var(--spacing-f21);
+    margin: var(--spacing-f21) 0;
+  }
+  .docs-radii figure {
+    margin: 0;
+  }
+  .docs-radii span {
+    display: block;
+    aspect-ratio: var(--aspect-golden);
+    background: var(--docs-glass-hover);
+    box-shadow: inset 0 0 0 1px var(--docs-ring-hover), var(--docs-sheen);
+  }
+  .docs-radii figcaption {
+    margin-top: var(--spacing-f8);
+    display: grid;
+    gap: var(--spacing-f2);
+  }
+  .docs-radii strong {
+    font-size: var(--text-s-1);
+    color: var(--docs-text-strong);
+  }
+  .docs-radii small {
+    font-size: var(--text-s-2);
+    line-height: var(--text-s-1--line-height);
+    color: var(--docs-muted);
+  }
+  .docs-typescale {
+    margin: var(--spacing-f21) 0;
+    border-radius: var(--radius-f21);
+    overflow: hidden;
+    background: var(--docs-glass);
+    box-shadow: inset 0 0 0 1px var(--docs-ring), var(--docs-sheen);
+  }
+  .docs-typerow {
+    display: grid;
+    grid-template-columns: minmax(0, var(--container-f233)) minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--spacing-f21);
+    padding: var(--spacing-f13) var(--spacing-f21);
+  }
+  .docs-typerow + .docs-typerow {
+    border-top: 1px solid var(--docs-ring);
+  }
+  .docs-typemeta {
+    display: grid;
+    gap: var(--spacing-f2);
+    font-size: var(--text-s-2);
+    color: var(--docs-muted);
+  }
+  .docs-typemeta code {
+    width: fit-content;
+    font-size: var(--text-s-1);
+  }
+  .docs-typemeta small {
+    font-size: var(--text-s-2);
+    color: var(--docs-text-secondary);
+  }
+  .docs-typerow p {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--docs-text-strong);
+  }
+  .docs-panes > div {
+    display: grid;
+    gap: var(--spacing-f8);
+    height: var(--spacing-f144);
+  }
+  .docs-panes > div > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-f3);
+    border-radius: var(--radius-f13);
+    background: var(--docs-glass);
+    box-shadow: inset 0 0 0 1px var(--docs-ring), var(--docs-sheen);
+    font-size: var(--text-s-1);
+    color: var(--docs-text-secondary);
+  }
+  .docs-panes strong {
+    color: var(--docs-text-strong);
+  }
+  .docs-panes,
+  .docs-golden {
+    margin: var(--spacing-f21) 0;
+  }
+  .docs-golden > div {
+    display: flex;
+    max-width: var(--container-f377);
+    aspect-ratio: var(--aspect-golden);
+    gap: var(--spacing-f5);
+  }
+  .docs-golden > div > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-f13);
+    background: var(--docs-glass-hover);
+    box-shadow: inset 0 0 0 1px var(--docs-ring), var(--docs-sheen);
+    font-size: var(--text-s-1);
+    color: var(--docs-text-secondary);
+  }
+  .docs-golden > div > span:first-child {
+    aspect-ratio: 1;
+    flex: none;
+    height: 100%;
+    color: var(--docs-text-strong);
+  }
+  .docs-golden > div > span:last-child {
+    flex: 1;
+  }
+  @media (max-width: 609px) {
+    .docs-typerow {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--spacing-f5);
     }
   }
 }
