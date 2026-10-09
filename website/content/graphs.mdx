@@ -2,67 +2,191 @@ export const meta = {
   title: "Graphs",
   group: "Sky science",
   description:
-    "What each graph in the app plots, the units on its axes, how the best window is chosen, and what each graph becomes under the sky model.",
+    "What every graph and readout in the app plots, how each value is calculated, and what it means for the night, including the ones that are mock or unused.",
   sections: [
+    { id: "inventory", title: "What exists" },
+    { id: "axis", title: "Shared conventions" },
     { id: "conditions", title: "Conditions graph" },
     { id: "prime-view", title: "Prime view" },
-    { id: "visibility", title: "Object visibility graph" },
-    { id: "atmospherics", title: "Atmospherics" },
+    { id: "sheet", title: "The rest of the atmospherics sheet" },
+    { id: "object", title: "Object visibility graph" },
+    { id: "cards", title: "Dashboard readouts" },
+    { id: "labels", title: "Three label sets for one zone" },
+    { id: "unused", title: "Mock and unused" },
     { id: "target", title: "What each becomes" },
     { id: "implementation", title: "Implementation" },
   ],
 };
 
-<DocSection id="conditions" title="Conditions graph">
-
-The graph on the atmospherics sheet covers one night, from sunset to the next sunrise, with five time labels across the bottom.
+<DocSection id="inventory" title="What exists">
 
 <DocTable
-  head={["Layer", "What it plots", "Scale"]}
+  head={["Surface", "Where", "Data behind it", "Status"]}
   rows={[
-    ["Cloud cover", "the hourly cloud cover forecast as a filled area", "0% at the bottom to 100% at the top"],
-    ["Moon", "the moon curve as a filled area with an outline", "0 at the bottom to 90 at the top"],
-    ["Moonrise marker", "a vertical line and a dot where the moon rises", "time only"],
-    ["Prime view", "a highlighted band over the best window, with a badge", "time only"],
-    ["Now", "a line labelled NOW", "time only"],
+    ["Conditions graph", "atmospherics sheet", "hourly cloud cover, the moon's altitude, the prime-view window", "real"],
+    ["Rise and set cards", "atmospherics sheet", "ephemeris sunrise, sunset, moonrise and moonset", "real"],
+    ["Seeing, darkness, humidity and temperature tiles", "atmospherics sheet", "current forecast hour, zone and moon", "real"],
+    ["Hourly forecast list", "atmospherics sheet", "hourly forecast", "real"],
+    ["Object visibility graph", "object detail screen", "the object's altitude, a moon value, hourly cloud cover", "real"],
+    ["Cloud bar, visibility and moon cards, highlights", "home screen", "forecast, zone, ephemeris", "real"],
+    ["Altitude graph", "nowhere", "a sine wave and a fixed shape", "mock and unused"],
+    ["Cloud cover graph painter", "nowhere", "hourly cloud cover", "unused"],
   ]}
 />
 
-**The moon curve** is the moon's altitude multiplied by its illuminated fraction when it is above the horizon, sampled every 15 minutes. Its unit is degrees times a fraction, which has no physical meaning beyond "higher and fuller is worse". Because it is plotted against 90, a full moon at the zenith reaches the top and a half moon at 60° reaches a third of the height.
+The sections below follow the code. Colours are given by role, because the interface is being redesigned and today's colours come from a default palette that the design system replaces.
+
+</DocSection>
+
+<DocSection id="axis" title="Shared conventions">
+
+- **The window is the night.** Both real graphs span the night window: from sunset on the selected date to the next sunrise, from the ephemeris (see [Planets and the sky](/planets-sky)). The horizontal position of a point is its minutes since the start divided by the minutes in the window.
+- **Time labels.** The conditions graph shows five labels, evenly spaced, as hours such as 18:00. The object graph shows five labels the same way.
+- **Sampling.** Altitudes are sampled every 15 minutes. Cloud cover is sampled hourly. Between samples the graphs draw straight or smoothed lines, and never compute extra points.
+- **Heights.** Each graph is 200 px tall in a rounded glass card. The conditions graph reserves the bottom 30 px of its plot for the time labels.
+- **Now.** A vertical line marks the current time when it falls inside the window.
+- **Legend.** Labels sit above the graph and name each layer.
+
+</DocSection>
+
+<DocSection id="conditions" title="Conditions graph">
+
+This is the graph at the top of the atmospherics sheet. It answers one question: **when tonight are the skies clear and the moon out of the way?**
+
+<DocTable
+  head={["Layer", "What it plots", "Vertical scale", "Meaning"]}
+  rows={[
+    ["Cloud cover (legend CLOUD COVER, faint white)", "the hourly cloud forecast as a filled area", "0% at the bottom, 100% at the top of the plot", "the higher the area, the cloudier; a flat low line is a clear night"],
+    ["Moon (legend MOON, indigo)", "the **moon's altitude** above the horizon, from the same trajectory the moon's own page uses, floored at 0", "0° at the bottom, 90° at the top", "the area is where the moon is up; a tall area means a high moon"],
+    ["Moonrise marker", "a short line, a dot and the words MOON RISE at the time the moon rises, if that is inside the window", "low in the plot", "after this the moon starts to wash out faint objects"],
+    ["Prime view", "a highlighted band with a badge over the best window", "full height", "the stretch the app recommends (next section)"],
+    ["Now", "a line labelled NOW", "full height", "the current time"],
+  ]}
+/>
+
+**Reading it.** You want a low cloud area and the moon area either absent or low. A tall moon area under low cloud means a bright, high moon. A prime-view band that sits where the moon area is zero is the best case.
+
+**Not on the graph.** The graph does not show the moon's phase. A full moon and a thin crescent draw the same area, because only altitude is plotted. The phase enters the prime-view calculation, not the picture.
 
 </DocSection>
 
 <DocSection id="prime-view" title="Prime view">
 
-Prime view is the best stretch of the night for observing. For each hourly sample in the night:
+Prime view is the app's recommended stretch of the night. It uses the hourly samples inside the night window.
 
-$$ \text{score} = 0.7\,\frac{c}{100} + 0.3\,\frac{i\,a}{90} $$
+$$ \text{score}(t) = 0.7\,\frac{c(t)}{100} + 0.3\,\frac{i\,\max(a(t), 0)}{90} $$
 
-where $c$ is the cloud cover in percent, $i$ the moon's illuminated fraction and $a$ its altitude in degrees when above the horizon (otherwise the second term is 0). Lower is better. The window is the contiguous run of at least 2 hours (3 samples) with the lowest average score, and it is dropped if that average is above 0.8.
+where $c$ is the forecast cloud cover in percent, $i$ is the moon's illuminated fraction (one number for the night), and $a$ is the moon's altitude in degrees at that hour, linearly interpolated between the 15-minute points. Lower is better, and 0 is a perfectly clear sky with no moon above the horizon.
 
-The weights 0.7 and 0.3 and the 0.8 cut-off are fixed numbers with no stated basis.
+Choosing the window:
+
+1. Try every run of consecutive hourly samples that is at least 3 samples long, which spans 2 hours.
+2. Take the run with the **lowest average score**. Ties keep the shorter, earlier run.
+3. If that average is above 0.8, show nothing: the night is too poor.
+
+**The window is always short.** Any run of six or more samples can be cut into runs of three to five samples, and the best of those has an average no higher than the long run's. So the chosen window is always 3, 4 or 5 samples long, which is 2 to 4 hours. The method finds the best short stretch, not the longest good one.
+
+The weights 0.7 and 0.3 and the cut-off 0.8 are fixed numbers with no stated basis, and the score is not in physical units.
 
 </DocSection>
 
-<DocSection id="visibility" title="Object visibility graph">
+<DocSection id="sheet" title="The rest of the atmospherics sheet">
 
-For one object, the graph plots its altitude over the night and the moon curve, and shades the **optimal windows**: the hours when the object is above 30° and the moon curve is below 30. Both thresholds are described in the code as arbitrary. The moon curve is the same unit-less value as above and belongs to the moon alone, so the moon's effect does not depend on how close the moon is to the object.
+**Rise and set cards.** Four cards in a row: SUNRISE, SUNSET, MOONRISE and MOONSET, as local times from the ephemeris.
 
-</DocSection>
-
-<DocSection id="atmospherics" title="Atmospherics">
-
-The atmospherics sheet also shows tiles for seeing, darkness, humidity and temperature.
+**Tiles.** Four tiles in two columns, all for the current forecast hour:
 
 <DocTable
-  head={["Tile", "Value", "Meaning"]}
+  head={["Tile", "Value", "Bar and colour"]}
   rows={[
-    ["Seeing", "1 to 10 with a label", "a ground-weather proxy (see [Weather and clouds](/weather-clouds))"],
-    ["Darkness", "mag/arcsec², with a label from Excellent to Very Poor", "the zone's sky brightness minus a moon penalty `4 × phase × sin(altitude)`"],
-    ["Humidity", "%", "forecast at the current hour"],
-    ["Temperature", "°C", "forecast at the current hour"],
+    ["Seeing", "1 to 10 and a label, from the ground-weather proxy (see [Weather and clouds](/weather-clouds))", "bar is score over 10; light green from 8, amber from 5, faint white below 5"],
+    ["Darkness", "sky brightness in mag/arcsec² and a label", "bar maps 17 to 22 onto empty to full; colour from the label"],
+    ["Humidity", "percent", "none"],
+    ["Temp", "degrees Celsius", "none"],
   ]}
 />
+
+The darkness value is the zone's sky brightness minus a moon penalty of $4 \times i \times \sin(a)$ while the moon is up, where $i$ is the illuminated fraction and $a$ the moon's altitude. Its labels are Excellent from 21.5, Good from 21.0, Fair from 20.0, Poor from 19.0 and Very Poor below. The penalty is a heuristic, not a physical model; the [sky model](/sky-brightness) replaces it.
+
+**Hourly forecast list.** Up to 24 rows starting from half an hour ago. Each row shows the time, cloud cover in percent, temperature, wind speed and the seeing label, and the current hour is highlighted.
+
+</DocSection>
+
+<DocSection id="object" title="Object visibility graph">
+
+This is the graph on an object's detail screen, titled Visibility. It answers: **when tonight is this object high, and what is in the way?**
+
+<DocTable
+  head={["Layer", "What it plots", "Vertical scale", "Meaning"]}
+  rows={[
+    ["Cloud (legend CLOUD, faint white)", "the hourly cloud forecast as a smooth filled area behind everything, with a stroke", "0% at the bottom, 100% at the top of the plot", "as on the conditions graph"],
+    ["Moon (legend MOON, indigo)", "the **moon value**: the moon's altitude times its illuminated fraction while it is up, 0 otherwise", "0 at the bottom; a value of 90 reaches 70% of the plot height", "higher means a brighter, higher moon; a thin crescent stays flat even when high"],
+    ["Object (legend OBJECT, blue)", "the object's altitude, every 15 minutes", "0° at the bottom; 90° reaches 70% of the plot height", "the higher the line, the less air the light crosses"],
+    ["Peak", "a dot at the highest point inside the window", "as the object", "the best moment for altitude"],
+    ["Current position", "a dot on the curve at the current time, by linear interpolation", "as the object", "where the object is right now"],
+    ["Now", "an orange line that fades out downward, with a NOW label", "below the top badge", "the current time"],
+    ["Moonrise", "a marker with the words MOON RISE", "low in the plot", "when the moon rises"],
+  ]}
+/>
+
+The graph stops at 70% of its height for 90° so that peak and labels have room. The scale is therefore the same for the object and the moon value but shows each as a share of 70%, not of the full height.
+
+**Scrubbing.** Dragging or tapping shows a line, a dot on the curve and a tooltip with the time and the altitude at the nearest 15-minute point, to a tenth of a degree. The graph also refreshes every minute so the Now line and the current-position dot move.
+
+**Calculated but not drawn.** The data also holds "optimal windows": hours when the object is above 30° and the moon value is below 30, and sunrise and sunset times. The code comments call both thresholds arbitrary. The windows are computed and never drawn, so they do not appear anywhere on screen.
+
+**The two moon curves.** The conditions graph plots the moon's **altitude**. The object graph plots **altitude times illuminated fraction**. Both are labelled MOON, and they differ for any moon that is not full.
+
+</DocSection>
+
+<DocSection id="cards" title="Dashboard readouts">
+
+<DocTable
+  head={["Readout", "What it shows", "How it is calculated"]}
+  rows={[
+    ["Cloud bar", "cloud cover, with a bar filled to the percentage", "the current hour for today, or the day's average for another date"],
+    ["Visibility card", "a sky type, and five bars", "zone to bars: 5 minus the floor of (zone minus 1) over 2, clamped 0 to 5, so zones 1 and 2 give 5 bars, 3 and 4 give 4, 5 and 6 give 3, 7 and 8 give 2, and 9 gives 1"],
+    ["Zone and brightness bar", "the zone number and the sky brightness in mag/arcsec², with a short label", "straight from the zone data"],
+    ["Darkness card", "a label, the sky brightness and a figure called Ratio", "zone data; the figure is shown only when above zero, and it is in fact the radiance in nW/cm²/sr, because of the naming mix-up on [Zone scale](/zone-scale)"],
+    ["Moon cards", "a moon picture, the phase name and the illuminated percentage", "the illuminated fraction times 100, and the phase angle in the bands below"],
+    ["Highlights", "up to three bright objects", "see below"],
+  ]}
+/>
+
+**Moon phase names** come from the phase angle in degrees: new moon at 355 or above and 5 or below, waxing crescent above 5 and below 85, first quarter from 85 to 95, waxing gibbous above 95 and below 175, full moon from 175 to 185, waning gibbous above 185 and below 265, last quarter from 265 to 275, waning crescent above 275 and below 355. Each band selects one of eight pictures.
+
+**Highlights** pick objects from the ephemeris list that is above 10° altitude and not the Sun, sort them by magnitude (lower is brighter), and show the three brightest. When the Sun is above −6° (daytime) only the Moon qualifies, since the planets are washed out. Only the Sun, Moon and planets are in that list: stars and deep-sky objects are not.
+
+</DocSection>
+
+<DocSection id="labels" title="Three label sets for one zone">
+
+The same zone gets different words in different places, and one set still uses Bortle-style names.
+
+<DocTable
+  head={["Zone", "Visibility card and zone bar (the card adds the word Sky)", "Darkness card"]}
+  rows={[
+    ["1", "Dark Sky", "Excellent"],
+    ["2", "Dark Sky", "Truly Dark"],
+    ["3", "Rural", "Rural"],
+    ["4", "Rural", "Rural/Suburban"],
+    ["5", "Suburban", "Suburban"],
+    ["6", "Suburban", "Bright Suburban"],
+    ["7", "Urban", "Suburban/Urban"],
+    ["8", "Urban", "City"],
+    ["9", "Urban", "Inner City"],
+  ]}
+/>
+
+The home screen's sky state (see [Sky states](/sky-states)) is a third description of the same sky. A redesign should use one vocabulary.
+
+</DocSection>
+
+<DocSection id="unused" title="Mock and unused">
+
+- **Altitude graph.** A widget that draws a sine wave with a peak at 80°, a hard-coded "now" a fifth of the way along and fixed 18:00 to 06:00 labels. Its cloud background is a fixed shape. It is not used by any screen and shows no real data.
+- **Cloud cover graph painter.** Draws hourly cloud cover with a "NOW" line, but nothing uses it.
+- **Optimal windows.** Computed for every object and never drawn (above).
 
 </DocSection>
 
@@ -72,11 +196,11 @@ The atmospherics sheet also shows tiles for seeing, darkness, humidity and tempe
   head={["Graph", "Definition under the sky model"]}
   rows={[
     ["Cloud cover", "the hourly cloud fraction over the night, with the 0.30, 0.50 and 0.70 cuts that set the sky state"],
-    ["Moon", "the moon's cost in magnitudes of sky brightness, in mag/arcsec², at the zenith"],
+    ["Moon", "the moon's cost in magnitudes of sky brightness at the zenith, in mag/arcsec², so the curve means something in physical units and depends on the phase"],
     ["Sky brightness", "the effective sky brightness over the night"],
-    ["Best window", "the window with the greatest utility, shaded on the time axis"],
+    ["Best window", "the window with the greatest utility, shaded on the time axis, replacing prime view"],
     ["Object altitude", "altitude over time with airmass on a second axis"],
-    ["Object windows", "hours when the object is at least 30° up and the moon adds at most 0.5 mag at the object's own position (proposal)"],
+    ["Object windows", "hours when the object is at least 30° up and the moon adds at most 0.5 mag at the object's own position (proposal), drawn this time"],
   ]}
 />
 
@@ -92,7 +216,11 @@ Excerpts of the real files, cut out by name, copied into the site and checked ag
 
 <SourceExcerpt file="lib/features/dashboard/presentation/widgets/conditions_graph.dart" symbols={["_drawMoonCurve", "_drawCloudCover"]} />
 <SourceExcerpt file="lib/core/engine/prime_view_calculator.dart" symbols={["_calculateCombinedScore", "_findBestContiguousWindow"]} />
+<SourceExcerpt file="lib/features/catalog/presentation/widgets/visibility_graph_painter.dart" symbols={["_drawObjectCurve", "_drawMoonInterference", "_drawPeakIndicator"]} />
+<SourceExcerpt file="lib/features/catalog/presentation/widgets/visibility_graph_widget.dart" symbols={["_updateScrubber"]} />
 <SourceExcerpt file="lib/features/catalog/data/services/visibility_service_impl.dart" symbols={["calculateVisibility"]} />
+<SourceExcerpt file="lib/features/dashboard/domain/logic/highlights_logic.dart" symbols={["selectTop3"]} />
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/moon_mini_card.dart" symbols={["_getMoonPhaseLabel"]} />
 
 </CodeTabs>
 

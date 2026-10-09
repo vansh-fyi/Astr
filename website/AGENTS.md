@@ -86,6 +86,63 @@ This file contains no code on purpose. Rules are written in plain language. The 
 - Data that comes from a one-off analysis lives in the data folder with its provenance in the file, and the verification script checks it adds up.
 - Do not use Bortle terms except to say they are not used.
 
+## Project context for front end work
+
+Read this before designing or building any interface here or in the application.
+
+- Astr tells you whether tonight's sky, at a place, is worth going outside for, and why not if it is not. Everything on screen serves that one question first. After that it offers astronomical data and, later, a star map and a very large object corpus.
+- The product is free, open source and tip-funded, with tipping through the stores. The code is licensed under Apache-2.0, published data packs under CC BY-SA, and no third-party copyleft code may ship in the application. Do not add a dependency or an asset without checking its licence, and record it in the repository's notice file.
+- The documentation site is the design authority. The application's front end will be redesigned screen by screen from Figma exports, and this site sets the precedent that the redesign follows. The application's old interface code is not a reference for design.
+- The next phase on this site is a component system. The owner asks for it one component at a time. Until a component is requested, do not add component pages, and do not invent components.
+- The audience stands outside at night with a phone. The interface is dark only, must be legible with the screen dimmed, and must keep working under the red night-vision overlay.
+- Decisions already made, which you must not reopen: the zone scale is a doubling ladder that starts at thirty-two hundredths of the natural brightness; the hero state follows the best window tonight with a separate chip for right now; sizes are fixed at sixteen pixels while layout is liquid; the ephemeris moves to free JPL data; the corpus targets parity with the best planetarium apps, plus visibility intelligence per object.
+
+## Design language: glass
+
+The site's look was set in two steps, a glass surface language drawn from the owner's portfolio, then rebuilt on the proportion scale. It is the precedent for every component. Its values live in the shell stylesheet as named custom properties and in the global stylesheet. Reuse those, never copy numbers, and when components arrive promote them to a shared component layer instead of repeating them.
+
+- **Surfaces are frosted glass.** A very faint translucent fill from the lightest space grey stop at magnitude eight, a hairline ring from the same stop at magnitude six, a top sheen at magnitude five, and a backdrop blur with raised saturation. Hover moves the fill to magnitude six and the ring to magnitude four. Code blocks, notes and inputs use a darker block fill from the deepest space grey stop at magnitude one so they stay near black. Raised areas use the dark Deep Space stops.
+- **Glass needs something behind it.** Blur on a flat background looks flat. The page has two soft ambient glows built from the Moffat gradient utility, and image areas sit behind glass too. Any component placed on a plain surface must be given a backdrop that varies in brightness, or it will not read as glass.
+- **Shape.** Cards and panels use radius step twenty-one, tiles step thirteen, inputs and small controls step eight. Controls that are tapped, chips, tabs and the search field are pills with the fully round radius token. Dialogs use the card radius with heavier blur and a dimmed, blurred backdrop.
+- **Interaction.** Hover brightens the fill and the ring as described above. Tiles and swatches lift by spacing step three on hover. Pills shrink slightly when pressed. Transitions run about two hundred milliseconds with an ease-out curve that starts fast, and only transform, opacity and colour animate, never layout. Reduced motion collapses every transition to nothing.
+- **Focus and selection** use Deep Space three hundred: a two-step outline for focus and the fill for selected chips and the active tab. It is never used for small text.
+- **Text.** Satoshi bold for headings from the second type step up, Inter for everything else. Body is the zero step, labels use the minus-one and minus-two steps. Leading and tracking come with the step.
+- **Hit targets.** A control may be drawn at the thirty-four step but its tappable area is at least the fifty-five step, which exceeds both platform minimums.
+- **Never express meaning by hue alone.** Under the red overlay every colour collapses to one. Pair colour with a label, a shape, a position or an icon, and keep contrast after compositing.
+
+## Building a component system
+
+- Work one component at a time, when asked. Each gets a documentation page in the proportion or a new components group, written to the page rules above.
+- A component page states, in this order: what it is for and the data it shows; anatomy; variants; states, which always include default, hover, pressed, focus, disabled, loading, error, empty, stale and offline where the data can be stale or missing; sizes and spacing as scale steps; colour as a stop and a ladder step per role; the glass level; motion; accessibility including the red overlay; behaviour on narrow and wide screens; and do and do not.
+- Define the component's roles in the shared stylesheet before writing the page. A page shows the real tokens, a live example built from them, and the Flutter mirror. If a component needs a value that is not on the scale, change the component, not the scale.
+- Mirror each component in Flutter as plain Dart constants plus a small reference widget that depends only on the existing mirror files for colour, opacity, gradients, spacing, radius, type and layout. Keep it analyser-clean and test-verified like the other Dart files, and extend the verification script so it fails if a component uses a raw pixel size or a colour outside the stops.
+- Components must handle the real data states described in the next section, because the application's hardest screens are about missing, stale and uncertain data.
+- Build components from the glass language, the proportion scale and the ladder only. Aurora and airglow colours belong to the application's own expressive moments, such as sky state art and the six illustrated backgrounds. They never appear in the documentation chrome and they never replace a stop.
+
+## What the interface must express
+
+These facts come from the sky science pages, which are the source of truth. Link to them rather than restating formulas.
+
+- **Six sky states**, best to worst: Milky Way visible, Starry sky, Planets visible, Few stars, Cloudy and Too much light. Each has one illustrated background image. The hero shows the state of the best window tonight. A small chip shows the state right now, and is empty in daylight and twilight. Both come from one function, so they never disagree about method.
+- **Say why.** The model returns a limiting factor: cloud, the moon, light pollution or nothing significant. Show it. Never present a bad state without its cause.
+- **Zones** are one to nine and never use Bortle words. Show the zone number, the sky brightness in magnitudes per square arcsecond and, where space allows, the limiting magnitude. Use one vocabulary for the same zone across the application. Today three label sets exist for it, and the redesign should replace them with one.
+- **Honesty about data.** Mark a zone that is only the dark-sky default, weather that is stale, cloud cover that is a forecast, and seeing that is a proxy index and not a measurement. Offline and stale are normal states, not errors. Say when there is no astronomical night at all.
+- **Graphs** share a night-window time axis from sunset to the next sunrise, a Now line, a legend, and a best-window band. The moon layer becomes the moon's cost in magnitudes, and an object's good hours are drawn. Colours in today's graphs come from a default palette that the redesign replaces.
+- **Units and wording:** magnitudes per square arcsecond for sky brightness, magnitude for limiting magnitude, percent for cloud, local time for events. Keep the tone short and factual, as on this site.
+- **Components today**, which the redesign will replace: the hero label and zone badge, the conditions card with cloud bar and sun and moon times, the visibility and moon cards, the highlights feed, the atmospherics sheet with its graph, tiles and hourly list, the object visibility graph, forecast day rows, the location and search sheets, and the navigation shell. The mock altitude graph and the unused cloud painter are dead and must not be rebuilt.
+
+## Working notes and pitfalls
+
+- The markdown pipeline has no table syntax. Use the shared table component. Links inside its cells are supported.
+- The documentation folder at the repository root is git-ignored for new files, although old files in it are tracked. A new file there needs a forced add, or the ignore rule needs to change.
+- Satoshi is fetched, never committed. A fresh checkout gets it automatically before the dev server and the build. The Flutter application needs the fonts script run with its application flag once.
+- Container query units were tried for a fluid size unit and dropped. Sizes are fixed. Media and container queries cannot read variables, so breakpoints are literals that are Fibonacci numbers or sums of pane widths, and are commented as such.
+- A new rule that targets an element already styled by a more specific shared rule will lose. The calculator labels were hit by the example controls' label rule, so match or beat that specificity.
+- The development server uses Turbopack and the build script uses webpack. A stylesheet that builds under one can still fail under the other, so run both when changing styles. Do not run a production build into the same output folder while a development server is running, because it can corrupt it. Ask the owner to restart the server if a stale error appears.
+- The headless browser used for screenshots has a minimum window width of about five hundred pixels. A narrow screenshot is only as narrow as that.
+- Stop only servers you started, and check the ports the verification script uses before and after.
+- The bundled object catalogue is tiny today, and some graphs are mock or unused. Do not describe a feature as working because a screen exists. Check the sky science pages for its real status.
+
 ## Typography and brand
 
 - Satoshi for headings and the wordmark. Inter for body text. No other typefaces.
@@ -102,7 +159,7 @@ This file contains no code on purpose. Rules are written in plain language. The 
 ## Layout rules
 
 - There is no top bar. The brand and the search field sit at the top of the left sidebar, and a small floating menu button appears on narrow screens.
-- Three panes: sidebar, article, and an on-this-page outline. The sidebar holds two groups, the colour system and the proportion system. The article scrolls without a visible scrollbar. Keep it that way.
+- Three panes: sidebar, article, and an on-this-page outline. The sidebar holds three groups: the colour system, the proportion system and sky science. The article scrolls without a visible scrollbar. Keep it that way.
 - Do not add banners, headers, footers, announcement strips or other chrome that was not requested.
 - Keep sizing, spacing and radii consistent with the existing shell stylesheet. Reuse its roles instead of introducing new ones. The shell stylesheet carries no raw pixel sizes: every length, font size and radius reads a proportion token, and the verification script fails if a literal appears outside a media query.
 
@@ -111,7 +168,7 @@ This file contains no code on purpose. Rules are written in plain language. The 
 - Pages live as markdown with embedded components in the content folder. Prose and formulas belong in the markdown, not in components.
 - Mathematics is written in markdown math and rendered with KaTeX. Every number a page shows should be traceable to a formula on the same page.
 - Each page declares its title, description and section list, and each declared section exists on the page. The verification script checks this.
-- Each page has exactly one code tabs block with a Tokens and CSS tab and a Flutter tab. Both panels must be filled. Never leave a placeholder tab.
+- Each page has exactly one code tabs block with two filled panels. The colour and proportion pages name them Tokens and CSS, and Flutter. Sky science pages name them for the page. Never leave a placeholder tab.
 - Use the shared documentation components for sections, notes, code blocks and tabs. Do not build one-off equivalents.
 - Tone: short, factual, no marketing language, British spelling for the word colour.
 
@@ -126,6 +183,7 @@ This file contains no code on purpose. Rules are written in plain language. The 
 
 - Run the type check, the linter, the production build and the documentation verification script, in that order, and report real results. A step you did not run is reported as not run.
 - Look at the page. For any visual change, take a screenshot and review it, at desktop and at a narrow width.
+- After changing any file listed in the source manifest, run the sync script. After changing a specification or a reference implementation, run its Python and Dart tests before the site's checks. Run the production-server check, not only the static one.
 - If the verification script's port is busy, find the leftover process from an earlier run and stop only your own.
 - A development server may already be running for the owner. Do not stop it.
 
@@ -134,6 +192,8 @@ This file contains no code on purpose. Rules are written in plain language. The 
 - Stage explicit paths inside this folder only. Never stage everything.
 - The repository-root project instructions file may carry the owner's uncommitted edits. Never stage, revert or edit it.
 - Commit with a clear message. Push only when the owner asks.
+- Changes outside this folder, such as the specifications, the reference implementations, the licence files and the application code they live in, are separate commits at the repository root. Planning files are not committed because the project configuration turns that off. The owner's project instructions file is never staged, reverted or edited.
+- Start edits through the project's quick-task workflow, as the root instructions require, and keep each task's summary in its folder.
 - Do not commit generated build output or dependency folders.
 
 ## Never do these

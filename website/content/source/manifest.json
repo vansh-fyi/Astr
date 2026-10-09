@@ -30,6 +30,16 @@
     "lib/features/dashboard/data/services/weather_cache_pruning_service.dart",
     "lib/features/dashboard/presentation/providers/weather_provider.dart",
     "lib/features/dashboard/presentation/widgets/conditions_graph.dart",
-    "lib/core/config/api_config.dart"
+    "lib/core/config/api_config.dart",
+    "lib/features/dashboard/presentation/widgets/atmospherics_sheet.dart",
+    "lib/features/catalog/presentation/widgets/visibility_graph_painter.dart",
+    "lib/features/catalog/presentation/widgets/visibility_graph_widget.dart",
+    "lib/features/dashboard/domain/logic/highlights_logic.dart",
+    "lib/features/dashboard/presentation/widgets/hourly_forecast_list.dart",
+    "lib/features/dashboard/presentation/widgets/moon_mini_card.dart",
+    "lib/features/dashboard/presentation/theme/graph_theme.dart",
+    "lib/features/dashboard/presentation/widgets/darkness_card.dart",
+    "lib/features/dashboard/presentation/widgets/visibility_mini_card.dart",
+    "lib/features/dashboard/presentation/widgets/bortle_bar.dart"
   ]
 }
