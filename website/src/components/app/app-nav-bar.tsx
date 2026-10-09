@@ -19,10 +19,11 @@ const BAR_H = F.f89;
 const NOTCH_DEPTH = F.f34;
 const NOTCH_HALF = F.f55;
 
-/** The bar's outline with the notch cut for the centre action, as the app's NavBarClipper draws it. */
+/** The bar's outline: rounded corners (--radius-f21) and the notch cut for the centre action, as NavBarClipper draws it. */
 function barPath(w: number): string {
   const c = w / 2;
-  return `M0 0 H${c - NOTCH_HALF} C${c - F.f34} 0 ${c - F.f34} ${NOTCH_DEPTH} ${c} ${NOTCH_DEPTH} C${c + F.f34} ${NOTCH_DEPTH} ${c + F.f34} 0 ${c + NOTCH_HALF} 0 H${w} V${BAR_H} H0 Z`;
+  const r = F.f21;
+  return `M${r} 0 H${c - NOTCH_HALF} C${c - F.f34} 0 ${c - F.f34} ${NOTCH_DEPTH} ${c} ${NOTCH_DEPTH} C${c + F.f34} ${NOTCH_DEPTH} ${c + F.f34} 0 ${c + NOTCH_HALF} 0 H${w - r} A${r} ${r} 0 0 1 ${w} ${r} V${BAR_H - r} A${r} ${r} 0 0 1 ${w - r} ${BAR_H} H${r} A${r} ${r} 0 0 1 0 ${BAR_H - r} V${r} A${r} ${r} 0 0 1 ${r} 0 Z`;
 }
 const notchPath = (w: number): string => {
   const c = w / 2;
