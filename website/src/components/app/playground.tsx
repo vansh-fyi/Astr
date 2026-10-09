@@ -4,6 +4,7 @@ import { useId, useState, type ReactNode } from "react";
 import { CodeBlock } from "../docs/code-block";
 import { AppButton, AppIconTile, type GlyphName, type TileTone } from "./app-icons";
 import { AppCloudCoverGraph, AppConditionsGraph } from "./app-graphs";
+import { AppObjectGraph, OBJECT_COLORS } from "./app-object-graph";
 import { AppStage, AppCloudBar, AppConditionsCard, AppMoonCard, AppSkyState, AppVisibilityCard, type SkyStateKey, moonPhase } from "./app-widgets";
 
 type Opt = { value: string; label?: string };
@@ -133,13 +134,29 @@ const CONFIGS: Record<string, Config> = {
       return `ConditionsGraph(\n${args.map((a) => `  ${a},`).join("\n")}\n  startTime: start,\n  endTime: end,\n)${v.now ? "" : "\n// the NOW marker draws only when now is inside [start, end]"}`;
     },
   },
+  "object-graph": {
+    controls: [
+      { kind: "segment", key: "variant", label: "Variant", options: [{ value: "visibility", label: "Visibility" }, { value: "altitude", label: "Altitude" }] },
+      { kind: "segment", key: "object", label: "Object", options: [{ value: "high", label: "High object" }, { value: "low", label: "Low object" }, { value: "late", label: "Late riser" }] },
+      { kind: "segment", key: "color", label: "Highlight", options: opts("blue", "orange", "emerald", "pink") },
+      { kind: "toggle", key: "horizon", label: "Horizon view" },
+    ],
+    initial: { variant: "visibility", object: "high", color: "blue", horizon: false },
+    column: true,
+    preview: (v) => <AppObjectGraph variant={v.variant as "visibility"} objectId={String(v.object)} color={OBJECT_COLORS[String(v.color)]} horizon={Boolean(v.horizon)} />,
+    react: (v) => `<AppObjectGraph${attrs([["variant", v.variant, "visibility"], ["objectId", v.object, "high"], ["color", OBJECT_COLORS[String(v.color)], "#3b82f6"], ["horizon", v.horizon]])} />`,
+    flutter: (v) =>
+      v.variant === "visibility"
+        ? `VisibilityGraphWidget(\n  objectId: '${v.object}',\n${v.color !== "blue" ? `  highlightColor: Color(0xFF${OBJECT_COLORS[String(v.color)].slice(1).toUpperCase()}),\n` : ""})${v.horizon ? "\n// Horizon view: proposed, not in the app yet." : ""}`
+        : `AltitudeGraph(\n  themeColor: Color(0xFF${OBJECT_COLORS[String(v.color)].slice(1).toUpperCase()}),\n)`,
+  },
   "cloud-cover-graph": {
     controls: [{ kind: "segment", key: "night", label: "Forecast", options: [{ value: "night", label: "Night" }, { value: "overcast", label: "Overcast" }, { value: "clear", label: "Clear" }] }],
     initial: { night: "night" },
     column: true,
-    preview: (v) => <AppCloudCoverGraph data={v.night === "overcast" ? [80, 85, 90, 95, 92, 88, 90] : v.night === "clear" ? [3, 2, 0, 0, 1, 2, 4] : undefined} />,
-    react: (v) => (v.night === "overcast" ? "<AppCloudCoverGraph data={[80, 85, 90, 95, 92, 88, 90]} />" : v.night === "clear" ? "<AppCloudCoverGraph data={[3, 2, 0, 0, 1, 2, 4]} />" : "<AppCloudCoverGraph />"),
-    flutter: (v) => `CustomPaint(\n  painter: CloudCoverGraphPainter(\n    data: ${v.night === "night" ? "hourly" : v.night + "Hourly"},\n    startTime: start,\n    endTime: end,\n    cloudColor: Colors.white24,\n    nowIndicatorColor: GraphTheme.nowIndicatorColor,\n  ),\n)`,
+    preview: (v) => <AppCloudCoverGraph data={v.night === "overcast" ? [80, 85, 90, 95, 92, 88, 90, 94, 96, 92, 90, 93, 95] : v.night === "clear" ? [3, 2, 0, 0, 1, 2, 4, 2, 1, 0, 0, 2, 5] : undefined} />,
+    react: (v) => (v.night === "night" ? "<AppCloudCoverGraph />" : `<AppCloudCoverGraph data={[${v.night === "overcast" ? "80, 85, 90, 95, 92, 88, 90, 94, 96, 92, 90, 93, 95" : "3, 2, 0, 0, 1, 2, 4, 2, 1, 0, 0, 2, 5"}]} />`),
+    flutter: (v) => `ConditionsGraph(\n  cloudCoverData: ${v.night === "night" ? "hourly" : v.night + "Hourly"},\n  startTime: start,\n  endTime: end,\n)\n// cloud layer only: no moonCurve, moonRiseTime or primeViewWindow`,
   },
 };
 

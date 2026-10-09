@@ -2,7 +2,7 @@ export const meta = {
   title: "Cloud cover graph",
   group: "Components",
   description:
-    "The hourly forecast's cloud area with straight edges, a half-opacity stroke and the NOW marker.",
+    "The hourly cloud forecast as a smoothed area over the night, with the time grid, hour labels and the pulsing NOW marker. It is the cloud layer of the conditions graph on its own.",
   sections: [
     { id: "preview", title: "Preview" },
     { id: "variants", title: "Variants" },
@@ -29,27 +29,24 @@ export const meta = {
 <DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
 
 <CodeTabs labels={["React", "Flutter"]} second={<>
-<CodeBlock lang="dart" filename="Usage" code={`CustomPaint(
-  painter: CloudCoverGraphPainter(
-    data: hourly,
-    startTime: start,
-    endTime: end,
-    cloudColor: Colors.white24,
-    nowIndicatorColor: GraphTheme.nowIndicatorColor,
-  ),
+<CodeBlock lang="dart" filename="Usage" code={`ConditionsGraph(
+  cloudCoverData: hourly,
+  startTime: start,
+  endTime: end,
 )`} />
 
-<SourceExcerpt file="lib/features/dashboard/presentation/widgets/cloud_cover_graph_painter.dart" symbols={["CloudCoverGraphPainter"]} />
-
-<SourceExcerpt file="lib/features/dashboard/presentation/widgets/graph_legend_item.dart" symbols={["GraphLegendItem"]} />
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/conditions_graph.dart" symbols={["ConditionsGraph", "_drawCloudCover"]} />
 
 </>}>
-<CodeBlock lang="javascript" filename="Usage" code={`<AppCloudCoverGraph data={[10, 12, 20, 35, 45, 30, 15]} />`} />
+<CodeBlock lang="javascript" filename="Usage" code={`<AppCloudCoverGraph />
+<AppCloudCoverGraph data={[80, 85, 90, 95, 92, 88, 90, 94, 96, 92, 90, 93, 95]} />`} />
 
-<ReactExcerpt file="src/components/app/app-graphs.tsx" symbols={["AppCloudCoverGraph", "AppLegend"]} />
+<ReactExcerpt file="src/components/app/app-graphs.tsx" symbols={["AppCloudCoverGraph", "smooth"]} />
 
-<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-graph", ".app-graph svg", ".app-legend"]} />
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-graph", ".app-graph svg", ".app-pulse"]} />
 </CodeTabs>
+
+<DocNote>The app's separate <code>CloudCoverGraphPainter</code> draws straight edges; this page follows the conditions graph, whose cloud layer is smoothed. The pulse is proposed: the app draws a still dot.</DocNote>
 
 </DocSection>
 
@@ -60,24 +57,17 @@ export const meta = {
   rows={[
   [
     "data",
-    "data",
+    "cloudCoverData",
     "number[] / List<HourlyForecast>",
     "sample night",
-    "Cloud cover percent per hour."
-  ],
-  [
-    "color",
-    "cloudColor",
-    "colour",
-    "white at 24%",
-    "Fill and stroke."
+    "Cloud cover percent at evenly spaced hours."
   ],
   [
     "height",
     "parent height",
     "number",
-    "120",
-    "Pixels."
+    "160",
+    "Includes 30 px for the time labels."
   ]
 ]}
 />
@@ -91,19 +81,31 @@ export const meta = {
   rows={[
   [
     "Fill",
-    "white at 24%",
-    "Colors.white24",
-    "24%"
+    "white 25% to 5% gradient",
+    "Colors.white at 0.25 and 0.05",
+    "gradient"
   ],
   [
     "Stroke",
-    "fill colour at 50%, 2 px",
-    "cloudColor.withValues(alpha: 0.5)",
-    "2"
+    "white at 30%, 1.5 px",
+    "Colors.white.withValues(alpha: 0.3)",
+    "1.5"
+  ],
+  [
+    "Smoothing",
+    "cubic segments, tension 0.2",
+    "(p2 - p0) * 0.2",
+    "0.2"
+  ],
+  [
+    "Grid",
+    "white at 5%",
+    "Colors.white.withValues(alpha: 0.05)",
+    "5%"
   ],
   [
     "Now",
-    "#F97316",
+    "#F97316 line, pulsing dot",
     "GraphTheme.nowIndicatorColor",
     "orange"
   ]

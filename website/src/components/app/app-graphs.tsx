@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import "./app-ui.css";
 import { useElementWidth } from "../docs/viz/use-width";
 import { CLOUD_HOURLY, MOON_RISE_MINUTES, NIGHT_END, NIGHT_START, moonAltitude, primeView } from "@/lib/viz-data";
@@ -25,6 +26,50 @@ function smooth(points: Pt[]): string {
   return d;
 }
 
+/** The NOW marker: a glowing orange line, a pulsing dot at its head and a small label. */
+function NowMarker({ x, top, bottom }: { x: number; top: number; bottom: number }) {
+  const id = useId();
+  return (
+    <g>
+      <defs>
+        <linearGradient id={id} gradientUnits="userSpaceOnUse" x1={x} x2={x} y1={top} y2={bottom}>
+          <stop offset="0" stopColor="#f97316" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#f97316" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <rect x={x - 2} y={top} width={4} height={bottom - top} fill={`url(#${id})`} fillOpacity={0.6} filter="url(#g-blur)" />
+      <rect x={x - 0.75} y={top} width={1.5} height={bottom - top} fill={`url(#${id})`} />
+      <circle className="app-pulse" cx={x} cy={top} r={8} fill="#f97316" fillOpacity={0.4} />
+      <circle cx={x} cy={top} r={3} fill="#fb923c" />
+      <rect x={x + 8} y={top - 7} width={30} height={15} rx={4} fill="#f97316" fillOpacity={0.1} stroke="#f97316" strokeOpacity={0.2} />
+      <text x={x + 12} y={top + 4} fontSize={9} fontWeight={700} fill="#fb923c">NOW</text>
+    </g>
+  );
+}
+
+/** Gradients and the blur used by every graph on this site. */
+function GraphDefs() {
+  return (
+    <defs>
+      <filter id="g-blur" x="-50%" y="-10%" width="200%" height="120%">
+        <feGaussianBlur stdDeviation="3" />
+      </filter>
+      <linearGradient id="g-cloud" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stopColor="#fff" stopOpacity="0.25" />
+        <stop offset="1" stopColor="#fff" stopOpacity="0.05" />
+      </linearGradient>
+      <linearGradient id="g-now" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stopColor="#f97316" stopOpacity="0.9" />
+        <stop offset="1" stopColor="#f97316" stopOpacity="0" />
+      </linearGradient>
+      <linearGradient id="g-prime" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stopColor="#10b981" stopOpacity="0.1" />
+        <stop offset="1" stopColor="#10b981" stopOpacity="0.02" />
+      </linearGradient>
+    </defs>
+  );
+}
+
 export interface GraphLayers {
   cloud?: boolean;
   moon?: boolean;
@@ -38,14 +83,14 @@ export interface GraphLayers {
  * rise marker, the prime view window with its badge and the NOW marker. Colours are GraphTheme and the
  * painter's own literals.
  */
-export function AppConditionsGraph({ layers = {}, height = 200 }: { layers?: GraphLayers; height?: number }) {
+export function AppConditionsGraph({ layers = {}, height = 200, cloudData = CLOUD_HOURLY }: { layers?: GraphLayers; height?: number; cloudData?: readonly number[] }) {
   const { cloud = true, moon = true, moonRise = true, prime = true, now = true } = layers;
   const [ref, w] = useElementWidth<HTMLDivElement>(560);
   const h = height - LABEL_H;
   const span = NIGHT_END - NIGHT_START;
   const x = (m: number): number => ((m - NIGHT_START) / span) * w;
 
-  const cloudPts: Pt[] = CLOUD_HOURLY.map((c, i) => [x(NIGHT_START + i * 60), h - (c / 100) * h] as const);
+  const cloudPts: Pt[] = cloudData.map((c, i) => [x(NIGHT_START + (i * span) / (cloudData.length - 1)), h - (c / 100) * h] as const);
   const cloudFill = `M${cloudPts[0][0]} ${h} L${cloudPts[0][0]} ${cloudPts[0][1]} ${smooth(cloudPts).replace(/^M\S+ \S+/, "")} L${cloudPts.at(-1)![0]} ${h} L${w} ${h} Z`;
   const moonPts: Pt[] = [];
   for (let m = NIGHT_START; m <= NIGHT_END; m += 15) moonPts.push([x(m), h - (Math.max(0, moonAltitude(m)) / 90) * h]);
@@ -57,29 +102,12 @@ export function AppConditionsGraph({ layers = {}, height = 200 }: { layers?: Gra
   const nowTop = h * 0.35;
   const winStart = win ? x(win.from) : 0;
   const winEnd = win ? x(win.to) : 0;
-  const winMid = Math.max(48, Math.min(w - 48, (winStart + winEnd) / 2));
+  const winMid = Math.max(44, Math.min(w - 44, (winStart + winEnd) / 2));
 
   return (
     <div ref={ref} className="app-ui app-graph" style={{ height }}>
       <svg viewBox={`0 0 ${w} ${height}`} height={height} role="img" aria-label="Conditions graph for an example night">
-        <defs>
-          <linearGradient id="g-cloud" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#fff" stopOpacity="0.25" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0.05" />
-          </linearGradient>
-          <linearGradient id="g-now" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#f97316" stopOpacity="0.5" />
-            <stop offset="1" stopColor="#f97316" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="g-prime" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#10b981" stopOpacity="0.08" />
-            <stop offset="1" stopColor="#10b981" stopOpacity="0.02" />
-          </linearGradient>
-          <linearGradient id="g-prime-line" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#10b981" stopOpacity="0.5" />
-            <stop offset="1" stopColor="#10b981" stopOpacity="0" />
-          </linearGradient>
-        </defs>
+        <GraphDefs />
         {[1, 2, 3].map((i) => <line key={`h${i}`} x1={0} x2={w} y1={(h * i) / 4} y2={(h * i) / 4} stroke="#fff" strokeOpacity={0.05} />)}
         {[1, 2, 3, 4].map((i) => <line key={`v${i}`} y1={0} y2={h} x1={(w * i) / 4} x2={(w * i) / 4} stroke="#fff" strokeOpacity={0.05} />)}
         {cloud && (
@@ -106,19 +134,11 @@ export function AppConditionsGraph({ layers = {}, height = 200 }: { layers?: Gra
         {win && (
           <g>
             <rect x={winStart} y={0} width={winEnd - winStart} height={h} fill="url(#g-prime)" />
-            <line x1={winMid} x2={winMid} y1={h - 40} y2={h} stroke="url(#g-prime-line)" />
-            <rect x={winMid - 44} y={h - 40 - 22} width={88} height={22} rx={20} fill="#10b981" fillOpacity={0.1} stroke="#10b981" strokeOpacity={0.2} />
-            <text x={winMid - 36} y={h - 40 - 7} fontSize={10} fontWeight={600} letterSpacing={0.5} fill="#6ee7b7">✦ PRIME VIEW</text>
+            <rect x={winMid - 40} y={8} width={80} height={20} rx={10} fill="#10b981" fillOpacity={0.12} stroke="#10b981" strokeOpacity={0.25} />
+            <text x={winMid} y={22} fontSize={10} fontWeight={600} letterSpacing={0.5} fill="#6ee7b7" textAnchor="middle">PRIME VIEW</text>
           </g>
         )}
-        {now && (
-          <g>
-            <line x1={nowX} x2={nowX} y1={nowTop} y2={h} stroke="url(#g-now)" />
-            <rect x={nowX + 6} y={nowTop} width={30} height={15} rx={4} fill="#f97316" fillOpacity={0.1} stroke="#f97316" strokeOpacity={0.2} />
-            <text x={nowX + 10} y={nowTop + 11} fontSize={9} fontWeight={700} fill="#fb923c">NOW</text>
-            <circle cx={nowX} cy={nowTop} r={3} fill="#fb923c" />
-          </g>
-        )}
+        {now && <NowMarker x={nowX} top={nowTop} bottom={h} />}
         {[0, 1, 2, 3, 4].map((i) => {
           const m = NIGHT_START + (span * i) / 4;
           const midnight = Math.round(m) % 1440 === 0;
@@ -134,32 +154,11 @@ export function AppConditionsGraph({ layers = {}, height = 200 }: { layers?: Gra
 }
 
 /**
- * CloudCoverGraphPainter: a straight-edged area with a half-opacity stroke and the NOW dot, used by the
- * hourly forecast. Data is a list of percentages, one per hour.
+ * The hourly cloud forecast: the same smoothed gradient area, grid, hour labels and NOW marker as the
+ * conditions graph, with only the cloud layer. Data is a percentage per hour across the night.
  */
-export function AppCloudCoverGraph({ data = CLOUD_HOURLY, color = "rgba(255,255,255,0.24)", height = 120 }: { data?: readonly number[]; color?: string; height?: number }) {
-  const [ref, w] = useElementWidth<HTMLDivElement>(560);
-  const pts: Pt[] = data.map((c, i) => [(i / (data.length - 1)) * w, height - (c / 100) * height] as const);
-  const area = `M0 ${height} ${pts.map(([px, py]) => `L${px} ${py}`).join(" ")} L${w} ${height} Z`;
-  const line = "M" + pts.map(([px, py]) => `${px} ${py}`).join(" L");
-  const nowX = (2.25 / (data.length - 1)) * w;
-  return (
-    <div ref={ref} className="app-ui app-graph" style={{ height }}>
-      <svg viewBox={`0 0 ${w} ${height}`} height={height} role="img" aria-label="Cloud cover over the night">
-        <defs>
-          <linearGradient id="g-cc-now" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#fb923c" stopOpacity="0.5" />
-            <stop offset="1" stopColor="#fb923c" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={area} fill={color} />
-        <path d={line} fill="none" stroke={color} strokeWidth={2} strokeOpacity={0.5} />
-        <line x1={nowX} x2={nowX} y1={20} y2={height} stroke="url(#g-cc-now)" />
-        <circle cx={nowX} cy={20} r={3} fill="#f97316" />
-        <text x={nowX + 4} y={30} fontSize={9} fontWeight={700} fill="#f97316">NOW</text>
-      </svg>
-    </div>
-  );
+export function AppCloudCoverGraph({ data = CLOUD_HOURLY, height = 160 }: { data?: readonly number[]; height?: number }) {
+  return <AppConditionsGraph cloudData={data} height={height} layers={{ moon: false, moonRise: false, prime: false }} />;
 }
 
 /** GraphLegendItem: an 8 dp dot with a label at 70% white. */

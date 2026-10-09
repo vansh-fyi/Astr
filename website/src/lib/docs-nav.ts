@@ -45,6 +45,7 @@ export const DOCS_GROUPS = [
     links: [
       { href: "/components/conditions-graph", label: "Conditions graph" },
       { href: "/components/cloud-cover-graph", label: "Cloud cover graph" },
+      { href: "/components/object-graph", label: "Object visibility graph" },
     ],
   },
   {

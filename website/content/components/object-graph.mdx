@@ -1,0 +1,141 @@
+export const meta = {
+  title: "Object visibility graph",
+  group: "Components",
+  description:
+    "Where a planet or deep sky object is over the night: its altitude above the horizon, the moon and the clouds in the way, and an optional horizon strip showing where it sits at the scrubbed time. The app has two variants.",
+  sections: [
+    { id: "preview", title: "Preview" },
+    { id: "variants", title: "Variants" },
+    { id: "implementation", title: "Implementation" },
+    { id: "api", title: "API reference" },
+    { id: "tokens", title: "Design tokens" },
+  ],
+};
+
+<DocSection id="preview" title="Preview">
+
+<Gallery column>
+  <AppObjectGraph />
+</Gallery>
+
+</DocSection>
+
+<DocSection id="variants" title="Variants" description="Pick a variant with the controls. The preview and both code blocks follow.">
+
+<Playground name="object-graph" />
+
+</DocSection>
+
+<DocSection id="implementation" title="Implementation" description="The React tab is this site's own component, the same source that draws the preview, styled by the CSS below it. The Flutter tab is the Dart a screen builds it with, from the app's tokens.">
+
+<CodeTabs labels={["React", "Flutter"]} second={<>
+<CodeBlock lang="dart" filename="Usage" code={`VisibilityGraphWidget(
+  objectId: 'jupiter',
+  highlightColor: AppColors.accent,
+)
+
+AltitudeGraph(themeColor: Colors.orange)`} />
+
+<SourceExcerpt file="lib/features/catalog/presentation/widgets/visibility_graph_widget.dart" symbols={["VisibilityGraphWidget"]} />
+
+<SourceExcerpt file="lib/features/catalog/presentation/widgets/visibility_graph_painter.dart" symbols={["VisibilityGraphPainter"]} />
+
+<SourceExcerpt file="lib/features/dashboard/presentation/widgets/altitude_graph.dart" symbols={["AltitudeGraph", "_AltitudeGraphPainter"]} />
+
+</>}>
+<CodeBlock lang="javascript" filename="Usage" code={`<AppObjectGraph />
+<AppObjectGraph variant="altitude" color="#f97316" />
+<AppObjectGraph objectId="late" horizon />`} />
+
+<ReactExcerpt file="src/components/app/app-object-graph.tsx" symbols={["AppObjectGraph", "HorizonView", "azimuth"]} />
+
+<CssExcerpt file="src/components/app/app-ui.css" selectors={[".app-og", ".app-og-head", ".app-og-plot", ".app-og-axis", ".app-og-tip", ".app-og-horizon", ".app-pulse"]} />
+</CodeTabs>
+
+<DocNote>The horizon strip is proposed. It uses the same altitude and a standard azimuth from latitude, declination and hour angle.</DocNote>
+
+</DocSection>
+
+<DocSection id="api" title="API reference">
+
+<DocTable
+  head={["React prop", "Flutter parameter", "Type", "Default", "Meaning"]}
+  rows={[
+  [
+    "variant",
+    "VisibilityGraphWidget or AltitudeGraph",
+    "visibility, altitude",
+    "visibility",
+    "The full graph with moon and cloud, or the single curve."
+  ],
+  [
+    "objectId",
+    "objectId",
+    "string",
+    "high",
+    "Which object. The site has three sample objects."
+  ],
+  [
+    "color",
+    "highlightColor, themeColor",
+    "colour",
+    "#3B82F6",
+    "Curve, peak dot, scrubber and tooltip colour."
+  ],
+  [
+    "horizon",
+    "none (proposed)",
+    "boolean",
+    "false",
+    "The strip under the graph: altitude above the horizon line and azimuth, east to west."
+  ]
+]}
+/>
+
+</DocSection>
+
+<DocSection id="tokens" title="Design tokens">
+
+<DocTable
+  head={["Token", "CSS", "Dart", "Value"]}
+  rows={[
+  [
+    "Plot surface",
+    "white at 5%, 24 radius, white 10% border",
+    "Colors.white.withValues(alpha: 0.05)",
+    "24"
+  ],
+  [
+    "Curve",
+    "3 px, round, 40% glow at 6 px",
+    "highlightColor",
+    "#3B82F6"
+  ],
+  [
+    "Moon",
+    "#1E1B4B at 50%, #6366F1 stroke",
+    "GraphTheme.moonFillColor",
+    "indigo"
+  ],
+  [
+    "Now",
+    "#F97316, starts 80 px from the top",
+    "topY = 80",
+    "orange"
+  ],
+  [
+    "Altitude scale",
+    "degrees over 90, at 70% of the height",
+    "value / 90 * height * 0.7",
+    "0.7"
+  ],
+  [
+    "Hour axis",
+    "12 px, white at 30%",
+    "DateFormat.j()",
+    "12"
+  ]
+]}
+/>
+
+</DocSection>
