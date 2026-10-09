@@ -51,12 +51,14 @@ export const activeBars = (zone: number): number => Math.min(5, Math.max(0, 5 - 
 export function AppVisibilityCard({ zone, mpsas }: { zone: number; mpsas: number }) {
   const bars = activeBars(zone);
   return (
-    <div className="app-ui app-card is-mini">
-      <span className="abs app-label-sm" style={{ top: 15, left: 15 }}>VISIBILITY</span>
-      <span className="abs app-zone-pill" style={{ top: 15, right: 15 }}>Zone {zone}</span>
-      <span className="abs app-title" style={{ top: 50, left: 15, whiteSpace: "nowrap" }}>{skyLabel(zone)}</span>
-      <span className="abs app-label-sm" style={{ top: 86, left: 15 }}>{mpsas.toFixed(2)} MPSAS</span>
-      <div className="abs app-rating" style={{ bottom: 15, left: 15, right: 15 }}>
+    <div className="app-ui app-card is-mini app-vis">
+      <div className="app-vis-head">
+        <span className="app-label-sm">VISIBILITY</span>
+        <span className="app-zone-pill">Zone {zone}</span>
+      </div>
+      <span className="app-title app-vis-label">{skyLabel(zone)}</span>
+      <span className="app-label-sm">{mpsas.toFixed(2)} MPSAS</span>
+      <div className="app-rating">
         {Array.from({ length: 5 }, (_, i) => (
           <i key={i} className={i < bars ? "on" : undefined} />
         ))}
