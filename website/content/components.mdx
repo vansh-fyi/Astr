@@ -37,7 +37,18 @@ export const meta = {
 <details className="app-source">
 <summary>Dart source</summary>
 
-<SourceExcerpt file="lib/core/design/app_colors.dart" symbols={["AppColors"]} />
+<CodeTabs labels={["Dart", "CSS"]} second={<CodeBlock lang="css" filename="app-ui.css" code={`.app-ui {
+  --app-surface: #0c0f11;
+  --app-overlay: rgb(12 15 17 / 0.5);
+  --app-glass: rgb(12 15 17 / 0.8);
+  --app-accent: #448aff;
+  --app-accent-2: #3a96ff;
+  --app-border-primary: #1b3766;
+  --app-border-subtle: #0c1e33;
+  --app-glow: 0 0 1px rgb(255 255 255 / 0.25), 0 1px 12.2px #3a7fff;
+}`} />}>
+  <SourceExcerpt file="lib/core/design/app_colors.dart" symbols={["AppColors"]} />
+</CodeTabs>
 
 
 </details>
