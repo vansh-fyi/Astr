@@ -6,7 +6,7 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.32+-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.0+-0175C2?logo=dart)](https://dart.dev)
-[![License](https://img.shields.io/badge/License-Proprietary-red)](#license)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](#license)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-brightgreen)](#supported-platforms)
 
 [Download on Google Play](https://play.google.com/store/apps/details?id=com.astr.app) |
@@ -220,11 +220,9 @@ If you enjoy using Astr, consider supporting development:
 
 ## License
 
-Copyright (c) 2025-2026 Vansh Grover. All Rights Reserved.
+Copyright 2025-2026 Vansh Grover. Licensed under the [Apache License, Version 2.0](LICENSE).
 
-The code, design, and content of this repository are the intellectual property of Vansh Grover. Unauthorized copying, modification, distribution, or use is strictly prohibited.
-
-See [LICENSE](LICENSE) for details.
+Third-party data, fonts and one transitional dependency have their own terms; see [NOTICE](NOTICE).
 
 ---
 

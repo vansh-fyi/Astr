@@ -1,0 +1,68 @@
+Astr
+Copyright 2025 Vansh Grover
+
+Licensed under the Apache License, Version 2.0 (see LICENSE). Source code, documentation and original
+design in this repository are covered by that licence unless a file or section below says otherwise.
+
+Data packs and derived datasets that Astr publishes are intended to be released under CC BY-SA 4.0 and
+under each upstream source's own terms (owner decision D6, 2026-10-09).
+
+--------------------------------------------------------------------------------
+Data and services in use today
+--------------------------------------------------------------------------------
+
+VIIRS Nighttime Lights (VNL) v2 annual composite, 2024
+  Earth Observation Group, Payne Institute for Public Policy, Colorado School of Mines.
+  https://eogdata.mines.edu/products/vnl/
+  Used to derive the Astr zone data. EOG publishes many VNL products under CC BY 4.0; the exact licence of
+  the product used here is to be confirmed against EOG's licence document.
+  Cite: Elvidge, C.D., Zhizhin, M., Ghosh, T., Hsu, F.-C., Taneja, J. (2021). Annual time series of global
+  VIIRS nighttime lights derived from monthly averages: 2012 to 2019. Remote Sensing 13(5), 922.
+
+Weather data
+  Weather data by Open-Meteo.com, licensed CC BY 4.0. https://open-meteo.com/
+  Subject to Open-Meteo's terms of use. Free use is for non-commercial purposes; confirm that a free,
+  open-source, tip-based app qualifies before the first store release.
+
+H3 geospatial indexing
+  Uber H3, Apache-2.0, through the h3_flutter package. https://h3geo.org/
+
+--------------------------------------------------------------------------------
+Transitional dependency (not Apache-2.0)
+--------------------------------------------------------------------------------
+
+Swiss Ephemeris, through the sweph package
+  Astrodienst AG (Dieter Koch and Alois Treindl). Licensed AGPL-3.0, or under a paid Professional License.
+  https://www.astro.com/swisseph/
+  The app currently depends on sweph. Binaries that include it are subject to the AGPL-3.0, which conflicts
+  with distributing the whole app under Apache-2.0. It is being replaced by an implementation built on JPL
+  ephemerides (decision D5). Do not publish a store build that includes sweph.
+
+--------------------------------------------------------------------------------
+Files in this repository that are not licensed under Apache-2.0
+--------------------------------------------------------------------------------
+
+Satoshi typeface (assets/fonts/Satoshi-*.ttf, website/src/fonts/Satoshi-*.ttf)
+  Indian Type Foundry, ITF Free Font License. Free for commercial use, but the font files may not be
+  redistributed, which includes uploading them to a public server. Remove the files from the public
+  repository and fetch them at build time from Fontshare, or replace the typeface, before the repository
+  is made public.
+
+Inter typeface
+  SIL Open Font License 1.1.
+
+Photographs on the documentation site (website/images)
+  Credited per image in website/src/lib/images.ts; each keeps its original licence.
+
+App illustrations and backgrounds (assets/img/*.jpg, *.webp)
+  Provenance and licence to be confirmed by the owner before the repository is made public.
+
+--------------------------------------------------------------------------------
+Planned data sources (not yet shipped)
+--------------------------------------------------------------------------------
+
+JPL planetary ephemerides (DE440), JPL Small-Body Database, Minor Planet Center orbits, CelesTrak GP data,
+Gaia DR3 (CC BY-SA 3.0 IGO), Hipparcos/Tycho-2, OpenNGC (CC BY-SA 4.0), HyperLEDA, SIMBAD, NED,
+Globe at Night (CC BY 4.0). Each will be listed here with its licence when it is first included.
+
+Dart and Flutter packages keep their own licences; the app shows them through Flutter's licence page.
