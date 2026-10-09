@@ -1,80 +1,96 @@
 /*
  * Astr proportion system: spacing, type, radii, sizes and layout widths.
- * Base unit is 16 px = 1 rem on the web = 16 dp/sp in Flutter.
  *
- * Spacing, sizes and radii are Fibonacci numbers (1 2 3 5 8 13 21 34 55 89 144).
- * Consecutive terms tend to the golden ratio phi = (1 + sqrt 5) / 2.
- * Type steps: size(n) = round(16 * phi^(n/2)) px, leading(n) = 1 + phi^-(1 + n/2),
- * tracking(n) = -(phi^(n/2) - 1) / 89 em. Every value is exact in rem.
+ * Every size is a multiple of one liquid unit, --u, so the whole interface
+ * scales with the box it sits in (container query units, cqw). The multiples
+ * are the Fibonacci numbers and golden-ratio type steps divided by 16, so at
+ * the base unit (16 px) they are exactly the pixel values on the docs pages.
+ *
+ *   --u = 16 px          when the container is 377 px wide or narrower
+ *   --u = 16 px * (1 + (w - 377) / (1597 - 377) * (sqrt(phi) - 1))   above that
+ *
+ * That is 16 px at a phone and 16 * sqrt(phi) = 20.35 px at 1597 px, then it
+ * keeps growing at the same rate. Written with cqw: 0.9159rem + 0.3567cqw.
+ *
+ * Spacing, sizes and radii: Fibonacci numbers (1 2 3 5 8 13 21 34 55 89 144).
+ * Type steps: size(n) = round(16 * phi^(n/2)), leading(n) = 1 + phi^-(1 + n/2),
+ * tracking(n) = -(phi^(n/2) - 1) / 89 em.
+ * Panes are Fibonacci proportions (233 : 610 : 144) shared out as fr tracks.
  * Colour lives in globals.css only; nothing here defines a colour.
  * check-docs.mjs recomputes every value from the formulas and fails on drift.
  */
 @theme static {
+  /* The liquid unit. Needs a size container (container-type: inline-size) above it. */
+  --u: max(1rem, 0.9159rem + 0.3567cqw);
+
   --phi: 1.618;
   --phi-inverse: 0.618;
   --phi-inverse-squared: 0.382;
 
+  /* Longest line of reading text, in characters, so it follows the type size. */
+  --measure: 76ch;
+
   /* Heading face. Satoshi is loaded once in the root layout. Usage: font-heading */
   --font-heading: var(--font-satoshi), system-ui, sans-serif;
 
-  /* Spacing: Fibonacci. Usage: p-f13, gap-f8, mt-f55 */
-  --spacing-f1: 0.0625rem;
-  --spacing-f2: 0.125rem;
-  --spacing-f3: 0.1875rem;
-  --spacing-f5: 0.3125rem;
-  --spacing-f8: 0.5rem;
-  --spacing-f13: 0.8125rem;
-  --spacing-f21: 1.3125rem;
-  --spacing-f34: 2.125rem;
-  --spacing-f55: 3.4375rem;
-  --spacing-f89: 5.5625rem;
-  --spacing-f144: 9rem;
+  /* Spacing: Fibonacci multiples of --u. Usage: p-f13, gap-f8, mt-f55 */
+  --spacing-f1: calc(var(--u) * 0.0625);
+  --spacing-f2: calc(var(--u) * 0.125);
+  --spacing-f3: calc(var(--u) * 0.1875);
+  --spacing-f5: calc(var(--u) * 0.3125);
+  --spacing-f8: calc(var(--u) * 0.5);
+  --spacing-f13: calc(var(--u) * 0.8125);
+  --spacing-f21: calc(var(--u) * 1.3125);
+  --spacing-f34: calc(var(--u) * 2.125);
+  --spacing-f55: calc(var(--u) * 3.4375);
+  --spacing-f89: calc(var(--u) * 5.5625);
+  --spacing-f144: calc(var(--u) * 9);
 
-  /* Type: step n, size = round(16 * phi^(n/2)). Usage: text-s0, text-s-1 */
-  --text-s-2: 0.625rem;
+  /* Type: step n, size = round(16 * phi^(n/2)) at the base unit. Usage: text-s0, text-s-1 */
+  --text-s-2: calc(var(--u) * 0.625);
   --text-s-2--line-height: 2;
   --text-s-2--letter-spacing: 0.0043em;
-  --text-s-1: 0.8125rem;
+  --text-s-1: calc(var(--u) * 0.8125);
   --text-s-1--line-height: 1.786;
   --text-s-1--letter-spacing: 0.0024em;
-  --text-s0: 1rem;
+  --text-s0: calc(var(--u) * 1);
   --text-s0--line-height: 1.618;
   --text-s0--letter-spacing: 0em;
-  --text-s1: 1.25rem;
+  --text-s1: calc(var(--u) * 1.25);
   --text-s1--line-height: 1.486;
   --text-s1--letter-spacing: -0.0031em;
-  --text-s2: 1.625rem;
+  --text-s2: calc(var(--u) * 1.625);
   --text-s2--line-height: 1.382;
   --text-s2--letter-spacing: -0.0069em;
-  --text-s3: 2.0625rem;
-  --text-s3--line-height: 1.300;
+  --text-s3: calc(var(--u) * 2.0625);
+  --text-s3--line-height: 1.3;
   --text-s3--letter-spacing: -0.0119em;
-  --text-s4: 2.625rem;
+  --text-s4: calc(var(--u) * 2.625);
   --text-s4--line-height: 1.236;
   --text-s4--letter-spacing: -0.0182em;
-  --text-s5: 3.3125rem;
+  --text-s5: calc(var(--u) * 3.3125);
   --text-s5--line-height: 1.186;
   --text-s5--letter-spacing: -0.0262em;
-  --text-s6: 4.25rem;
+  --text-s6: calc(var(--u) * 4.25);
   --text-s6--line-height: 1.146;
   --text-s6--letter-spacing: -0.0364em;
 
-  /* Radii: Fibonacci. Pills use rounded-full. Usage: rounded-f21 */
-  --radius-f3: 0.1875rem;
-  --radius-f5: 0.3125rem;
-  --radius-f8: 0.5rem;
-  --radius-f13: 0.8125rem;
-  --radius-f21: 1.3125rem;
-  --radius-f34: 2.125rem;
+  /* Radii: Fibonacci multiples of --u. Pills use rounded-full. Usage: rounded-f21 */
+  --radius-f3: calc(var(--u) * 0.1875);
+  --radius-f5: calc(var(--u) * 0.3125);
+  --radius-f8: calc(var(--u) * 0.5);
+  --radius-f13: calc(var(--u) * 0.8125);
+  --radius-f21: calc(var(--u) * 1.3125);
+  --radius-f34: calc(var(--u) * 2.125);
   --radius-full: calc(infinity * 1px);
 
-  /* Widths: Fibonacci. Usage: w-f233, max-w-f610 */
-  --container-f233: 14.5625rem;
-  --container-f377: 23.5625rem;
-  --container-f610: 38.125rem;
-  --container-f987: 61.6875rem;
+  /* Widths: Fibonacci multiples of --u. Usage: w-f233, max-w-f610 */
+  --container-f233: calc(var(--u) * 14.5625);
+  --container-f377: calc(var(--u) * 23.5625);
+  --container-f610: calc(var(--u) * 38.125);
+  --container-f987: calc(var(--u) * 61.6875);
 
-  /* Breakpoints: Fibonacci. Usage: f610:grid-cols-2 */
+  /* Breakpoints: Fibonacci. Media queries cannot use --u, so these stay absolute. Usage: f610:grid-cols-2 */
   --breakpoint-f377: 23.5625rem;
   --breakpoint-f610: 38.125rem;
   --breakpoint-f987: 61.6875rem;

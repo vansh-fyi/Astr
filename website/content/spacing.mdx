@@ -39,7 +39,7 @@ The first few steps are coarse (1, 2, 3, 5 differ by 100%, 50%, 67%) and by the 
 
 <DocSection id="scale" title="The scale">
 
-The base is 16 px, which is 1 rem on the web and 16 dp in Flutter. Every step is a whole number of pixels and is exact in rem, so the web and Flutter agree to the pixel. Tailwind reads the tokens as `p-f13`, `gap-f8` and so on; the number is the pixel value.
+The base is 16 px, which is 1 rem on the web and 16 dp in Flutter. At that base every step is a whole number of pixels. Each token is a multiple of the liquid unit, so it also grows with the container: the px column below is the size at the base, and [Layout and size](/layout) explains how it scales. Tailwind reads the tokens as `p-f13`, `gap-f8` and so on; the number is the pixel value at the base.
 
 <SpacingScale />
 

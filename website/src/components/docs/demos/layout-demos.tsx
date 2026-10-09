@@ -1,4 +1,4 @@
-import { PANES, SIZE_ROWS } from "@/lib/scale";
+import { FLUID_MAX, FLUID_MIN, PANES, SIZE_ROWS, fluidFactor, readMeasure } from "@/lib/scale";
 
 /** Panes drawn at their real proportions. */
 export function PaneDiagram() {
@@ -9,12 +9,12 @@ export function PaneDiagram() {
         {PANES.map((p) => (
           <div key={p.name}>
             <strong>{p.name}</strong>
-            <span>{p.px}px</span>
+            <span>{Math.round((p.px / total) * 100)}%</span>
           </div>
         ))}
       </div>
       <figcaption>
-        {total}px of panes. 233 + 377 = 610, and 377 / 233 and 610 / 377 are both phi to three decimals.
+        Proportions {PANES.map((p) => p.px).join(" : ")}, shared out as fr tracks of whatever width the screen has. 233 + 377 = 610, and 377 / 233 and 610 / 377 are both phi to three decimals.
       </figcaption>
     </figure>
   );
@@ -42,7 +42,7 @@ export function SizeTable() {
         <thead>
           <tr>
             <th>Element</th>
-            <th>px</th>
+            <th>px at base</th>
             <th>Token</th>
             <th>Rule</th>
           </tr>
@@ -58,6 +58,45 @@ export function SizeTable() {
               <td>{r.note}</td>
             </tr>
           ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** The liquid unit at a range of container widths, computed from the formula. */
+export function FluidTable() {
+  const widths = [320, FLUID_MIN, 610, 987, 1440, FLUID_MAX, 2560];
+  return (
+    <div className="docs-table-wrap">
+      <table className="docs-table">
+        <caption>
+          Computed from the formula and checked against scale.css at build time. Body is step 0, the card padding is f21, the measure is {readMeasure()}.
+        </caption>
+        <thead>
+          <tr>
+            <th>Container</th>
+            <th>Factor</th>
+            <th>Unit u</th>
+            <th>Body</th>
+            <th>f21</th>
+            <th>Heading 2 (s4)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {widths.map((w) => {
+            const f = fluidFactor(w);
+            return (
+              <tr key={w}>
+                <td>{w}px</td>
+                <td>{f.toFixed(3)}</td>
+                <td>{(16 * f).toFixed(2)}px</td>
+                <td>{(16 * f).toFixed(1)}px</td>
+                <td>{(21 * f).toFixed(1)}px</td>
+                <td>{(42 * f).toFixed(1)}px</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -15,7 +15,7 @@ import { DartSource } from "@/components/docs/demos/dart-source";
 import { CssSource } from "@/components/docs/demos/css-source";
 import { FibonacciSpiral } from "@/components/docs/demos/fibonacci-spiral";
 import { GradientPlayground } from "@/components/docs/demos/gradient-playground";
-import { GoldenSplit, PaneDiagram, SizeTable } from "@/components/docs/demos/layout-demos";
+import { FluidTable, GoldenSplit, PaneDiagram, SizeTable } from "@/components/docs/demos/layout-demos";
 import { LadderTable } from "@/components/docs/demos/ladder-table";
 import { OpacityDemo } from "@/components/docs/demos/opacity-demo";
 import { PaletteBento, PaletteCredits, PaletteGrid, PaletteStrip } from "@/components/docs/demos/palette-grid";
@@ -73,6 +73,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     TypeTable,
     PaneDiagram,
     GoldenSplit,
+    FluidTable,
     SizeTable,
     p: ({ children }) => <p className="docs-description">{children}</p>,
     h3: ({ children }) => <h3>{children}</h3>,

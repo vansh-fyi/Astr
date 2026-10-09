@@ -53,13 +53,17 @@ abstract final class AstrType {
       (-(math.pow(phi, n / 2) - 1) / 89).toDouble();
 
   /// Text style for step [n]. Steps 2 and up default to Satoshi.
-  static TextStyle style(int n, {String? fontFamily}) {
+  ///
+  /// [factor] is `AstrFluid.factor(width)` for the box the text sits in, so the
+  /// size grows with the screen. Leading and tracking are ratios and stay put.
+  static TextStyle style(int n, {String? fontFamily, double factor = 1}) {
     final int i = n + 2;
+    final double size = sizes[i] * factor;
     return TextStyle(
       fontFamily: fontFamily ?? (n >= 2 ? 'Satoshi' : 'Inter'),
-      fontSize: sizes[i],
+      fontSize: size,
       height: leading[i],
-      letterSpacing: sizes[i] * tracking[i],
+      letterSpacing: size * tracking[i],
     );
   }
 }

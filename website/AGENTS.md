@@ -64,10 +64,12 @@ This file contains no code on purpose. Rules are written in plain language. The 
 
 - Proportion is derived from nature, like colour. Spacing, radii, element sizes, pane widths and breakpoints are Fibonacci numbers. Type steps are half golden-ratio steps. The base is sixteen pixels, which is one rem on the web and sixteen dp or sp in Flutter.
 - The proportion stylesheet in the app source folder is the only place these values are defined, exactly as the global stylesheet is for colour. It defines no colour and no opacity.
+- The system is liquid. Every spacing, radius, type size and element size is a multiple of one unit that follows the width of the size container: sixteen pixels up to three hundred seventy-seven wide, growing to the square root of phi times that at fifteen hundred ninety-seven, and continuing at the same rate. The floor is also the minimum text size. Never replace it with a viewport unit or a fixed size.
+- Panes are shared out as Fibonacci fractions of the free width, never as pixel widths, and reading text is capped by characters, never by a pixel width. Breakpoints are the only absolute widths.
 - Never write a pixel size, gap, radius or font size that is not on the scale. If something does not fit, change the structure or tell the owner. Do not add a step.
 - Never edit, round or reorder a step. Every value must be reproducible from its formula. The verification script recomputes the formulas and compares the stylesheet and the Dart files value for value, and fails on drift. Treat a failure as a stop sign.
 - Type: size, leading and tracking always come together from one step. Body is step zero. Headings are two steps or more above the text they introduce.
-- Layout: the reading measure is six hundred ten pixels. Panes use consecutive Fibonacci widths. Compact controls are drawn at thirty-four and tapped at fifty-five.
+- Layout: the reading measure is seventy-six characters. Panes use consecutive Fibonacci proportions. Compact controls are drawn at thirty-four and tapped at fifty-five.
 - Media queries cannot read variables, so a breakpoint written in the shell stylesheet is a literal. It must be a Fibonacci breakpoint or a sum of pane widths, and its comment must say which.
 - The same page rules apply to the proportion pages: markdown with embedded components, formulas on the page, one code tabs block, and Dart files in the Flutter folder.
 

@@ -43,7 +43,10 @@ function walk(dir, skip = new Set(["node_modules", ".next"])) {
 }
 
 // ----------------------------------------------------------------- scale ----
-const remPx = (v) => parseFloat(v) * 16;
+const remPx = (v) => {
+  const m = /^calc\(var\(--u\) \* (-?[\d.]+)\)$/.exec(v);
+  return parseFloat(m ? m[1] : v) * 16;
+};
 const near = (a, b, eps) => Math.abs(a - b) <= eps;
 
 function scaleChecks() {
@@ -84,6 +87,26 @@ function scaleChecks() {
     const tr = -(PHI ** (n / 2) - 1) / 89;
     assert(near(parseFloat(tok.get(`${k}--letter-spacing`)), tr, 0.00005), `${k}--letter-spacing drifted from ${tr.toFixed(4)}`);
   }
+  // The liquid unit: 16 px up to 377, sqrt(phi) times that at 1597, linear between.
+  const u = /--u:\s*max\(1rem,\s*([\d.]+)rem \+ ([\d.]+)cqw\);/.exec(text);
+  assert(u, "scale.css has no --u: max(1rem, Arem + Bcqw)");
+  const factor = (w) => Math.max(1, 1 + ((w - 377) / (1597 - 377)) * (Math.sqrt(PHI) - 1));
+  for (const w of [377, 610, 987, 1597, 2560]) {
+    const got = Math.max(16, parseFloat(u[1]) * 16 + (parseFloat(u[2]) / 100) * w);
+    assert(near(got, 16 * factor(w), 0.02), `--u is ${got.toFixed(3)}px at ${w}px, the formula gives ${(16 * factor(w)).toFixed(3)}px`);
+  }
+  assert(near(16 * factor(1597), 16 * Math.sqrt(PHI), 1e-9), "the unit is not sqrt(phi) times the base at 1597");
+  assert(tok.get("--measure") === "76ch", "--measure must be 76ch");
+  for (const k of [...tok.keys()].filter((k) => /^--(spacing|text|radius|container)-/.test(k) && !k.includes("--line-height") && !k.includes("--letter-spacing") && k !== "--radius-full"))
+    assert(/^calc\(var\(--u\) \* [\d.]+\)$/.test(tok.get(k)), `${k} must be a multiple of --u`);
+
+  // The shell shares its panes by Fibonacci proportions and is the size container.
+  const css = readFileSync(join(ROOT, "src/components/docs/docs.css"), "utf8");
+  assert(/container-type:\s*inline-size/.test(css), "docs.css: .docs-root must be a size container");
+  assert(css.includes("minmax(0, 233fr) minmax(0, 754fr)"), "docs.css: workspace must split 233 : 754 (sidebar : article + outline)");
+  assert(css.includes("minmax(0, 610fr) minmax(0, 144fr)"), "docs.css: page must split 610 : 144 (article : outline)");
+  assert(233 + 610 + 144 === 987 && 610 + 144 === 754, "pane proportions are not 233 / 610 / 144");
+  assert(!/max-width:\s*var\(--(breakpoint|container)-f1597\)/.test(css), "docs.css: the layout must not be capped in pixels");
   // 233 + 377 = 610 keeps the panes golden.
   assert(px("--container-f233") + px("--container-f377") === px("--container-f610"), "panes are not consecutive Fibonacci widths");
 
@@ -115,6 +138,9 @@ function scaleChecks() {
   for (const [name, token] of [["w233", "--container-f233"], ["w377", "--container-f377"], ["w610", "--container-f610"], ["w987", "--container-f987"], ["bp377", "--breakpoint-f377"], ["bp610", "--breakpoint-f610"], ["bp987", "--breakpoint-f987"], ["bp1597", "--breakpoint-f1597"]])
     assert(lay.get(name) === px(token), `AstrLayout.${name} drifted from ${token}`);
   assert(lay.get("major") === Number(tok.get("--phi-inverse")) && lay.get("minor") === Number(tok.get("--phi-inverse-squared")) && lay.get("goldenAspect") === 1.618, "AstrLayout golden constants drifted");
+  const fluid = consts(dart("astr_layout.dart"), "AstrFluid");
+  assert(fluid.get("minWidth") === 377 && fluid.get("maxWidth") === 1597, "AstrFluid reference widths drifted");
+  assert(near(fluid.get("growth"), Math.sqrt(PHI), 1e-12), "AstrFluid.growth is not sqrt(phi)");
   const size = consts(dart("astr_layout.dart"), "AstrSize");
   for (const [name, v] of size) assert(isFib(v), `AstrSize.${name} = ${v} is not a Fibonacci number`);
 
@@ -122,9 +148,9 @@ function scaleChecks() {
   const shell = readFileSync(join(ROOT, "src/components/docs/docs.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const rawPx = shell
     .split("\n")
-    .filter((l) => !l.trim().startsWith("@media") && /(?<![\w.-])-?\d*\.?\d+px\b/.test(l));
+    .filter((l) => !/^\s*@(media|container)/.test(l) && /(?<![\w.-])-?\d*\.?\d+px\b/.test(l));
   assert(rawPx.length === 0, `docs.css has raw pixel sizes (use the scale tokens):\n${rawPx.join("\n")}`);
-  ok("docs.css: no raw pixel sizes outside media queries");
+  ok("docs.css: no raw pixel sizes outside media and container queries");
   ok("scale.css: Fibonacci spacing, radii, widths and breakpoints, phi-derived type, no colour; Dart mirrors match");
 }
 

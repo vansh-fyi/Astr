@@ -47,10 +47,9 @@
     --docs-blur: blur(var(--spacing-f13)) saturate(1.4);
     --docs-ease: cubic-bezier(0.23, 1, 0.32, 1);
     --docs-radius: var(--radius-f21);
-    --docs-sidebar-width: var(--container-f233);
-    --docs-article-width: var(--container-f610);
-    --docs-outline-width: var(--spacing-f144);
     --docs-section-gap: var(--spacing-f55);
+    /* The size container: every cqw in the scale resolves against this box. */
+    container-type: inline-size;
     position: fixed;
     inset: 0;
     height: 100dvh;
@@ -96,10 +95,9 @@
   }
   .docs-workspace {
     display: grid;
-    grid-template-columns: var(--docs-sidebar-width) minmax(0, 1fr);
+    /* Sidebar : (article + outline) = 233 : 754, shared out as fr. */
+    grid-template-columns: minmax(0, 233fr) minmax(0, 754fr);
     width: 100%;
-    max-width: var(--breakpoint-f1597);
-    margin: 0 auto;
     flex: 1;
     min-height: 0;
     padding: 0 var(--spacing-f34);
@@ -160,6 +158,16 @@
   .docs-copy:active,
   .docs-chip-button:active {
     transform: scale(0.97);
+  }
+  .docs-search-trigger svg {
+    width: var(--spacing-f13);
+    height: var(--spacing-f13);
+    flex: none;
+  }
+  .docs-mobile-trigger svg {
+    display: block;
+    width: var(--spacing-f21);
+    height: var(--spacing-f21);
   }
   .docs-search-trigger kbd {
     margin-left: auto;
@@ -224,9 +232,8 @@
   }
   .docs-page {
     display: grid;
-    grid-template-columns: minmax(0, var(--docs-article-width)) var(
-        --docs-outline-width
-      );
+    /* Article : outline = 610 : 144, Fibonacci proportions of the free width. */
+    grid-template-columns: minmax(0, 610fr) minmax(0, 144fr);
     gap: var(--spacing-f34);
     height: 100%;
     min-height: 0;
@@ -259,7 +266,7 @@
     color: var(--docs-text-strong);
   }
   .docs-lead {
-    max-width: var(--container-f610);
+    max-width: var(--measure);
     color: var(--docs-text-secondary);
     font-size: var(--text-s0);
     line-height: var(--text-s0--line-height);
@@ -317,6 +324,11 @@
   .docs-section > h2 a:hover span,
   .docs-section > h2 a:focus-visible span {
     opacity: 1;
+  }
+  .docs-description,
+  .docs-section ul,
+  .docs-section ol {
+    max-width: var(--measure);
   }
   .docs-description {
     font-size: var(--text-s0);
@@ -1021,11 +1033,10 @@
   .docs-skip:focus {
     top: var(--spacing-f13);
   }
-  /* Media queries cannot read variables. 1143 = 233 + 55 + 610 + 34 + 144 + 2 x 34 - 1: the panes plus gaps and gutters. */
-  @media (max-width: 1143px) {
+  /* Container queries cannot read variables, so these are literals. Below 1143 the outline is dropped; below 987 (f987) the sidebar is too. */
+  @container (max-width: 1143px) {
     .docs-page {
       grid-template-columns: minmax(0, 1fr);
-      max-width: var(--docs-article-width);
     }
     .docs-outline {
       display: none;
@@ -1034,8 +1045,7 @@
       gap: var(--spacing-f34);
     }
   }
-  /* 987 is the Fibonacci breakpoint f987. */
-  @media (max-width: 986px) {
+  @container (max-width: 986px) {
     .docs-workspace {
       grid-template-columns: minmax(0, 1fr);
       padding: 0 var(--spacing-f21);
@@ -1068,7 +1078,7 @@
     }
   }
   /* 610 is the Fibonacci breakpoint f610. */
-  @media (max-width: 609px) {
+  @container (max-width: 609px) {
     .docs-bento {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       grid-auto-rows: var(--container-f233);
@@ -1269,7 +1279,7 @@
   .docs-golden > div > span:last-child {
     flex: 1;
   }
-  @media (max-width: 609px) {
+  @container (max-width: 609px) {
     .docs-typerow {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--spacing-f5);

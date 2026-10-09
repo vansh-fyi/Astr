@@ -2,9 +2,10 @@ export const meta = {
   title: "Layout and size",
   group: "Proportion system",
   description:
-    "Golden-section panes, Fibonacci breakpoints and the size of every common element.",
+    "A liquid unit that scales with the screen, golden-section panes, and the size of every common element.",
   sections: [
     { id: "golden", title: "The golden section" },
+    { id: "liquid", title: "Liquid sizing" },
     { id: "panes", title: "Panes and measure" },
     { id: "breakpoints", title: "Breakpoints" },
     { id: "sizes", title: "Element sizes" },
@@ -27,25 +28,47 @@ On a phone, use it for vertical structure: the main content takes the upper 61.8
 
 </DocSection>
 
+<DocSection id="liquid" title="Liquid sizing">
+
+Nothing in the system is a fixed pixel size. Every spacing, radius, type size and element size is a multiple of one liquid unit, written `--u`, and the unit follows the width of the box it sits in. The whole interface scales together, so a phone and a wide desktop show the same design at different sizes.
+
+The unit is pinned at two golden references. At a container 377 px wide or narrower it is the 16 px base. At 1597 px it has grown by the square root of phi, so everything is about 27 percent larger. In between it rises in a straight line, and above 1597 it keeps rising at the same rate:
+
+$$ u(w) = 16\,\text{px}\cdot\left(1 + \frac{w-377}{1597-377}\left(\sqrt{\varphi}-1\right)\right) \quad (w \ge 377) $$
+
+The two references are Fibonacci numbers, and 1597 / 377 is phi cubed, so the width grows by six half-steps while the unit grows by one. A true proportional scale with no floor would shrink 16 px text to about 4 px on a phone, so the unit never goes below 16 px. That floor is also the minimum text size.
+
+<FluidTable />
+
+The width is the width of the size container, not the viewport. The shell declares itself a container, and every `cqw` inside it resolves against that box. Put a component in a narrower container and it adapts to the space it was given. In Flutter the same factor comes from a `LayoutBuilder`; see the Flutter tab.
+
+<DocNote>
+
+Two things stay absolute because the platform needs them: breakpoints, since media and container queries cannot read variables, and the 16 px floor. Touch targets need no extra rule. A 55 unit is at least 55 px, so it always meets the 44 pt and 48 dp minimums.
+
+</DocNote>
+
+</DocSection>
+
 <DocSection id="panes" title="Panes and measure">
 
-The documentation shell is built from consecutive Fibonacci widths. The sidebar is 233, the article is 610 and the outline is 144. Since 233 plus 377 is 610, the article is itself two golden parts.
+The documentation panes share the screen by Fibonacci proportions: sidebar, article and outline are 233 : 610 : 144. They are fractions of the free width, not pixels, so the layout always fills the screen. Since 233 plus 377 is 610, the article is itself two golden parts.
 
 <PaneDiagram />
 
-Prose is capped at 610, which is about 76 characters of body text. Wider content such as tables scrolls inside its own container instead of widening the column.
+Prose is capped by its character count, not by a width. The measure is 76 characters, which is the upper end of comfortable reading, and because it is in `ch` it follows the type size. Text stays readable on a very wide screen while demos, tables and images fill the column.
 
 </DocSection>
 
 <DocSection id="breakpoints" title="Breakpoints">
 
-Breakpoints are Fibonacci numbers too, and each step is about phi wider than the one before: 377 is a large phone, 610 a small tablet, 987 a landscape tablet or a narrow desktop and 1597 a wide desktop. Design for the smallest width first and add layout at each breakpoint.
+Breakpoints are Fibonacci numbers too, and each step is about phi wider than the one before: 377 is a large phone, 610 a small tablet, 987 a landscape tablet or a narrow desktop and 1597 a wide desktop. They are the only absolute widths in the system. Use them to change structure, such as dropping a pane, and let proportions handle everything else. Design for the smallest width first.
 
 </DocSection>
 
 <DocSection id="sizes" title="Element sizes">
 
-Every element dimension is a Fibonacci number from the spacing scale.
+Every element dimension is a Fibonacci number from the spacing scale. The px column is the size at the 16 px base unit, and it grows with the container.
 
 <SizeTable />
 
@@ -54,9 +77,9 @@ Every element dimension is a Fibonacci number from the spacing scale.
 <DocSection id="rules" title="Rules">
 
 1. **Draw compact, hit large.** A control can be drawn at 34 px tall but its tappable area must reach 55 px, by padding the hit area and never by enlarging the drawn control.
-2. **One column of prose.** No more than one reading column per view, 610 wide at most.
-3. **Panes divide by golden parts.** If a view has two panes, the larger takes 61.8 percent. Three panes use consecutive Fibonacci widths.
-4. **Align to the scale, not to the grid.** Positions and sizes come from the steps. There is no separate column grid to keep in sync.
+2. **Cap text by characters.** Reading text is at most 76 characters wide, never a pixel width, and a view has one reading column.
+3. **Panes divide by proportion.** If a view has two panes, the larger takes 61.8 percent. Three panes share the width as Fibonacci fractions. Never give a pane a pixel width.
+4. **Never write a pixel size.** Positions and sizes are multiples of the liquid unit from the scale. There is no separate column grid to keep in sync.
 5. **Keep dark and glass surfaces legible.** Size and spacing never replace contrast. Text on a translucent surface must still meet contrast after compositing.
 
 </DocSection>
@@ -66,21 +89,25 @@ Every element dimension is a Fibonacci number from the spacing scale.
 <CodeTabs flutter={<DartSource file="astr_layout.dart" />}>
 
 ```html
-<!-- Tailwind -->
-<main class="mx-auto max-w-f610 px-f21 f610:px-f34">
+<!-- Tailwind: @container makes this box the size container -->
+<main class="@container grid grid-cols-[233fr_610fr_144fr] gap-f21 p-f21">
+  <p class="max-w-[var(--measure)]">…</p>
   <div class="aspect-golden rounded-f21"></div>
 </main>
 ```
 
 ```css
 /* the equivalent plain CSS */
-.article {
-  max-width: var(--container-f610);
-  aspect-ratio: var(--aspect-golden);
+.screen {
+  container-type: inline-size; /* the unit follows this box */
+  display: grid;
+  grid-template-columns: 233fr 610fr 144fr;
 }
+.prose { max-width: var(--measure); }
+.card { aspect-ratio: var(--aspect-golden); }
 ```
 
-<ScaleSource prefixes={["--container-", "--breakpoint-", "--aspect-", "--phi"]} />
+<ScaleSource prefixes={["--u:", "--measure", "--container-", "--breakpoint-", "--aspect-", "--phi"]} />
 
 </CodeTabs>
 

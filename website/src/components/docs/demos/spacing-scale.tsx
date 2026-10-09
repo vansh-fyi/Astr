@@ -7,7 +7,7 @@ export function SpacingScale() {
         <thead>
           <tr>
             <th>Token</th>
-            <th>px</th>
+            <th>px at base</th>
             <th>rem</th>
             <th>Step</th>
             <th>Typical use</th>
